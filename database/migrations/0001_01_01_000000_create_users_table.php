@@ -11,12 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('institucion_educativa', function (Blueprint $table) {
+            $table->id('insti_id');
+            $table->string('insti_ruc', 20)->nullable();
+            $table->string('insti_razon_social', 100)->nullable();
+            $table->string('insti_direccion', 200)->nullable();
+            $table->string('insti_telefono1', 20)->nullable();
+            $table->string('insti_telefono2', 20)->nullable();
+            $table->string('insti_email', 100)->nullable();
+            $table->string('insti_director', 100)->nullable();
+            $table->string('insti_ndni', 20)->nullable();
+            $table->string('insti_logo', 200)->nullable();
+            $table->tinyInteger('insti_estatus')->default(1)->comment('1: ACTIVO, 0: INACTIVO');
+            $table->timestamps();
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->unsignedBigInteger('insti_id')->nullable();
+            $table->foreign('insti_id')->references('insti_id')->on('institucion_educativa')->nullOnDelete();
+            $table->string('username')->unique()->comment('DNI o usuario de acceso');
+            $table->string('name')->nullable();
+            $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->char('estado', 1)->default('1')->comment('1=activo, 0=inactivo, 5=bloqueado');
             $table->rememberToken();
             $table->timestamps();
         });
@@ -45,5 +64,6 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('institucion_educativa');
     }
 };
