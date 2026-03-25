@@ -10,6 +10,7 @@ import { UserInfo } from '@/components/layout/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { edit } from '@/routes/profile';
 import { clearAuthToken } from '@/plugins/inertia-token-plugin';
+import api from '@/lib/api';
 import type { User } from '@/types';
 
 type Props = {
@@ -19,11 +20,19 @@ type Props = {
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
 
-    const handleLogout = () => {
-        clearAuthToken();
-        cleanup();
-        // Destruye la sesión PHP (Fortify) y redirige al login
-        router.post('/logout');
+    const handleLogout = async () => {
+        try {
+            await api.post('/auth/logout');
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            clearAuthToken();
+            // Limpiar cookie de autenticación
+            document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
+            cleanup();
+            // Usar router.visit() de Inertia en lugar de window.location.href
+            router.visit('/login', { method: 'get' });
+        }
     };
 
     return (

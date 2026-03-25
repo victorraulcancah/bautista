@@ -9,7 +9,6 @@ import {
     CreditCard,
     GraduationCap,
     LayoutDashboard,
-    LogOut,
     MessageSquare,
     Settings,
     UserCheck,
@@ -29,7 +28,6 @@ import {
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
-import api from '@/lib/api';
 
 type NavChild = { title: string; href: string };
 type NavItem = { type: 'section'; label: string } | { type: 'link'; title: string; icon: React.ElementType; href: string } | { type: 'group'; title: string; icon: React.ElementType; children: NavChild[] };
@@ -66,48 +64,27 @@ const navigation: NavItem[] = [
     { type: 'section', label: 'INFORMACIÓN DE USUARIOS' },
     { type: 'link', title: 'Usuarios',      icon: Users,   href: '/usuarios' },
     { type: 'link', title: 'Configuración', icon: Settings, href: '/settings/profile' },
-    { type: 'link', title: 'Salir',         icon: LogOut,   href: '/logout' },
 ];
 
 function NavLinkItem({ item }: { item: Extract<NavItem, { type: 'link' }> }) {
     const page = usePage();
     const path = page.url;
     const isActive = path.startsWith(item.href);
-    const isLogout = item.href === '/logout';
 
     const btnClass = cn(
         'transition-colors',
-        isActive && !isLogout
+        isActive
             ? 'border-l-2 border-[#00a65a] bg-sidebar-accent text-white pl-[10px]'
             : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-white',
-        isLogout && 'text-red-400 hover:text-red-300',
     );
-
-    const handleLogout = async () => {
-        try {
-            await api.post('/auth/logout');
-        } catch (error) {
-            console.error('Logout error:', error);
-        } finally {
-            localStorage.removeItem('auth_token');
-            window.location.href = '/login';
-        }
-    };
 
     return (
         <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={item.title} className={btnClass}>
-                {isLogout ? (
-                    <button onClick={handleLogout} className="flex items-center gap-2 w-full">
-                        <item.icon className="size-4" />
-                        <span>{item.title}</span>
-                    </button>
-                ) : (
-                    <Link href={item.href}>
-                        <item.icon className="size-4" />
-                        <span>{item.title}</span>
-                    </Link>
-                )}
+                <Link href={item.href}>
+                    <item.icon className="size-4" />
+                    <span>{item.title}</span>
+                </Link>
             </SidebarMenuButton>
         </SidebarMenuItem>
     );

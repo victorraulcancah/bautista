@@ -1,60 +1,28 @@
-import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
 import InputError from '@/components/shared/input-error';
 import PasswordInput from '@/components/shared/password-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import api from '@/lib/api';
-
-const SPLASH_DURATION = 3000;
+import { useLogin } from '@/hooks/useLogin';
+import { useSplashScreen } from '@/hooks/useSplashScreen';
 
 type Props = {
     status?: string;
 };
 
 export default function Login({ status }: Props) {
-    const [showSplash, setShowSplash] = useState(false);
-    const [fadeOut, setFadeOut] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const { showSplash, fadeOut } = useSplashScreen();
+    const { login, loading, errors } = useLogin();
     const [formData, setFormData] = useState({ username: '', password: '' });
-
-    useEffect(() => {
-        setShowSplash(true);
-        const fadeTimer = setTimeout(() => setFadeOut(true), SPLASH_DURATION - 600);
-        const hideTimer = setTimeout(() => setShowSplash(false), SPLASH_DURATION);
-        return () => {
-            clearTimeout(fadeTimer);
-            clearTimeout(hideTimer);
-        };
-    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        setErrors({});
-
-        try {
-            const response = await api.post('/auth/login', {
-                username: formData.username,
-                password: formData.password,
-                device_name: 'web',
-            });
-
-            localStorage.setItem('auth_token', response.data.token);
-            window.location.href = '/dashboard';
-        } catch (error: any) {
-            if (error.response?.data?.errors) {
-                setErrors(error.response.data.errors);
-            } else if (error.response?.data?.message) {
-                setErrors({ general: error.response.data.message });
-            } else {
-                setErrors({ general: 'Error al iniciar sesión' });
-            }
-        } finally {
-            setLoading(false);
+        const result = await login(formData);
+        if (result.success) {
+            router.visit('/dashboard');
         }
     };
 

@@ -5,6 +5,10 @@ use Inertia\Inertia;
 
 Route::get('/', fn () => redirect()->route('login'))->name('home');
 
+// ── Rutas públicas ──────────────────────────────────────────────────────
+Route::get('/login', fn () => Inertia::render('auth/login'))->name('login');
+
+// ── Rutas protegidas ────────────────────────────────────────────────────
 Route::middleware(['auth.token'])->group(function () {
     Route::get('/dashboard',    fn () => Inertia::render('Dashboard/index'))->name('dashboard');
     Route::get('/estudiantes',  fn () => Inertia::render('Estudiantes/index'))->name('estudiantes.index');

@@ -22,8 +22,10 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
+            // Solo limpiar token, no redirigir aquí
+            // La redirección será manejada por el middleware auth.token
             localStorage.removeItem('auth_token');
-            window.location.href = '/login';
+            document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
         }
         return Promise.reject(error);
     }

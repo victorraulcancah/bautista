@@ -11,19 +11,23 @@ class AuthenticateWithToken
 {
     public function handle(Request $request, Closure $next)
     {
-        // Si ya hay sesión activa (Fortify), continuar
+        // Si ya hay sesión activa, continuar
         if (Auth::check()) {
             return $next($request);
         }
 
-        // Intentar autenticar con token Sanctum Bearer
+        // Intentar autenticar con token Bearer en headers
         $token = $request->bearerToken();
+
+        // Si no hay Bearer token, intentar obtenerlo de la cookie
+        if (!$token) {
+            $token = $request->cookie('auth_token');
+        }
 
         if ($token) {
             $personalAccessToken = PersonalAccessToken::findToken($token);
 
             if ($personalAccessToken) {
-                // login() crea sesión PHP → los recargas de página quedan autenticadas
                 Auth::login($personalAccessToken->tokenable);
                 return $next($request);
             }

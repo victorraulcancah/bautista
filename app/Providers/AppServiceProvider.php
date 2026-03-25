@@ -14,12 +14,14 @@ use App\Repositories\Interfaces\EstudianteRepositoryInterface;
 use App\Repositories\Interfaces\GradoRepositoryInterface;
 use App\Repositories\Interfaces\NivelEducativoRepositoryInterface;
 use App\Repositories\Interfaces\SeccionRepositoryInterface;
+use App\Services\Implements\AuthService;
 use App\Services\Implements\CursoService;
 use App\Services\Implements\DocenteService;
 use App\Services\Implements\EstudianteService;
 use App\Services\Implements\GradoService;
 use App\Services\Implements\NivelEducativoService;
 use App\Services\Implements\SeccionService;
+use App\Services\Interfaces\AuthServiceInterface;
 use App\Services\Interfaces\CursoServiceInterface;
 use App\Services\Interfaces\DocenteServiceInterface;
 use App\Services\Interfaces\EstudianteServiceInterface;
@@ -39,6 +41,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Auth
+        $this->app->bind(AuthServiceInterface::class, AuthService::class);
+
         // Estudiante
         $this->app->bind(EstudianteRepositoryInterface::class, EstudianteRepository::class);
         $this->app->bind(EstudianteServiceInterface::class, EstudianteService::class);
