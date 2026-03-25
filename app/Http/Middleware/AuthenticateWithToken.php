@@ -23,7 +23,8 @@ class AuthenticateWithToken
             $personalAccessToken = PersonalAccessToken::findToken($token);
 
             if ($personalAccessToken) {
-                Auth::setUser($personalAccessToken->tokenable);
+                // login() crea sesión PHP → los recargas de página quedan autenticadas
+                Auth::login($personalAccessToken->tokenable);
                 return $next($request);
             }
         }

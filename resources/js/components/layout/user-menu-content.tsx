@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
 import {
     DropdownMenuGroup,
@@ -9,7 +9,7 @@ import {
 import { UserInfo } from '@/components/layout/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { edit } from '@/routes/profile';
-import api from '@/lib/api';
+import { clearAuthToken } from '@/plugins/inertia-token-plugin';
 import type { User } from '@/types';
 
 type Props = {
@@ -19,16 +19,11 @@ type Props = {
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
 
-    const handleLogout = async () => {
-        try {
-            await api.post('/auth/logout');
-        } catch (error) {
-            console.error('Logout error:', error);
-        } finally {
-            localStorage.removeItem('auth_token');
-            cleanup();
-            window.location.href = '/login';
-        }
+    const handleLogout = () => {
+        clearAuthToken();
+        cleanup();
+        // Destruye la sesión PHP (Fortify) y redirige al login
+        router.post('/logout');
     };
 
     return (
