@@ -64,6 +64,20 @@ return [
             ]) : [],
         ],
 
+        // Conexión a la base de datos antigua (solo para migración de datos)
+        'mysql_old' => [
+            'driver'    => 'mysql',
+            'host'      => env('DB_OLD_HOST', '127.0.0.1'),
+            'port'      => env('DB_OLD_PORT', '3306'),
+            'database'  => env('DB_OLD_DATABASE', 'edu_bautista'),
+            'username'  => env('DB_OLD_USERNAME', env('DB_USERNAME', 'root')),
+            'password'  => env('DB_OLD_PASSWORD', env('DB_PASSWORD', '')),
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix'    => '',
+            'strict'    => false,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

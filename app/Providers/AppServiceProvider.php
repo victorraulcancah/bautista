@@ -2,6 +2,30 @@
 
 namespace App\Providers;
 
+use App\Repositories\Implements\CursoRepository;
+use App\Repositories\Implements\DocenteRepository;
+use App\Repositories\Implements\EstudianteRepository;
+use App\Repositories\Implements\GradoRepository;
+use App\Repositories\Implements\NivelEducativoRepository;
+use App\Repositories\Implements\SeccionRepository;
+use App\Repositories\Interfaces\CursoRepositoryInterface;
+use App\Repositories\Interfaces\DocenteRepositoryInterface;
+use App\Repositories\Interfaces\EstudianteRepositoryInterface;
+use App\Repositories\Interfaces\GradoRepositoryInterface;
+use App\Repositories\Interfaces\NivelEducativoRepositoryInterface;
+use App\Repositories\Interfaces\SeccionRepositoryInterface;
+use App\Services\Implements\CursoService;
+use App\Services\Implements\DocenteService;
+use App\Services\Implements\EstudianteService;
+use App\Services\Implements\GradoService;
+use App\Services\Implements\NivelEducativoService;
+use App\Services\Implements\SeccionService;
+use App\Services\Interfaces\CursoServiceInterface;
+use App\Services\Interfaces\DocenteServiceInterface;
+use App\Services\Interfaces\EstudianteServiceInterface;
+use App\Services\Interfaces\GradoServiceInterface;
+use App\Services\Interfaces\NivelEducativoServiceInterface;
+use App\Services\Interfaces\SeccionServiceInterface;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +39,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Estudiante
+        $this->app->bind(EstudianteRepositoryInterface::class, EstudianteRepository::class);
+        $this->app->bind(EstudianteServiceInterface::class, EstudianteService::class);
+
+        // NivelEducativo
+        $this->app->bind(NivelEducativoRepositoryInterface::class, NivelEducativoRepository::class);
+        $this->app->bind(NivelEducativoServiceInterface::class, NivelEducativoService::class);
+
+        // Grado
+        $this->app->bind(GradoRepositoryInterface::class, GradoRepository::class);
+        $this->app->bind(GradoServiceInterface::class, GradoService::class);
+
+        // Seccion
+        $this->app->bind(SeccionRepositoryInterface::class, SeccionRepository::class);
+        $this->app->bind(SeccionServiceInterface::class, SeccionService::class);
+
+        // Curso
+        $this->app->bind(CursoRepositoryInterface::class, CursoRepository::class);
+        $this->app->bind(CursoServiceInterface::class, CursoService::class);
+
+        // Docente
+        $this->app->bind(DocenteRepositoryInterface::class, DocenteRepository::class);
+        $this->app->bind(DocenteServiceInterface::class, DocenteService::class);
     }
 
     /**

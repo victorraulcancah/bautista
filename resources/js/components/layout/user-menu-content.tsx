@@ -1,4 +1,4 @@
-import { Link, router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
 import {
     DropdownMenuGroup,
@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/layout/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
+import api from '@/lib/api';
 import type { User } from '@/types';
 
 type Props = {
@@ -19,9 +19,16 @@ type Props = {
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
 
-    const handleLogout = () => {
-        cleanup();
-        router.flushAll();
+    const handleLogout = async () => {
+        try {
+            await api.post('/auth/logout');
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            localStorage.removeItem('auth_token');
+            cleanup();
+            window.location.href = '/login';
+        }
     };
 
     return (
@@ -47,16 +54,14 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-                <Link
-                    className="block w-full cursor-pointer"
-                    href={logout()}
-                    as="button"
+                <button
+                    className="block w-full cursor-pointer text-left"
                     onClick={handleLogout}
                     data-test="logout-button"
                 >
-                    <LogOut className="mr-2" />
+                    <LogOut className="mr-2 inline" />
                     Log out
-                </Link>
+                </button>
             </DropdownMenuItem>
         </>
     );

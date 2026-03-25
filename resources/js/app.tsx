@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import '../css/app.css';
 import { initializeTheme } from '@/hooks/use-appearance';
+import { setupInertiaTokenPlugin } from '@/plugins/inertia-token-plugin';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -30,6 +31,9 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+// Configurar plugin para enviar token en peticiones de Inertia
+setupInertiaTokenPlugin();
 
 // This will set light / dark mode on load...
 initializeTheme();

@@ -6,15 +6,14 @@ use App\Models\LoginHistory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Laravel\Fortify\Fortify;
 
 class AuthenticateLoginAttempt
 {
-    public function __invoke(Request $request, string $username, string $password): ?User
+    public function __invoke(Request $request): ?User
     {
-        $user = User::where('username', $username)->first();
+        $user = User::where('username', $request->username)->first();
 
-        if (! $user || ! Hash::check($password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return null;
         }
 
