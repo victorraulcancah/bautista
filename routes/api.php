@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthApiController;
+use App\Http\Controllers\Api\CursoContenidoApiController;
+use App\Http\Controllers\Api\MatriculaApiController;
 use App\Http\Controllers\Api\CursoApiController;
 use App\Http\Controllers\Api\DashboardApiController;
 use App\Http\Controllers\Api\DocenteApiController;
@@ -51,4 +53,34 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Cursos
     Route::apiResource('cursos', CursoApiController::class);
+
+    // Contenido de Curso (Unidades y Clases)
+    Route::prefix('contenido')->group(function () {
+        Route::get('cursos/{cursoId}',                           [CursoContenidoApiController::class, 'show']);
+        Route::post('unidades',                                   [CursoContenidoApiController::class, 'storeUnidad']);
+        Route::put('unidades/{id}',                              [CursoContenidoApiController::class, 'updateUnidad']);
+        Route::delete('unidades/{id}',                           [CursoContenidoApiController::class, 'destroyUnidad']);
+        Route::post('cursos/{cursoId}/reordenar-unidades',       [CursoContenidoApiController::class, 'reordenarUnidades']);
+        Route::post('clases',                                    [CursoContenidoApiController::class, 'storeClase']);
+        Route::put('clases/{id}',                                [CursoContenidoApiController::class, 'updateClase']);
+        Route::delete('clases/{id}',                             [CursoContenidoApiController::class, 'destroyClase']);
+        Route::post('unidades/{unidadId}/reordenar-clases',      [CursoContenidoApiController::class, 'reordenarClases']);
+        Route::post('clases/{claseId}/archivos',                 [CursoContenidoApiController::class, 'subirArchivo']);
+        Route::delete('archivos/{archivoId}',                    [CursoContenidoApiController::class, 'eliminarArchivo']);
+    });
+
+    // Matrícula — Aperturas
+    Route::prefix('matriculas')->group(function () {
+        Route::get('aperturas',                              [MatriculaApiController::class, 'indexAperturas']);
+        Route::post('aperturas',                             [MatriculaApiController::class, 'storeApertura']);
+        Route::get('aperturas/{id}',                         [MatriculaApiController::class, 'showApertura']);
+        Route::put('aperturas/{id}',                         [MatriculaApiController::class, 'updateApertura']);
+        Route::delete('aperturas/{id}',                      [MatriculaApiController::class, 'destroyApertura']);
+
+        // Matrículas dentro de una apertura
+        Route::get('aperturas/{aperturaId}/estudiantes',     [MatriculaApiController::class, 'indexMatriculas']);
+        Route::get('aperturas/{aperturaId}/disponibles',     [MatriculaApiController::class, 'estudiantesDisponibles']);
+        Route::post('/',                                     [MatriculaApiController::class, 'storeMatricula']);
+        Route::delete('/{id}',                              [MatriculaApiController::class, 'destroyMatricula']);
+    });
 });

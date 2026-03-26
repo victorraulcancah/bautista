@@ -2,26 +2,38 @@
 
 namespace App\Providers;
 
+use App\Repositories\Implements\AsistenciaRepository;
 use App\Repositories\Implements\CursoRepository;
+use App\Repositories\Implements\CursoContenidoRepository;
+use App\Repositories\Implements\MatriculaRepository;
 use App\Repositories\Implements\DocenteRepository;
 use App\Repositories\Implements\EstudianteRepository;
 use App\Repositories\Implements\GradoRepository;
 use App\Repositories\Implements\NivelEducativoRepository;
 use App\Repositories\Implements\SeccionRepository;
+use App\Repositories\Interfaces\AsistenciaRepositoryInterface;
 use App\Repositories\Interfaces\CursoRepositoryInterface;
+use App\Repositories\Interfaces\CursoContenidoRepositoryInterface;
+use App\Repositories\Interfaces\MatriculaRepositoryInterface;
 use App\Repositories\Interfaces\DocenteRepositoryInterface;
 use App\Repositories\Interfaces\EstudianteRepositoryInterface;
 use App\Repositories\Interfaces\GradoRepositoryInterface;
 use App\Repositories\Interfaces\NivelEducativoRepositoryInterface;
 use App\Repositories\Interfaces\SeccionRepositoryInterface;
+use App\Services\Implements\AsistenciaService;
 use App\Services\Implements\AuthService;
+use App\Services\Implements\CursoContenidoService;
+use App\Services\Implements\MatriculaService;
 use App\Services\Implements\CursoService;
 use App\Services\Implements\DocenteService;
 use App\Services\Implements\EstudianteService;
 use App\Services\Implements\GradoService;
 use App\Services\Implements\NivelEducativoService;
 use App\Services\Implements\SeccionService;
+use App\Services\Interfaces\AsistenciaServiceInterface;
 use App\Services\Interfaces\AuthServiceInterface;
+use App\Services\Interfaces\CursoContenidoServiceInterface;
+use App\Services\Interfaces\MatriculaServiceInterface;
 use App\Services\Interfaces\CursoServiceInterface;
 use App\Services\Interfaces\DocenteServiceInterface;
 use App\Services\Interfaces\EstudianteServiceInterface;
@@ -67,6 +79,18 @@ class AppServiceProvider extends ServiceProvider
         // Docente
         $this->app->bind(DocenteRepositoryInterface::class, DocenteRepository::class);
         $this->app->bind(DocenteServiceInterface::class, DocenteService::class);
+
+        // Matricula
+        $this->app->bind(MatriculaRepositoryInterface::class, MatriculaRepository::class);
+        $this->app->bind(MatriculaServiceInterface::class, MatriculaService::class);
+
+        // CursoContenido (Unidades y Clases)
+        $this->app->bind(CursoContenidoRepositoryInterface::class, CursoContenidoRepository::class);
+        $this->app->bind(CursoContenidoServiceInterface::class, CursoContenidoService::class);
+
+        // Asistencia
+        $this->app->bind(AsistenciaRepositoryInterface::class, AsistenciaRepository::class);
+        $this->app->bind(AsistenciaServiceInterface::class, AsistenciaService::class);
     }
 
     /**

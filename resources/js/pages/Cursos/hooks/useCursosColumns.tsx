@@ -1,7 +1,20 @@
+import { BookOpen } from 'lucide-react';
 import type { Column } from '@/components/shared/ResourceTable';
 import type { Curso } from './useCursos';
 
 export const cursosColumns: Column<Curso>[] = [
+    {
+        label: 'Contenido',
+        render: (c) => (
+            <a
+                href={`/cursos/${c.curso_id}/contenido`}
+                className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-amber-600 hover:bg-amber-50 hover:text-amber-800"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <BookOpen className="h-3 w-3" /> Ver
+            </a>
+        ),
+    },
     { label: 'Nombre', render: (c) => c.nombre },
     {
         label: 'Descripción',

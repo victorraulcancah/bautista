@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Curso extends Model
 {
@@ -22,5 +23,10 @@ class Curso extends Model
     public function grado(): BelongsTo
     {
         return $this->belongsTo(Grado::class, 'grado_academico', 'grado_id');
+    }
+
+    public function unidades(): HasMany
+    {
+        return $this->hasMany(Unidad::class, 'curso_id', 'curso_id')->orderBy('orden');
     }
 }

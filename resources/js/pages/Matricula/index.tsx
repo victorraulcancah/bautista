@@ -1,0 +1,125 @@
+import { Head } from '@inertiajs/react';
+import { useState } from 'react';
+import { ClipboardList, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import ResourcePage from '@/components/shared/ResourcePage';
+import ResourceTable from '@/components/shared/ResourceTable';
+import type { Column } from '@/components/shared/ResourceTable';
+import type { BreadcrumbItem } from '@/types';
+import { useResource } from '@/hooks/useResource';
+import { useOptions } from '@/hooks/useOptions';
+import AperturaFormModal from './components/AperturaFormModal';
+import MatriculasDrawer from './components/MatriculasDrawer';
+import type { MatriculaApertura, AperturaFormData, SeccionOption } from './hooks/useMatricula';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Dashboard',  href: '/dashboard' },
+    { title: 'Matrículas', href: '/matriculas' },
+];
+
+export default function MatriculaPage() {
+    const res       = useResource<MatriculaApertura>('/matriculas/aperturas');
+    const secciones = useOptions<SeccionOption>('/secciones');
+
+    const [modalOpen, setModalOpen]   = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [editing, setEditing]       = useState<MatriculaApertura | null>(null);
+    const [selected, setSelected]     = useState<MatriculaApertura | null>(null);
+
+    const openCreate = () => { setEditing(null); setModalOpen(true); };
+    const openEdit   = (a: MatriculaApertura) => { setEditing(a); setModalOpen(true); };
+    const openDetail = (a: MatriculaApertura) => { setSelected(a); setDrawerOpen(true); };
+
+    const columns: Column<MatriculaApertura>[] = [
+        {
+            label:  'Apertura',
+            render: (a) => <span className="font-medium">{a.nombre}</span>,
+        },
+        {
+            label:  'Año',
+            render: (a) => a.anio,
+        },
+        {
+            label:  'Período',
+            render: (a) => `${a.fecha_inicio} → ${a.fecha_fin}`,
+        },
+        {
+            label:  'Matriculados',
+            render: (a) => (
+                <div className="flex items-center justify-center gap-2">
+                    <span className="font-semibold text-blue-600">{a.matriculas_count}</span>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 px-2 text-xs text-blue-600 hover:text-blue-800"
+                        onClick={(e) => { e.stopPropagation(); openDetail(a); }}
+                    >
+                        <Users className="mr-1 h-3 w-3" />
+                        Ver
+                    </Button>
+                </div>
+            ),
+        },
+        {
+            label:  'Estado',
+            render: (a) => (
+                <Badge variant={a.estado === '1' ? 'default' : 'secondary'}>
+                    {a.estado === '1' ? 'Activo' : 'Cerrado'}
+                </Badge>
+            ),
+        },
+    ];
+
+    return (
+        <>
+            <Head title="Matrículas" />
+            <ResourcePage
+                breadcrumbs={breadcrumbs}
+                pageTitle="Matrículas"
+                subtitle={res.rows ? `${res.rows.total} aperturas` : '…'}
+                icon={ClipboardList}
+                iconColor="bg-blue-600"
+                search={res.search}
+                onSearch={res.setSearch}
+                flashSuccess={res.success}
+                btnLabel="Nueva Apertura"
+                onNew={openCreate}
+            >
+                {res.rows && (
+                    <ResourceTable
+                        rows={res.rows}
+                        columns={columns}
+                        getKey={(a) => a.apertura_id}
+                        onEdit={openEdit}
+                        onDelete={(a) => {
+                            if (confirm(`¿Eliminar apertura "${a.nombre}"? Se eliminarán todas sus matrículas.`)) {
+                                res.remove(a.apertura_id);
+                            }
+                        }}
+                        onPageChange={res.setPage}
+                    />
+                )}
+                {res.loading && <p className="py-6 text-center text-sm text-gray-400">Cargando...</p>}
+            </ResourcePage>
+
+            <AperturaFormModal
+                open={modalOpen}
+                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                editing={editing}
+                onSave={editing
+                    ? (data: AperturaFormData) => res.update(editing.apertura_id, data)
+                    : (data: AperturaFormData) => res.create(data)}
+                apiErrors={res.apiErrors}
+                clearErrors={res.clearErrors}
+            />
+
+            <MatriculasDrawer
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+                apertura={selected}
+                secciones={secciones}
+            />
+        </>
+    );
+}
