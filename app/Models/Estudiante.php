@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Estudiante extends Model
 {
@@ -52,6 +54,23 @@ class Estudiante extends Model
     public function institucion(): BelongsTo
     {
         return $this->belongsTo(InstitucionEducativa::class, 'insti_id', 'insti_id');
+    }
+
+    public function contactos(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            PadreApoderado::class,
+            'estudiante_contacto',
+            'estudiante_id',
+            'contacto_id',
+            'estu_id',
+            'id_contacto',
+        )->withPivot('mensualidad')->withTimestamps();
+    }
+
+    public function pagos(): HasMany
+    {
+        return $this->hasMany(Pago::class, 'estudiante_id', 'estu_id');
     }
 
     public function getNombreCompletoAttribute(): string

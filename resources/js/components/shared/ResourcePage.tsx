@@ -16,8 +16,8 @@ type Props = {
     search:        string;
     onSearch:      (v: string) => void;
     flashSuccess?: string | null;
-    btnLabel:      string;
-    onNew:         () => void;
+    btnLabel?:     string;
+    onNew?:        () => void;
     children:      React.ReactNode;
 };
 
@@ -49,9 +49,11 @@ export default function ResourcePage({
                                 <Search className="size-4" />
                             </Button>
                         </div>
-                        <Button onClick={onNew} className="bg-[#00a65a] hover:bg-[#008d4c] text-white gap-2">
-                            <Plus className="size-4" /> {btnLabel}
-                        </Button>
+                        {btnLabel && onNew && (
+                            <Button onClick={onNew} className="bg-[#00a65a] hover:bg-[#008d4c] text-white gap-2">
+                                <Plus className="size-4" /> {btnLabel}
+                            </Button>
+                        )}
                     </div>
                     {children}
                 </SectionCard>

@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repositories\Implements\PagoRepository;
+use App\Repositories\Implements\GaleriaRepository;
+use App\Repositories\Implements\NoticiaRepository;
+use App\Repositories\Implements\InstitucionRepository;
 use App\Repositories\Implements\AsistenciaRepository;
 use App\Repositories\Implements\CursoRepository;
 use App\Repositories\Implements\CursoContenidoRepository;
@@ -11,6 +15,11 @@ use App\Repositories\Implements\EstudianteRepository;
 use App\Repositories\Implements\GradoRepository;
 use App\Repositories\Implements\NivelEducativoRepository;
 use App\Repositories\Implements\SeccionRepository;
+use App\Repositories\Implements\ActividadRepository;
+use App\Repositories\Interfaces\PagoRepositoryInterface;
+use App\Repositories\Interfaces\GaleriaRepositoryInterface;
+use App\Repositories\Interfaces\NoticiaRepositoryInterface;
+use App\Repositories\Interfaces\InstitucionRepositoryInterface;
 use App\Repositories\Interfaces\AsistenciaRepositoryInterface;
 use App\Repositories\Interfaces\CursoRepositoryInterface;
 use App\Repositories\Interfaces\CursoContenidoRepositoryInterface;
@@ -20,6 +29,13 @@ use App\Repositories\Interfaces\EstudianteRepositoryInterface;
 use App\Repositories\Interfaces\GradoRepositoryInterface;
 use App\Repositories\Interfaces\NivelEducativoRepositoryInterface;
 use App\Repositories\Interfaces\SeccionRepositoryInterface;
+use App\Repositories\Interfaces\ActividadRepositoryInterface;
+use App\Services\Implements\PagoService;
+use App\Services\Implements\GaleriaService;
+use App\Services\Implements\MensajeService;
+use App\Services\Implements\MensajeriaGrupoService;
+use App\Services\Implements\NoticiaService;
+use App\Services\Implements\InstitucionService;
 use App\Services\Implements\AsistenciaService;
 use App\Services\Implements\AuthService;
 use App\Services\Implements\CursoContenidoService;
@@ -30,6 +46,13 @@ use App\Services\Implements\EstudianteService;
 use App\Services\Implements\GradoService;
 use App\Services\Implements\NivelEducativoService;
 use App\Services\Implements\SeccionService;
+use App\Services\Implements\ActividadService;
+use App\Services\Interfaces\PagoServiceInterface;
+use App\Services\Interfaces\GaleriaServiceInterface;
+use App\Services\Interfaces\MensajeServiceInterface;
+use App\Services\Interfaces\MensajeriaGrupoServiceInterface;
+use App\Services\Interfaces\NoticiaServiceInterface;
+use App\Services\Interfaces\InstitucionServiceInterface;
 use App\Services\Interfaces\AsistenciaServiceInterface;
 use App\Services\Interfaces\AuthServiceInterface;
 use App\Services\Interfaces\CursoContenidoServiceInterface;
@@ -40,6 +63,7 @@ use App\Services\Interfaces\EstudianteServiceInterface;
 use App\Services\Interfaces\GradoServiceInterface;
 use App\Services\Interfaces\NivelEducativoServiceInterface;
 use App\Services\Interfaces\SeccionServiceInterface;
+use App\Services\Interfaces\ActividadServiceInterface;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -55,6 +79,26 @@ class AppServiceProvider extends ServiceProvider
     {
         // Auth
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
+
+        // Pagos
+        $this->app->bind(PagoRepositoryInterface::class, PagoRepository::class);
+        $this->app->bind(PagoServiceInterface::class, PagoService::class);
+
+        // Institución
+        $this->app->bind(InstitucionRepositoryInterface::class, InstitucionRepository::class);
+        $this->app->bind(InstitucionServiceInterface::class, InstitucionService::class);
+
+        // Galería
+        $this->app->bind(GaleriaRepositoryInterface::class, GaleriaRepository::class);
+        $this->app->bind(GaleriaServiceInterface::class, GaleriaService::class);
+
+        // Noticias
+        $this->app->bind(NoticiaRepositoryInterface::class, NoticiaRepository::class);
+        $this->app->bind(NoticiaServiceInterface::class, NoticiaService::class);
+
+        // Mensajería
+        $this->app->bind(MensajeServiceInterface::class, MensajeService::class);
+        $this->app->bind(MensajeriaGrupoServiceInterface::class, MensajeriaGrupoService::class);
 
         // Estudiante
         $this->app->bind(EstudianteRepositoryInterface::class, EstudianteRepository::class);
@@ -91,6 +135,10 @@ class AppServiceProvider extends ServiceProvider
         // Asistencia
         $this->app->bind(AsistenciaRepositoryInterface::class, AsistenciaRepository::class);
         $this->app->bind(AsistenciaServiceInterface::class, AsistenciaService::class);
+
+        // Actividades (Exámenes Virtuales)
+        $this->app->bind(ActividadRepositoryInterface::class, ActividadRepository::class);
+        $this->app->bind(ActividadServiceInterface::class, ActividadService::class);
     }
 
     /**

@@ -1,6 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
-    Bell,
     BookOpen,
     Building2,
     CalendarDays,
@@ -36,8 +35,12 @@ const navigation: NavItem[] = [
     // ── Menú principal ──────────────────────────────────────────────
     { type: 'section', label: 'MENÚ DE NAVEGACIÓN' },
     { type: 'link', title: 'Inicio',          icon: LayoutDashboard, href: '/dashboard' },
-    { type: 'link', title: 'Institución',     icon: Building2,       href: '/institucion' },
-    { type: 'link', title: 'Notificaciones',  icon: Bell,            href: '/notificaciones' },
+    { type: 'group', title: 'Institución', icon: Building2, children: [
+        { title: 'Datos Básicos', href: '/institucion' },
+        { title: 'Galería',       href: '/institucion/galeria' },
+        { title: 'Noticias',      href: '/institucion/noticias' },
+    ]},
+    { type: 'link', title: 'Mensajes',        icon: MessageSquare,   href: '/mensajes' },
     { type: 'link', title: 'Pagos',           icon: CreditCard,      href: '/pagos' },
 
     // ── Información Académica ────────────────────────────────────────
@@ -115,7 +118,7 @@ function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
                 <ChevronRight className={cn('size-3.5 transition-transform duration-200', open && 'rotate-90')} />
             </SidebarMenuButton>
 
-            {open && (
+            {open ? (
                 <div className="ml-6 mt-0.5 flex flex-col gap-0.5 border-l border-sidebar-border pl-3">
                     {item.children.map((child) => (
                         <Link
@@ -132,7 +135,7 @@ function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
                         </Link>
                     ))}
                 </div>
-            )}
+            ) : null}
         </SidebarMenuItem>
     );
 }

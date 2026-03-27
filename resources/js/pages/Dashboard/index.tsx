@@ -31,7 +31,7 @@ export default function Dashboard() {
                     title="Panel de Control"
                     subtitle="IEP Bautista La Pascana"
                 />
-                {stats && <StatsCards stats={stats} />}
+                {stats !== null ? <StatsCards stats={stats} /> : null}
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                     <NotificacionesPendientes />
                     <AccesosRapidos />

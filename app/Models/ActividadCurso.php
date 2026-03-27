@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
+class ActividadCurso extends Model
+{
+    protected $table = 'actividad_curso';
+    protected $primaryKey = 'actividad_id';
+
+    protected $fillable = [
+        'id_curso', 'id_clase_curso', 'id_tipo_activada',
+        'nombre_activid', 'descripcion_corta', 'descripcion_larga',
+        'fecha_inicio', 'fecha_cierre',
+        'nota_visible', 'nota_actvidad', 'respuesta_visible',
+        'ocultar_actividad', 'estado', 'es_calificado',
+    ];
+
+    protected $casts = [
+        'fecha_inicio' => 'datetime',
+        'fecha_cierre' => 'datetime',
+    ];
+
+    public function tipo(): BelongsTo
+    {
+        return $this->belongsTo(TipoActividad::class, 'id_tipo_activada', 'tipo_id');
+    }
+
+    public function cuestionario(): HasOne
+    {
+        return $this->hasOne(Cuestionario::class, 'id_actividad', 'actividad_id');
+    }
+}

@@ -80,7 +80,7 @@ pages/Estudiantes/
 
 ### Database
 
-Default: **SQLite** (`database/database.sqlite`) for development. Configured for MySQL/PostgreSQL via `.env`.
+Development uses **MySQL** (`edu_bautista2`) as configured in `.env`. Tests use in-memory SQLite (configured in `phpunit.xml` — no extra setup needed).
 
 Sessions, cache, and queues all use the database driver by default.
 

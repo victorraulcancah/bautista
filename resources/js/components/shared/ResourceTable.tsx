@@ -18,15 +18,16 @@ export type Paginated<T> = {
 };
 
 type Props<T> = {
-    rows:         Paginated<T>;
-    columns:      Column<T>[];
-    getKey:       (row: T) => number | string;
-    onEdit:       (row: T) => void;
-    onDelete:     (row: T) => void;
-    onPageChange: (page: number) => void;
+    rows:          Paginated<T>;
+    columns:       Column<T>[];
+    getKey:        (row: T) => number | string;
+    onEdit?:       (row: T) => void;
+    onDelete?:     (row: T) => void;
+    onPageChange:  (page: number) => void;
 };
 
 export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDelete, onPageChange }: Props<T>) {
+    const showActions = !!(onEdit || onDelete);
     return (
         <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -36,13 +37,13 @@ export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDele
                         {columns.map((c, idx) => (
                             <th key={`col-${idx}`} className={`px-3 py-2 ${c.className ?? ''}`}>{c.label}</th>
                         ))}
-                        <th className="px-3 py-2">Acciones</th>
+                        {showActions && <th className="px-3 py-2">Acciones</th>}
                     </tr>
                 </thead>
                 <tbody>
                     {rows.data.length === 0 ? (
                         <tr>
-                            <td colSpan={columns.length + 2} className="py-8 text-center text-gray-400">
+                            <td colSpan={columns.length + 1 + (showActions ? 1 : 0)} className="py-8 text-center text-gray-400">
                                 No se encontraron registros.
                             </td>
                         </tr>
@@ -54,16 +55,22 @@ export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDele
                                     {c.render(row, i)}
                                 </td>
                             ))}
-                            <td className="px-3 py-2">
-                                <div className="flex items-center justify-center gap-1">
-                                    <Button size="icon" variant="ghost" className="size-7 text-blue-600 hover:bg-blue-50" onClick={() => onEdit(row)}>
-                                        <Pencil className="size-3.5" />
-                                    </Button>
-                                    <Button size="icon" variant="ghost" className="size-7 text-red-500 hover:bg-red-50" onClick={() => onDelete(row)}>
-                                        <Trash2 className="size-3.5" />
-                                    </Button>
-                                </div>
-                            </td>
+                            {showActions && (
+                                <td className="px-3 py-2">
+                                    <div className="flex items-center justify-center gap-1">
+                                        {onEdit && (
+                                            <Button size="icon" variant="ghost" className="size-7 text-blue-600 hover:bg-blue-50" onClick={() => onEdit(row)}>
+                                                <Pencil className="size-3.5" />
+                                            </Button>
+                                        )}
+                                        {onDelete && (
+                                            <Button size="icon" variant="ghost" className="size-7 text-red-500 hover:bg-red-50" onClick={() => onDelete(row)}>
+                                                <Trash2 className="size-3.5" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </td>
+                            )}
                         </tr>
                     ))}
                 </tbody>

@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import InputError from '@/components/shared/input-error';
 import PasswordInput from '@/components/shared/password-input';
@@ -22,7 +22,9 @@ export default function Login({ status }: Props) {
         e.preventDefault();
         const result = await login(formData);
         if (result.success) {
-            router.visit('/dashboard');
+            // Full reload so the browser sends the auth_token cookie
+            // and the server can authenticate before Inertia renders
+            window.location.href = '/dashboard';
         }
     };
 

@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\PagoApiController;
+use App\Http\Controllers\Api\GaleriaApiController;
+use App\Http\Controllers\Api\MensajeApiController;
+use App\Http\Controllers\Api\MensajeriaGrupoApiController;
+use App\Http\Controllers\Api\NoticiaApiController;
+use App\Http\Controllers\Api\UsuarioBusquedaApiController;
+use App\Http\Controllers\Api\InstitucionApiController;
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\CursoContenidoApiController;
 use App\Http\Controllers\Api\MatriculaApiController;
@@ -10,6 +17,7 @@ use App\Http\Controllers\Api\EstudianteApiController;
 use App\Http\Controllers\Api\GradoApiController;
 use App\Http\Controllers\Api\NivelEducativoApiController;
 use App\Http\Controllers\Api\SeccionApiController;
+use App\Http\Controllers\Api\ActividadApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,6 +43,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Dashboard
     Route::get('dashboard/stats', [DashboardApiController::class, 'stats']);
+
+    // Instituciones
+    Route::apiResource('instituciones', InstitucionApiController::class);
+
+    // Galería de la institución
+    Route::apiResource('galeria', GaleriaApiController::class)->except(['show']);
+
+    // Noticias de la institución
+    Route::apiResource('noticias', NoticiaApiController::class)->except(['show']);
+
+    // Mensajería
+    Route::get('mensajes',                        [MensajeApiController::class, 'index']);
+    Route::post('mensajes',                       [MensajeApiController::class, 'store']);
+    Route::get('mensajes/no-leidos',              [MensajeApiController::class, 'noLeidos']);
+    Route::get('mensajes/{id}',                   [MensajeApiController::class, 'show']);
+    Route::post('mensajes/{id}/responder',        [MensajeApiController::class, 'reply']);
+    Route::get('mensajeria/grupos',               [MensajeriaGrupoApiController::class, 'index']);
+    Route::post('mensajeria/grupos',              [MensajeriaGrupoApiController::class, 'store']);
+    Route::get('mensajeria/cursos',               [MensajeriaGrupoApiController::class, 'cursos']);
+    Route::get('mensajeria/cursos/{id}/alumnos',  [MensajeriaGrupoApiController::class, 'alumnosPorCurso']);
+    Route::get('usuarios/buscar',                 UsuarioBusquedaApiController::class);
 
     // Estudiantes
     Route::apiResource('estudiantes', EstudianteApiController::class);
@@ -68,6 +97,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('clases/{claseId}/archivos',                 [CursoContenidoApiController::class, 'subirArchivo']);
         Route::delete('archivos/{archivoId}',                    [CursoContenidoApiController::class, 'eliminarArchivo']);
     });
+
+    // Pagos
+    Route::prefix('pagos')->group(function () {
+        Route::get('pagadores',                    [PagoApiController::class, 'indexPagadores']);
+        Route::get('contactos/{contactoId}',       [PagoApiController::class, 'porContacto']);
+        Route::post('/',                           [PagoApiController::class, 'store']);
+        Route::put('/{id}',                        [PagoApiController::class, 'update']);
+        Route::delete('/{id}',                     [PagoApiController::class, 'destroy']);
+    });
+
+    // Actividades (Exámenes Virtuales)
+    Route::get('actividades/tipos',     [ActividadApiController::class, 'tipos']);
+    Route::apiResource('actividades',   ActividadApiController::class);
 
     // Matrícula — Aperturas
     Route::prefix('matriculas')->group(function () {

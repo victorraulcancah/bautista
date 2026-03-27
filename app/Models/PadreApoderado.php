@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PadreApoderado extends Model
 {
@@ -51,5 +53,22 @@ class PadreApoderado extends Model
     public function institucion(): BelongsTo
     {
         return $this->belongsTo(InstitucionEducativa::class, 'insti_id', 'insti_id');
+    }
+
+    public function estudiantes(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Estudiante::class,
+            'estudiante_contacto',
+            'contacto_id',
+            'estudiante_id',
+            'id_contacto',
+            'estu_id',
+        )->withPivot('mensualidad')->withTimestamps();
+    }
+
+    public function pagos(): HasMany
+    {
+        return $this->hasMany(Pago::class, 'contacto_id', 'id_contacto');
     }
 }

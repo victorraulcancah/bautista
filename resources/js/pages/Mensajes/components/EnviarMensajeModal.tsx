@@ -1,0 +1,164 @@
+import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import RichTextEditor from '@/components/shared/RichTextEditor';
+import api from '@/lib/api';
+
+type Usuario = { id: number; nombre: string; username: string };
+type Grupo   = { id: number; nombre: string };
+
+type Props = {
+    open:    boolean;
+    onClose: () => void;
+    onSent:  () => void;
+    grupos:  Grupo[];
+};
+
+export default function EnviarMensajeModal({ open, onClose, onSent, grupos }: Props) {
+    const [grupoId, setGrupoId]               = useState('');
+    const [query, setQuery]                   = useState('');
+    const [results, setResults]               = useState<Usuario[]>([]);
+    const [destinatario, setDestinatario]     = useState<Usuario | null>(null);
+    const [asunto, setAsunto]                 = useState('');
+    const [cuerpo, setCuerpo]                 = useState('');
+    const [searching, setSearching]           = useState(false);
+    const [sending, setSending]               = useState(false);
+    const [error, setError]                   = useState('');
+    const debounceRef                         = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        if (!open) {
+            setGrupoId(''); setQuery(''); setResults([]);
+            setDestinatario(null); setAsunto(''); setCuerpo(''); setError('');
+        }
+    }, [open]);
+
+    const buscarUsuario = (q: string) => {
+        setQuery(q);
+        setDestinatario(null);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        if (q.length < 2) { setResults([]); return; }
+        debounceRef.current = setTimeout(async () => {
+            setSearching(true);
+            try {
+                const { data } = await api.get('/usuarios/buscar', { params: { q } });
+                setResults(data);
+            } finally {
+                setSearching(false);
+            }
+        }, 300);
+    };
+
+    const seleccionar = (u: Usuario) => {
+        setDestinatario(u);
+        setQuery(u.nombre);
+        setResults([]);
+    };
+
+    const handleSubmit = async (e: { preventDefault(): void }) => {
+        e.preventDefault();
+        if (!grupoId && !destinatario) { setError('Busque y seleccione un usuario, o elija un grupo.'); return; }
+        if (!asunto.trim())            { setError('El asunto es requerido.');                            return; }
+        if (!cuerpo.trim())            { setError('El mensaje no puede estar vacío.');                   return; }
+        setSending(true); setError('');
+        try {
+            await api.post('/mensajes', {
+                destinatario_id: destinatario?.id ?? null,
+                grupo_id:        grupoId ? Number(grupoId) : null,
+                asunto,
+                cuerpo,
+            });
+            onSent();
+            onClose();
+        } catch {
+            setError('Error al enviar el mensaje.');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+            <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                    <DialogTitle>Mensaje</DialogTitle>
+                </DialogHeader>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Grupo */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-700">Grupo:</label>
+                        <select
+                            value={grupoId}
+                            onChange={(e) => { setGrupoId(e.target.value); setDestinatario(null); setQuery(''); }}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a65a]"
+                        >
+                            <option value="">Seleccionar grupo</option>
+                            {grupos.map((g) => (
+                                <option key={g.id} value={g.id}>{g.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Para (autocomplete) */}
+                    <div className="relative flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-700">Para:</label>
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={(e) => { setGrupoId(''); buscarUsuario(e.target.value); }}
+                            placeholder={searching ? 'Buscando...' : ''}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a65a]"
+                            autoComplete="off"
+                        />
+                        {results.length > 0 && (
+                            <ul className="absolute z-50 top-full mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg">
+                                {results.map((u) => (
+                                    <li
+                                        key={u.id}
+                                        className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-50"
+                                        onClick={() => seleccionar(u)}
+                                    >
+                                        <span className="font-medium">{u.nombre}</span>
+                                        <span className="ml-2 text-xs text-gray-400">@{u.username}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+
+                    {/* Asunto */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-700">Asunto:</label>
+                        <input
+                            type="text"
+                            value={asunto}
+                            onChange={(e) => setAsunto(e.target.value)}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a65a]"
+                        />
+                    </div>
+
+                    {/* Mensaje */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-700">Mensaje:</label>
+                        <RichTextEditor
+                            value={cuerpo}
+                            onChange={setCuerpo}
+                            placeholder="Escribe tu mensaje..."
+                            minHeight={180}
+                        />
+                    </div>
+
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+
+                    <DialogFooter>
+                        <Button type="submit" disabled={sending} className="bg-blue-600 hover:bg-blue-700 text-white">
+                            {sending ? 'Enviando...' : 'Enviar'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
