@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { BookOpen, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,8 @@ export type TipoActividad = { tipo_id: number; nombre: string };
 export type Actividad = {
     actividad_id:      number;
     id_curso:          number;
-    id_tipo_activada:  number;
-    nombre_activid:    string;
+    id_tipo_actividad: number;
+    nombre_actividad:  string;
     descripcion_corta: string | null;
     fecha_inicio:      string | null;
     fecha_cierre:      string | null;
@@ -28,6 +28,7 @@ export type Actividad = {
     cuestionario?:     null | {
         cuestionario_id: number;
         duracion:        number;
+        mostrar_respuesta: string;
         preguntas:       Pregunta[];
     };
 };
@@ -73,9 +74,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 // ─── Main page ────────────────────────────────────────────────────────────
-export default function ExamenesPage() {
+export default function ExamenesPage({ cursoId }: { cursoId?: number }) {
     // For now show all; in production filter by curso_id from route params
-    const res = useResource<Actividad>('/actividades?curso_id=0');
+    const endpoint = cursoId ? `/actividades?curso_id=${cursoId}` : '/actividades';
+    const res = useResource<Actividad>(endpoint);
 
     const [modalOpen, setModalOpen]     = useState(false);
     const [editing, setEditing]         = useState<Actividad | null>(null);
@@ -98,7 +100,7 @@ export default function ExamenesPage() {
                     className="text-left font-medium text-purple-700 hover:underline"
                     onClick={() => openDrawer(a)}
                 >
-                    {a.nombre_activid}
+                    {a.nombre_actividad}
                 </button>
             ),
         },
@@ -123,22 +125,23 @@ export default function ExamenesPage() {
             ),
         },
         {
-            label:  'Calificado',
-            render: (a) => a.es_calificado === '1'
-                ? <span className="text-green-600 text-xs font-semibold">Sí</span>
-                : <span className="text-gray-400 text-xs">No</span>,
-        },
-        {
             label:  'Acciones',
             render: (a) => (
-                <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-purple-600 hover:text-purple-800 h-7 px-2"
-                    onClick={(e) => { e.stopPropagation(); openEdit(a); }}
-                >
-                    Editar
-                </Button>
+                <div className="flex space-x-2">
+                    <Link href={`/examenes/${a.actividad_id}/resolver`}>
+                        <Button variant="outline" size="sm" className="h-8 rounded-lg font-bold">
+                            Probar Examen
+                        </Button>
+                    </Link>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 rounded-lg font-bold text-gray-400"
+                        onClick={(e) => { e.stopPropagation(); openEdit(a); }}
+                    >
+                        Editar
+                    </Button>
+                </div>
             ),
         },
     ];

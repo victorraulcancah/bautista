@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { Users, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import TitleForm from '@/components/TitleForm';
 import api from '@/lib/api';
+
 
 type Curso   = { curso_id: number; nombre: string; nivel: string | null; grado: string | null };
 type Alumno  = { user_id: number; nombre: string };
@@ -71,13 +73,20 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Grupos</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2 text-neutral-800">
+                        <Users className="h-5 w-5 text-emerald-600" />
+                        Nuevo Grupo
+                    </DialogTitle>
+                    <DialogDescription className="sr-only">Crea un grupo de mensajería con alumnos de un curso.</DialogDescription>
                 </DialogHeader>
+
+                <TitleForm>Datos del Grupo</TitleForm>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Nombre del grupo */}
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700">Nombre del grupo:</label>
+                        <label className="text-sm font-medium text-neutral-600">Nombre del grupo:</label>
+
                         <input
                             type="text"
                             value={nombre}
@@ -86,9 +95,12 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
                         />
                     </div>
 
+                    <TitleForm className="pt-1">Seleccionar Miembros</TitleForm>
+
                     {/* Curso */}
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700">Curso:</label>
+                        <label className="text-sm font-medium text-neutral-600">Curso:</label>
+
                         <select
                             value={cursoId}
                             onChange={(e) => setCursoId(e.target.value)}
@@ -105,7 +117,8 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
 
                     {/* Alumnos */}
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700">Alumonos:</label>
+                        <label className="text-sm font-medium text-neutral-600">Alumnos:</label>
+
                         <select
                             onChange={seleccionarAlumno}
                             disabled={alumnos.length === 0}

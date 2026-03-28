@@ -42,11 +42,32 @@ def _migrate_generic(old, new, dry_run, table_old: str, table_new: str,
 
 
 def migrate_erp(old, new, dry_run: bool):
-    # 1. empresas
-    _migrate_generic(old, new, dry_run, "empresas", "empresas",
-                     "id_empresa",
-                     ["id_empresa", "nombre"],
-                     "nombre")
+    # 1. empresas — old uses razon_social, new schema renamed it to nombre
+    log.head("ERP  empresas")
+    with old.cursor() as c:
+        c.execute("SELECT * FROM empresas ORDER BY id_empresa")
+        rows_emp = c.fetchall()
+    log.info(f"{len(rows_emp)} empresas encontradas")
+    with new.cursor() as c:
+        c.execute("SELECT id_empresa FROM empresas")
+        existing_emp = {r["id_empresa"] for r in c.fetchall()}
+    inserted_emp = skipped_emp = 0
+    with new.cursor() as c:
+        for r in rows_emp:
+            if r["id_empresa"] in existing_emp:
+                skipped_emp += 1
+                continue
+            nombre = r.get("razon_social") or r.get("comercial") or ""
+            if not dry_run:
+                c.execute(
+                    "INSERT INTO empresas (id_empresa, nombre, created_at, updated_at) VALUES (%s, %s, %s, %s)",
+                    (r["id_empresa"], nombre, NOW, NOW),
+                )
+            log.ok(f"  id_empresa={r['id_empresa']}  nombre={nombre[:60]}")
+            inserted_emp += 1
+    if not dry_run:
+        new.commit()
+    log.info(f"Insertados: {inserted_emp}  |  Omitidos: {skipped_emp}")
 
     # 2. tipo_pago
     _migrate_generic(old, new, dry_run, "tipo_pago", "tipo_pago",
@@ -66,11 +87,32 @@ def migrate_erp(old, new, dry_run: bool):
                      ["id_metodo_pago", "nombre"],
                      "nombre")
 
-    # 5. proveedores
-    _migrate_generic(old, new, dry_run, "proveedores", "proveedores",
-                     "proveedor_id",
-                     ["proveedor_id", "nombre"],
-                     "nombre")
+    # 5. proveedores — old uses razon_social, new schema renamed it to nombre
+    log.head("ERP  proveedores")
+    with old.cursor() as c:
+        c.execute("SELECT * FROM proveedores ORDER BY proveedor_id")
+        rows_prov = c.fetchall()
+    log.info(f"{len(rows_prov)} proveedores encontrados")
+    with new.cursor() as c:
+        c.execute("SELECT proveedor_id FROM proveedores")
+        existing_prov = {r["proveedor_id"] for r in c.fetchall()}
+    inserted_prov = skipped_prov = 0
+    with new.cursor() as c:
+        for r in rows_prov:
+            if r["proveedor_id"] in existing_prov:
+                skipped_prov += 1
+                continue
+            nombre = r.get("razon_social") or ""
+            if not dry_run:
+                c.execute(
+                    "INSERT INTO proveedores (proveedor_id, nombre, created_at, updated_at) VALUES (%s, %s, %s, %s)",
+                    (r["proveedor_id"], nombre, NOW, NOW),
+                )
+            log.ok(f"  proveedor_id={r['proveedor_id']}  nombre={nombre[:60]}")
+            inserted_prov += 1
+    if not dry_run:
+        new.commit()
+    log.info(f"Insertados: {inserted_prov}  |  Omitidos: {skipped_prov}")
 
     # 6. clientes
     _migrate_generic(old, new, dry_run, "clientes", "clientes",

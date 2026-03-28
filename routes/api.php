@@ -18,6 +18,15 @@ use App\Http\Controllers\Api\GradoApiController;
 use App\Http\Controllers\Api\NivelEducativoApiController;
 use App\Http\Controllers\Api\SeccionApiController;
 use App\Http\Controllers\Api\ActividadApiController;
+use App\Http\Controllers\Api\DocenteCursoApiController;
+use App\Http\Controllers\Api\UsuarioApiController;
+use App\Http\Controllers\Api\BlogApiController;
+use App\Http\Controllers\Api\AsistenciaGeneralApiController;
+use App\Http\Controllers\Api\MediosApiController;
+use App\Http\Controllers\Api\MensajeriaApiController;
+use App\Http\Controllers\Api\PadreApiController;
+use App\Http\Controllers\Api\CalificacionApiController;
+use App\Http\Controllers\Api\ExamenResolucionApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -67,9 +76,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Estudiantes
     Route::apiResource('estudiantes', EstudianteApiController::class);
+    Route::get('estudiantes/{id}/contactos',  [EstudianteApiController::class, 'contactos']);
+    Route::post('estudiantes/{id}/contactos', [EstudianteApiController::class, 'guardarContacto']);
 
     // Docentes
     Route::apiResource('docentes', DocenteApiController::class);
+    Route::get('docentes/{docenteId}/cursos',             [DocenteCursoApiController::class, 'index']);
+    Route::post('docentes/{docenteId}/cursos',            [DocenteCursoApiController::class, 'store']);
+    Route::delete('docentes/{docenteId}/cursos/{id}',     [DocenteCursoApiController::class, 'destroy']);
+    Route::get('docentes/{docenteId}/horario',            [DocenteCursoApiController::class, 'horario']);
 
     // Niveles Educativos
     Route::apiResource('niveles', NivelEducativoApiController::class);
@@ -110,6 +125,62 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Actividades (Exámenes Virtuales)
     Route::get('actividades/tipos',     [ActividadApiController::class, 'tipos']);
     Route::apiResource('actividades',   ActividadApiController::class);
+    Route::get('actividades/{id}/notas', [CalificacionApiController::class, 'indexByActivity']);
+    Route::post('actividades/{id}/calificar', [CalificacionApiController::class, 'calificar']);
+    Route::post('examenes/comenzar', [ExamenResolucionApiController::class, 'comenzar']);
+    Route::post('examenes/{id}/responder', [ExamenResolucionApiController::class, 'responder']);
+    Route::post('examenes/{id}/finalizar', [ExamenResolucionApiController::class, 'finalizar']);
+
+    // Portal Alumno
+    Route::get('alumno/dashboard', [AlumnoApiController::class, 'dashboard']);
+    Route::get('alumno/cursos', [AlumnoApiController::class, 'cursos']);
+    Route::get('alumno/curso/{id}', [AlumnoApiController::class, 'cursoDetalle']);
+    Route::get('alumno/clase/{id}', [AlumnoApiController::class, 'claseDetalle']);
+    Route::post('alumno/actividad/{id}/entregar', [AlumnoApiController::class, 'entregarActividad']);
+
+    // Portal Docente
+    Route::get('docente/dashboard', [DocenteApiController::class, 'dashboard']);
+    Route::get('docente/mis-cursos', [DocenteApiController::class, 'misCursos']);
+    Route::post('docente/unidad', [DocenteApiController::class, 'crearUnidad']);
+    Route::post('docente/clase', [DocenteApiController::class, 'crearClase']);
+    Route::post('docente/actividad', [DocenteApiController::class, 'crearActividad']);
+    Route::get('docente/curso/{id}/alumnos', [DocenteApiController::class, 'alumnosSeccion']);
+    Route::post('docente/asistencia/iniciar', [DocenteApiController::class, 'iniciarAsistencia']);
+    Route::post('docente/asistencia/{id}/marcar', [DocenteApiController::class, 'marcarAsistencia']);
+
+    // Mensajería
+    Route::get('mensajes/recibidos', [MensajeriaApiController::class, 'recibidos']);
+    Route::get('mensajes/enviados', [MensajeriaApiController::class, 'enviados']);
+    Route::get('mensajes/contactos', [MensajeriaApiController::class, 'buscarContactos']);
+    Route::post('mensajes/enviar', [MensajeriaApiController::class, 'enviar']);
+    Route::get('mensajes/{id}', [MensajeriaApiController::class, 'ver']);
+    Route::post('mensajes/{id}/responder', [MensajeriaApiController::class, 'responder']);
+
+    // Blog y Noticias
+    Route::get('blog', [BlogApiController::class, 'index']);
+    Route::get('blog/{id}', [BlogApiController::class, 'show']);
+
+    // Biblioteca de Medios
+    Route::get('medios', [MediosApiController::class, 'index']);
+    Route::post('medios/upload', [MediosApiController::class, 'store']);
+    Route::delete('medios/{id}', [MediosApiController::class, 'destroy']);
+
+    // Asistencia General (QR)
+    Route::get('asistencia/usuarios', [AsistenciaGeneralApiController::class, 'index']);
+    Route::get('asistencia/usuario/{id}', [AsistenciaGeneralApiController::class, 'show']);
+    Route::get('asistencia/usuario/{id}/export', [AsistenciaGeneralApiController::class, 'export']);
+    Route::post('asistencia/marcar-qr', [AsistenciaGeneralApiController::class, 'marcarQR']);
+    Route::get('asistencia/historial', [AsistenciaGeneralApiController::class, 'historial']);
+
+    // Portal Padre
+    Route::get('padre/hijos', [PadreApiController::class, 'hijos']);
+    Route::get('padre/hijo/{id}/resumen', [PadreApiController::class, 'hijoDetalle']);
+
+    // Usuarios
+    Route::apiResource('usuarios', UsuarioApiController::class)->only(['index', 'show', 'store', 'update']);
+    Route::patch('usuarios/{id}/estado',       [UsuarioApiController::class, 'toggleEstado']);
+    Route::get('usuarios/{id}/historial',      [UsuarioApiController::class, 'historial']);
+    Route::patch('usuarios/{id}/credenciales', [UsuarioApiController::class, 'resetCredenciales']);
 
     // Matrícula — Aperturas
     Route::prefix('matriculas')->group(function () {
@@ -121,8 +192,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Matrículas dentro de una apertura
         Route::get('aperturas/{aperturaId}/estudiantes',     [MatriculaApiController::class, 'indexMatriculas']);
+        Route::get('aperturas/{aperturaId}/por-nivel',       [MatriculaApiController::class, 'indexPorNivel']);
         Route::get('aperturas/{aperturaId}/disponibles',     [MatriculaApiController::class, 'estudiantesDisponibles']);
         Route::post('/',                                     [MatriculaApiController::class, 'storeMatricula']);
         Route::delete('/{id}',                              [MatriculaApiController::class, 'destroyMatricula']);
     });
+
+    // Horarios de Asistencia
+    Route::apiResource('horarios-asistencia', \App\Http\Controllers\Api\HorarioAsistenciaApiController::class);
 });

@@ -16,18 +16,31 @@ class MatriculaResource extends JsonResource
             'seccion_id'    => $this->seccion_id,
             'anio'          => $this->anio,
             'estado'        => $this->estado,
+            'fecha_matricula' => $this->created_at?->format('Y-m-d'),
             'estudiante' => $this->whenLoaded('estudiante', fn () => [
-                'estu_id'        => $this->estudiante->estu_id,
-                'nombre_completo'=> trim(
+                'estu_id'          => $this->estudiante->estu_id,
+                'primer_nombre'    => $this->estudiante->perfil?->primer_nombre,
+                'segundo_nombre'   => $this->estudiante->perfil?->segundo_nombre,
+                'apellido_paterno' => $this->estudiante->perfil?->apellido_paterno,
+                'apellido_materno' => $this->estudiante->perfil?->apellido_materno,
+                'nombre_completo'  => trim(
                     ($this->estudiante->perfil?->primer_nombre ?? '') . ' ' .
-                    ($this->estudiante->perfil?->apellido_paterno ?? '')
+                    ($this->estudiante->perfil?->segundo_nombre ?? '') . ' ' .
+                    ($this->estudiante->perfil?->apellido_paterno ?? '') . ' ' .
+                    ($this->estudiante->perfil?->apellido_materno ?? '')
                 ),
-                'doc_numero'     => $this->estudiante->perfil?->doc_numero,
-                'genero'         => $this->estudiante->perfil?->genero,
+                'doc_numero'       => $this->estudiante->perfil?->doc_numero,
+                'genero'           => $this->estudiante->perfil?->genero,
+                'user_id'          => $this->estudiante->user?->id,
+                'estado_user'      => $this->estudiante->user?->estado,
             ]),
             'seccion' => $this->whenLoaded('seccion', fn () => [
                 'seccion_id' => $this->seccion->seccion_id,
                 'nombre'     => $this->seccion->nombre,
+                'grado'      => $this->seccion->grado ? [
+                    'grado_id'     => $this->seccion->grado->grado_id,
+                    'nombre_grado' => $this->seccion->grado->nombre_grado,
+                ] : null,
             ]),
         ];
     }

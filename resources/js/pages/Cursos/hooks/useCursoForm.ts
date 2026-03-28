@@ -5,12 +5,13 @@ import { defaultForm } from './useCursos';
 type Props = {
     editing:     Curso | null;
     open:        boolean;
+    defaults?:   Partial<CursoFormData>;
     onSave:      (data: CursoFormData) => Promise<void>;
     onClose:     () => void;
     clearErrors: () => void;
 };
 
-export function useCursoForm({ editing, open, onSave, onClose, clearErrors }: Props) {
+export function useCursoForm({ editing, open, defaults, onSave, onClose, clearErrors }: Props) {
     const [form, setForm]       = useState<CursoFormData>(defaultForm);
     const [processing, setProc] = useState(false);
 
@@ -24,7 +25,7 @@ export function useCursoForm({ editing, open, onSave, onClose, clearErrors }: Pr
                 grado_academico:    editing.grado_academico?.toString() ?? '',
                 estado:             editing.estado,
             }
-            : defaultForm,
+            : { ...defaultForm, ...defaults },
         );
     }, [editing, open]);
 

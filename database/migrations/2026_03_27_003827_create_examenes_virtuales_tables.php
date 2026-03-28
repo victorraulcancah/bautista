@@ -20,19 +20,23 @@ return new class extends Migration
             $table->id('actividad_id');
             $table->unsignedBigInteger('id_curso')->nullable();
             $table->unsignedBigInteger('id_clase_curso')->nullable();
-            $table->unsignedBigInteger('id_tipo_activada')->nullable();
-            $table->string('nombre_activid', 200)->nullable();
+            $table->unsignedBigInteger('id_tipo_actividad')->nullable();
+            $table->string('nombre_actividad', 200)->nullable();
             $table->text('descripcion_corta')->nullable();
             $table->longText('descripcion_larga')->nullable();
             $table->dateTime('fecha_inicio')->nullable();
             $table->dateTime('fecha_cierre')->nullable();
             $table->char('nota_visible', 1)->nullable()->comment('1=visible, 0= no visible');
-            $table->string('nota_actvidad', 5)->nullable();
+            $table->string('nota_actividad', 5)->nullable();
             $table->char('respuesta_visible', 1)->nullable()->comment('solo examne: 1 = visible 0= no visible');
             $table->char('ocultar_actividad', 1)->nullable()->comment('1=visible, 0= no visible');
             $table->char('estado', 1)->nullable();
             $table->char('es_calificado', 1)->nullable()->comment('1= si, 0= no');
             $table->timestamps();
+
+            // Foreign Keys
+            $table->foreign('id_curso')->references('curso_id')->on('cursos')->cascadeOnDelete();
+            $table->foreign('id_clase_curso')->references('clase_id')->on('clases')->cascadeOnDelete();
         });
 
         // tipo_respuesta_quiz
@@ -48,9 +52,11 @@ return new class extends Migration
             $table->unsignedBigInteger('id_actividad')->nullable();
             $table->double('duracion', 10, 2)->nullable();
             $table->char('nota_visible', 1)->default('0');
-            $table->char('mostrar_respusta', 1)->default('0');
+            $table->char('mostrar_respuesta', 1)->default('0');
             $table->char('estado', 1)->nullable();
             $table->timestamps();
+
+            $table->foreign('id_actividad')->references('actividad_id')->on('actividad_curso')->cascadeOnDelete();
         });
 
         // pregunta_cuestionario

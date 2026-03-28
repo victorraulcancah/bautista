@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Seccion extends Model
 {
+    protected $table = 'secciones';
     protected $primaryKey = 'seccion_id';
 
     protected $fillable = ['id_grado', 'nombre', 'abreviatura', 'cnt_alumnos', 'horario'];

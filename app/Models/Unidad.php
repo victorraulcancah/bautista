@@ -11,12 +11,12 @@ class Unidad extends Model
     protected $primaryKey = 'unidad_id';
 
     protected $fillable = [
-        'curso_id', 'titulo', 'descripcion', 'orden', 'estado',
+        'docente_curso_id', 'titulo', 'descripcion', 'orden', 'estado',
     ];
 
-    public function curso(): BelongsTo
+    public function docenteCurso(): BelongsTo
     {
-        return $this->belongsTo(Curso::class, 'curso_id', 'curso_id');
+        return $this->belongsTo(DocenteCurso::class, 'docente_curso_id', 'docen_curso_id');
     }
 
     public function clases(): HasMany

@@ -83,18 +83,42 @@ def migrate_estudiantes(old, new, user_id_map: dict, dry_run: bool):
             sql = """
                 INSERT INTO estudiantes
                     (estu_id, insti_id, perfil_id, user_id, estado,
+                     foto, colegio, neurodivergencia, redes,
+                     facebook, instagram, tiktok, terapia_ocupacional,
+                     seguro, privado, fecha_ingreso, fecha_promovido,
+                     mensualidad, edad, talla, peso,
                      created_at, updated_at)
                 VALUES
-                    (%(estu_id)s, %(insti_id)s, %(perfil_id)s, %(user_id)s,
-                     %(estado)s, %(ts)s, %(ts)s)
+                    (%(estu_id)s, %(insti_id)s, %(perfil_id)s, %(user_id)s, %(estado)s,
+                     %(foto)s, %(colegio)s, %(neurodivergencia)s, %(redes)s,
+                     %(facebook)s, %(instagram)s, %(tiktok)s, %(terapia_ocupacional)s,
+                     %(seguro)s, %(privado)s, %(fecha_ingreso)s, %(fecha_promovido)s,
+                     %(mensualidad)s, %(edad)s, %(talla)s, %(peso)s,
+                     %(ts)s, %(ts)s)
             """
             params = {
-                "estu_id":   r["estu_id"],
-                "insti_id":  r["insti_id"],
-                "perfil_id": r["perfil_id"],
-                "user_id":   new_user_id,
-                "estado":    r.get("estado") or "1",
-                "ts":        NOW,
+                "estu_id":            r["estu_id"],
+                "insti_id":           r["insti_id"],
+                "perfil_id":          r["perfil_id"],
+                "user_id":            new_user_id,
+                "estado":             r.get("estado") or "1",
+                "foto":               r.get("foto"),
+                "colegio":            r.get("colegio"),
+                "neurodivergencia":   r.get("neurodivergencia"),
+                "redes":              r.get("redes"),
+                "facebook":           r.get("facebook"),
+                "instagram":          r.get("instagram"),
+                "tiktok":             r.get("tiktok"),
+                "terapia_ocupacional":r.get("terapia_ocupacional"),
+                "seguro":             r.get("Seguro"),    # mayúscula en origen
+                "privado":            r.get("Privado"),   # mayúscula en origen
+                "fecha_ingreso":      r.get("fecha_i"),   # renombrado
+                "fecha_promovido":    r.get("fecha_p"),   # renombrado
+                "mensualidad":        r.get("mensualidad"),
+                "edad":               r.get("edad"),
+                "talla":              r.get("talla"),
+                "peso":               r.get("peso"),
+                "ts":                 NOW,
             }
 
             if not dry_run:
@@ -197,8 +221,8 @@ def migrate_estudiante_contacto(old, new, dry_run: bool):
         existing = {(r["estudiante_id"], r["contacto_id"]) for r in c.fetchall()}
 
     with new.cursor() as c:
-        c.execute("SELECT estu_id FROM estudiantes")
-        valid_estudiantes = {r["estu_id"] for r in c.fetchall()}
+        c.execute("SELECT estu_id, mensualidad FROM estudiantes")
+        valid_estudiantes = {r["estu_id"]: r["mensualidad"] for r in c.fetchall()}
     with new.cursor() as c:
         c.execute("SELECT id_contacto FROM padre_apoderado")
         valid_contactos = {r["id_contacto"] for r in c.fetchall()}
@@ -224,12 +248,14 @@ def migrate_estudiante_contacto(old, new, dry_run: bool):
                 errors += 1
                 continue
 
+            mensualidad = valid_estudiantes[estu_id] or 0
+
             if not dry_run:
                 c.execute(
-                    "INSERT IGNORE INTO estudiante_contacto (estudiante_id, contacto_id) VALUES (%s, %s)",
-                    (estu_id, cont_id),
+                    "INSERT IGNORE INTO estudiante_contacto (estudiante_id, contacto_id, mensualidad, created_at, updated_at) VALUES (%s, %s, %s, NOW(), NOW())",
+                    (estu_id, cont_id, mensualidad),
                 )
-            log.ok(f"  estudiante_id={estu_id} ↔ contacto_id={cont_id}")
+            log.ok(f"  estudiante_id={estu_id} ↔ contacto_id={cont_id} (mensualidad={mensualidad})")
             inserted += 1
 
     if not dry_run:

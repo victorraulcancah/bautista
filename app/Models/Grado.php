@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Grado extends Model
 {
+    protected $table = 'grados';
     protected $primaryKey = 'grado_id';
 
     protected $fillable = ['nivel_id', 'nombre_grado', 'abreviatura'];

@@ -142,10 +142,9 @@ def migrate_mensajes(old, new, user_id_map: dict, username_map: dict, dry_run: b
                 skipped += 1
                 continue
 
-            remitente_str = str(r.get("remitente") or "").strip()
-            remitente_id  = username_map.get(remitente_str)
+            remitente_id = user_id_map.get(r.get("remitente"))
             if not remitente_id:
-                log.err(f"  mensaje_id={r['mensaje_id']}: remitente='{remitente_str}' no encontrado → omitido")
+                log.err(f"  mensaje_id={r['mensaje_id']}: remitente={r.get('remitente')} no encontrado en users → omitido")
                 errors += 1
                 continue
 
@@ -156,10 +155,9 @@ def migrate_mensajes(old, new, user_id_map: dict, username_map: dict, dry_run: b
             if es_grupo:
                 grupo_id = r.get("id_usuario")
             else:
-                dest_str = str(r.get("id_usuario") or "").strip()
-                destinatario_id = username_map.get(dest_str)
+                destinatario_id = user_id_map.get(r.get("id_usuario"))
                 if not destinatario_id:
-                    log.err(f"  mensaje_id={r['mensaje_id']}: destinatario='{dest_str}' no encontrado → omitido")
+                    log.err(f"  mensaje_id={r['mensaje_id']}: destinatario={r.get('id_usuario')} no encontrado en users → omitido")
                     errors += 1
                     continue
 
@@ -204,7 +202,7 @@ def migrate_mensajes(old, new, user_id_map: dict, username_map: dict, dry_run: b
     return mensaje_id_map
 
 
-def migrate_mensajes_respuestas(old, new, username_map: dict, dry_run: bool):
+def migrate_mensajes_respuestas(old, new, user_id_map: dict, dry_run: bool):
     log.head("14/14  mensajeria_respuestas → mensajes_respuestas")
 
     with old.cursor() as c:
@@ -233,10 +231,9 @@ def migrate_mensajes_respuestas(old, new, username_map: dict, dry_run: bool):
                 skipped += 1
                 continue
 
-            user_str = str(r.get("id_usuario") or "").strip()
-            user_id  = username_map.get(user_str)
+            user_id = user_id_map.get(r.get("id_usuario"))
             if not user_id:
-                log.err(f"  resp id={r['id']}: id_usuario='{user_str}' no encontrado → omitido")
+                log.err(f"  resp id={r['id']}: id_usuario={r.get('id_usuario')} no encontrado en users → omitido")
                 errors += 1
                 continue
 
@@ -278,4 +275,4 @@ def migrate_mensajeria(old, new, user_id_map: dict, dry_run: bool):
     migrate_mensajeria_grupos(old, new, user_id_map, dry_run)
     migrate_mensajeria_grupo_miembros(old, new, estu_user_map, dry_run)
     migrate_mensajes(old, new, user_id_map, username_map, dry_run)
-    migrate_mensajes_respuestas(old, new, username_map, dry_run)
+    migrate_mensajes_respuestas(old, new, user_id_map, dry_run)

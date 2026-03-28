@@ -17,10 +17,11 @@ interface MatriculaRepositoryInterface
     public function deleteApertura(MatriculaApertura $apertura): void;
 
     // Matrículas
-    public function paginateMatriculas(int $aperturaId, string $search = '', int $perPage = 15): LengthAwarePaginator;
+    public function paginateMatriculas(int $aperturaId, string $search = '', int $perPage = 15, ?int $nivelId = null): LengthAwarePaginator;
     public function findMatriculaById(int $id): Matricula;
     public function createMatricula(array $data): Matricula;
     public function deleteMatricula(Matricula $matricula): void;
+    public function countByNivel(int $aperturaId): \Illuminate\Support\Collection;
 
     // Helpers
     public function estudiantesNoMatriculados(int $instiId, int $aperturaId): Collection;

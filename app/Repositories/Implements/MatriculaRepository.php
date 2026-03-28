@@ -8,6 +8,7 @@ use App\Models\MatriculaApertura;
 use App\Repositories\Interfaces\MatriculaRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class MatriculaRepository implements MatriculaRepositoryInterface
 {
@@ -48,28 +49,49 @@ class MatriculaRepository implements MatriculaRepositoryInterface
 
     // ── Matrículas ───────────────────────────────────────────────────────────
 
-    public function paginateMatriculas(int $aperturaId, string $search = '', int $perPage = 15): LengthAwarePaginator
+    public function paginateMatriculas(int $aperturaId, string $search = '', int $perPage = 15, ?int $nivelId = null): LengthAwarePaginator
     {
-        return Matricula::with(['estudiante.perfil', 'seccion'])
+        return Matricula::with(['estudiante.perfil', 'estudiante.user', 'seccion.grado'])
             ->where('apertura_id', $aperturaId)
             ->when($search, fn ($q) => $q->whereHas('estudiante.perfil', fn ($p) => $p
                 ->where('primer_nombre', 'like', "%{$search}%")
                 ->orWhere('apellido_paterno', 'like', "%{$search}%")
                 ->orWhere('doc_numero', 'like', "%{$search}%")
             ))
+            ->when($nivelId, fn ($q) => $q->whereHas('seccion.grado', fn ($g) => $g
+                ->where('nivel_id', $nivelId)
+            ))
             ->latest('matricula_id')
             ->paginate($perPage);
     }
 
+    public function countByNivel(int $aperturaId): \Illuminate\Support\Collection
+    {
+        return DB::table('matriculas')
+            ->join('secciones', 'matriculas.seccion_id', '=', 'secciones.seccion_id')
+            ->join('grados', 'secciones.id_grado', '=', 'grados.grado_id')
+            ->join('niveles_educativos', 'grados.nivel_id', '=', 'niveles_educativos.nivel_id')
+            ->where('matriculas.apertura_id', $aperturaId)
+            ->where('matriculas.estado', '1')
+            ->groupBy('niveles_educativos.nivel_id', 'niveles_educativos.nombre_nivel')
+            ->select(
+                'niveles_educativos.nivel_id',
+                'niveles_educativos.nombre_nivel',
+                DB::raw('COUNT(*) as total')
+            )
+            ->orderBy('niveles_educativos.nivel_id')
+            ->get();
+    }
+
     public function findMatriculaById(int $id): Matricula
     {
-        return Matricula::with(['estudiante.perfil', 'seccion'])->findOrFail($id);
+        return Matricula::with(['estudiante.perfil', 'estudiante.user', 'seccion.grado'])->findOrFail($id);
     }
 
     public function createMatricula(array $data): Matricula
     {
         $matricula = Matricula::create($data);
-        return $matricula->load(['estudiante.perfil', 'seccion']);
+        return $matricula->load(['estudiante.perfil', 'estudiante.user', 'seccion.grado']);
     }
 
     public function deleteMatricula(Matricula $matricula): void

@@ -23,4 +23,9 @@ class Clase extends Model
     {
         return $this->hasMany(ArchivoClase::class, 'clase_id', 'clase_id');
     }
+
+    public function actividades(): HasMany
+    {
+        return $this->hasMany(ActividadCurso::class, 'id_clase_curso', 'clase_id');
+    }
 }

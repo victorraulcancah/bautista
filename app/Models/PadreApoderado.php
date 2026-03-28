@@ -15,6 +15,7 @@ class PadreApoderado extends Model
     protected $fillable = [
         'user_id',
         'insti_id',
+        'parentesco',
         'nombres',
         'apellidos',
         'direccion',

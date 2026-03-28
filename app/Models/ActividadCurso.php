@@ -12,10 +12,10 @@ class ActividadCurso extends Model
     protected $primaryKey = 'actividad_id';
 
     protected $fillable = [
-        'id_curso', 'id_clase_curso', 'id_tipo_activada',
-        'nombre_activid', 'descripcion_corta', 'descripcion_larga',
+        'id_curso', 'id_clase_curso', 'id_tipo_actividad',
+        'nombre_actividad', 'descripcion_corta', 'descripcion_larga',
         'fecha_inicio', 'fecha_cierre',
-        'nota_visible', 'nota_actvidad', 'respuesta_visible',
+        'nota_visible', 'nota_actividad', 'respuesta_visible',
         'ocultar_actividad', 'estado', 'es_calificado',
     ];
 
@@ -26,7 +26,7 @@ class ActividadCurso extends Model
 
     public function tipo(): BelongsTo
     {
-        return $this->belongsTo(TipoActividad::class, 'id_tipo_activada', 'tipo_id');
+        return $this->belongsTo(TipoActividad::class, 'id_tipo_actividad', 'tipo_id');
     }
 
     public function cuestionario(): HasOne

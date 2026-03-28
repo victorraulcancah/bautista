@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEstudianteRequest;
 use App\Http\Requests\UpdateEstudianteRequest;
 use App\Http\Resources\EstudianteResource;
+use App\Models\Estudiante;
+use App\Models\PadreApoderado;
+use Illuminate\Support\Facades\DB;
 use App\Services\Interfaces\EstudianteServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +24,7 @@ class EstudianteApiController extends Controller
     {
         return EstudianteResource::collection($this->service->listar(
             instiId: $request->user()->insti_id,
-            search:  $request->get('search', ''),
+            search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
         ));
     }
@@ -53,5 +56,70 @@ class EstudianteApiController extends Controller
         $this->service->eliminar($id);
 
         return response()->json(null, 204);
+    }
+
+    /** GET /api/estudiantes/{id}/contactos */
+    public function contactos(int $id): JsonResponse
+    {
+        $estudiante = Estudiante::findOrFail($id);
+
+        $contactos = $estudiante->contactos()->get()->keyBy('parentesco');
+
+        $result = [];
+        foreach (['padre', 'madre', 'apoderado'] as $tipo) {
+            $c = $contactos->get($tipo);
+            $result[$tipo] = $c ? [
+                'id_contacto'    => $c->id_contacto,
+                'nombres'        => $c->nombres,
+                'apellidos'      => $c->apellidos,
+                'email_contacto' => $c->email_contacto,
+                'telefono_1'     => $c->telefono_1,
+                'telefono_2'     => $c->telefono_2,
+                'tipo_doc'       => $c->tipo_doc,
+                'numero_doc'     => $c->numero_doc,
+                'genero'         => $c->genero,
+                'direccion'      => $c->direccion,
+                'es_pagador'     => $c->es_pagador,
+            ] : null;
+        }
+
+        return response()->json($result);
+    }
+
+    /** POST /api/estudiantes/{id}/contactos */
+    public function guardarContacto(Request $request, int $id): JsonResponse
+    {
+        $data = $request->validate([
+            'parentesco'     => ['required', 'in:padre,madre,apoderado'],
+            'nombres'        => ['nullable', 'string', 'max:200'],
+            'apellidos'      => ['nullable', 'string', 'max:200'],
+            'email_contacto' => ['nullable', 'email', 'max:200'],
+            'telefono_1'     => ['nullable', 'string', 'max:20'],
+            'telefono_2'     => ['nullable', 'string', 'max:20'],
+            'tipo_doc'       => ['nullable', 'integer'],
+            'numero_doc'     => ['nullable', 'string', 'max:20'],
+            'genero'         => ['nullable', 'in:M,F'],
+            'direccion'      => ['nullable', 'string', 'max:200'],
+            'es_pagador'     => ['nullable', 'string'],
+        ]);
+
+        $estudiante = Estudiante::findOrFail($id);
+
+        $contacto = $estudiante->contactos()
+            ->where('parentesco', $data['parentesco'])
+            ->first();
+
+        if ($contacto) {
+            $contacto->update($data);
+        } else {
+            $data['insti_id'] = $request->user()->insti_id;
+            $contacto = PadreApoderado::create($data);
+            DB::table('estudiante_contacto')->insertOrIgnore([
+                'estudiante_id' => $estudiante->estu_id,
+                'contacto_id'   => $contacto->id_contacto,
+            ]);
+        }
+
+        return response()->json(['ok' => true, 'id_contacto' => $contacto->id_contacto]);
     }
 }

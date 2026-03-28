@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import RichTextEditor from '@/components/shared/RichTextEditor';
+import TitleForm from '@/components/TitleForm';
 import api from '@/lib/api';
+
 
 type Usuario = { id: number; nombre: string; username: string };
 type Grupo   = { id: number; nombre: string };
@@ -79,15 +82,21 @@ export default function EnviarMensajeModal({ open, onClose, onSent, grupos }: Pr
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>Mensaje</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2 text-neutral-800">
+                        <Send className="h-5 w-5 text-emerald-600" />
+                        Nueva Notificación
+                    </DialogTitle>
+                    <DialogDescription className="sr-only">Redacta y envía una notificación a un usuario o grupo.</DialogDescription>
                 </DialogHeader>
+
+                <TitleForm>Destinatario</TitleForm>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Grupo */}
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700">Grupo:</label>
+                        <label className="text-sm font-medium text-neutral-600">Grupo:</label>
                         <select
                             value={grupoId}
                             onChange={(e) => { setGrupoId(e.target.value); setDestinatario(null); setQuery(''); }}
@@ -102,7 +111,8 @@ export default function EnviarMensajeModal({ open, onClose, onSent, grupos }: Pr
 
                     {/* Para (autocomplete) */}
                     <div className="relative flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700">Para:</label>
+                        <label className="text-sm font-medium text-neutral-600">Para:</label>
+
                         <input
                             type="text"
                             value={query}
@@ -127,9 +137,12 @@ export default function EnviarMensajeModal({ open, onClose, onSent, grupos }: Pr
                         )}
                     </div>
 
+                    <TitleForm className="pt-1">Contenido</TitleForm>
+
                     {/* Asunto */}
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700">Asunto:</label>
+                        <label className="text-sm font-medium text-neutral-600">Asunto:</label>
+
                         <input
                             type="text"
                             value={asunto}
@@ -140,7 +153,8 @@ export default function EnviarMensajeModal({ open, onClose, onSent, grupos }: Pr
 
                     {/* Mensaje */}
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700">Mensaje:</label>
+                        <label className="text-sm font-medium text-neutral-600">Mensaje:</label>
+
                         <RichTextEditor
                             value={cuerpo}
                             onChange={setCuerpo}
@@ -152,13 +166,14 @@ export default function EnviarMensajeModal({ open, onClose, onSent, grupos }: Pr
                     {error && <p className="text-sm text-red-500">{error}</p>}
 
                     <DialogFooter>
-                        <Button type="submit" disabled={sending} className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+                        <Button type="submit" disabled={sending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
                             {sending ? 'Enviando...' : 'Enviar'}
                         </Button>
-                        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>
     );
 }
+

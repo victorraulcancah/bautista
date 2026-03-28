@@ -21,7 +21,7 @@ class NivelEducativoApiController extends Controller
     {
         return NivelEducativoResource::collection($this->service->listar(
             instiId: $request->user()->insti_id,
-            search:  $request->get('search', ''),
+            search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
         ));
     }

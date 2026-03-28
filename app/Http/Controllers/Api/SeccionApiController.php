@@ -21,7 +21,7 @@ class SeccionApiController extends Controller
     {
         return SeccionResource::collection($this->service->listar(
             instiId: $request->user()->insti_id,
-            search:  $request->get('search', ''),
+            search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
         ));
     }

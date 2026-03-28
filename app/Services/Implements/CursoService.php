@@ -14,9 +14,9 @@ class CursoService implements CursoServiceInterface
         private readonly CursoRepositoryInterface $repository,
     ) {}
 
-    public function listar(int $instiId, string $search = '', int $perPage = 15): LengthAwarePaginator
+    public function listar(int $instiId, string $search = '', int $perPage = 15, ?int $gradoId = null): LengthAwarePaginator
     {
-        return $this->repository->paginate($instiId, $search, $perPage);
+        return $this->repository->paginate($instiId, $search, $perPage, $gradoId);
     }
 
     public function todos(int $instiId): Collection

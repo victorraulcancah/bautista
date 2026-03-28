@@ -8,6 +8,7 @@ import { useResource } from '@/hooks/useResource';
 import InstitucionFormModal from './components/InstitucionFormModal';
 import { institucionColumns } from './hooks/useInstitucionColumns';
 import type { Institucion } from './hooks/useInstitucion';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard',   href: '/dashboard' },
@@ -18,13 +19,15 @@ export default function InstitucionPage() {
     const res = useResource<Institucion>('/instituciones');
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Institucion | null>(null);
+    const [deleting, setDeleting]   = useState<Institucion | null>(null);
 
     const openCreate   = () => { setEditing(null); setModalOpen(true); };
     const openEdit     = (i: Institucion) => { setEditing(i); setModalOpen(true); };
-    const handleDelete = (i: Institucion) => {
-        if (confirm(`¿Eliminar la institución "${i.insti_razon_social}"?`)) {
-            res.remove(i.insti_id);
-        }
+    
+    const handleDelete = async () => {
+        if (!deleting) return;
+        await res.remove(deleting.insti_id);
+        setDeleting(null);
     };
 
     return (
@@ -48,7 +51,7 @@ export default function InstitucionPage() {
                         columns={institucionColumns}
                         getKey={(i) => i.insti_id}
                         onEdit={openEdit}
-                        onDelete={handleDelete}
+                        onDelete={setDeleting}
                         onPageChange={res.setPage}
                     />
                 )}
@@ -65,6 +68,16 @@ export default function InstitucionPage() {
                 apiErrors={res.apiErrors}
                 clearErrors={res.clearErrors}
             />
+
+            <ConfirmDeleteModal
+                open={!!deleting}
+                onClose={() => setDeleting(null)}
+                onConfirm={handleDelete}
+                title="Eliminar Institución"
+                message={`¿Estás seguro de que deseas eliminar la institución "${deleting?.insti_razon_social}"? Esta acción no se puede deshacer.`}
+                processing={res.loading}
+            />
         </>
     );
 }
+

@@ -12,19 +12,21 @@ class MensajeService implements MensajeServiceInterface
 {
     public function bandeja(int $userId, int $instiId, int $perPage): LengthAwarePaginator
     {
-        // Mensajes individuales recibidos + mensajes de grupos donde el usuario es miembro
+        // Mensajes individuales (recibidos o enviados) + mensajes de grupos donde el usuario es miembro
         $gruposIds = MensajeriaGrupo::whereHas('miembros', fn ($q) => $q->where('user_id', $userId))
             ->pluck('id');
 
         return Mensaje::where('insti_id', $instiId)
             ->where(function ($q) use ($userId, $gruposIds) {
                 $q->where('destinatario_id', $userId)
+                  ->orWhere('remitente_id', $userId)
                   ->orWhereIn('grupo_id', $gruposIds);
             })
             ->with(['remitente.perfil', 'grupo'])
             ->orderByDesc('created_at')
             ->paginate($perPage);
     }
+
 
     public function enviados(int $userId, int $instiId, int $perPage): LengthAwarePaginator
     {

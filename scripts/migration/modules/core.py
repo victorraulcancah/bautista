@@ -2,17 +2,17 @@
 from config import log, NOW, make_bcrypt, ts
 
 ROL_MAP = {
-    1: "admin",       # administrador
+    1: "administrador",
     2: "estudiante",
-    3: "padre",       # padre_familia
-    4: "padre",       # apoderado
-    5: "padre",       # madre_familia
+    3: "padre_familia",
+    4: "apoderado",
+    5: "madre_familia",
     6: "docente",
-    7: "docente",     # psicologo
+    7: "psicologo",
 }
 
-# Roles a crear en Spatie antes de migrar usuarios
-SPATIE_ROLES = ["admin", "docente", "padre", "estudiante"]
+# Roles esperados del RolePermissionSeeder de Laravel
+SPATIE_ROLES = ["administrador", "docente", "estudiante", "padre_familia", "madre_familia", "apoderado", "psicologo"]
 
 def migrate_institucion(old, new, dry_run: bool):
     log.head("1/9  institucion_educativa")

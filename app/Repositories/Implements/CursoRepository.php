@@ -9,11 +9,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class CursoRepository implements CursoRepositoryInterface
 {
-    public function paginate(int $instiId, string $search = '', int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $instiId, string $search = '', int $perPage = 15, ?int $gradoId = null): LengthAwarePaginator
     {
         return Curso::with(['nivel', 'grado'])
             ->where('id_insti', $instiId)
             ->when($search, fn ($q) => $q->where('nombre', 'like', "%{$search}%"))
+            ->when($gradoId, fn ($q) => $q->where('grado_academico', $gradoId))
             ->latest('curso_id')
             ->paginate($perPage);
     }

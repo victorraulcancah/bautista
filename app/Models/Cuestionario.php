@@ -12,7 +12,7 @@ class Cuestionario extends Model
     protected $primaryKey = 'cuestionario_id';
 
     protected $fillable = [
-        'id_actividad', 'duracion', 'nota_visible', 'mostrar_respusta', 'estado',
+        'id_actividad', 'duracion', 'nota_visible', 'mostrar_respuesta', 'estado',
     ];
 
     public function actividad(): BelongsTo

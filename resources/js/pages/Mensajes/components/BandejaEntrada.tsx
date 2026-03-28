@@ -1,5 +1,17 @@
 import { RefreshCw } from 'lucide-react';
 
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').trim();
+
+const fmtDate = (iso: string) => {
+    const d = new Date(iso);
+    const today = new Date();
+    if (d.toDateString() === today.toDateString()) {
+        return d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    }
+    return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+
+
 type Mensaje = {
     id:          number;
     asunto:      string;
@@ -59,10 +71,13 @@ export default function BandejaEntrada({ mensajes, loading, onSelect, onRefresh,
                                             {m.remitente?.nombre ?? '—'}
                                             {m.grupo ? <span className="ml-1 text-green-600">· {m.grupo.nombre}</span> : null}
                                         </p>
-                                        <p className="mt-0.5 truncate text-xs text-gray-400">{m.cuerpo.substring(0, 80)}</p>
+                                        <p className="mt-0.5 truncate text-xs text-gray-400">
+                                            {stripHtml(m.cuerpo).substring(0, 80)}
+                                        </p>
                                     </div>
                                     <div className="flex shrink-0 flex-col items-end gap-1">
-                                        <span className="whitespace-nowrap text-xs text-gray-400">{m.created_at}</span>
+                                        <span className="whitespace-nowrap text-xs text-gray-400">{fmtDate(m.created_at)}</span>
+
                                         {!m.leido && (
                                             <span className="inline-block size-2 rounded-full bg-blue-500" />
                                         )}

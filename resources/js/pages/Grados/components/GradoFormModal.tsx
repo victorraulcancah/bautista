@@ -1,8 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import FormField from '@/components/shared/FormField';
+import TitleForm from '@/components/TitleForm';
 import type { Grado, GradoFormData, Nivel } from '../hooks/useGrados';
 import { useGradoForm } from '../hooks/useGradoForm';
 
@@ -29,23 +27,40 @@ export default function GradoFormModal({ open, onClose, editing, niveles, onSave
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <TitleForm>Datos del Grado</TitleForm>
+
+                    {/* Nombre */}
                     <div className="space-y-1">
-                        <Label>Nivel *</Label>
-                        <Select value={form.nivel_id} onValueChange={(v) => set('nivel_id', v)}>
-                            <SelectTrigger><SelectValue placeholder="Seleccionar nivel" /></SelectTrigger>
-                            <SelectContent>
-                                {niveles.map((n) => (
-                                    <SelectItem key={n.nivel_id} value={n.nivel_id.toString()}>
-                                        {n.nombre_nivel}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {err('nivel_id') && <p className="text-xs text-red-500">{err('nivel_id')}</p>}
+                        <label className="text-sm font-medium flex items-center gap-1">
+                            <span className="h-2 w-2 rounded-full bg-rose-700 inline-block" />
+                            Nombre del Grado
+                        </label>
+                        <input
+                            type="text"
+                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            value={form.nombre_grado}
+                            onChange={(e) => set('nombre_grado', e.target.value)}
+                            placeholder="Ej: Primer Grado"
+                            required
+                        />
+                        {err('nombre_grado') && <p className="text-xs text-red-500">{err('nombre_grado')}</p>}
                     </div>
 
-                    <FormField label="Nombre del Grado *" value={form.nombre_grado} onChange={(v) => set('nombre_grado', v)} error={err('nombre_grado')} placeholder="Ej: Primer Grado" />
-                    <FormField label="Abreviatura"        value={form.abreviatura}  onChange={(v) => set('abreviatura', v)}  error={err('abreviatura')}  placeholder="Ej: 1°" />
+                    {/* Abreviatura */}
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium flex items-center gap-1">
+                            <span className="h-2 w-2 rounded-full bg-cyan-600 inline-block" />
+                            Abreviatura
+                        </label>
+                        <input
+                            type="text"
+                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            value={form.abreviatura}
+                            onChange={(e) => set('abreviatura', e.target.value)}
+                            placeholder="Ej: 1°"
+                        />
+                        {err('abreviatura') && <p className="text-xs text-red-500">{err('abreviatura')}</p>}
+                    </div>
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>

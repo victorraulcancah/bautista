@@ -25,7 +25,7 @@ class MatriculaApiController extends Controller
     {
         return MatriculaAperturaResource::collection($this->service->listarAperturas(
             instiId: $request->user()->insti_id,
-            search:  $request->get('search', ''),
+            search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
         ));
     }
@@ -64,9 +64,15 @@ class MatriculaApiController extends Controller
     {
         return MatriculaResource::collection($this->service->listarMatriculas(
             aperturaId: $aperturaId,
-            search:     $request->get('search', ''),
+            search:     $request->get('search') ?? '',
             perPage:    (int) $request->get('per_page', 20),
+            nivelId:    $request->get('nivel_id') ? (int) $request->get('nivel_id') : null,
         ));
+    }
+
+    public function indexPorNivel(int $aperturaId): JsonResponse
+    {
+        return response()->json($this->service->contarPorNivel($aperturaId));
     }
 
     public function storeMatricula(StoreMatriculaRequest $request): JsonResponse

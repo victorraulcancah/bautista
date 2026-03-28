@@ -10,22 +10,39 @@ export type MatriculaApertura = {
 };
 
 export type Matricula = {
-    matricula_id:  number;
-    apertura_id:   number;
-    estudiante_id: number;
-    seccion_id:    number | null;
-    anio:          number;
-    estado:        '1' | '0';
+    matricula_id:    number;
+    apertura_id:     number;
+    estudiante_id:   number;
+    seccion_id:      number | null;
+    anio:            number;
+    estado:          '1' | '0';
+    fecha_matricula: string | null;
     estudiante: {
-        estu_id:         number;
-        nombre_completo: string;
-        doc_numero:      string | null;
-        genero:          string | null;
+        estu_id:          number;
+        primer_nombre:    string | null;
+        segundo_nombre:   string | null;
+        apellido_paterno: string | null;
+        apellido_materno: string | null;
+        nombre_completo:  string;
+        doc_numero:       string | null;
+        genero:           string | null;
+        user_id:          number | null;
+        estado_user:      string | null;
     } | null;
     seccion: {
         seccion_id: number;
         nombre:     string;
+        grado: {
+            grado_id:     number;
+            nombre_grado: string;
+        } | null;
     } | null;
+};
+
+export type NivelCount = {
+    nivel_id:     number;
+    nombre_nivel: string;
+    total:        number;
 };
 
 export type EstudianteDisponible = {
@@ -34,9 +51,16 @@ export type EstudianteDisponible = {
     doc_numero:      string | null;
 };
 
+export type GradoOption = {
+    grado_id:     number;
+    nombre_grado: string;
+    nivel_id:     number;
+};
+
 export type SeccionOption = {
     seccion_id: number;
     nombre:     string;
+    id_grado:   number;
 };
 
 // ── Form types ────────────────────────────────────────────────────────────────

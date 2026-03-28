@@ -1,8 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import FormField from '@/components/shared/FormField';
+import TitleForm from '@/components/TitleForm';
 import type { Curso, CursoFormData, NivelOption, GradoOption } from '../hooks/useCursos';
 import { useCursoForm } from '../hooks/useCursoForm';
 
@@ -12,13 +10,14 @@ type Props = {
     editing:     Curso | null;
     niveles:     NivelOption[];
     grados:      GradoOption[];
+    defaults?:   Partial<CursoFormData>;
     onSave:      (data: CursoFormData) => Promise<void>;
     apiErrors:   Record<string, string[]>;
     clearErrors: () => void;
 };
 
-export default function CursoFormModal({ open, onClose, editing, niveles, grados, onSave, apiErrors, clearErrors }: Props) {
-    const { form, set, processing, handleSubmit } = useCursoForm({ editing, open, onSave, onClose, clearErrors });
+export default function CursoFormModal({ open, onClose, editing, niveles, grados, defaults, onSave, apiErrors, clearErrors }: Props) {
+    const { form, set, processing, handleSubmit } = useCursoForm({ editing, open, defaults, onSave, onClose, clearErrors });
 
     const err = (key: keyof CursoFormData) => apiErrors[key]?.[0];
 
@@ -30,10 +29,31 @@ export default function CursoFormModal({ open, onClose, editing, niveles, grados
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <FormField label="Nombre *" value={form.nombre} onChange={(v) => set('nombre', v)} error={err('nombre')} placeholder="Ej: Matemáticas" />
+                    <TitleForm>Datos del Curso</TitleForm>
 
+                    {/* Nombre */}
                     <div className="space-y-1">
-                        <Label>Descripción</Label>
+                        <label className="text-sm font-medium flex items-center gap-1">
+                            <span className="h-2 w-2 rounded-full bg-rose-700 inline-block" />
+                            Nombre
+                        </label>
+                        <input
+                            type="text"
+                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            value={form.nombre}
+                            onChange={(e) => set('nombre', e.target.value)}
+                            placeholder="Ej: Matemáticas"
+                            required
+                        />
+                        {err('nombre') && <p className="text-xs text-red-500">{err('nombre')}</p>}
+                    </div>
+
+                    {/* Descripción */}
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium flex items-center gap-1">
+                            <span className="h-2 w-2 rounded-full bg-cyan-600 inline-block" />
+                            Descripción
+                        </label>
                         <textarea
                             className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             value={form.descripcion}
@@ -43,45 +63,60 @@ export default function CursoFormModal({ open, onClose, editing, niveles, grados
                         {err('descripcion') && <p className="text-xs text-red-500">{err('descripcion')}</p>}
                     </div>
 
+                    {/* Nivel / Grado */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <Label>Nivel Académico</Label>
-                            <Select value={form.nivel_academico_id} onValueChange={(v) => set('nivel_academico_id', v)}>
-                                <SelectTrigger><SelectValue placeholder="Seleccionar nivel" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="">Sin nivel</SelectItem>
-                                    {niveles.map((n) => (
-                                        <SelectItem key={n.nivel_id} value={n.nivel_id.toString()}>{n.nombre_nivel}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <label className="text-sm font-medium flex items-center gap-1">
+                                <span className="h-2 w-2 rounded-full bg-cyan-600 inline-block" />
+                                Nivel Académico
+                            </label>
+                            <select
+                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                value={form.nivel_academico_id}
+                                onChange={(e) => set('nivel_academico_id', e.target.value)}
+                            >
+                                <option value="">Sin nivel</option>
+                                {niveles.map((n) => (
+                                    <option key={n.nivel_id} value={n.nivel_id.toString()}>{n.nombre_nivel}</option>
+                                ))}
+                            </select>
                             {err('nivel_academico_id') && <p className="text-xs text-red-500">{err('nivel_academico_id')}</p>}
                         </div>
+
                         <div className="space-y-1">
-                            <Label>Grado Académico</Label>
-                            <Select value={form.grado_academico} onValueChange={(v) => set('grado_academico', v)}>
-                                <SelectTrigger><SelectValue placeholder="Seleccionar grado" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="">Sin grado</SelectItem>
-                                    {grados.map((g) => (
-                                        <SelectItem key={g.grado_id} value={g.grado_id.toString()}>{g.nombre_grado}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <label className="text-sm font-medium flex items-center gap-1">
+                                <span className="h-2 w-2 rounded-full bg-cyan-600 inline-block" />
+                                Grado Académico
+                            </label>
+                            <select
+                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                value={form.grado_academico}
+                                onChange={(e) => set('grado_academico', e.target.value)}
+                            >
+                                <option value="">Sin grado</option>
+                                {grados.map((g) => (
+                                    <option key={g.grado_id} value={g.grado_id.toString()}>{g.nombre_grado}</option>
+                                ))}
+                            </select>
                             {err('grado_academico') && <p className="text-xs text-red-500">{err('grado_academico')}</p>}
                         </div>
                     </div>
 
+                    {/* Estado (solo edición) */}
                     {editing && (
                         <div className="space-y-1">
-                            <Label>Estado</Label>
-                            <Select value={form.estado} onValueChange={(v) => set('estado', v)}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="1">Activo</SelectItem>
-                                    <SelectItem value="0">Inactivo</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <label className="text-sm font-medium flex items-center gap-1">
+                                <span className="h-2 w-2 rounded-full bg-cyan-600 inline-block" />
+                                Estado
+                            </label>
+                            <select
+                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                value={form.estado}
+                                onChange={(e) => set('estado', e.target.value)}
+                            >
+                                <option value="1">Activo</option>
+                                <option value="0">Inactivo</option>
+                            </select>
                             {err('estado') && <p className="text-xs text-red-500">{err('estado')}</p>}
                         </div>
                     )}

@@ -18,22 +18,22 @@ export type Paginated<T> = {
 };
 
 type Props<T> = {
-    rows:          Paginated<T>;
-    columns:       Column<T>[];
-    getKey:        (row: T) => number | string;
-    onEdit?:       (row: T) => void;
-    onDelete?:     (row: T) => void;
-    onPageChange:  (page: number) => void;
+    rows:           Paginated<T>;
+    columns:        Column<T>[];
+    getKey:         (row: T) => number | string;
+    onEdit?:        (row: T) => void;
+    onDelete?:      (row: T) => void;
+    extraActions?:  (row: T) => React.ReactNode;
+    onPageChange:   (page: number) => void;
 };
 
-export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDelete, onPageChange }: Props<T>) {
-    const showActions = !!(onEdit || onDelete);
+export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDelete, extraActions, onPageChange }: Props<T>) {
+    const showActions = !!(onEdit || onDelete || extraActions);
     return (
         <div className="overflow-x-auto">
             <table className="w-full text-sm">
                 <thead>
                     <tr className="bg-[#00a65a] text-white text-center">
-                        <th className="px-3 py-2 w-10">N°</th>
                         {columns.map((c, idx) => (
                             <th key={`col-${idx}`} className={`px-3 py-2 ${c.className ?? ''}`}>{c.label}</th>
                         ))}
@@ -49,7 +49,6 @@ export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDele
                         </tr>
                     ) : rows.data.map((row, i) => (
                         <tr key={getKey(row)} className="border-b border-gray-100 hover:bg-gray-50 text-center">
-                            <td className="px-3 py-2 text-gray-500">{(rows.from ?? 0) + i}</td>
                             {columns.map((c, idx) => (
                                 <td key={`cell-${idx}`} className={`px-3 py-2 ${c.className ?? ''}`}>
                                     {c.render(row, i)}
@@ -68,6 +67,7 @@ export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDele
                                                 <Trash2 className="size-3.5" />
                                             </Button>
                                         )}
+                                        {extraActions?.(row)}
                                     </div>
                                 </td>
                             )}

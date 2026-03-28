@@ -11,9 +11,12 @@ import {
     MessageSquare,
     Settings,
     UserCheck,
+    Library,
+    Newspaper,
     Users,
+    Folder
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import AppLogo from '@/components/layout/app-logo';
 import { NavUser } from '@/components/layout/nav-user';
 import {
@@ -29,44 +32,75 @@ import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 
 type NavChild = { title: string; href: string };
-type NavItem = { type: 'section'; label: string } | { type: 'link'; title: string; icon: React.ElementType; href: string } | { type: 'group'; title: string; icon: React.ElementType; children: NavChild[] };
+type NavItem = { 
+    type: 'section'; 
+    label: string; 
+    roles?: string[] 
+} | { 
+    type: 'link'; 
+    title: string; 
+    icon: React.ElementType; 
+    href: string; 
+    roles?: string[] 
+} | { 
+    type: 'group'; 
+    title: string; 
+    icon: React.ElementType; 
+    children: NavChild[]; 
+    roles?: string[] 
+};
 
 const navigation: NavItem[] = [
-    // ── Menú principal ──────────────────────────────────────────────
+    // ── Menú de Navegación ──────────────────────────────────────────────
     { type: 'section', label: 'MENÚ DE NAVEGACIÓN' },
     { type: 'link', title: 'Inicio',          icon: LayoutDashboard, href: '/dashboard' },
-    { type: 'group', title: 'Institución', icon: Building2, children: [
+    { type: 'group', title: 'Institución', icon: Building2, roles: ['administrador'], children: [
         { title: 'Datos Básicos', href: '/institucion' },
         { title: 'Galería',       href: '/institucion/galeria' },
         { title: 'Noticias',      href: '/institucion/noticias' },
     ]},
-    { type: 'link', title: 'Mensajes',        icon: MessageSquare,   href: '/mensajes' },
-    { type: 'link', title: 'Pagos',           icon: CreditCard,      href: '/pagos' },
+    { type: 'link', title: 'Notificaciones',  icon: MessageSquare,   href: '/comunicados', roles: ['administrador'] },
+    { type: 'link', title: 'Pagos',           icon: CreditCard,      href: '/pagos', roles: ['administrador'] },
 
     // ── Información Académica ────────────────────────────────────────
-    { type: 'section', label: 'INFORMACIÓN ACADÉMICA' },
-    { type: 'group', title: 'Niveles Académicos', icon: BookOpen, children: [
-        { title: 'Niveles / Grados',   href: '/niveles' },
+    { type: 'section', label: 'INFORMACIÓN ACADÉMICA', roles: ['administrador', 'docente'] },
+    { type: 'group', title: 'Niveles Académicos', icon: BookOpen, roles: ['administrador'], children: [
+        { title: 'Niveles',            href: '/niveles' },
         { title: 'Grados / Cursos',    href: '/cursos' },
         { title: 'Grados / Secciones', href: '/secciones' },
     ]},
-    { type: 'link', title: 'Estudiantes', icon: GraduationCap, href: '/estudiantes' },
-    { type: 'link', title: 'Profesores',  icon: UserCheck,     href: '/docentes' },
+    { type: 'link', title: 'Mis Cursos', icon: BookOpen, href: '/docente/mis-cursos', roles: ['docente'] },
+    { type: 'link', title: 'Profesores',  icon: UserCheck, href: '/docentes', roles: ['administrador'] },
+    { type: 'link', title: 'Estudiantes', icon: GraduationCap, href: '/estudiantes', roles: ['administrador'] },
 
     // ── Procedimientos Administrativos ───────────────────────────────
-    { type: 'section', label: 'PROCEDIMIENTOS ADMINISTRATIVOS' },
-    { type: 'link', title: 'Matrícula',   icon: ClipboardList, href: '/matriculas' },
-    { type: 'link', title: 'Asistencia',  icon: CalendarDays,  href: '/asistencia' },
-    { type: 'link', title: 'Notas',       icon: BookOpen,      href: '/notas' },
-    { type: 'group', title: 'Mensajería', icon: MessageSquare, children: [
-        { title: 'Mensajes',  href: '/mensajes' },
-        { title: 'Circulares', href: '/circulares' },
+    { type: 'section', label: 'PROCEDIMIENTOS ADMINISTRATIVOS', roles: ['administrador', 'docente', 'estudiante'] },
+    { type: 'group', title: 'Matrícula', icon: ClipboardList, roles: ['administrador'], children: [
+        { title: 'Aperturas / Cierre', href: '/matriculas' },
+        { title: 'Nuevos Ingresos',    href: '/matriculas/gestion' },
     ]},
+    { type: 'group', title: 'Asistencia', icon: CalendarDays, roles: ['administrador', 'docente'], children: [
+        { title: 'Gestión / Reportes', href: '/asistencia' },
+        { title: 'Escáner QR',        href: '/asistencia/scanner' },
+    ]},
+    { type: 'link', title: 'Mis Notas',   icon: ClipboardList, href: '/alumno/notas', roles: ['estudiante'] },
+    { type: 'link', title: 'Mis Cursos',  icon: BookOpen,      href: '/alumno/cursos', roles: ['estudiante'] },
+
+    // ── Módulo Padre ─────────────────────────────────────────────────
+    { type: 'section', label: 'FAMILIA', roles: ['padre_familia', 'madre_familia', 'apoderado'] },
+    { type: 'link', title: 'Mis Hijos', icon: Users, href: '/padre/dashboard', roles: ['padre_familia', 'madre_familia', 'apoderado'] },
+
+    // ── Recursos Compartidos ─────────────────────────────────────────
+    { type: 'section', label: 'RECURSOS' },
+    { type: 'link', title: 'Biblioteca', icon: Library, href: '/biblioteca' },
+    { type: 'link', title: 'Mensajería', icon: MessageSquare, href: '/mensajeria' },
 
     // ── Información de Usuarios ──────────────────────────────────────
-    { type: 'section', label: 'INFORMACIÓN DE USUARIOS' },
-    { type: 'link', title: 'Usuarios',      icon: Users,   href: '/usuarios' },
-    { type: 'link', title: 'Configuración', icon: Settings, href: '/settings/profile' },
+    { type: 'section', label: 'INFORMACIÓN DE USUARIOS', roles: ['administrador'] },
+    { type: 'group', title: 'Configuración', icon: Settings, roles: ['administrador'], children: [
+        { title: 'Usuarios', href: '/usuarios' },
+        { title: 'Perfil',   href: '/settings/profile' },
+    ]},
 ];
 
 function NavLinkItem({ item }: { item: Extract<NavItem, { type: 'link' }> }) {
@@ -141,23 +175,29 @@ function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
 }
 
 export function AppSidebar() {
+    const { auth } = usePage<any>().props;
+    const userRoles = auth.user?.roles?.map((r: any) => r.name) || [];
+
+    const filteredNavigation = useMemo(() => {
+        return navigation.filter(item => {
+            if (!item.roles) return true;
+            return item.roles.some(role => userRoles.includes(role));
+        });
+    }, [userRoles]);
+
     return (
         <Sidebar collapsible="icon" variant="sidebar">
-            <SidebarHeader>
+            <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent/50 p-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
-                                <AppLogo />
-                            </Link>
-                        </SidebarMenuButton>
+                        <NavUser />
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
 
             <SidebarContent className="overflow-y-auto">
-                <SidebarMenu className="px-2 py-2 gap-0.5">
-                    {navigation.map((item, i) => {
+                <SidebarMenu className="px-2 py-4 gap-1">
+                    {filteredNavigation.map((item, i) => {
                         if (item.type === 'section') {
                             return (
                                 <li key={i} className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-wider text-sidebar-foreground/40 uppercase select-none">
@@ -173,8 +213,8 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarContent>
 
-            <SidebarFooter>
-                <NavUser />
+            <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar-accent/5">
+                <AppLogo variant="sidebar" />
             </SidebarFooter>
         </Sidebar>
     );

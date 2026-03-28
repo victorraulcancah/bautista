@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 from config import log, NOW
 
+MES_MAP = {
+    '1': 'ENERO',   '01': 'ENERO',
+    '2': 'FEBRERO', '02': 'FEBRERO',
+    '3': 'MARZO',   '03': 'MARZO',
+    '4': 'ABRIL',   '04': 'ABRIL',
+    '5': 'MAYO',    '05': 'MAYO',
+    '6': 'JUNIO',   '06': 'JUNIO',
+    '7': 'JULIO',   '07': 'JULIO',
+    '8': 'AGOSTO',  '08': 'AGOSTO',
+    '9': 'SEPTIEMBRE', '09': 'SEPTIEMBRE',
+    '10': 'OCTUBRE',
+    '11': 'NOVIEMBRE',
+    '12': 'DICIEMBRE',
+}
+
 def migrate_pagos(old, new, dry_run: bool):
     log.head("C/3  pagos_notifica → pagos")
 
@@ -41,6 +56,9 @@ def migrate_pagos(old, new, dry_run: bool):
 
             insti_id = contacto_insti.get(contacto_id) if contacto_id else None
 
+            pag_mes_raw = str(r.get("pag_mes") or "").strip()
+            pag_mes = MES_MAP.get(pag_mes_raw, pag_mes_raw)
+
             pag_fecha_raw = r.get("pag_fecha")
             pag_fecha = None
             if pag_fecha_raw:
@@ -71,7 +89,7 @@ def migrate_pagos(old, new, dry_run: bool):
                 "estudiante_id":r.get("id_estudiante"),
                 "contacto_id":  contacto_id,
                 "pag_anual":    r.get("pag_anual"),
-                "pag_mes":      r.get("pag_mes"),
+                "pag_mes":      pag_mes,
                 "pag_monto":    r.get("pag_monto") or 0,
                 "pag_nombre1":  r.get("pag_nombre1"),
                 "pag_otro1":    r.get("pag_otro1") or 0,

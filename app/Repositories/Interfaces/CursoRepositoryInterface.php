@@ -8,7 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 interface CursoRepositoryInterface
 {
-    public function paginate(int $instiId, string $search = '', int $perPage = 15): LengthAwarePaginator;
+    public function paginate(int $instiId, string $search = '', int $perPage = 15, ?int $gradoId = null): LengthAwarePaginator;
     public function all(int $instiId): Collection;
     public function findById(int $id): Curso;
     public function create(array $data): Curso;

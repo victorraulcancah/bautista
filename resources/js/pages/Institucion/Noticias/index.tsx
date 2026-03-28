@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import NoticiasTable from './components/NoticiasTable';
 import NoticiaFormModal from './components/NoticiaFormModal';
 import type { Noticia } from './hooks/useNoticias';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard',   href: '/dashboard' },
@@ -19,6 +20,7 @@ export default function NoticiasPage() {
     const res = useResource<Noticia>('/noticias');
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Noticia | null>(null);
+    const [deleting, setDeleting]   = useState<Noticia | null>(null);
 
     const openCreate = () => { setEditing(null); setModalOpen(true); };
     const openEdit   = (n: Noticia) => { setEditing(n); setModalOpen(true); };
@@ -32,6 +34,12 @@ export default function NoticiasPage() {
         } else {
             await res.create(data);
         }
+    };
+
+    const handleDelete = async () => {
+        if (!deleting) return;
+        await res.remove(deleting.not_id);
+        setDeleting(null);
     };
 
     return (
@@ -53,11 +61,7 @@ export default function NoticiasPage() {
                     <NoticiasTable
                         noticias={res.rows}
                         onEdit={openEdit}
-                        onDelete={(n) => {
-                            if (confirm(`¿Eliminar la noticia "${n.not_titulo}"?`)) {
-                                res.remove(n.not_id);
-                            }
-                        }}
+                        onDelete={setDeleting}
                         onPageChange={res.setPage}
                     />
                 )}
@@ -72,6 +76,16 @@ export default function NoticiasPage() {
                 apiErrors={res.apiErrors}
                 clearErrors={res.clearErrors}
             />
+
+            <ConfirmDeleteModal
+                open={!!deleting}
+                onClose={() => setDeleting(null)}
+                onConfirm={handleDelete}
+                title="Eliminar Noticia"
+                message={`¿Estás seguro de que deseas eliminar la noticia "${deleting?.not_titulo}"? Esta acción no se puede deshacer.`}
+                processing={res.loading}
+            />
         </>
     );
 }
+

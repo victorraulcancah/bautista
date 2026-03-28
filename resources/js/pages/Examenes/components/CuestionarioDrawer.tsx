@@ -78,7 +78,7 @@ export default function CuestionarioDrawer({ open, onClose, actividad }: Props) 
             <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="text-purple-700">
-                        {actividad.nombre_activid}
+                        {actividad.nombre_actividad}
                     </DialogTitle>
                     {actividad.tipo && (
                         <p className="text-sm text-gray-500">

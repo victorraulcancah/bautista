@@ -9,6 +9,7 @@ import modules.messaging as messaging
 import modules.payments as payments
 import modules.erp as erp
 import modules.examenes as examenes
+import modules.enrollment as enrollment
 
 TABLAS = {
     "institucion_educativa": lambda old, new, maps, dry: core.migrate_institucion(old, new, dry),
@@ -28,6 +29,7 @@ TABLAS = {
     "pagos":                 lambda old, new, maps, dry: payments.migrate_pagos(old, new, dry),
     "erp":                   lambda old, new, maps, dry: erp.migrate_erp(old, new, dry),
     "examenes":              lambda old, new, maps, dry: examenes.migrate_examenes(old, new, dry),
+    "enrollment":            lambda old, new, maps, dry: enrollment.migrate_enrollment(old, new, dry),
 }
 
 def main():
@@ -52,7 +54,8 @@ def main():
     try:
         if args.tabla:
             if args.tabla in ("perfiles", "docentes", "estudiantes", "mensajeria",
-                              "padre_apoderado", "estudiante_contacto", "pagos"):
+                              "padre_apoderado", "estudiante_contacto", "pagos",
+                              "enrollment"):
                 print(f"\n  ℹ  La tabla '{args.tabla}' requiere el mapeo de users — migrando users primero...\n")
                 maps["users"] = core.migrate_users(old, new, args.dry_run)
             TABLAS[args.tabla](old, new, maps, args.dry_run)
@@ -74,6 +77,7 @@ def main():
             payments.migrate_pagos(old, new, args.dry_run)
             erp.migrate_erp(old, new, args.dry_run)
             examenes.migrate_examenes(old, new, args.dry_run)
+            enrollment.migrate_enrollment(old, new, args.dry_run)
 
     except Exception as e:
         new.rollback()

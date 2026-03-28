@@ -3,6 +3,15 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 
+const fmtDate = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-PE', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+    });
+};
+
+
 type Respuesta = {
     id:         number;
     respuesta:  string;
@@ -89,7 +98,8 @@ export default function Conversacion({ mensajeId, userId, onBack }: Props) {
                         Para: <strong>{destino}</strong>
                     </p>
                 </div>
-                <span className="whitespace-nowrap text-xs text-gray-400">{mensaje.created_at}</span>
+                <span className="whitespace-nowrap text-xs text-gray-400">{fmtDate(mensaje.created_at)}</span>
+
             </div>
 
             {/* Chat */}
@@ -102,8 +112,12 @@ export default function Conversacion({ mensajeId, userId, onBack }: Props) {
                                 {!esMio && (
                                     <p className="mb-1 text-xs font-semibold text-green-700">{r.autor.nombre}</p>
                                 )}
-                                <p className="whitespace-pre-wrap break-words">{r.respuesta}</p>
-                                <p className={`mt-1 text-right text-xs ${esMio ? 'text-green-100' : 'text-gray-400'}`}>{r.created_at}</p>
+                                <div
+                                    className="prose prose-sm max-w-none whitespace-pre-wrap break-words"
+                                    dangerouslySetInnerHTML={{ __html: r.respuesta }}
+                                />
+                                <p className={`mt-1 text-right text-xs ${esMio ? 'text-green-100' : 'text-gray-400'}`}>{fmtDate(r.created_at)}</p>
+
                             </div>
                         </div>
                     );

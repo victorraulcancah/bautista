@@ -17,7 +17,8 @@ interface MatriculaServiceInterface
     public function eliminarApertura(int $id): void;
 
     // Matrículas
-    public function listarMatriculas(int $aperturaId, string $search = '', int $perPage = 15): LengthAwarePaginator;
+    public function listarMatriculas(int $aperturaId, string $search = '', int $perPage = 15, ?int $nivelId = null): LengthAwarePaginator;
+    public function contarPorNivel(int $aperturaId): \Illuminate\Support\Collection;
     public function matricular(array $data): Matricula;
     public function anularMatricula(int $id): void;
 

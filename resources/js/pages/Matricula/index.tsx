@@ -11,6 +11,7 @@ import { useResource } from '@/hooks/useResource';
 import { useOptions } from '@/hooks/useOptions';
 import AperturaFormModal from './components/AperturaFormModal';
 import MatriculasDrawer from './components/MatriculasDrawer';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import type { MatriculaApertura, AperturaFormData, SeccionOption } from './hooks/useMatricula';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -26,23 +27,34 @@ export default function MatriculaPage() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [editing, setEditing]       = useState<MatriculaApertura | null>(null);
     const [selected, setSelected]     = useState<MatriculaApertura | null>(null);
+    const [deleting, setDeleting]     = useState<MatriculaApertura | null>(null);
 
     const openCreate = () => { setEditing(null); setModalOpen(true); };
     const openEdit   = (a: MatriculaApertura) => { setEditing(a); setModalOpen(true); };
     const openDetail = (a: MatriculaApertura) => { setSelected(a); setDrawerOpen(true); };
 
+    const handleDelete = async () => {
+        if (!deleting) return;
+        await res.remove(deleting.apertura_id);
+        setDeleting(null);
+    };
+
     const columns: Column<MatriculaApertura>[] = [
         {
-            label:  'Apertura',
+            label:  'Nombre',
             render: (a) => <span className="font-medium">{a.nombre}</span>,
         },
         {
-            label:  'Año',
-            render: (a) => a.anio,
+            label:  'Fecha Inicio',
+            render: (a) => a.fecha_inicio ?? '—',
         },
         {
-            label:  'Período',
-            render: (a) => `${a.fecha_inicio} → ${a.fecha_fin}`,
+            label:  'Fecha Fin',
+            render: (a) => a.fecha_fin ?? '—',
+        },
+        {
+            label:  'Periodo',
+            render: (a) => a.anio,
         },
         {
             label:  'Matriculados',
@@ -73,17 +85,17 @@ export default function MatriculaPage() {
 
     return (
         <>
-            <Head title="Matrículas" />
+            <Head title="Matrículas — Apertura/Cierre" />
             <ResourcePage
                 breadcrumbs={breadcrumbs}
-                pageTitle="Matrículas"
-                subtitle={res.rows ? `${res.rows.total} aperturas` : '…'}
+                pageTitle="Apertura / Cierre de Matrícula"
+                subtitle={res.rows ? `${res.rows.total} periodos` : '…'}
                 icon={ClipboardList}
                 iconColor="bg-blue-600"
                 search={res.search}
                 onSearch={res.setSearch}
                 flashSuccess={res.success}
-                btnLabel="Nueva Apertura"
+                btnLabel="Nuevo Periodo"
                 onNew={openCreate}
             >
                 {res.rows && (
@@ -92,11 +104,7 @@ export default function MatriculaPage() {
                         columns={columns}
                         getKey={(a) => a.apertura_id}
                         onEdit={openEdit}
-                        onDelete={(a) => {
-                            if (confirm(`¿Eliminar apertura "${a.nombre}"? Se eliminarán todas sus matrículas.`)) {
-                                res.remove(a.apertura_id);
-                            }
-                        }}
+                        onDelete={setDeleting}
                         onPageChange={res.setPage}
                     />
                 )}
@@ -120,6 +128,16 @@ export default function MatriculaPage() {
                 apertura={selected}
                 secciones={secciones}
             />
+
+            <ConfirmDeleteModal
+                open={!!deleting}
+                onClose={() => setDeleting(null)}
+                onConfirm={handleDelete}
+                title="Eliminar Periodo"
+                message={`¿Estás seguro de que deseas eliminar el periodo "${deleting?.nombre}"? Esta acción eliminará permanentemente todas las matrículas asociadas.`}
+                processing={res.loading}
+            />
         </>
     );
 }
+

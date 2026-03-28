@@ -42,9 +42,14 @@ class MatriculaService implements MatriculaServiceInterface
         $this->repository->deleteApertura($apertura);
     }
 
-    public function listarMatriculas(int $aperturaId, string $search = '', int $perPage = 15): LengthAwarePaginator
+    public function listarMatriculas(int $aperturaId, string $search = '', int $perPage = 15, ?int $nivelId = null): LengthAwarePaginator
     {
-        return $this->repository->paginateMatriculas($aperturaId, $search, $perPage);
+        return $this->repository->paginateMatriculas($aperturaId, $search, $perPage, $nivelId);
+    }
+
+    public function contarPorNivel(int $aperturaId): \Illuminate\Support\Collection
+    {
+        return $this->repository->countByNivel($aperturaId);
     }
 
     public function matricular(array $data): Matricula

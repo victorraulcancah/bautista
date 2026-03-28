@@ -27,6 +27,8 @@ class User extends Authenticatable
         'estado',
     ];
 
+    protected $appends = ['nombre_completo'];
+
     protected $hidden = [
         'password',
         'two_factor_secret',

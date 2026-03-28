@@ -23,7 +23,7 @@ class ActividadApiController extends Controller
     {
         return ActividadResource::collection($this->service->listar(
             cursoId: (int) $request->get('curso_id', 0),
-            search:  $request->get('search', ''),
+            search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
         ));
     }

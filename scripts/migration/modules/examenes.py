@@ -67,6 +67,7 @@ def migrate_examenes(old, new, dry_run: bool):
                 skipped += 1
                 continue
             if not dry_run:
+                fecha_creacion = r.get("fecha_creacion") or NOW
                 c.execute("""
                     INSERT INTO actividad_curso
                         (actividad_id, id_curso, id_clase_curso, id_tipo_activada,
@@ -83,7 +84,7 @@ def migrate_examenes(old, new, dry_run: bool):
                     r.get("fecha_inicio"), r.get("fecha_cierre"),
                     r.get("nota_visible"), r.get("nota_actvidad"),
                     r.get("respuesta_visible"), r.get("ocultar_actividad"),
-                    r.get("estado"), r.get("es_calificado"), NOW, NOW,
+                    r.get("estado"), r.get("es_calificado"), fecha_creacion, NOW,
                 ))
             log.ok(f"  actividad_id={r['actividad_id']}  {str(r.get('nombre_activid',''))[:50]}")
             inserted += 1

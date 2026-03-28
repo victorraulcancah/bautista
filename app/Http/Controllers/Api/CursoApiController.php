@@ -21,8 +21,9 @@ class CursoApiController extends Controller
     {
         return CursoResource::collection($this->service->listar(
             instiId: $request->user()->insti_id,
-            search:  $request->get('search', ''),
+            search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
+            gradoId: $request->get('grado_id') ? (int) $request->get('grado_id') : null,
         ));
     }
 

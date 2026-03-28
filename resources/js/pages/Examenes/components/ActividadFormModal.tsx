@@ -10,8 +10,8 @@ import type { TipoActividad } from '../index';
 // ─── Form shape ─────────────────────────────────────────────────────────────
 export type ActividadFormData = {
     id_curso:          string;
-    id_tipo_activada:  string;
-    nombre_activid:    string;
+    id_tipo_actividad:  string;
+    nombre_actividad:    string;
     descripcion_corta: string;
     fecha_inicio:      string;
     fecha_cierre:      string;
@@ -22,8 +22,8 @@ export type ActividadFormData = {
 type EditableActividad = {
     actividad_id:      number;
     id_curso:          number;
-    id_tipo_activada:  number;
-    nombre_activid:    string;
+    id_tipo_actividad:  number;
+    nombre_actividad:    string;
     descripcion_corta: string | null;
     fecha_inicio:      string | null;
     fecha_cierre:      string | null;
@@ -42,8 +42,8 @@ type Props = {
 
 const blank = (): ActividadFormData => ({
     id_curso:          '0',
-    id_tipo_activada:  '',
-    nombre_activid:    '',
+    id_tipo_actividad:  '',
+    nombre_actividad:    '',
     descripcion_corta: '',
     fecha_inicio:      '',
     fecha_cierre:      '',
@@ -53,8 +53,8 @@ const blank = (): ActividadFormData => ({
 
 const fromActividad = (a: EditableActividad): ActividadFormData => ({
     id_curso:          a.id_curso.toString(),
-    id_tipo_activada:  a.id_tipo_activada.toString(),
-    nombre_activid:    a.nombre_activid,
+    id_tipo_actividad:  a.id_tipo_actividad.toString(),
+    nombre_actividad:    a.nombre_actividad,
     descripcion_corta: a.descripcion_corta ?? '',
     fecha_inicio:      a.fecha_inicio?.slice(0, 10) ?? '',
     fecha_cierre:      a.fecha_cierre?.slice(0, 10) ?? '',
@@ -109,8 +109,8 @@ export default function ActividadFormModal({
                     <div className="space-y-1">
                         <Label>Tipo de actividad *</Label>
                         <Select
-                            value={form.id_tipo_activada}
-                            onValueChange={(v) => set('id_tipo_activada', v)}
+                            value={form.id_tipo_actividad}
+                            onValueChange={(v) => set('id_tipo_actividad', v)}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Seleccionar tipo..." />
@@ -123,17 +123,17 @@ export default function ActividadFormModal({
                                 ))}
                             </SelectContent>
                         </Select>
-                        {err('id_tipo_activada') && (
-                            <p className="text-xs text-red-500">{err('id_tipo_activada')}</p>
+                        {err('id_tipo_actividad') && (
+                            <p className="text-xs text-red-500">{err('id_tipo_actividad')}</p>
                         )}
                     </div>
 
                     {/* Nombre */}
                     <FormField
                         label="Nombre de la actividad *"
-                        value={form.nombre_activid}
-                        onChange={(v) => set('nombre_activid', v)}
-                        error={err('nombre_activid')}
+                        value={form.nombre_actividad}
+                        onChange={(v) => set('nombre_actividad', v)}
+                        error={err('nombre_actividad')}
                         placeholder="ej. Examen Parcial Unidad 1"
                     />
 

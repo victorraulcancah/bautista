@@ -16,7 +16,9 @@ use App\Repositories\Implements\GradoRepository;
 use App\Repositories\Implements\NivelEducativoRepository;
 use App\Repositories\Implements\SeccionRepository;
 use App\Repositories\Implements\ActividadRepository;
+use App\Repositories\Implements\UsuarioRepository;
 use App\Repositories\Interfaces\PagoRepositoryInterface;
+use App\Repositories\Interfaces\UsuarioRepositoryInterface;
 use App\Repositories\Interfaces\GaleriaRepositoryInterface;
 use App\Repositories\Interfaces\NoticiaRepositoryInterface;
 use App\Repositories\Interfaces\InstitucionRepositoryInterface;
@@ -47,7 +49,9 @@ use App\Services\Implements\GradoService;
 use App\Services\Implements\NivelEducativoService;
 use App\Services\Implements\SeccionService;
 use App\Services\Implements\ActividadService;
+use App\Services\Implements\UsuarioService;
 use App\Services\Interfaces\PagoServiceInterface;
+use App\Services\Interfaces\UsuarioServiceInterface;
 use App\Services\Interfaces\GaleriaServiceInterface;
 use App\Services\Interfaces\MensajeServiceInterface;
 use App\Services\Interfaces\MensajeriaGrupoServiceInterface;
@@ -139,6 +143,10 @@ class AppServiceProvider extends ServiceProvider
         // Actividades (Exámenes Virtuales)
         $this->app->bind(ActividadRepositoryInterface::class, ActividadRepository::class);
         $this->app->bind(ActividadServiceInterface::class, ActividadService::class);
+
+        // Usuarios
+        $this->app->bind(UsuarioRepositoryInterface::class, UsuarioRepository::class);
+        $this->app->bind(UsuarioServiceInterface::class, UsuarioService::class);
     }
 
     /**

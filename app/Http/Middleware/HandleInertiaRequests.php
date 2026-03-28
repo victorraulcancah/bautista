@@ -36,7 +36,7 @@ class HandleInertiaRequests extends Middleware
     {
         // 1. Sesión estándar
         if ($request->user()) {
-            return $request->user();
+            return $request->user()->load('perfil', 'roles');
         }
 
         // 2. Token desde cookie auth_token

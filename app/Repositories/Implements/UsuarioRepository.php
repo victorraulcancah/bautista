@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Repositories\Implements;
+
+use App\Models\Perfil;
+use App\Models\User;
+use App\Repositories\Interfaces\UsuarioRepositoryInterface;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Hash;
+
+class UsuarioRepository implements UsuarioRepositoryInterface
+{
+    public function paginate(int $instiId, string $search = '', int $perPage = 20): LengthAwarePaginator
+    {
+        return User::with(['perfil', 'roles'])
+            ->where('insti_id', $instiId)
+            ->when($search, function ($q) use ($search) {
+                $q->where('username', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhereHas('perfil', fn ($p) => $p
+                        ->where('primer_nombre', 'like', "%{$search}%")
+                        ->orWhere('apellido_paterno', 'like', "%{$search}%")
+                        ->orWhere('doc_numero', 'like', "%{$search}%")
+                    );
+            })
+            ->latest('id')
+            ->paginate($perPage);
+    }
+
+    public function findById(int $id): User
+    {
+        return User::with(['perfil', 'roles'])->findOrFail($id);
+    }
+
+    public function create(array $data): User
+    {
+        $user = User::create([
+            'insti_id' => $data['insti_id'],
+            'username' => $data['username'],
+            'name'     => $data['primer_nombre'] . ' ' . $data['apellido_paterno'],
+            'email'    => $data['email'] ?? null,
+            'password' => Hash::make($data['username']),
+            'estado'   => '1',
+        ]);
+
+        if ($data['rol'] ?? null) {
+            $user->assignRole($data['rol']);
+        }
+
+        Perfil::create([
+            'user_id'          => $user->id,
+            'primer_nombre'    => $data['primer_nombre'],
+            'segundo_nombre'   => $data['segundo_nombre']   ?? null,
+            'apellido_paterno' => $data['apellido_paterno'],
+            'apellido_materno' => $data['apellido_materno'] ?? null,
+            'genero'           => $data['genero']           ?? null,
+            'tipo_doc'         => $data['tipo_doc']         ?? 1,
+            'doc_numero'       => $data['doc_numero']       ?? $data['username'],
+            'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
+            'direccion'        => $data['direccion']        ?? null,
+            'telefono'         => $data['telefono']         ?? null,
+            'fecha_registro'   => now()->toDateString(),
+        ]);
+
+        return $user->load(['perfil', 'roles']);
+    }
+
+    public function update(User $user, array $data): User
+    {
+        $user->update([
+            'username' => $data['username'],
+            'name'     => ($data['primer_nombre'] ?? '') . ' ' . ($data['apellido_paterno'] ?? ''),
+            'email'    => $data['email'] ?? null,
+            'estado'   => $data['estado'] ?? $user->estado,
+        ]);
+
+        if ($user->perfil) {
+            $user->perfil->update([
+                'primer_nombre'    => $data['primer_nombre']    ?? $user->perfil->primer_nombre,
+                'segundo_nombre'   => $data['segundo_nombre']   ?? null,
+                'apellido_paterno' => $data['apellido_paterno'] ?? $user->perfil->apellido_paterno,
+                'apellido_materno' => $data['apellido_materno'] ?? null,
+                'genero'           => $data['genero']           ?? $user->perfil->genero,
+                'tipo_doc'         => $data['tipo_doc']         ?? $user->perfil->tipo_doc,
+                'doc_numero'       => $data['doc_numero']       ?? $data['username'],
+                'fecha_nacimiento' => $data['fecha_nacimiento'] ?? $user->perfil->fecha_nacimiento,
+                'direccion'        => $data['direccion']        ?? $user->perfil->direccion,
+                'telefono'         => $data['telefono']         ?? $user->perfil->telefono,
+            ]);
+        }
+
+        if ($data['rol'] ?? null) {
+            $user->syncRoles([$data['rol']]);
+        }
+
+        return $user->load(['perfil', 'roles']);
+    }
+}

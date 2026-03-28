@@ -23,9 +23,10 @@ type Paginated<T> = { data: T[]; current_page: number; last_page: number; total:
 type Grupo = { id: number; nombre: string };
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Mensajes',  href: '/mensajes' },
+    { title: 'Dashboard',   href: '/dashboard' },
+    { title: 'Comunicados', href: '/comunicados' },
 ];
+
 
 export default function MensajesPage() {
     const { auth } = usePage<{ auth: { user: { id: number } } }>().props;
