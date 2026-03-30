@@ -16,11 +16,11 @@ type Mensaje = {
     cuerpo:      string;
     leido:       boolean;
     created_at:  string;
-    remitente:   { id: number; nombre: string } | null;
-    grupo:       { id: number; nombre: string } | null;
+    remitente:   { id: number; nombre: string; foto?: string | null } | null;
+    grupo:       { id: number; nombre: string; foto?: string | null } | null;
 };
 type Paginated<T> = { data: T[]; current_page: number; last_page: number; total: number; from: number; to: number };
-type Grupo = { id: number; nombre: string };
+type Grupo = { id: number; nombre: string; foto?: string | null };
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard',   href: '/dashboard' },

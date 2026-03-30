@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import TitleForm from '@/components/TitleForm';
-import { ReqLabel, OptLabel, SELECT_CLS } from './FormLabels';
+import { ReqLabel, OptLabel, SELECT_CLS } from '@/components/shared/FormLabels';
 import type { AlumnoForm } from './types';
 import type { GradoOption, SeccionOption, MatriculaFormData } from '../../hooks/useMatricula';
 

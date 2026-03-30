@@ -1,13 +1,20 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
-import { Layers } from 'lucide-react';
+import { Layers, GraduationCap, BookOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
 import type { BreadcrumbItem } from '@/types';
 import { useResource } from '@/hooks/useResource';
+import { useOptions } from '@/hooks/useOptions';
 import NivelFormModal from './components/NivelFormModal';
 import { nivelesColumns } from './hooks/useNivelesColumns';
 import type { Nivel } from './hooks/useNiveles';
+
+type Institucion = {
+    insti_id: number;
+    insti_razon_social: string;
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -16,6 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function NivelesPage() {
     const res = useResource<Nivel>('/niveles');
+    const instituciones = useOptions<Institucion>('/instituciones');
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Nivel | null>(null);
 
@@ -26,6 +34,31 @@ export default function NivelesPage() {
             res.remove(n.nivel_id);
         }
     };
+
+    const extraActions = (n: Nivel) => (
+        <>
+            <Link href={`/grados?nivel_id=${n.nivel_id}`}>
+                <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="size-7 text-blue-600 hover:bg-blue-50"
+                    title="Gestionar Grados"
+                >
+                    <GraduationCap className="size-3.5" />
+                </Button>
+            </Link>
+            <Link href={`/cursos?nivel_id=${n.nivel_id}`}>
+                <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="size-7 text-red-600 hover:bg-red-50"
+                    title="Gestionar Cursos"
+                >
+                    <BookOpen className="size-3.5" />
+                </Button>
+            </Link>
+        </>
+    );
 
     return (
         <>
@@ -49,6 +82,7 @@ export default function NivelesPage() {
                         getKey={(n) => n.nivel_id}
                         onEdit={openEdit}
                         onDelete={handleDelete}
+                        extraActions={extraActions}
                         onPageChange={res.setPage}
                     />
                 )}
@@ -59,6 +93,7 @@ export default function NivelesPage() {
                 open={modalOpen}
                 onClose={() => { setModalOpen(false); res.clearSuccess(); }}
                 editing={editing}
+                instituciones={instituciones}
                 onSave={editing
                     ? (data) => res.update(editing.nivel_id, data)
                     : (data) => res.create(data)}

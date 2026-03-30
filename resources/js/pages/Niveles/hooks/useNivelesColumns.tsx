@@ -2,6 +2,11 @@ import type { Column } from '@/components/shared/ResourceTable';
 import type { Nivel } from './useNiveles';
 
 export const nivelesColumns: Column<Nivel>[] = [
+    { 
+        label: '#', 
+        className: 'w-16',
+        render: (_n, index) => <span className="text-gray-500">{index + 1}</span>
+    },
     { label: 'Nombre del Nivel', render: (n) => n.nombre_nivel },
     {
         label: 'Estado',

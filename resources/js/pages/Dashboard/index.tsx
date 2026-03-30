@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import AccesosRapidos from './components/AccesosRapidos';
 import NotificacionesPendientes from './components/NotificacionesPendientes';
 import StatsCards from './components/StatsCards';
+import AlertasHoy from './components/AlertasHoy';
 import type { DashboardStats } from './hooks/useDashboard';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -25,16 +26,24 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
 
-            <div className="flex flex-col gap-6 p-6">
+            <div className="flex flex-col gap-8 p-6">
                 <PageHeader
                     icon={TrendingUp}
                     title="Panel de Control"
                     subtitle="IEP Bautista La Pascana"
                 />
-                {stats !== null ? <StatsCards stats={stats} /> : null}
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                    <NotificacionesPendientes />
-                    <AccesosRapidos />
+
+                {stats !== null && <StatsCards stats={stats} />}
+
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+                    <div className="lg:col-span-3">
+                        <NotificacionesPendientes 
+                            messages={stats?.mensajes_pendientes ?? []}
+                        />
+                    </div>
+                    <div className="lg:col-span-1">
+                        <AccesosRapidos />
+                    </div>
                 </div>
             </div>
         </AppLayout>

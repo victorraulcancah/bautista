@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import { LayoutList } from 'lucide-react';
+import { CalendarDays, LayoutList } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
 import type { BreadcrumbItem } from '@/types';
@@ -18,8 +19,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function SeccionesPage() {
     const res    = useResource<Seccion>('/secciones');
     const grados = useOptions<GradoOption>('/grados');
-    const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing]     = useState<Seccion | null>(null);
+    const [modalOpen, setModalOpen]         = useState(false);
+    const [editing, setEditing]             = useState<Seccion | null>(null);
 
     const openCreate   = () => { setEditing(null); setModalOpen(true); };
     const openEdit     = (s: Seccion) => { setEditing(s); setModalOpen(true); };
@@ -52,6 +53,17 @@ export default function SeccionesPage() {
                         onEdit={openEdit}
                         onDelete={handleDelete}
                         onPageChange={res.setPage}
+                        extraActions={(s) => (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="size-7 text-blue-500 hover:bg-blue-50"
+                                title="Horarios"
+                                onClick={() => window.location.href = `/secciones/${s.seccion_id}/horarios`}
+                            >
+                                <CalendarDays className="size-3.5" />
+                            </Button>
+                        )}
                     />
                 )}
                 {res.loading && <p className="py-6 text-center text-sm text-gray-400">Cargando...</p>}

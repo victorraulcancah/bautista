@@ -19,6 +19,10 @@ class SeccionResource extends JsonResource
             'grado'       => $this->whenLoaded('grado', fn () => [
                 'grado_id'     => $this->grado->grado_id,
                 'nombre_grado' => $this->grado->nombre_grado,
+                'nivel'        => $this->grado->relationLoaded('nivel') ? [
+                    'nivel_id'     => $this->grado->nivel?->nivel_id,
+                    'nombre_nivel' => $this->grado->nivel?->nombre_nivel,
+                ] : null,
             ]),
         ];
     }

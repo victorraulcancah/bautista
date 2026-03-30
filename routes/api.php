@@ -85,6 +85,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('docentes/{docenteId}/cursos',            [DocenteCursoApiController::class, 'store']);
     Route::delete('docentes/{docenteId}/cursos/{id}',     [DocenteCursoApiController::class, 'destroy']);
     Route::get('docentes/{docenteId}/horario',            [DocenteCursoApiController::class, 'horario']);
+    Route::get('docentes/{docenteId}/horarios',           [\App\Http\Controllers\Api\DocenteHorarioApiController::class, 'index']);
+    Route::post('docentes/{docenteId}/horarios',          [\App\Http\Controllers\Api\DocenteHorarioApiController::class, 'store']);
+    Route::delete('docentes/horarios/{id}',               [\App\Http\Controllers\Api\DocenteHorarioApiController::class, 'destroy']);
 
     // Niveles Educativos
     Route::apiResource('niveles', NivelEducativoApiController::class);
@@ -94,6 +97,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Secciones
     Route::apiResource('secciones', SeccionApiController::class);
+    Route::get('secciones/{seccionId}/horarios',          [\App\Http\Controllers\Api\SeccionHorarioApiController::class, 'index']);
+    Route::post('secciones/{seccionId}/horarios',         [\App\Http\Controllers\Api\SeccionHorarioApiController::class, 'store']);
+    Route::delete('secciones/horarios/{id}',              [\App\Http\Controllers\Api\SeccionHorarioApiController::class, 'destroy']);
 
     // Cursos
     Route::apiResource('cursos', CursoApiController::class);
@@ -117,6 +123,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('pagos')->group(function () {
         Route::get('pagadores',                    [PagoApiController::class, 'indexPagadores']);
         Route::get('contactos/{contactoId}',       [PagoApiController::class, 'porContacto']);
+        Route::get('reporte-pdf',                  [PagoApiController::class, 'reportePdf']);
         Route::post('/',                           [PagoApiController::class, 'store']);
         Route::put('/{id}',                        [PagoApiController::class, 'update']);
         Route::delete('/{id}',                     [PagoApiController::class, 'destroy']);
@@ -200,4 +207,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Horarios de Asistencia
     Route::apiResource('horarios-asistencia', \App\Http\Controllers\Api\HorarioAsistenciaApiController::class);
+
+    // Perfil del usuario autenticado
+    Route::patch('me/perfil',   [\App\Http\Controllers\Api\PerfilApiController::class, 'updateDatos']);
+    Route::post('me/foto',      [\App\Http\Controllers\Api\PerfilApiController::class, 'updateFoto']);
+    Route::put('me/password',   [\App\Http\Controllers\Api\PerfilApiController::class, 'updatePassword']);
 });

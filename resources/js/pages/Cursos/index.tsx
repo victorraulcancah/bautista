@@ -9,7 +9,7 @@ import { useOptions } from '@/hooks/useOptions';
 import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import CursoFormModal from './components/CursoFormModal';
 import GradoFormModal from '../Grados/components/GradoFormModal';
-import type { Curso, CursoFormData, NivelOption, GradoOption } from './hooks/useCursos';
+import type { Curso, CursoFormData, NivelOption } from './hooks/useCursos';
 import type { Grado, GradoFormData, Nivel } from '../Grados/hooks/useGrados';
 import type { BreadcrumbItem } from '@/types';
 
@@ -176,12 +176,6 @@ export default function CursosPage() {
         });
     };
 
-    // Grado options for the modal selector
-    const gradoOptions: GradoOption[] = grados.map((g) => ({
-        grado_id:     g.grado_id,
-        nombre_grado: g.nombre_grado,
-    }));
-
     // Pre-fill modal when creating from drill-down
     const formDefaults: Partial<CursoFormData> | undefined = selectedGrado
         ? {
@@ -234,9 +228,7 @@ export default function CursosPage() {
                                                     <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Nivel Académico</th>
                                                     <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Grado</th>
                                                     <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Abreviatura</th>
-                                                    <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Eliminar</th>
-                                                    <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Cursos</th>
-                                                    <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Editar</th>
+                                                    <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -247,37 +239,35 @@ export default function CursosPage() {
                                                         <td className="px-4 py-3 text-center font-medium">{g.nombre_grado}</td>
                                                         <td className="px-4 py-3 text-center text-neutral-500">{g.abreviatura ?? '—'}</td>
                                                         <td className="px-4 py-3 text-center">
-                                                            <Button size="sm" variant="ghost"
-                                                                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                                                                title="Eliminar grado"
-                                                                onClick={() => confirmDeleteGrado(g)}
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </td>
-                                                        <td className="px-4 py-3 text-center">
-                                                            <Button size="sm"
-                                                                className="bg-[#00a65a] hover:bg-[#008d4c] text-white gap-1"
-                                                                onClick={() => handleSelectGrado(g)}
-                                                            >
-                                                                <BookOpen className="h-3 w-3" />
-                                                                Cursos
-                                                            </Button>
-                                                        </td>
-                                                        <td className="px-4 py-3 text-center">
-                                                            <Button size="sm" variant="ghost"
-                                                                className="h-8 w-8 p-0 text-amber-500 hover:text-amber-700"
-                                                                title="Editar grado"
-                                                                onClick={() => openEditGrado(g)}
-                                                            >
-                                                                <Pencil className="h-4 w-4" />
-                                                            </Button>
+                                                            <div className="flex items-center justify-center gap-1">
+                                                                <Button size="sm" variant="ghost"
+                                                                    className="h-8 w-8 p-0 text-[#00a65a] hover:text-[#008d4c]"
+                                                                    title="Ver cursos"
+                                                                    onClick={() => handleSelectGrado(g)}
+                                                                >
+                                                                    <BookOpen className="h-4 w-4" />
+                                                                </Button>
+                                                                <Button size="sm" variant="ghost"
+                                                                    className="h-8 w-8 p-0 text-amber-500 hover:text-amber-700"
+                                                                    title="Editar grado"
+                                                                    onClick={() => openEditGrado(g)}
+                                                                >
+                                                                    <Pencil className="h-4 w-4" />
+                                                                </Button>
+                                                                <Button size="sm" variant="ghost"
+                                                                    className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                                                    title="Eliminar grado"
+                                                                    onClick={() => confirmDeleteGrado(g)}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))}
                                                 {gradosFiltrados.length === 0 && (
                                                     <tr>
-                                                        <td colSpan={7} className="py-16 text-center text-sm text-neutral-400">
+                                                        <td colSpan={5} className="py-16 text-center text-sm text-neutral-400">
                                                             {searchGrado ? 'Sin resultados para la búsqueda.' : 'No hay grados registrados.'}
                                                         </td>
                                                     </tr>
@@ -401,7 +391,6 @@ export default function CursosPage() {
                 onClose={handleClose}
                 editing={editing}
                 niveles={niveles}
-                grados={gradoOptions}
                 defaults={formDefaults}
                 onSave={handleSave}
                 apiErrors={apiErrors}

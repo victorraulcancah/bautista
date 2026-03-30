@@ -10,11 +10,13 @@ export type Nivel = {
 export type PaginatedNiveles = Paginated<Nivel>;
 
 export type NivelFormData = {
+    insti_id:      string;
     nombre_nivel:  string;
     nivel_estatus: string;
 };
 
 export const defaultForm: NivelFormData = {
+    insti_id:      '',
     nombre_nivel:  '',
     nivel_estatus: '1',
 };

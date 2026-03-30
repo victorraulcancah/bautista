@@ -19,6 +19,7 @@ export type Curso = {
     grado_academico:     number | null;
     nivel:               NivelOption | null;
     grado:               GradoOption | null;
+    logo:                string | null;
 };
 
 export type PaginatedCursos = Paginated<Curso>;

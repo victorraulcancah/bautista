@@ -75,7 +75,7 @@ def main():
             users.migrate_padre_apoderado(old, new, maps["users"], args.dry_run)
             users.migrate_estudiante_contacto(old, new, args.dry_run)
             payments.migrate_pagos(old, new, args.dry_run)
-            erp.migrate_erp(old, new, args.dry_run)
+            # erp.migrate_erp(old, new, args.dry_run)
             examenes.migrate_examenes(old, new, args.dry_run)
             enrollment.migrate_enrollment(old, new, args.dry_run)
 

@@ -1,7 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import { ClipboardList, Users } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
@@ -76,9 +75,9 @@ export default function MatriculaPage() {
         {
             label:  'Estado',
             render: (a) => (
-                <Badge variant={a.estado === '1' ? 'default' : 'secondary'}>
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${a.estado === '1' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                     {a.estado === '1' ? 'Activo' : 'Cerrado'}
-                </Badge>
+                </span>
             ),
         },
     ];

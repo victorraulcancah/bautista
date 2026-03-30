@@ -27,7 +27,7 @@ class User extends Authenticatable
         'estado',
     ];
 
-    protected $appends = ['nombre_completo'];
+    protected $appends = ['nombre_completo', 'avatar'];
 
     protected $hidden = [
         'password',
@@ -82,5 +82,14 @@ class User extends Authenticatable
             return trim("{$perfil->primer_nombre} {$perfil->apellido_paterno} {$perfil->apellido_materno}");
         }
         return $this->name ?? $this->username;
+    }
+
+    public function getAvatarAttribute(): ?string
+    {
+        $perfil = $this->perfil;
+        if ($perfil && $perfil->foto_perfil) {
+            return asset('storage/' . $perfil->foto_perfil);
+        }
+        return null;
     }
 }

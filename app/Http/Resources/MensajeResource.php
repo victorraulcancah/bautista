@@ -20,16 +20,19 @@ class MensajeResource extends JsonResource
                 'nombre' => $this->remitente->perfil
                     ? trim("{$this->remitente->perfil->primer_nombre} {$this->remitente->perfil->apellido_paterno}")
                     : $this->remitente->username,
+                'foto'   => $this->remitente->perfil?->foto_perfil ? asset("storage/{$this->remitente->perfil->foto_perfil}") : null,
             ]),
             'destinatario'   => $this->whenLoaded('destinatario', fn () => $this->destinatario ? [
                 'id'     => $this->destinatario->id,
                 'nombre' => $this->destinatario->perfil
                     ? trim("{$this->destinatario->perfil->primer_nombre} {$this->destinatario->perfil->apellido_paterno}")
                     : $this->destinatario->username,
+                'foto'   => $this->destinatario->perfil?->foto_perfil ? asset("storage/{$this->destinatario->perfil->foto_perfil}") : null,
             ] : null),
             'grupo'          => $this->whenLoaded('grupo', fn () => $this->grupo ? [
                 'id'     => $this->grupo->id,
                 'nombre' => $this->grupo->nombre,
+                'foto'   => null, // Opcional: foto del grupo
             ] : null),
             'respuestas'     => $this->whenLoaded('respuestas', fn () =>
                 $this->respuestas->map(fn ($r) => [
@@ -41,6 +44,7 @@ class MensajeResource extends JsonResource
                         'nombre' => $r->autor->perfil
                             ? trim("{$r->autor->perfil->primer_nombre} {$r->autor->perfil->apellido_paterno}")
                             : $r->autor->username,
+                        'foto'   => $r->autor->perfil?->foto_perfil ? asset("storage/{$r->autor->perfil->foto_perfil}") : null,
                     ],
                 ])
             ),

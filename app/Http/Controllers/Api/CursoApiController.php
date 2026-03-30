@@ -24,6 +24,7 @@ class CursoApiController extends Controller
             search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
             gradoId: $request->get('grado_id') ? (int) $request->get('grado_id') : null,
+            nivelId: $request->get('nivel_academico_id') ? (int) $request->get('nivel_academico_id') : null,
         ));
     }
 

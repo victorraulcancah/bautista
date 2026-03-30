@@ -1,8 +1,14 @@
 import type { Paginated } from '@/components/shared/ResourceTable';
 
+export type NivelOption = {
+    nivel_id:     number;
+    nombre_nivel: string;
+};
+
 export type GradoOption = {
     grado_id:     number;
     nombre_grado: string;
+    nivel:        NivelOption | null;
 };
 
 export type Seccion = {

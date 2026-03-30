@@ -82,6 +82,7 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/asistencia/scanner', fn () => Inertia::render('Asistencia/Scanner'))->name('asistencia.scanner');
 
     Route::get('/horarios',               fn () => Inertia::render('Horarios/index'))->name('horarios.index');
+    Route::get('/secciones/{seccionId}/horarios', fn (int $seccionId) => Inertia::render('Secciones/HorariosPage', ['seccionId' => $seccionId]))->name('secciones.horarios');
     Route::get('/notas',                  fn () => Inertia::render('Notas/index'))->name('notas.index');
     Route::get('/usuarios',               fn () => Inertia::render('Usuarios/index'))->name('usuarios.index');
 });

@@ -70,9 +70,9 @@ def migrate_examenes(old, new, dry_run: bool):
                 fecha_creacion = r.get("fecha_creacion") or NOW
                 c.execute("""
                     INSERT INTO actividad_curso
-                        (actividad_id, id_curso, id_clase_curso, id_tipo_activada,
-                         nombre_activid, descripcion_corta, descripcion_larga,
-                         fecha_inicio, fecha_cierre, nota_visible, nota_actvidad,
+                        (actividad_id, id_curso, id_clase_curso, id_tipo_actividad,
+                         nombre_actividad, descripcion_corta, descripcion_larga,
+                         fecha_inicio, fecha_cierre, nota_visible, nota_actividad,
                          respuesta_visible, ocultar_actividad, estado, es_calificado,
                          created_at, updated_at)
                     VALUES
@@ -110,7 +110,7 @@ def migrate_examenes(old, new, dry_run: bool):
                 c.execute("""
                     INSERT INTO cuestionario
                         (cuestionario_id, id_actividad, duracion, nota_visible,
-                         mostrar_respusta, estado, created_at, updated_at)
+                         mostrar_respuesta, estado, created_at, updated_at)
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
                 """, (
                     r["cuestionario_id"], r.get("id_actividad"), r.get("duracion"),

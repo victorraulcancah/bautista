@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { Clock, PlusCircle } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
 import type { Column } from '@/components/shared/ResourceTable';
@@ -66,7 +66,7 @@ export default function HorariosPage() {
         }
     ];
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (editing) {
             await res.update(editing.id, form);
@@ -101,7 +101,7 @@ export default function HorariosPage() {
             </ResourcePage>
 
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent>
+                <DialogContent className="max-w-sm">
                     <DialogHeader>
                         <DialogTitle>{editing ? 'Editar Horario' : 'Nuevo Horario'}</DialogTitle>
                     </DialogHeader>

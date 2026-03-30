@@ -31,13 +31,14 @@ export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDele
     const showActions = !!(onEdit || onDelete || extraActions);
     return (
         <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-                <thead>
+            <div className="overflow-y-auto max-h-[600px] rounded-lg border border-gray-100">
+                <table className="w-full text-sm border-separate border-spacing-0">
+                <thead className="sticky top-0 z-20">
                     <tr className="bg-[#00a65a] text-white text-center">
                         {columns.map((c, idx) => (
-                            <th key={`col-${idx}`} className={`px-3 py-2 ${c.className ?? ''}`}>{c.label}</th>
+                            <th key={`col-${idx}`} className={`px-3 py-3 font-semibold first:rounded-tl-lg last:rounded-tr-lg border-b border-green-600 ${c.className ?? ''}`}>{c.label}</th>
                         ))}
-                        {showActions && <th className="px-3 py-2">Acciones</th>}
+                        {showActions && <th className="px-3 py-3 font-semibold last:rounded-tr-lg border-b border-green-600">Acciones</th>}
                     </tr>
                 </thead>
                 <tbody>
@@ -75,6 +76,7 @@ export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDele
                     ))}
                 </tbody>
             </table>
+        </div>
 
             {rows.last_page > 1 && (
                 <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-sm text-gray-500">

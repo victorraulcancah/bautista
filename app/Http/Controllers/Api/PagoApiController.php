@@ -60,4 +60,50 @@ class PagoApiController extends Controller
         $this->service->eliminarPago($id);
         return response()->json(null, 204);
     }
+
+    // ── Reporte PDF ────────────────────────────────────────────────────────
+
+    public function reportePdf(Request $request)
+    {
+        $contactoId = $request->get('contacto_id');
+        $estudianteId = $request->get('estudiante_id');
+        $fechaInicio = $request->get('fecha_inicio');
+        $fechaFin = $request->get('fecha_fin');
+
+        $pagos = $this->service->pagosPorContacto((int) $contactoId);
+
+        // Filtrar por fechas si se proporcionan
+        if ($fechaInicio && $fechaFin) {
+            $pagos = $pagos->filter(function ($pago) use ($fechaInicio, $fechaFin) {
+                if (!$pago->pag_fecha) return false;
+                $fecha = $pago->pag_fecha->format('Y-m-d');
+                return $fecha >= $fechaInicio && $fecha <= $fechaFin;
+            });
+        }
+
+        $total = $pagos->sum('total');
+
+        // Obtener información del contacto
+        $contacto = \App\Models\PadreApoderado::with('estudiantes')
+            ->find($contactoId);
+
+        $estudiante = $contacto->estudiantes->first();
+
+        $subtitulo = '';
+        if ($fechaInicio && $fechaFin) {
+            $subtitulo = 'DESDE ' . date('d-m-Y', strtotime($fechaInicio)) . 
+                        ' - HASTA ' . date('d-m-Y', strtotime($fechaFin));
+        }
+
+        $html = view('pdf.pagos', [
+            'pagos' => $pagos,
+            'total' => $total,
+            'subtitulo' => $subtitulo,
+            'contacto' => $contacto,
+            'estudiante' => $estudiante,
+        ])->render();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+        return $pdf->download('Reporte_Pagos.pdf');
+    }
 }

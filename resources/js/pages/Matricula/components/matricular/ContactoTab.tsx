@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import TitleForm from '@/components/TitleForm';
-import { ReqLabel, OptLabel, SELECT_CLS } from './FormLabels';
+import { ReqLabel, OptLabel, SELECT_CLS } from '@/components/shared/FormLabels';
 import type { ContactoForm } from './types';
 
 type Props = {

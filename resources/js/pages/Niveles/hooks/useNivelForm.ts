@@ -18,6 +18,7 @@ export function useNivelForm({ editing, open, onSave, onClose, clearErrors }: Pr
         clearErrors();
         setForm(editing
             ? {
+                insti_id:      editing.insti_id.toString(),
                 nombre_nivel:  editing.nombre_nivel,
                 nivel_estatus: editing.nivel_estatus.toString(),
             }

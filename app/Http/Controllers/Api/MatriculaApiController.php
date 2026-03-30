@@ -21,13 +21,23 @@ class MatriculaApiController extends Controller
 
     // ── Aperturas ────────────────────────────────────────────────────────────
 
-    public function indexAperturas(Request $request): AnonymousResourceCollection
+    public function indexAperturas(Request $request): JsonResponse
     {
-        return MatriculaAperturaResource::collection($this->service->listarAperturas(
+        $paginator = $this->service->listarAperturas(
             instiId: $request->user()->insti_id,
             search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
-        ));
+        );
+
+        return response()->json([
+            'data'         => MatriculaAperturaResource::collection($paginator->items()),
+            'total'        => $paginator->total(),
+            'current_page' => $paginator->currentPage(),
+            'last_page'    => $paginator->lastPage(),
+            'per_page'     => $paginator->perPage(),
+            'from'         => $paginator->firstItem(),
+            'to'           => $paginator->lastItem(),
+        ]);
     }
 
     public function showApertura(int $id): MatriculaAperturaResource

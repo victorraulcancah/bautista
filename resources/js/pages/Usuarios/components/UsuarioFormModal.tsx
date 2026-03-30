@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from '@/components/ui/label';
 import FormField from '@/components/shared/FormField';
 import FormSection from '@/components/shared/FormSection';
+import TitleForm from '@/components/TitleForm';
+import { ReqLabel, OptLabel } from '@/components/shared/FormLabels';
 import type { Usuario, UsuarioFormData } from '../hooks/useUsuarios';
 import { defaultForm, ROLES, TIPOS_DOC } from '../hooks/useUsuarios';
 
@@ -66,7 +68,9 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>{editing ? 'Editar Usuario' : 'Nuevo Usuario'}</DialogTitle>
+                    <TitleForm>
+                        {editing ? 'Editar Usuario' : 'Nuevo Usuario'}
+                    </TitleForm>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -74,7 +78,8 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
                     {/* ── Datos de Acceso ─────────────────────────────── */}
                     <FormSection title="Datos de Acceso">
                         <FormField
-                            label="Usuario *"
+                            label="Usuario"
+                            required={true}
                             value={form.username}
                             onChange={(v) => set('username', v)}
                             error={err('username')}
@@ -82,6 +87,7 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
                         />
                         <FormField
                             label="Correo Electrónico"
+                            required={false}
                             value={form.email}
                             onChange={(v) => set('email', v)}
                             error={err('email')}
@@ -89,7 +95,7 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
                             placeholder="Ej: usuario@correo.com"
                         />
                         <div className="space-y-1">
-                            <Label>Rol *</Label>
+                            <ReqLabel>Rol</ReqLabel>
                             <Select value={form.rol} onValueChange={(v) => set('rol', v)}>
                                 <SelectTrigger><SelectValue placeholder="Seleccionar rol" /></SelectTrigger>
                                 <SelectContent>
@@ -102,7 +108,7 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
                         </div>
                         {editing && (
                             <div className="space-y-1">
-                                <Label>Estado</Label>
+                                <ReqLabel>Estado</ReqLabel>
                                 <Select value={form.estado} onValueChange={(v) => set('estado', v)}>
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
@@ -117,12 +123,12 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
 
                     {/* ── Datos Personales ────────────────────────────── */}
                     <FormSection title="Datos Personales">
-                        <FormField label="Primer Nombre *"    value={form.primer_nombre}    onChange={(v) => set('primer_nombre', v)}    error={err('primer_nombre')}    placeholder="Ej: Juan" />
-                        <FormField label="Segundo Nombre"     value={form.segundo_nombre}   onChange={(v) => set('segundo_nombre', v)}   error={err('segundo_nombre')}   placeholder="Ej: Carlos" />
-                        <FormField label="Apellido Paterno *" value={form.apellido_paterno} onChange={(v) => set('apellido_paterno', v)} error={err('apellido_paterno')} placeholder="Ej: García" />
-                        <FormField label="Apellido Materno"   value={form.apellido_materno} onChange={(v) => set('apellido_materno', v)} error={err('apellido_materno')} placeholder="Ej: López" />
+                        <FormField label="Primer Nombre"    required={true}  value={form.primer_nombre}    onChange={(v) => set('primer_nombre', v)}    error={err('primer_nombre')}    placeholder="Ej: Juan" />
+                        <FormField label="Segundo Nombre"   required={false} value={form.segundo_nombre}   onChange={(v) => set('segundo_nombre', v)}   error={err('segundo_nombre')}   placeholder="Ej: Carlos" />
+                        <FormField label="Apellido Paterno" required={true}  value={form.apellido_paterno} onChange={(v) => set('apellido_paterno', v)} error={err('apellido_paterno')} placeholder="Ej: García" />
+                        <FormField label="Apellido Materno" required={false} value={form.apellido_materno} onChange={(v) => set('apellido_materno', v)} error={err('apellido_materno')} placeholder="Ej: López" />
                         <div className="space-y-1">
-                            <Label>Género</Label>
+                            <OptLabel>Género</OptLabel>
                             <Select value={form.genero} onValueChange={(v) => set('genero', v)}>
                                 <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                                 <SelectContent>
@@ -131,13 +137,13 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
                                 </SelectContent>
                             </Select>
                         </div>
-                        <FormField label="Fecha de Nacimiento" value={form.fecha_nacimiento} onChange={(v) => set('fecha_nacimiento', v)} type="date" />
+                        <FormField label="Fecha de Nacimiento" required={false} value={form.fecha_nacimiento} onChange={(v) => set('fecha_nacimiento', v)} type="date" />
                     </FormSection>
 
                     {/* ── Documento de Identidad ──────────────────────── */}
                     <FormSection title="Documento de Identidad">
                         <div className="space-y-1">
-                            <Label>Tipo de Documento *</Label>
+                            <ReqLabel>Tipo de Documento</ReqLabel>
                             <Select value={form.tipo_doc} onValueChange={(v) => set('tipo_doc', v)}>
                                 <SelectTrigger><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger>
                                 <SelectContent>
@@ -149,7 +155,8 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
                             {err('tipo_doc') && <p className="text-xs text-red-500">{err('tipo_doc')}</p>}
                         </div>
                         <FormField
-                            label="Número de Documento *"
+                            label="Número de Documento"
+                            required={true}
                             value={form.doc_numero}
                             onChange={(v) => set('doc_numero', v)}
                             error={err('doc_numero')}
@@ -159,8 +166,8 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
 
                     {/* ── Contacto ────────────────────────────────────── */}
                     <FormSection title="Contacto">
-                        <FormField label="Teléfono"  value={form.telefono}  onChange={(v) => set('telefono', v)}  placeholder="Ej: 987654321" />
-                        <FormField label="Dirección" value={form.direccion} onChange={(v) => set('direccion', v)} placeholder="Ej: Av. Los Pinos 123" />
+                        <FormField label="Teléfono"  required={false} value={form.telefono}  onChange={(v) => set('telefono', v)}  placeholder="Ej: 987654321" />
+                        <FormField label="Dirección" required={false} value={form.direccion} onChange={(v) => set('direccion', v)} placeholder="Ej: Av. Los Pinos 123" />
                     </FormSection>
 
                     <DialogFooter>

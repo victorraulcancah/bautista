@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -97,20 +98,24 @@ export default function AperturaFormModal({ open, onClose, editing, onSave, apiE
                         <div className="space-y-1">
                             <Label>Estado</Label>
                             <Select value={form.estado} onValueChange={(v) => set('estado', v)}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectTrigger className="bg-[#00a65a] text-white [&>svg]:text-white"><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="1">Activo</SelectItem>
-                                    <SelectItem value="0">Cerrado</SelectItem>
+                                    <SelectItem value="1" className="bg-[#00a65a] text-white focus:bg-[#008d4c] focus:text-white">Activo</SelectItem>
+                                    <SelectItem value="0" className="bg-[#00a65a] text-white focus:bg-[#008d4c] focus:text-white">Cerrado</SelectItem>
                                 </SelectContent>
                             </Select>
                             {err('estado') && <p className="text-xs text-red-500">{err('estado')}</p>}
                         </div>
                     )}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-                        <Button type="submit" disabled={processing} className="bg-[#00a65a] hover:bg-[#008d4c] text-white">
+                    <DialogFooter className="flex-col gap-2 sm:flex-col">
+                        <Button type="submit" disabled={processing} className="w-full bg-[#00a65a] hover:bg-[#008d4c] text-white">
+                            <Save className="h-4 w-4 mr-2" />
                             {processing ? 'Guardando...' : 'Guardar'}
+                        </Button>
+                        <Button type="button" variant="destructive" className="w-full" onClick={onClose}>
+                            <X className="h-4 w-4 mr-2" />
+                            Cerrar
                         </Button>
                     </DialogFooter>
                 </form>

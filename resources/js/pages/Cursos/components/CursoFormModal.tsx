@@ -1,130 +1,81 @@
+import { useEffect, useState } from 'react';
+import { Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import TitleForm from '@/components/TitleForm';
-import type { Curso, CursoFormData, NivelOption, GradoOption } from '../hooks/useCursos';
+import api from '@/lib/api';
+import type { Curso, CursoFormData, NivelOption } from '../hooks/useCursos';
 import { useCursoForm } from '../hooks/useCursoForm';
+
+type CursoOption = { curso_id: number; nombre: string };
 
 type Props = {
     open:        boolean;
     onClose:     () => void;
     editing:     Curso | null;
     niveles:     NivelOption[];
-    grados:      GradoOption[];
     defaults?:   Partial<CursoFormData>;
     onSave:      (data: CursoFormData) => Promise<void>;
     apiErrors:   Record<string, string[]>;
     clearErrors: () => void;
 };
 
-export default function CursoFormModal({ open, onClose, editing, niveles, grados, defaults, onSave, apiErrors, clearErrors }: Props) {
+export default function CursoFormModal({ open, onClose, editing, niveles, defaults, onSave, apiErrors, clearErrors }: Props) {
     const { form, set, processing, handleSubmit } = useCursoForm({ editing, open, defaults, onSave, onClose, clearErrors });
+    const [cursoOpts, setCursoOpts] = useState<CursoOption[]>([]);
+
+    const nivelNombre = niveles.find(n => n.nivel_id.toString() === form.nivel_academico_id)?.nombre_nivel || '';
+
+    useEffect(() => {
+        if (!open || !form.nivel_academico_id) { setCursoOpts([]); return; }
+        api.get('/cursos', { params: { nivel_academico_id: form.nivel_academico_id, per_page: 500 } })
+            .then((r) => setCursoOpts(r.data.data ?? []))
+            .catch(() => setCursoOpts([]));
+    }, [open, form.nivel_academico_id]);
 
     const err = (key: keyof CursoFormData) => apiErrors[key]?.[0];
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-sm">
                 <DialogHeader>
-                    <DialogTitle>{editing ? 'Editar Curso' : 'Nuevo Curso'}</DialogTitle>
+                    <DialogTitle>{editing ? 'Editar Curso' : 'Agregar Curso'}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <TitleForm>Datos del Curso</TitleForm>
-
-                    {/* Nombre */}
                     <div className="space-y-1">
-                        <label className="text-sm font-medium flex items-center gap-1">
-                            <span className="h-2 w-2 rounded-full bg-rose-700 inline-block" />
-                            Nombre
-                        </label>
+                        <label className="text-sm font-medium uppercase">Nivel Académico:</label>
                         <input
                             type="text"
-                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="flex h-9 w-full rounded-md border border-input bg-gray-100 px-3 py-1 text-sm uppercase"
+                            value={nivelNombre}
+                            disabled
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium uppercase">Curso:</label>
+                        <select
+                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             value={form.nombre}
                             onChange={(e) => set('nombre', e.target.value)}
-                            placeholder="Ej: Matemáticas"
                             required
-                        />
+                        >
+                            <option value="">-- Seleccionar --</option>
+                            {cursoOpts.map((c) => (
+                                <option key={c.curso_id} value={c.nombre}>{c.nombre}</option>
+                            ))}
+                        </select>
                         {err('nombre') && <p className="text-xs text-red-500">{err('nombre')}</p>}
                     </div>
 
-                    {/* Descripción */}
-                    <div className="space-y-1">
-                        <label className="text-sm font-medium flex items-center gap-1">
-                            <span className="h-2 w-2 rounded-full bg-cyan-600 inline-block" />
-                            Descripción
-                        </label>
-                        <textarea
-                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            value={form.descripcion}
-                            onChange={(e) => set('descripcion', e.target.value)}
-                            placeholder="Descripción del curso..."
-                        />
-                        {err('descripcion') && <p className="text-xs text-red-500">{err('descripcion')}</p>}
-                    </div>
-
-                    {/* Nivel / Grado */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <label className="text-sm font-medium flex items-center gap-1">
-                                <span className="h-2 w-2 rounded-full bg-cyan-600 inline-block" />
-                                Nivel Académico
-                            </label>
-                            <select
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                value={form.nivel_academico_id}
-                                onChange={(e) => set('nivel_academico_id', e.target.value)}
-                            >
-                                <option value="">Sin nivel</option>
-                                {niveles.map((n) => (
-                                    <option key={n.nivel_id} value={n.nivel_id.toString()}>{n.nombre_nivel}</option>
-                                ))}
-                            </select>
-                            {err('nivel_academico_id') && <p className="text-xs text-red-500">{err('nivel_academico_id')}</p>}
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-sm font-medium flex items-center gap-1">
-                                <span className="h-2 w-2 rounded-full bg-cyan-600 inline-block" />
-                                Grado Académico
-                            </label>
-                            <select
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                value={form.grado_academico}
-                                onChange={(e) => set('grado_academico', e.target.value)}
-                            >
-                                <option value="">Sin grado</option>
-                                {grados.map((g) => (
-                                    <option key={g.grado_id} value={g.grado_id.toString()}>{g.nombre_grado}</option>
-                                ))}
-                            </select>
-                            {err('grado_academico') && <p className="text-xs text-red-500">{err('grado_academico')}</p>}
-                        </div>
-                    </div>
-
-                    {/* Estado (solo edición) */}
-                    {editing && (
-                        <div className="space-y-1">
-                            <label className="text-sm font-medium flex items-center gap-1">
-                                <span className="h-2 w-2 rounded-full bg-cyan-600 inline-block" />
-                                Estado
-                            </label>
-                            <select
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                value={form.estado}
-                                onChange={(e) => set('estado', e.target.value)}
-                            >
-                                <option value="1">Activo</option>
-                                <option value="0">Inactivo</option>
-                            </select>
-                            {err('estado') && <p className="text-xs text-red-500">{err('estado')}</p>}
-                        </div>
-                    )}
-
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-                        <Button type="submit" disabled={processing} className="bg-[#00a65a] hover:bg-[#008d4c] text-white">
+                    <DialogFooter className="flex-col gap-2 sm:flex-col">
+                        <Button type="submit" disabled={processing} className="w-full bg-[#00a65a] hover:bg-[#008d4c] text-white">
+                            <Save className="h-4 w-4 mr-2" />
                             {processing ? 'Guardando...' : 'Guardar'}
+                        </Button>
+                        <Button type="button" variant="destructive" onClick={onClose} className="w-full">
+                            <X className="h-4 w-4 mr-2" />
+                            Cerrar
                         </Button>
                     </DialogFooter>
                 </form>

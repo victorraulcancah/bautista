@@ -1,5 +1,5 @@
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { ReqLabel, OptLabel } from './FormLabels';
 
 type Props = {
     label:        string;
@@ -8,12 +8,15 @@ type Props = {
     error?:       string;
     type?:        string;
     placeholder?: string;
+    required?:    boolean;
 };
 
-export default function FormField({ label, value, onChange, error, type = 'text', placeholder }: Props) {
+export default function FormField({ label, value, onChange, error, type = 'text', placeholder, required }: Props) {
+    const LabelComponent = required ? ReqLabel : OptLabel;
+
     return (
         <div className="space-y-1">
-            <Label>{label}</Label>
+            <LabelComponent>{label}</LabelComponent>
             <Input
                 type={type}
                 value={value}

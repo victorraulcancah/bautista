@@ -6,7 +6,7 @@ import pymysql
 import pymysql.cursors
 
 OLD_DB = dict(host="127.0.0.1", port=3306, user="root", password="", db="edu_bautista",  charset="utf8mb4")
-NEW_DB = dict(host="127.0.0.1", port=3306, user="root", password="", db="edu_bautista2", charset="utf8mb4")
+NEW_DB = dict(host="127.0.0.1", port=3306, user="root", password="", db="edu_bautista3", charset="utf8mb4")
 
 NOW = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
