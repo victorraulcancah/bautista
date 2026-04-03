@@ -117,10 +117,12 @@ def migrate_users(old, new, dry_run: bool) -> dict:
             hashed = make_bcrypt(plain) if not dry_run else "DRY_RUN_HASH"
 
             rol_nombre = ROL_MAP.get(r.get("id_rol"))
-            if not rol_nombre:
-                log.err(f"  id_rol={r.get('id_rol')} sin mapeo para username={username} → usuario sin rol")
-
             rol_id = roles_map.get(rol_nombre) if rol_nombre else None
+
+            if not rol_id:
+                log.err(f"  id_rol={r.get('id_rol')} sin mapeo para username={username} → omitido (rol_id NOT NULL)")
+                skipped += 1
+                continue
 
             sql = """
                 INSERT INTO users

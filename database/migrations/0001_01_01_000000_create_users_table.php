@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('institucion_educativa', function (Blueprint $table) {
@@ -26,15 +23,27 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 50)->unique()->comment('administrador, docente, estudiante, padre_familia, madre_familia, apoderado, psicologo');
+            $table->string('guard_name', 20)->default('web');
+            $table->timestamps();
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('insti_id')->nullable();
             $table->foreign('insti_id')->references('insti_id')->on('institucion_educativa')->nullOnDelete();
+            $table->unsignedBigInteger('rol_id');
+            $table->foreign('rol_id')->references('id')->on('roles')->restrictOnDelete();
             $table->string('username')->unique()->comment('DNI o usuario de acceso');
             $table->string('name')->nullable();
             $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->text('two_factor_secret')->nullable();
+            $table->text('two_factor_recovery_codes')->nullable();
+            $table->timestamp('two_factor_confirmed_at')->nullable();
             $table->char('estado', 1)->default('1')->comment('1=activo, 0=inactivo, 5=bloqueado');
             $table->rememberToken();
             $table->timestamps();
@@ -56,14 +65,12 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('roles');
         Schema::dropIfExists('institucion_educativa');
     }
 };

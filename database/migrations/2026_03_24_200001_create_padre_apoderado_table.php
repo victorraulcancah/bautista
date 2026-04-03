@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->unsignedBigInteger('insti_id')->nullable();
             $table->foreign('insti_id')->references('insti_id')->on('institucion_educativa')->nullOnDelete();
+            $table->string('parentesco', 20)->nullable()->comment('padre | madre | apoderado');
             $table->string('nombres', 200)->nullable();
             $table->string('apellidos', 200)->nullable();
             $table->string('direccion', 200)->nullable();

@@ -15,7 +15,9 @@ return new class extends Migration
         Schema::create('estudiante_contacto', function (Blueprint $table) {
             $table->unsignedBigInteger('estudiante_id');
             $table->unsignedBigInteger('contacto_id');
+            $table->decimal('mensualidad', 10, 2)->default(0);
             $table->primary(['estudiante_id', 'contacto_id']);
+            $table->timestamps();
         });
 
         // Pagos por alumno registrados por el padre/apoderado pagador

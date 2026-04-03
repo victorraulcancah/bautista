@@ -154,16 +154,20 @@ def migrate_padre_apoderado(old, new, user_id_map: dict, dry_run: bool):
             if not new_user_id and r.get("id_usuario"):
                 log.err(f"  id_contacto={r['id_contacto']}: id_usuario={r.get('id_usuario')} no encontrado → se guarda con user_id=NULL")
 
+            # Derivar parentesco del id_rol legacy: 3=padre, 4=apoderado, 5=madre
+            PARENTESCO_MAP = {3: "padre", 4: "apoderado", 5: "madre"}
+            parentesco = PARENTESCO_MAP.get(r.get("id_rol"))
+
             sql = """
                 INSERT INTO padre_apoderado
-                    (id_contacto, user_id, insti_id, nombres, apellidos,
+                    (id_contacto, user_id, insti_id, parentesco, nombres, apellidos,
                      direccion, departamento_id, provincia_id, distrito_id,
                      telefono_1, telefono_2, tipo_doc, numero_doc, genero,
                      fecha_nacimiento, nacionalidad, estado_civil, es_pagador,
                      email_contacto, estado, foto_perfil,
                      facebook, instagram, tiktok, created_at, updated_at)
                 VALUES
-                    (%(id_contacto)s, %(user_id)s, %(insti_id)s, %(nombres)s, %(apellidos)s,
+                    (%(id_contacto)s, %(user_id)s, %(insti_id)s, %(parentesco)s, %(nombres)s, %(apellidos)s,
                      %(direccion)s, %(departamento_id)s, %(provincia_id)s, %(distrito_id)s,
                      %(telefono_1)s, %(telefono_2)s, %(tipo_doc)s, %(numero_doc)s, %(genero)s,
                      %(fecha_nacimiento)s, %(nacionalidad)s, %(estado_civil)s, %(es_pagador)s,
@@ -174,6 +178,7 @@ def migrate_padre_apoderado(old, new, user_id_map: dict, dry_run: bool):
                 "id_contacto":    r["id_contacto"],
                 "user_id":        new_user_id or None,
                 "insti_id":       r.get("id_insti"),
+                "parentesco":     parentesco,
                 "nombres":        r.get("nombres"),
                 "apellidos":      r.get("apellidos"),
                 "direccion":      r.get("direccion"),
