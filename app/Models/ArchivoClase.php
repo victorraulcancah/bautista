@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ArchivoClase extends Model
 {
+    protected $table = 'archivos_clase';
     protected $primaryKey = 'archivo_id';
 
     protected $fillable = [

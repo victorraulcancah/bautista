@@ -11,7 +11,7 @@ class Matricula extends Model
     protected $primaryKey = 'matricula_id';
 
     protected $fillable = [
-        'apertura_id', 'estudiante_id', 'seccion_id', 'anio', 'estado',
+        'apertura_id', 'estu_id', 'seccion_id', 'anio', 'estado',
     ];
 
     public function apertura(): BelongsTo
@@ -21,7 +21,7 @@ class Matricula extends Model
 
     public function estudiante(): BelongsTo
     {
-        return $this->belongsTo(Estudiante::class, 'estudiante_id', 'estu_id');
+        return $this->belongsTo(Estudiante::class, 'estu_id', 'estu_id');
     }
 
     public function seccion(): BelongsTo

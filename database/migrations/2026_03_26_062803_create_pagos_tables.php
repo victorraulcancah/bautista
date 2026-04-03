@@ -13,10 +13,10 @@ return new class extends Migration
     {
         // Relación alumno ↔ padre/apoderado
         Schema::create('estudiante_contacto', function (Blueprint $table) {
-            $table->unsignedBigInteger('estudiante_id');
+            $table->unsignedBigInteger('estu_id');
             $table->unsignedBigInteger('contacto_id');
             $table->decimal('mensualidad', 10, 2)->default(0);
-            $table->primary(['estudiante_id', 'contacto_id']);
+            $table->primary(['estu_id', 'contacto_id']);
             $table->timestamps();
         });
 
@@ -24,7 +24,7 @@ return new class extends Migration
         Schema::create('pagos', function (Blueprint $table) {
             $table->id('pag_id');
             $table->unsignedBigInteger('insti_id')->nullable();
-            $table->unsignedBigInteger('estudiante_id');           // FK estudiantes.estu_id
+            $table->unsignedBigInteger('estu_id');           // FK estudiantes.estu_id
             $table->unsignedBigInteger('contacto_id')->nullable(); // FK padre_apoderado.id_contacto
             $table->year('pag_anual');
             $table->string('pag_mes', 20);                         // ENERO … DICIEMBRE

@@ -24,9 +24,14 @@ class ActividadCurso extends Model
         'fecha_cierre' => 'datetime',
     ];
 
-    public function tipo(): BelongsTo
+    public function tipoActividad(): BelongsTo
     {
         return $this->belongsTo(TipoActividad::class, 'id_tipo_actividad', 'tipo_id');
+    }
+
+    public function clase(): BelongsTo
+    {
+        return $this->belongsTo(Clase::class, 'id_clase_curso', 'clase_id');
     }
 
     public function cuestionario(): HasOne

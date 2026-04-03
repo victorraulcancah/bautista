@@ -3,6 +3,7 @@ import { ChevronLeft, FileText, Download, Upload, PlayCircle, ClipboardList, Che
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 
 export default function ClaseVer({ claseId }: { claseId: number }) {
     const [clase, setClase] = useState<any>(null);
@@ -40,7 +41,8 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
     if (loading) return <div className="p-10 text-center font-black animate-pulse text-indigo-600">Preparando el aula virtual...</div>;
 
     return (
-        <div className="min-h-screen bg-[#FDFDFF] p-4 md:p-10 space-y-10 font-sans">
+        <AppSidebarLayout>
+            <div className="min-h-screen bg-[#FDFDFF] p-4 md:p-10 space-y-10 font-sans">
             <Head title={clase.titulo} />
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -145,5 +147,6 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
 
             </div>
         </div>
+    </AppSidebarLayout>
     );
 }

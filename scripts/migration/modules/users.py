@@ -222,8 +222,8 @@ def migrate_estudiante_contacto(old, new, dry_run: bool):
     log.info(f"{len(rows)} relaciones estudiante-contacto encontradas")
 
     with new.cursor() as c:
-        c.execute("SELECT estudiante_id, contacto_id FROM estudiante_contacto")
-        existing = {(r["estudiante_id"], r["contacto_id"]) for r in c.fetchall()}
+        c.execute("SELECT estu_id, contacto_id FROM estudiante_contacto")
+        existing = {(r["estu_id"], r["contacto_id"]) for r in c.fetchall()}
 
     with new.cursor() as c:
         c.execute("SELECT estu_id, mensualidad FROM estudiantes")
@@ -257,10 +257,10 @@ def migrate_estudiante_contacto(old, new, dry_run: bool):
 
             if not dry_run:
                 c.execute(
-                    "INSERT IGNORE INTO estudiante_contacto (estudiante_id, contacto_id, mensualidad, created_at, updated_at) VALUES (%s, %s, %s, NOW(), NOW())",
+                    "INSERT IGNORE INTO estudiante_contacto (estu_id, contacto_id, mensualidad, created_at, updated_at) VALUES (%s, %s, %s, NOW(), NOW())",
                     (estu_id, cont_id, mensualidad),
                 )
-            log.ok(f"  estudiante_id={estu_id} ↔ contacto_id={cont_id} (mensualidad={mensualidad})")
+            log.ok(f"  estu_id={estu_id} ↔ contacto_id={cont_id} (mensualidad={mensualidad})")
             inserted += 1
 
     if not dry_run:

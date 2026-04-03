@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActividadCurso;
 use App\Models\AlternativaPregunta;
 use App\Models\Cuestionario;
+use App\Models\Estudiante;
 use App\Models\ExamenIniciado;
 use App\Models\NotaActividad;
 use App\Models\PreguntaCuestionario;
@@ -23,21 +24,24 @@ class ExamenResolucionApiController extends Controller
     {
         $request->validate([
             'actividad_id' => 'required|integer',
-            'estu_id'      => 'required|integer',
         ]);
+
+        $userId = auth()->id();
+        $estudiante = Estudiante::where('user_id', $userId)->firstOrFail();
+        $estuId = $estudiante->estu_id;
 
         $actividad = ActividadCurso::findOrFail($request->actividad_id);
         $cuestionario = Cuestionario::where('id_actividad', $actividad->actividad_id)->firstOrFail();
 
         // Check if there's an active session
-        $intento = ExamenIniciado::where('estu_id', $request->estu_id)
+        $intento = ExamenIniciado::where('estu_id', $estuId)
             ->where('actividad_id', $request->actividad_id)
             ->where('estado', '1')
             ->first();
 
         if (!$intento) {
             // Check if already finished
-            $finalizado = ExamenIniciado::where('estu_id', $request->estu_id)
+            $finalizado = ExamenIniciado::where('estu_id', $estuId)
                 ->where('actividad_id', $request->actividad_id)
                 ->where('estado', '0')
                 ->first();
@@ -49,7 +53,7 @@ class ExamenResolucionApiController extends Controller
             // Create new session
             $duracionMinutos = $cuestionario->duracion ?? 60;
             $intento = ExamenIniciado::create([
-                'estu_id' => $request->estu_id,
+                'estu_id' => $estuId,
                 'actividad_id' => $request->actividad_id,
                 'fecha_inicio' => now(),
                 'fecha_limite' => now()->addMinutes($duracionMinutos),

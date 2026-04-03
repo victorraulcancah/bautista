@@ -44,10 +44,13 @@ Route::middleware(['auth.token'])->group(function () {
     ]))->name('matriculas.nivel');
     Route::get('/cursos/{id}/contenido',  fn (int $id) => Inertia::render('CursoContenido/index', ['cursoId' => $id]))->name('cursos.contenido');
     Route::get('/examenes',               fn () => Inertia::render('Examenes/index'))->name('examenes.index');
-    Route::get('/examenes/{id}/resolver', fn (int $id, Request $request) => Inertia::render('Examenes/Resolver', [
-        'actividadId' => $id,
-        'estudianteId' => $request->user()->id 
-    ]))->name('examenes.resolver');
+    Route::get('/examenes/{id}/resolver', function (int $id) {
+        $estuId = \App\Models\Estudiante::where('user_id', auth()->id())->value('estu_id');
+        return Inertia::render('Examenes/Resolver', [
+            'actividadId' => $id,
+            'estudianteId' => $estuId
+        ]);
+    })->name('examenes.resolver');
 
     Route::prefix('alumno')->name('alumno.')->middleware('check.role:estudiante')->group(function () {
         Route::get('/dashboard', fn () => Inertia::render('PortalAlumno/Dashboard'))->name('dashboard');
@@ -85,6 +88,11 @@ Route::middleware(['auth.token'])->group(function () {
                 'puzzle' => $puzzle
             ]);
         })->name('puzzles.ver');
+
+        // Legacy compatibility routes
+        Route::get('/qr',         fn () => Inertia::render('PortalAlumno/QR'))->name('qr');
+        Route::get('/profesores', fn () => Inertia::render('PortalAlumno/Profesores'))->name('profesores');
+        Route::get('/asistencia', fn () => Inertia::render('PortalAlumno/Asistencia'))->name('asistencia');
     });
 
     Route::prefix('docente')->name('docente.')->middleware('check.role:docente')->group(function () {

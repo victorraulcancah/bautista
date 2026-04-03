@@ -71,13 +71,13 @@ def migrate_pagos(old, new, dry_run: bool):
 
             sql = """
                 INSERT INTO pagos
-                    (pag_id, insti_id, estudiante_id, contacto_id,
+                    (pag_id, insti_id, estu_id, contacto_id,
                      pag_anual, pag_mes, pag_monto,
                      pag_nombre1, pag_otro1, pag_nombre2, pag_otro2,
                      total, pag_notifica, pag_fecha, estatus,
                      created_at, updated_at)
                 VALUES
-                    (%(pag_id)s, %(insti_id)s, %(estudiante_id)s, %(contacto_id)s,
+                    (%(pag_id)s, %(insti_id)s, %(estu_id)s, %(contacto_id)s,
                      %(pag_anual)s, %(pag_mes)s, %(pag_monto)s,
                      %(pag_nombre1)s, %(pag_otro1)s, %(pag_nombre2)s, %(pag_otro2)s,
                      %(total)s, %(pag_notifica)s, %(pag_fecha)s, %(estatus)s,
@@ -86,7 +86,7 @@ def migrate_pagos(old, new, dry_run: bool):
             params = {
                 "pag_id":       r["pag_id"],
                 "insti_id":     insti_id,
-                "estudiante_id":r.get("id_estudiante"),
+                "estu_id":      r.get("id_estudiante"),
                 "contacto_id":  contacto_id,
                 "pag_anual":    r.get("pag_anual"),
                 "pag_mes":      pag_mes,

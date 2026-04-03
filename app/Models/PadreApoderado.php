@@ -62,7 +62,7 @@ class PadreApoderado extends Model
             Estudiante::class,
             'estudiante_contacto',
             'contacto_id',
-            'estudiante_id',
+            'estu_id',
             'id_contacto',
             'estu_id',
         )->withPivot('mensualidad')->withTimestamps();

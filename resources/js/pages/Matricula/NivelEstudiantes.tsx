@@ -8,9 +8,9 @@ import { useOptions } from '@/hooks/useOptions';
 import MatricularModal from './components/MatricularModal';
 import HistorialModal from './components/HistorialModal';
 import ResetUserModal from './components/ResetUserModal';
-import EstudianteFormModal from '../Estudiantes/components/EstudianteFormModal';
+import EstudianteFormModal from '../GestionAlumnos/components/EstudianteFormModal';
 import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
-import type { Estudiante, EstudianteFormData } from '../Estudiantes/hooks/useEstudiantes';
+import type { Estudiante, EstudianteFormData } from '../GestionAlumnos/hooks/useEstudiantes';
 import type {
     Matricula,
     MatriculaApertura,

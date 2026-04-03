@@ -1,6 +1,7 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { Trophy, Clock, Play, HelpCircle } from 'lucide-react';
+import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 
 interface Puzzle {
     actividad_id: number;
@@ -18,7 +19,8 @@ interface Props {
 
 const PuzzleIndex = ({ puzzles }: Props) => {
     return (
-        <div className="min-h-screen bg-gray-50/50 p-6">
+        <AppSidebarLayout>
+            <div className="min-h-screen bg-gray-50/50 p-6">
             <Head title="Mis Rompecabezas" />
             
             <div className="max-w-7xl mx-auto">
@@ -88,6 +90,7 @@ const PuzzleIndex = ({ puzzles }: Props) => {
                 )}
             </div>
         </div>
+    </AppSidebarLayout>
     );
 };
 

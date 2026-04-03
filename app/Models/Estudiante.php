@@ -62,7 +62,7 @@ class Estudiante extends Model
         return $this->belongsToMany(
             PadreApoderado::class,
             'estudiante_contacto',
-            'estudiante_id',
+            'estu_id',
             'contacto_id',
             'estu_id',
             'id_contacto',
@@ -71,7 +71,7 @@ class Estudiante extends Model
 
     public function pagos(): HasMany
     {
-        return $this->hasMany(Pago::class, 'estudiante_id', 'estu_id');
+        return $this->hasMany(Pago::class, 'estu_id', 'estu_id');
     }
 
     public function getNombreCompletoAttribute(): string

@@ -84,7 +84,7 @@ def migrate_matriculas(old, new, apertura_id_map: dict, dry_run: bool):
     Mapeo de columnas:
       matricula_id     → matricula_id
       id_apertura_mtr  → apertura_id
-      id_estudiante    → estudiante_id
+      id_estudiante    → estu_id
       seccion          → seccion_id
       estado           → estado
       (calculado)      → anio           (desde apertura_id_map)
@@ -134,16 +134,16 @@ def migrate_matriculas(old, new, apertura_id_map: dict, dry_run: bool):
 
             sql = """
                 INSERT INTO matriculas
-                    (matricula_id, apertura_id, estudiante_id, seccion_id,
+                    (matricula_id, apertura_id, estu_id, seccion_id,
                      anio, estado, created_at, updated_at)
                 VALUES
-                    (%(matricula_id)s, %(apertura_id)s, %(estudiante_id)s,
+                    (%(matricula_id)s, %(apertura_id)s, %(estu_id)s,
                      %(seccion_id)s, %(anio)s, %(estado)s, %(ts)s, %(ts)s)
             """
             params = {
                 "matricula_id": mat_id,
                 "apertura_id":  old_apertura,
-                "estudiante_id":estu_id,
+                "estu_id":      estu_id,
                 "seccion_id":   r.get("seccion"),
                 "anio":         anio,
                 "estado":       r.get("estado") or "1",

@@ -8,7 +8,6 @@ import api from '@/lib/api';
 import AccesosRapidos from './components/AccesosRapidos';
 import NotificacionesPendientes from './components/NotificacionesPendientes';
 import StatsCards from './components/StatsCards';
-import AlertasHoy from './components/AlertasHoy';
 import type { DashboardStats } from './hooks/useDashboard';
 
 const breadcrumbs: BreadcrumbItem[] = [

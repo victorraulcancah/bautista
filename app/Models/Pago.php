@@ -11,7 +11,7 @@ class Pago extends Model
 
     protected $fillable = [
         'insti_id',
-        'estudiante_id',
+        'estu_id',
         'contacto_id',
         'pag_anual',
         'pag_mes',
@@ -37,7 +37,7 @@ class Pago extends Model
 
     public function estudiante(): BelongsTo
     {
-        return $this->belongsTo(Estudiante::class, 'estudiante_id', 'estu_id');
+        return $this->belongsTo(Estudiante::class, 'estu_id', 'estu_id');
     }
 
     public function contacto(): BelongsTo

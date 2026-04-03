@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Timer, Send, RefreshCw, Star, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 
 interface Props {
     puzzle: {
@@ -47,7 +48,8 @@ const PuzzleVer = ({ puzzle }: Props) => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 p-4 md:p-8">
+        <AppSidebarLayout>
+            <div className="min-h-screen bg-slate-50 p-4 md:p-8">
             <Head title={`Resolviendo: ${puzzle.nombre_actividad}`} />
             
             <div className="max-w-4xl mx-auto">
@@ -128,6 +130,7 @@ const PuzzleVer = ({ puzzle }: Props) => {
                 </div>
             </div>
         </div>
+    </AppSidebarLayout>
     );
 };
 

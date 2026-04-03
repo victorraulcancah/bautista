@@ -150,6 +150,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('check.role:estudiante')->group(function () {
         Route::get('alumno/dashboard', [AlumnoApiController::class, 'dashboard']);
         Route::get('alumno/cursos', [AlumnoApiController::class, 'cursos']);
+        Route::get('alumno/curso/{id}', [AlumnoApiController::class, 'cursoDetalle']);
+        Route::get('alumno/asistencia', [AlumnoApiController::class, 'asistencia']);
+        Route::get('alumno/clase/{id}', [AlumnoApiController::class, 'claseDetalle']);
+        Route::get('alumno/profesores', [AlumnoApiController::class, 'profesores']);
         Route::post('alumno/actividad/{id}/entregar', [AlumnoApiController::class, 'entregarActividad']);
         Route::post('alumno/dibujo/guardar', [ActividadApiController::class, 'guardarDibujo']);
     });

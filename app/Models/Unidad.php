@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Unidad extends Model
 {
+    protected $table = 'unidades';
     protected $primaryKey = 'unidad_id';
 
     protected $fillable = [
-        'docente_curso_id', 'titulo', 'descripcion', 'orden', 'estado',
+        'curso_id', 'titulo', 'descripcion', 'orden', 'estado',
     ];
 
-    public function docenteCurso(): BelongsTo
+    public function curso(): BelongsTo
     {
-        return $this->belongsTo(DocenteCurso::class, 'docente_curso_id', 'docen_curso_id');
+        return $this->belongsTo(Curso::class, 'curso_id', 'curso_id');
     }
 
     public function clases(): HasMany

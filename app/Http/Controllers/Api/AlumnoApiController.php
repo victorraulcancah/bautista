@@ -35,12 +35,12 @@ class AlumnoApiController extends Controller
             return response()->json(['message' => 'No se encontró matrícula activa.'], 404);
         }
 
-        $seccionId = $matricula->seccion;
-        $aperturaId = $matricula->id_apertura_mtr;
+        $seccionId = $matricula->seccion_id;
+        $aperturaId = $matricula->apertura_id;
 
         // Active courses for this section
         $cursosCount = DocenteCurso::where('seccion_id', $seccionId)
-            ->where('id_apertura', $aperturaId)
+            ->where('apertura_id', $aperturaId)
             ->count();
 
         // Next pending activities
@@ -112,8 +112,8 @@ class AlumnoApiController extends Controller
 
         if (!$matricula) return response()->json([]);
 
-        $docenteCursos = DocenteCurso::where('seccion_id', $matricula->seccion)
-            ->where('id_apertura', $matricula->id_apertura_mtr)
+        $docenteCursos = DocenteCurso::where('seccion_id', $matricula->seccion_id)
+            ->where('apertura_id', $matricula->apertura_id)
             ->with(['curso', 'docente.perfil'])
             ->get();
 
@@ -125,8 +125,16 @@ class AlumnoApiController extends Controller
      */
     public function cursoDetalle(Request $request, int $docenteCursoId)
     {
-        $unidades = Unidad::where('docente_curso_id', $docenteCursoId)
-            ->with(['clases'])
+        $dc = DocenteCurso::find($docenteCursoId);
+        if (!$dc) return response()->json([], 404);
+
+        $unidades = Unidad::where('curso_id', $dc->curso_id)
+            ->with([
+                'clases' => function ($q) {
+                    $q->orderBy('orden')
+                      ->with(['archivos', 'actividades.tipoActividad']);
+                }
+            ])
             ->orderBy('orden')
             ->get();
 
@@ -139,7 +147,7 @@ class AlumnoApiController extends Controller
     public function claseDetalle(Request $request, int $claseId)
     {
         $clase = Clase::where('clase_id', $claseId)
-            ->with(['unidad.docenteCurso', 'archivos', 'actividades.tipoActividad'])
+            ->with(['unidad.curso', 'archivos', 'actividades.tipoActividad'])
             ->firstOrFail();
 
         return response()->json($clase);
@@ -165,5 +173,78 @@ class AlumnoApiController extends Controller
         );
 
         return response()->json(['message' => 'Entregado con éxito.']);
+    }
+
+    /**
+     * Get attendance history for the logged-in student.
+     */
+    public function asistencia(Request $request)
+    {
+        $userId = $request->user()->id;
+        $estudiante = Estudiante::where('user_id', $userId)->first();
+
+        if (!$estudiante) {
+            return response()->json(['message' => 'No se encontró perfil de estudiante.'], 404);
+        }
+
+        $mes = $request->query('mes');
+        $anio = $request->query('anio');
+
+        $query = \App\Models\Asistencia::where('id_persona', $estudiante->estu_id)
+            ->where('tipo', 'E')
+            ->orderBy('fecha', 'desc');
+
+        if ($mes) {
+            $query->whereMonth('fecha', $mes);
+        }
+        if ($anio) {
+            $query->whereYear('fecha', $anio);
+        }
+
+        $logs = $query->limit(50)->get();
+
+        return response()->json($logs);
+    }
+
+    /**
+     * List teachers assigned to the student's current courses.
+     */
+    public function profesores(Request $request)
+    {
+        $userId = $request->user()->id;
+        $estudiante = Estudiante::where('user_id', $userId)->first();
+
+        if (!$estudiante) {
+            return response()->json(['message' => 'No se encontró perfil de estudiante.'], 404);
+        }
+
+        $matricula = Matricula::where('estu_id', $estudiante->estu_id)
+            ->where('estado', '1')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (!$matricula) {
+            return response()->json(['message' => 'No se encontró matrícula activa.'], 404);
+        }
+
+        $profesores = DocenteCurso::where('seccion_id', $matricula->seccion_id)
+            ->where('apertura_id', $matricula->apertura_id)
+            ->with(['docente.perfil', 'curso'])
+            ->get()
+            ->map(function ($dc) {
+                $perfil = $dc->docente->perfil;
+                return [
+                    'docente_id'   => $dc->docente_id,
+                    'nombres'      => trim(($perfil->primer_nombre ?? '') . ' ' . ($perfil->segundo_nombre ?? '')),
+                    'apellidos'    => trim(($perfil->apellido_paterno ?? '') . ' ' . ($perfil->apellido_materno ?? '')),
+                    'especialidad' => $dc->docente->especialidad ?? '—',
+                    'telefono'     => $perfil->telefono ?? '—',
+                    'curso'        => $dc->curso->nombre ?? '—',
+                    'foto'         => $perfil?->foto_perfil ? asset('storage/' . $perfil->foto_perfil) : null,
+                    'email'        => $dc->docente->user?->email ?? '—',
+                ];
+            });
+
+        return response()->json($profesores);
     }
 }
