@@ -56,4 +56,44 @@ class ActividadApiController extends Controller
     {
         return response()->json(TipoActividad::orderBy('tipo_id')->get());
     }
+
+    /** Guardar dibujo hecho en el Paint */
+    public function guardarDibujo(Request $request): JsonResponse
+    {
+        $request->validate([
+            'actividad_id' => 'required|exists:actividad_curso,actividad_id',
+            'image' => 'required|string', // Base64
+        ]);
+
+        $user = $request->user();
+        $student = \App\Models\Estudiante::where('user_id', $user->id)->first();
+        
+        if (!$student) {
+            return response()->json(['message' => 'Estudiante no encontrado'], 404);
+        }
+
+        $image = $request->input('image');
+        $image = str_replace('data:image/png;base64,', '', $image);
+        $image = str_replace(' ', '+', $image);
+        $imageData = base64_decode($image);
+
+        $fileName = 'dibujo_' . $user->id . '_' . time() . '.png';
+        $path = 'dibujos_alumnos/' . $fileName;
+
+        \Storage::disk('public')->put($path, $imageData);
+
+        // Record in database
+        \DB::table('archivos_actividad')->insert([
+            'id_actividad' => $request->input('actividad_id'),
+            'origen' => 'e',
+            'archivo' => $path,
+            'nombre_archivo' => 'Mi Dibujo.png',
+            'tipo_archivo' => 'png',
+            'estudiante' => $student->estu_id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Dibujo guardado con éxito', 'path' => $path]);
+    }
 }

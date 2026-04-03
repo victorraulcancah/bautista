@@ -2,6 +2,7 @@
 
 use App\Exceptions\UserInactiveException;
 use App\Http\Middleware\AuthenticateWithToken;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Auth\AuthenticationException;
@@ -30,6 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'auth.token' => AuthenticateWithToken::class,
+            'check.role' => \App\Http\Middleware\CheckRole::class,
+            // Nota: el alias 'role' de Spatie no se usa porque usa Auth::guard(null)->user()
+            // que falla en rutas API con sanctum. Usar 'check.role' en su lugar.
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -46,5 +50,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => 'No autenticado.'], 401);
             }
             return redirect()->route('login');
+        });
+
+        $exceptions->render(function (UnauthorizedException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'No tienes permiso para acceder a este recurso.'], 403);
+            }
+            // En web: redirigir al dashboard propio del rol en lugar de mostrar error 403
+            return redirect()->route('dashboard');
         });
     })->create();

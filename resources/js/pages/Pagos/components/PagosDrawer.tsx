@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { PlusCircle, Pencil, Trash2, Calendar, FileText, X, AlertCircle } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Calendar, FileText, X, AlertCircle, Receipt } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import api from '@/lib/api';
 import type { Pagador, Pago, PagoFormData, PagoUpdateData } from '../hooks/usePago';
 import PagoFormModal from './PagoFormModal';
+import VoucherModal from './VoucherModal';
 
 type Props = {
     open:     boolean;
@@ -26,6 +27,7 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
     const [filteredPagos, setFilteredPagos] = useState<Pago[]>([]);
     const [confirmGenerar, setConfirmGenerar] = useState(false);
     const [generando, setGenerando]   = useState(false);
+    const [voucherPagId, setVoucherPagId] = useState<number | null>(null);
 
     const cargar = useCallback(async () => {
         if (!pagador) return;
@@ -297,6 +299,15 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
+                                                        title="Ver comprobantes"
+                                                        className="text-amber-500 hover:text-amber-700 hover:bg-amber-50 h-7 w-7 p-0"
+                                                        onClick={() => setVoucherPagId(p.pag_id)}
+                                                    >
+                                                        <Receipt className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
                                                         className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 h-7 w-7 p-0"
                                                         onClick={() => openEdit(p)}
                                                     >
@@ -350,6 +361,13 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
                     clearErrors={() => setApiErrors({})}
                 />
             )}
+
+            {/* Modal de vouchers / comprobantes */}
+            <VoucherModal
+                open={voucherPagId !== null}
+                onClose={() => setVoucherPagId(null)}
+                pagId={voucherPagId}
+            />
 
             {/* Modal de confirmación para generar mensualidad */}
             <Dialog open={confirmGenerar} onOpenChange={setConfirmGenerar}>

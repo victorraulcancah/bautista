@@ -38,10 +38,10 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
             .then(() => loadContent());
     };
 
-    const addActividad = (claseId: number) => {
-        const nombre = prompt('Nombre de la actividad/tarea:');
+    const addActividad = (claseId: number, tipoId: number) => {
+        const nombre = prompt(tipoId === 3 ? 'Nombre del Cuestionario/Examen:' : 'Nombre de la actividad/tarea:');
         if (!nombre) return;
-        api.post('/docente/actividad', { id_clase_curso: claseId, nombre_actividad: nombre, tipo_id: 2 }) // default to task
+        api.post('/docente/actividad', { id_clase_curso: claseId, nombre_actividad: nombre, tipo_id: tipoId })
             .then(() => loadContent());
     };
 
@@ -118,8 +118,11 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
                                                 </div>
                                             </div>
                                             <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="sm" onClick={() => addActividad(clase.clase_id)} className="h-8 rounded-lg text-indigo-600 font-bold">
-                                                    + Actividad
+                                                <Button variant="ghost" size="sm" onClick={() => addActividad(clase.clase_id, 1)} className="h-8 rounded-lg text-indigo-600 font-bold hover:bg-indigo-50">
+                                                    + Tarea
+                                                </Button>
+                                                <Button variant="ghost" size="sm" onClick={() => addActividad(clase.clase_id, 3)} className="h-8 rounded-lg text-emerald-600 font-bold hover:bg-emerald-50">
+                                                    + Examen
                                                 </Button>
                                                 <Button variant="ghost" size="sm" className="h-8 w-8 rounded-lg text-gray-400">
                                                     <Edit3 className="w-4 h-4" />
@@ -135,9 +138,18 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
                                                         <FileText className="w-4 h-4 text-indigo-400" />
                                                         <span className="text-sm font-bold text-gray-700">{act.nombre_actividad}</span>
                                                     </div>
-                                                    <button className="text-gray-300 hover:text-rose-500 p-1">
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
+                                                    <div className="flex items-center space-x-1">
+                                                        {(act.id_tipo_actividad === 2 || act.id_tipo_actividad === 3) && (
+                                                            <Link href={`/docente/cursos/${docenteCursoId}/cuestionario/${act.actividad_id}`}>
+                                                                <button className="text-emerald-400 hover:text-emerald-600 p-1 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors" title="Abrir Constructor de Examen">
+                                                                    <Edit3 className="w-4 h-4" />
+                                                                </button>
+                                                            </Link>
+                                                        )}
+                                                        <button className="text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg p-1 transition-colors">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                             {clase.actividades?.length === 0 && (

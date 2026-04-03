@@ -273,6 +273,11 @@ def migrate_unidades(old, new, dry_run: bool):
 
     log.info(f"{len(rows)} unidades encontradas")
 
+    # Construir mapa curso_doce_id → curso_id real (a través de curso_docente)
+    with old.cursor() as c:
+        c.execute("SELECT curso_doce_id, curso_id FROM curso_docente")
+        curso_docente_map = {r["curso_doce_id"]: r["curso_id"] for r in c.fetchall()}
+
     with new.cursor() as c:
         c.execute("SELECT unidad_id FROM unidades")
         existing = {r["unidad_id"] for r in c.fetchall()}
@@ -286,9 +291,10 @@ def migrate_unidades(old, new, dry_run: bool):
                 skipped += 1
                 continue
 
-            curso_id = r.get("id_docente_curso")
+            curso_doce_id = r.get("id_docente_curso")
+            curso_id = curso_docente_map.get(curso_doce_id) if curso_doce_id else None
             if not curso_id:
-                log.err(f"  unidad_id={u_id}: id_docente_curso nulo → omitido")
+                log.err(f"  unidad_id={u_id}: no se pudo resolver curso_id desde id_docente_curso={curso_doce_id} → omitido")
                 errors += 1
                 continue
 

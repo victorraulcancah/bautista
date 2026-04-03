@@ -14,7 +14,8 @@ import {
     Library,
     Newspaper,
     Users,
-    Folder
+    Folder,
+    Gamepad2
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import AppLogo from '@/components/layout/app-logo';
@@ -59,7 +60,7 @@ const navigation: NavItem[] = [
         { title: 'Galería',       href: '/institucion/galeria' },
         { title: 'Noticias',      href: '/institucion/noticias' },
     ]},
-    { type: 'link', title: 'Notificaciones',  icon: MessageSquare,   href: '/comunicados', roles: ['administrador'] },
+    { type: 'link', title: 'Comunicados',     icon: MessageSquare,   href: '/comunicados', roles: ['administrador'] },
     { type: 'link', title: 'Pagos',           icon: CreditCard,      href: '/pagos', roles: ['administrador'] },
 
     // ── Información Académica ────────────────────────────────────────
@@ -70,8 +71,8 @@ const navigation: NavItem[] = [
         { title: 'Grados / Secciones', href: '/secciones' },
     ]},
     { type: 'link', title: 'Mis Cursos', icon: BookOpen, href: '/docente/mis-cursos', roles: ['docente'] },
-    { type: 'link', title: 'Profesores',  icon: UserCheck, href: '/docentes', roles: ['administrador'] },
-    { type: 'link', title: 'Estudiantes', icon: GraduationCap, href: '/estudiantes', roles: ['administrador'] },
+    { type: 'link', title: 'Gestión de Docentes',  icon: UserCheck, href: '/docentes', roles: ['administrador'] },
+    { type: 'link', title: 'Gestión de Alumnos', icon: GraduationCap, href: '/estudiantes', roles: ['administrador'] },
 
     // ── Procedimientos Administrativos ───────────────────────────────
     { type: 'section', label: 'PROCEDIMIENTOS ADMINISTRATIVOS', roles: ['administrador', 'docente', 'estudiante'] },
@@ -85,6 +86,7 @@ const navigation: NavItem[] = [
     ]},
     { type: 'link', title: 'Mis Notas',   icon: ClipboardList, href: '/alumno/notas', roles: ['estudiante'] },
     { type: 'link', title: 'Mis Cursos',  icon: BookOpen,      href: '/alumno/cursos', roles: ['estudiante'] },
+    { type: 'link', title: 'Rompecabezas', icon: Gamepad2,     href: '/alumno/puzzles', roles: ['estudiante'] },
 
     // ── Módulo Padre ─────────────────────────────────────────────────
     { type: 'section', label: 'FAMILIA', roles: ['padre_familia', 'madre_familia', 'apoderado'] },
@@ -93,7 +95,7 @@ const navigation: NavItem[] = [
     // ── Recursos Compartidos ─────────────────────────────────────────
     { type: 'section', label: 'RECURSOS' },
     { type: 'link', title: 'Biblioteca', icon: Library, href: '/biblioteca' },
-    { type: 'link', title: 'Mensajería', icon: MessageSquare, href: '/mensajeria' },
+    { type: 'link', title: 'Mensajes Privados', icon: MessageSquare, href: '/mensajeria' },
 
     // ── Información de Usuarios ──────────────────────────────────────
     { type: 'section', label: 'INFORMACIÓN DE USUARIOS', roles: ['administrador'] },

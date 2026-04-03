@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Printer, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { Paginated } from '@/components/shared/ResourceTable';
@@ -59,6 +59,11 @@ export default function EstudiantesTable({ estudiantes, onEdit, onDelete, onPage
                                     <Button size="icon" variant="ghost" className="size-7 text-blue-600 hover:bg-blue-50" onClick={() => onEdit(est)}>
                                         <Pencil className="size-3.5" />
                                     </Button>
+                                    <a href={`/estudiantes/${est.estu_id}/fotocheck`} target="_blank" rel="noopener noreferrer">
+                                        <Button size="icon" variant="ghost" className="size-7 text-emerald-600 hover:bg-emerald-50" title="Imprimir Fotocheck / Carnet">
+                                            <Printer className="size-3.5" />
+                                        </Button>
+                                    </a>
                                     <Button size="icon" variant="ghost" className="size-7 text-red-500 hover:bg-red-50" onClick={() => onDelete(est)}>
                                         <Trash2 className="size-3.5" />
                                     </Button>

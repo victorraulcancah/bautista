@@ -8,15 +8,19 @@ use App\Http\Requests\UpdatePagoRequest;
 use App\Http\Resources\EstudianteConPagadorResource;
 use App\Http\Resources\PagadorResource;
 use App\Http\Resources\PagoResource;
+use App\Http\Resources\PagoNotificaResource;
+use App\Services\Interfaces\PagoNotificaServiceInterface;
 use App\Services\Interfaces\PagoServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\Rule;
 
 class PagoApiController extends Controller
 {
     public function __construct(
         private readonly PagoServiceInterface $service,
+        private readonly PagoNotificaServiceInterface $notificaService,
     ) {}
 
     // ── Pagadores (lista principal) ────────────────────────────────────────
@@ -59,6 +63,44 @@ class PagoApiController extends Controller
     {
         $this->service->eliminarPago($id);
         return response()->json(null, 204);
+    }
+
+    // ── Vouchers / Comprobantes de pago ───────────────────────────────────
+
+    public function vouchers(int $pagId): AnonymousResourceCollection
+    {
+        return PagoNotificaResource::collection($this->notificaService->listarPorPago($pagId));
+    }
+
+    public function subirVoucher(Request $request, int $pagId): JsonResponse
+    {
+        $request->validate([
+            'archivo' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+        ]);
+
+        $notifica = $this->notificaService->subirVoucher(
+            pagId:   $pagId,
+            userId:  $request->user()->id,
+            archivo: $request->file('archivo'),
+        );
+
+        return (new PagoNotificaResource($notifica))->response()->setStatusCode(201);
+    }
+
+    public function validarVoucher(Request $request, int $notificaId): JsonResponse
+    {
+        $request->validate([
+            'estado'     => ['required', Rule::in(['validado', 'rechazado'])],
+            'comentario' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $notifica = $this->notificaService->validar(
+            notificaId: $notificaId,
+            estado:     $request->input('estado'),
+            comentario: $request->input('comentario'),
+        );
+
+        return (new PagoNotificaResource($notifica))->response();
     }
 
     // ── Reporte PDF ────────────────────────────────────────────────────────

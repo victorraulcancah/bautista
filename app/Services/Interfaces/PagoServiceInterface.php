@@ -3,6 +3,7 @@
 namespace App\Services\Interfaces;
 
 use App\Models\Pago;
+use App\Models\PagoNotifica;
 use App\Models\PadreApoderado;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -20,4 +21,13 @@ interface PagoServiceInterface
     public function actualizarPago(int $id, array $data): Pago;
 
     public function eliminarPago(int $id): void;
+    
+    /**
+     * Vouchers / Notificaciones de Pago
+     */
+    public function subirVoucher(int $pagoId, int $userId, \Illuminate\Http\UploadedFile $archivo): PagoNotifica;
+
+    public function listarVouchers(int $pagoId): Collection;
+
+    public function validarVoucher(int $notificaId, string $estado, ?string $comentario): PagoNotifica;
 }

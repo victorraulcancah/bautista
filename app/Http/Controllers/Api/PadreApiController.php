@@ -7,6 +7,7 @@ use App\Models\Estudiante;
 use App\Models\PadreApoderado;
 use App\Models\NotaActividad;
 use App\Models\Pago;
+use App\Models\Asistencia;
 use Illuminate\Http\Request;
 
 class PadreApiController extends Controller
@@ -51,12 +52,37 @@ class PadreApiController extends Controller
             ->orderBy('fecha_pago', 'desc')
             ->get();
 
-        // Mock Attendance for now
+        // Real Attendance
+        $historialAsistencia = Asistencia::where('id_persona', $hijoId)
+            ->where('tipo', 'estudiante')
+            ->orderBy('fecha', 'desc')
+            ->get();
+
+        $asistencias = $historialAsistencia->where('estado', '1')->count();
+        $tardanzas   = $historialAsistencia->where('estado', 'T')->count();
+        $faltas      = $historialAsistencia->where('estado', '0')->count();
+        $total       = $asistencias + $tardanzas + $faltas;
+        $porcentaje  = $total > 0 ? round(($asistencias / $total) * 100) : 0;
+
+        // Limiting history for frontend
+        $historialLimitado = $historialAsistencia->take(30)->values()->map(function($a) {
+            return [
+                'id' => $a->asistencia_id,
+                'fecha' => $a->fecha ? $a->fecha->format('Y-m-d') : null,
+                'hora_entrada' => $a->hora_entrada,
+                'hora_salida' => $a->hora_salida,
+                'estado' => $a->estado,
+                'estado_label' => $a->estado_label,
+                'observacion' => $a->observacion,
+            ];
+        });
+
         $asistencia = [
-            'asistencias' => 45,
-            'tardanzas' => 2,
-            'faltas' => 1,
-            'porcentaje' => 93
+            'asistencias' => $asistencias,
+            'tardanzas'   => $tardanzas,
+            'faltas'      => $faltas,
+            'porcentaje'  => $porcentaje,
+            'historial'   => $historialLimitado,
         ];
 
         return response()->json([

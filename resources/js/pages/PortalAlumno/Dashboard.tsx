@@ -57,6 +57,33 @@ export default function AlumnoDashboard() {
                 ))}
             </div>
 
+            {/* Pending Evaluations (Exams/Questionnaires) */}
+            {data.examenes && data.examenes.length > 0 && (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                        <h3 className="text-xl font-black text-gray-900 flex items-center">
+                            <Star className="w-5 h-5 mr-3 text-red-500 fill-red-500" />Evaluaciones Pendientes
+                        </h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {data.examenes.map((ex: any) => (
+                            <div key={ex.actividad_id} className="bg-white p-6 rounded-[2rem] border-2 border-red-100 shadow-xl shadow-red-50 flex items-center justify-between group hover:border-red-500 transition-all duration-300">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Atención: Cierra pronto</p>
+                                    <h4 className="text-xl font-black text-gray-900">{ex.nombre_actividad}</h4>
+                                    <p className="text-xs text-gray-400 font-medium italic">Vence el {new Date(ex.fecha_cierre).toLocaleString()}</p>
+                                </div>
+                                <Link href={`/alumno/actividad/${ex.actividad_id}`}>
+                                    <Button className="bg-red-600 hover:bg-black text-white rounded-2xl h-12 px-6 font-black uppercase tracking-widest">
+                                        Resolver Ahora
+                                    </Button>
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Pending Activities */}
                 <div className="space-y-6">
@@ -166,6 +193,101 @@ export default function AlumnoDashboard() {
                     </div>
                 </Link>
             </div>
+
+            {/* Biblioteca - Resources List */}
+            {data.biblioteca && data.biblioteca.length > 0 && (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-black text-gray-900 flex items-center px-2">
+                        <Folder className="w-5 h-5 mr-3 text-amber-500" /> Mi Biblioteca Digital
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {data.biblioteca.map((file: any) => (
+                            <a 
+                                key={file.id_medio}
+                                href={`/storage/${file.ruta}`}
+                                target="_blank"
+                                className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex items-center space-x-4 hover:shadow-md transition-all group"
+                            >
+                                <div className="bg-amber-100 p-3 rounded-2xl text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                    <Folder className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-black text-gray-800 truncate">{file.nombre}</p>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{file.tipo}</p>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Latest News (from Blog) */}
+            {data.noticias && data.noticias.length > 0 && (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-black text-gray-900 flex items-center px-2">
+                        <Star className="w-5 h-5 mr-3 text-pink-500" /> Últimas Noticias
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {data.noticias.map((post: any) => (
+                            <div key={post.blo_id} className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col group">
+                                {post.blo_imagen && (
+                                    <div className="h-48 overflow-hidden">
+                                        <img 
+                                            src={`/storage/${post.blo_imagen}`} 
+                                            alt={post.blo_titulo}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                    </div>
+                                )}
+                                <div className="p-8 flex-1 flex flex-col justify-between space-y-4">
+                                    <div>
+                                        <p className="text-[10px] font-black text-pink-500 uppercase tracking-[0.2em] mb-2">
+                                            {new Date(post.blo_fecha).toLocaleDateString()}
+                                        </p>
+                                        <h4 className="text-xl font-black text-gray-900 leading-tight">{post.blo_titulo}</h4>
+                                    </div>
+                                    <Link href={`/blog/${post.blo_id}`}>
+                                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest hover:text-pink-600 cursor-pointer">Leer más →</p>
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Horarios Section */}
+            {data.horarios && data.horarios.length > 0 && (
+                <div className="space-y-6">
+                    <h3 className="text-xl font-black text-gray-900 flex items-center px-2">
+                        <Calendar className="w-5 h-5 mr-3 text-emerald-500" /> Mi Horario Escolar
+                    </h3>
+                    <div className="bg-white p-4 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50">
+                        {data.horarios.map((h: any) => (
+                            <div key={h.horario_archivo_id} className="space-y-4">
+                                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">{h.nombre}</p>
+                                <div className="rounded-3xl overflow-hidden border-8 border-gray-50 shadow-inner bg-gray-50/50">
+                                    <img 
+                                        src={`/storage/${h.path}`} 
+                                        alt={h.nombre}
+                                        className="w-full h-auto object-contain max-h-[800px]"
+                                    />
+                                </div>
+                                <div className="flex justify-end p-2">
+                                    <a 
+                                        href={`/storage/${h.path}`} 
+                                        target="_blank" 
+                                        download 
+                                        className="text-xs font-black text-purple-600 uppercase tracking-widest hover:underline"
+                                    >
+                                        Descargar Horario ↓
+                                    </a>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

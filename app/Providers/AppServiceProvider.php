@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Repositories\Implements\PagoNotificaRepository;
 use App\Repositories\Implements\PagoRepository;
 use App\Repositories\Implements\GaleriaRepository;
 use App\Repositories\Implements\NoticiaRepository;
@@ -17,6 +18,7 @@ use App\Repositories\Implements\NivelEducativoRepository;
 use App\Repositories\Implements\SeccionRepository;
 use App\Repositories\Implements\ActividadRepository;
 use App\Repositories\Implements\UsuarioRepository;
+use App\Repositories\Interfaces\PagoNotificaRepositoryInterface;
 use App\Repositories\Interfaces\PagoRepositoryInterface;
 use App\Repositories\Interfaces\UsuarioRepositoryInterface;
 use App\Repositories\Interfaces\GaleriaRepositoryInterface;
@@ -32,6 +34,8 @@ use App\Repositories\Interfaces\GradoRepositoryInterface;
 use App\Repositories\Interfaces\NivelEducativoRepositoryInterface;
 use App\Repositories\Interfaces\SeccionRepositoryInterface;
 use App\Repositories\Interfaces\ActividadRepositoryInterface;
+use App\Services\ActividadUsuarioService;
+use App\Services\Implements\PagoNotificaService;
 use App\Services\Implements\PagoService;
 use App\Services\Implements\GaleriaService;
 use App\Services\Implements\MensajeService;
@@ -50,6 +54,7 @@ use App\Services\Implements\NivelEducativoService;
 use App\Services\Implements\SeccionService;
 use App\Services\Implements\ActividadService;
 use App\Services\Implements\UsuarioService;
+use App\Services\Interfaces\PagoNotificaServiceInterface;
 use App\Services\Interfaces\PagoServiceInterface;
 use App\Services\Interfaces\UsuarioServiceInterface;
 use App\Services\Interfaces\GaleriaServiceInterface;
@@ -84,9 +89,16 @@ class AppServiceProvider extends ServiceProvider
         // Auth
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
 
+        // Auditoría de actividad — singleton para reutilizar en múltiples servicios
+        $this->app->singleton(ActividadUsuarioService::class);
+
         // Pagos
         $this->app->bind(PagoRepositoryInterface::class, PagoRepository::class);
         $this->app->bind(PagoServiceInterface::class, PagoService::class);
+
+        // Vouchers / Notificaciones de pago
+        $this->app->bind(PagoNotificaRepositoryInterface::class, PagoNotificaRepository::class);
+        $this->app->bind(PagoNotificaServiceInterface::class, PagoNotificaService::class);
 
         // Institución
         $this->app->bind(InstitucionRepositoryInterface::class, InstitucionRepository::class);

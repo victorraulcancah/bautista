@@ -59,6 +59,29 @@ class AlumnoApiController extends Controller
             ->limit(5)
             ->get();
 
+        // Section schedules (Images)
+        $horarios = \DB::table('seccion_horarios')
+            ->where('seccion_id', $matricula->seccion)
+            ->get();
+
+        // Pending Exams and Questionnaires (Tipo 2=Examen, 3=Cuestionario)
+        $examenes = ActividadCurso::whereIn('id_tipo_actividad', [2, 3])
+            ->where('fecha_cierre', '>', now())
+            ->orderBy('fecha_cierre', 'asc')
+            ->get();
+
+        // Institutional News (from Blog)
+        $noticias = \DB::table('institucion_blog')
+            ->where('blo_estatus', '1')
+            ->orderBy('blo_fecha', 'desc')
+            ->limit(3)
+            ->get();
+
+        // Personal Media (Digital Library)
+        $biblioteca = \DB::table('mis_medios')
+            ->where('user_id', $userId)
+            ->get();
+
         return response()->json([
             'resumen' => [
                 'cursos' => $cursosCount,
@@ -68,6 +91,10 @@ class AlumnoApiController extends Controller
             'actividades' => $proximasActividades,
             'notas' => $ultimasNotas,
             'matricula' => $matricula,
+            'horarios' => $horarios,
+            'examenes' => $examenes,
+            'noticias' => $noticias,
+            'biblioteca' => $biblioteca,
         ]);
     }
 

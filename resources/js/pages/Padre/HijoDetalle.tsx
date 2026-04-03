@@ -1,13 +1,16 @@
 import { Head, Link } from '@inertiajs/react';
-import { GraduationCap, ClipboardCheck, CreditCard, ChevronLeft, Star, Clock, AlertCircle, FileText } from 'lucide-react';
+import { GraduationCap, ClipboardCheck, CreditCard, ChevronLeft, Star, Clock, AlertCircle, FileText, Upload } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import SubirVoucherModal from '@/pages/PortalPadre/components/SubirVoucherModal';
 
 export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'academico' | 'asistencia' | 'pagos'>('academico');
+    const [voucherPagId, setVoucherPagId] = useState<number | null>(null);
+    const [voucherMes, setVoucherMes] = useState('');
 
     useEffect(() => {
         api.get(`/padre/hijo/${hijoId}/resumen`)
@@ -18,6 +21,7 @@ export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
     if (loading) return <div className="p-10 text-center font-black animate-pulse text-rose-500">Cargando detalles...</div>;
 
     return (
+        <>
         <div className="min-h-screen bg-[#FDFDFD] p-4 md:p-10 space-y-10 font-sans">
             <Head title={`Seguimiento - ${data.hijo?.perfil?.primer_nombre}`} />
 
@@ -133,8 +137,71 @@ export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
                 )}
 
                 {activeTab === 'asistencia' && (
-                    <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl text-center py-20 italic text-gray-400 font-bold">
-                        Resumen de asistencia detallado cargando...
+                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col items-center justify-center text-center transition-transform hover:scale-105">
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Porcentaje</p>
+                                <p className="text-4xl font-black text-indigo-600">{data.asistencia.porcentaje}%</p>
+                            </div>
+                            <div className="bg-emerald-500 p-6 rounded-[2rem] shadow-xl shadow-emerald-200 flex flex-col items-center justify-center text-center text-white transition-transform hover:scale-105">
+                                <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-2">Días Presente</p>
+                                <p className="text-4xl font-black">{data.asistencia.asistencias}</p>
+                            </div>
+                            <div className="bg-amber-500 p-6 rounded-[2rem] shadow-xl shadow-amber-200 flex flex-col items-center justify-center text-center text-white transition-transform hover:scale-105">
+                                <p className="text-[10px] font-black text-amber-100 uppercase tracking-widest mb-2">Tardanzas</p>
+                                <p className="text-4xl font-black">{data.asistencia.tardanzas}</p>
+                            </div>
+                            <div className="bg-rose-500 p-6 rounded-[2rem] shadow-xl shadow-rose-200 flex flex-col items-center justify-center text-center text-white transition-transform hover:scale-105">
+                                <p className="text-[10px] font-black text-rose-100 uppercase tracking-widest mb-2">Faltas</p>
+                                <p className="text-4xl font-black">{data.asistencia.faltas}</p>
+                            </div>
+                        </div>
+
+                        {/* History Table */}
+                        <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+                            <table className="w-full text-left">
+                                <thead className="bg-gray-50 border-b text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    <tr>
+                                        <th className="px-8 py-6">Fecha</th>
+                                        <th className="px-8 py-6 text-center">Horario</th>
+                                        <th className="px-8 py-6 text-center">Estado</th>
+                                        <th className="px-8 py-6">Observación</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {data.asistencia.historial?.length > 0 ? (
+                                        data.asistencia.historial.map((log: any) => (
+                                            <tr key={log.id} className="hover:bg-rose-50/20 transition-colors">
+                                                <td className="px-8 py-6 font-bold text-gray-800">{log.fecha}</td>
+                                                <td className="px-8 py-6 text-center text-gray-500 font-bold">
+                                                    {log.hora_entrada ? `${log.hora_entrada.slice(0,5)}` : '--:--'} 
+                                                    {log.hora_salida ? ` - ${log.hora_salida.slice(0,5)}` : ''}
+                                                </td>
+                                                <td className="px-8 py-6 text-center">
+                                                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                                                        log.estado === '1' ? 'bg-emerald-100 text-emerald-600' :
+                                                        log.estado === 'T' ? 'bg-amber-100 text-amber-600' :
+                                                        'bg-rose-100 text-rose-600'
+                                                    }`}>
+                                                        {log.estado_label}
+                                                    </span>
+                                                </td>
+                                                <td className="px-8 py-6 text-xs text-gray-500 italic max-w-xs truncate">
+                                                    {log.observacion || '-'}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={4} className="px-8 py-10 text-center font-bold text-gray-400 italic">
+                                                No hay registros de asistencia en los últimos 30 días.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
 
@@ -147,6 +214,7 @@ export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
                                     <th className="px-8 py-6 text-center">Monto</th>
                                     <th className="px-8 py-6 text-center">Estado</th>
                                     <th className="px-8 py-6 text-right">Fecha Pago</th>
+                                    <th className="px-8 py-6 text-center">Voucher</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -158,6 +226,17 @@ export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
                                             <span className="px-3 py-1 bg-emerald-100 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">Pagado</span>
                                         </td>
                                         <td className="px-8 py-6 text-right text-gray-400 font-bold">{p.fecha_pago}</td>
+                                        <td className="px-8 py-6 text-center">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                title="Subir comprobante"
+                                                className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 h-8 w-8 p-0"
+                                                onClick={() => { setVoucherPagId(p.pag_id ?? p.pago_id); setVoucherMes(p.mes ?? p.tipo_pago ?? ''); }}
+                                            >
+                                                <Upload className="h-4 w-4" />
+                                            </Button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -166,5 +245,13 @@ export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
                 )}
             </div>
         </div>
+
+        <SubirVoucherModal
+            open={voucherPagId !== null}
+            onClose={() => setVoucherPagId(null)}
+            pagId={voucherPagId}
+            mes={voucherMes}
+        />
+        </>
     );
 }

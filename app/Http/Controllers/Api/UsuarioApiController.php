@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UsuarioResource;
+use App\Services\ActividadUsuarioService;
 use App\Services\Interfaces\UsuarioServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ class UsuarioApiController extends Controller
 {
     public function __construct(
         private readonly UsuarioServiceInterface $service,
+        private readonly ActividadUsuarioService $auditoria,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -74,6 +76,25 @@ class UsuarioApiController extends Controller
                 'isp'        => $h->isp ?? '—',
             ]);
         return response()->json($historial);
+    }
+
+    public function actividad(int $id): JsonResponse
+    {
+        $this->service->obtener($id); // valida que el usuario existe
+
+        $actividad = $this->auditoria->historialDeUsuario($id)
+            ->map(fn ($a) => [
+                'id'          => $a->id,
+                'accion'      => $a->accion,
+                'entidad'     => $a->entidad,
+                'entidad_id'  => $a->entidad_id,
+                'descripcion' => $a->descripcion,
+                'ip'          => $a->ip,
+                'fecha'       => $a->created_at?->format('Y-m-d'),
+                'hora'        => $a->created_at?->format('H:i'),
+            ]);
+
+        return response()->json($actividad);
     }
 
     public function resetCredenciales(Request $request, int $id): JsonResponse

@@ -27,6 +27,8 @@ use App\Http\Controllers\Api\MensajeriaApiController;
 use App\Http\Controllers\Api\PadreApiController;
 use App\Http\Controllers\Api\CalificacionApiController;
 use App\Http\Controllers\Api\ExamenResolucionApiController;
+use App\Http\Controllers\Api\AlumnoApiController;
+use App\Http\Controllers\Api\MatriculaPadresController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -121,43 +123,62 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Pagos
     Route::prefix('pagos')->group(function () {
-        Route::get('pagadores',                    [PagoApiController::class, 'indexPagadores']);
-        Route::get('contactos/{contactoId}',       [PagoApiController::class, 'porContacto']);
-        Route::get('reporte-pdf',                  [PagoApiController::class, 'reportePdf']);
-        Route::post('/',                           [PagoApiController::class, 'store']);
-        Route::put('/{id}',                        [PagoApiController::class, 'update']);
-        Route::delete('/{id}',                     [PagoApiController::class, 'destroy']);
+        Route::get('pagadores',                            [PagoApiController::class, 'indexPagadores']);
+        Route::get('contactos/{contactoId}',               [PagoApiController::class, 'porContacto']);
+        Route::get('reporte-pdf',                          [PagoApiController::class, 'reportePdf']);
+        Route::post('/',                                   [PagoApiController::class, 'store']);
+        Route::put('/{id}',                                [PagoApiController::class, 'update']);
+        Route::delete('/{id}',                             [PagoApiController::class, 'destroy']);
+        // Vouchers / comprobantes
+        Route::get('/{pagId}/vouchers',                    [PagoApiController::class, 'vouchers']);
+        Route::post('/{pagId}/vouchers',                   [PagoApiController::class, 'subirVoucher']);
+        Route::patch('/vouchers/{notificaId}/estado',      [PagoApiController::class, 'validarVoucher']);
     });
 
     // Actividades (Exámenes Virtuales)
     Route::get('actividades/tipos',     [ActividadApiController::class, 'tipos']);
     Route::apiResource('actividades',   ActividadApiController::class);
+    Route::get('actividades/{id}/cuestionario', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'show']);
+    Route::put('actividades/{id}/cuestionario', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'sync']);
     Route::get('actividades/{id}/notas', [CalificacionApiController::class, 'indexByActivity']);
     Route::post('actividades/{id}/calificar', [CalificacionApiController::class, 'calificar']);
     Route::post('examenes/comenzar', [ExamenResolucionApiController::class, 'comenzar']);
     Route::post('examenes/{id}/responder', [ExamenResolucionApiController::class, 'responder']);
     Route::post('examenes/{id}/finalizar', [ExamenResolucionApiController::class, 'finalizar']);
 
-    // Portal Alumno
-    Route::get('alumno/dashboard', [AlumnoApiController::class, 'dashboard']);
-    Route::get('alumno/cursos', [AlumnoApiController::class, 'cursos']);
-    Route::get('alumno/curso/{id}', [AlumnoApiController::class, 'cursoDetalle']);
-    Route::get('alumno/clase/{id}', [AlumnoApiController::class, 'claseDetalle']);
-    Route::post('alumno/actividad/{id}/entregar', [AlumnoApiController::class, 'entregarActividad']);
+    // Portal Alumno — solo rol estudiante
+    Route::middleware('check.role:estudiante')->group(function () {
+        Route::get('alumno/dashboard', [AlumnoApiController::class, 'dashboard']);
+        Route::get('alumno/cursos', [AlumnoApiController::class, 'cursos']);
+        Route::post('alumno/actividad/{id}/entregar', [AlumnoApiController::class, 'entregarActividad']);
+        Route::post('alumno/dibujo/guardar', [ActividadApiController::class, 'guardarDibujo']);
+    });
 
-    // Portal Docente
-    Route::get('docente/dashboard', [DocenteApiController::class, 'dashboard']);
-    Route::get('docente/mis-cursos', [DocenteApiController::class, 'misCursos']);
-    Route::post('docente/unidad', [DocenteApiController::class, 'crearUnidad']);
-    Route::post('docente/clase', [DocenteApiController::class, 'crearClase']);
-    Route::post('docente/actividad', [DocenteApiController::class, 'crearActividad']);
-    Route::get('docente/curso/{id}/alumnos', [DocenteApiController::class, 'alumnosSeccion']);
-    Route::post('docente/asistencia/iniciar', [DocenteApiController::class, 'iniciarAsistencia']);
-    Route::post('docente/asistencia/{id}/marcar', [DocenteApiController::class, 'marcarAsistencia']);
+    // Portal Padre — roles padre_familia, madre_familia, apoderado
+    Route::middleware('check.role:padre_familia|madre_familia|apoderado')->group(function () {
+        Route::get('padre/matricula/status', [MatriculaPadresController::class, 'status']);
+        Route::post('padre/matricula/step', [MatriculaPadresController::class, 'updateStep']);
+        Route::post('padre/matricula/save-padres', [MatriculaPadresController::class, 'savePadres']);
+        Route::post('padre/matricula/save-hijos', [MatriculaPadresController::class, 'saveHijos']);
+    });
+
+    // Portal Docente — solo rol docente
+    Route::middleware('check.role:docente')->group(function () {
+        Route::get('docente/dashboard', [DocenteApiController::class, 'dashboard']);
+        Route::get('docente/mis-cursos', [DocenteApiController::class, 'misCursos']);
+        Route::post('docente/unidad', [DocenteApiController::class, 'crearUnidad']);
+        Route::post('docente/clase', [DocenteApiController::class, 'crearClase']);
+        Route::post('docente/actividad', [DocenteApiController::class, 'crearActividad']);
+        Route::get('docente/curso/{id}/alumnos', [DocenteApiController::class, 'alumnosSeccion']);
+        Route::post('docente/asistencia/iniciar', [DocenteApiController::class, 'iniciarAsistencia']);
+        Route::post('docente/asistencia/{id}/marcar', [DocenteApiController::class, 'marcarAsistencia']);
+    });
 
     // Mensajería
     Route::get('mensajes/recibidos', [MensajeriaApiController::class, 'recibidos']);
     Route::get('mensajes/enviados', [MensajeriaApiController::class, 'enviados']);
+    Route::get('mensajes/grupos', [MensajeriaApiController::class, 'listarGrupos']);
+    Route::post('mensajes/grupos', [MensajeriaApiController::class, 'crearGrupo']);
     Route::get('mensajes/contactos', [MensajeriaApiController::class, 'buscarContactos']);
     Route::post('mensajes/enviar', [MensajeriaApiController::class, 'enviar']);
     Route::get('mensajes/{id}', [MensajeriaApiController::class, 'ver']);
@@ -179,14 +200,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('asistencia/marcar-qr', [AsistenciaGeneralApiController::class, 'marcarQR']);
     Route::get('asistencia/historial', [AsistenciaGeneralApiController::class, 'historial']);
 
-    // Portal Padre
-    Route::get('padre/hijos', [PadreApiController::class, 'hijos']);
-    Route::get('padre/hijo/{id}/resumen', [PadreApiController::class, 'hijoDetalle']);
+    // Portal Padre — detalle de hijos
+    Route::middleware('check.role:padre_familia|madre_familia|apoderado')->group(function () {
+        Route::get('padre/hijos', [PadreApiController::class, 'hijos']);
+        Route::get('padre/hijo/{id}/resumen', [PadreApiController::class, 'hijoDetalle']);
+    });
 
     // Usuarios
     Route::apiResource('usuarios', UsuarioApiController::class)->only(['index', 'show', 'store', 'update']);
     Route::patch('usuarios/{id}/estado',       [UsuarioApiController::class, 'toggleEstado']);
     Route::get('usuarios/{id}/historial',      [UsuarioApiController::class, 'historial']);
+    Route::get('usuarios/{id}/actividad',      [UsuarioApiController::class, 'actividad']);
     Route::patch('usuarios/{id}/credenciales', [UsuarioApiController::class, 'resetCredenciales']);
 
     // Matrícula — Aperturas

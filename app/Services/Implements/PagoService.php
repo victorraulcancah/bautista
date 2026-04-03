@@ -4,6 +4,7 @@ namespace App\Services\Implements;
 
 use App\Models\Pago;
 use App\Repositories\Interfaces\PagoRepositoryInterface;
+use App\Services\ActividadUsuarioService;
 use App\Services\Interfaces\PagoServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -12,6 +13,7 @@ class PagoService implements PagoServiceInterface
 {
     public function __construct(
         private readonly PagoRepositoryInterface $repo,
+        private readonly ActividadUsuarioService $auditoria,
     ) {}
 
     public function listarEstudiantesConPagador(int $instiId, string $search = '', int $perPage = 20): LengthAwarePaginator
@@ -37,7 +39,10 @@ class PagoService implements PagoServiceInterface
 
         $data['estatus'] = ($data['pag_monto'] > 0) ? 1 : 0;
 
-        return $this->repo->create($data);
+        $pago = $this->repo->create($data);
+        $this->auditoria->registrar('crear', 'Pago', $pago->pag_id,
+            "Pago registrado: S/ {$pago->total} — {$pago->pag_mes} {$pago->pag_anual}");
+        return $pago;
     }
 
     public function actualizarPago(int $id, array $data): Pago
@@ -50,12 +55,17 @@ class PagoService implements PagoServiceInterface
 
         $data['estatus'] = (($data['pag_monto'] ?? $pago->pag_monto) > 0) ? 1 : 0;
 
-        return $this->repo->update($pago, $data);
+        $updated = $this->repo->update($pago, $data);
+        $this->auditoria->registrar('actualizar', 'Pago', $id,
+            "Pago actualizado: S/ {$updated->total} — {$updated->pag_mes} {$updated->pag_anual}");
+        return $updated;
     }
 
     public function eliminarPago(int $id): void
     {
         $pago = $this->repo->findById($id);
+        $this->auditoria->registrar('eliminar', 'Pago', $id,
+            "Pago eliminado: S/ {$pago->total} — {$pago->pag_mes} {$pago->pag_anual}");
         $this->repo->delete($pago);
     }
 }
