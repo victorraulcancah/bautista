@@ -19,6 +19,7 @@ import modules.resolucion as resolucion
 import modules.asistencia_qr as asistencia_qr
 import modules.puzzles as puzzles
 import modules.horarios as horarios
+import modules.docente_cursos as docente_cursos
 
 TABLAS = {
     # ── Core ──────────────────────────────────────────────────────────────────
@@ -59,6 +60,7 @@ TABLAS = {
     "puzzles":               lambda old, new, maps, dry: puzzles.migrate_puzzles(old, new, dry),
     # ── Horarios (archivos adjuntos — horarios_asistencia ya va en enrollment) ──
     "horarios":              lambda old, new, maps, dry: (horarios.migrate_seccion_horarios(old, new, dry), horarios.migrate_docente_horarios(old, new, dry)),
+    "docente_cursos":        lambda old, new, maps, dry: docente_cursos.migrate_docente_cursos(old, new, dry),
     # ── Complementos ──────────────────────────────────────────────────────────
     "complementos":          lambda old, new, maps, dry: complementos.migrate_complementos(old, new, maps.get("users", {}), dry),
 }
@@ -114,6 +116,7 @@ def main():
             users.migrate_estudiantes(old, new, maps["users"], args.dry_run)
             users.migrate_padre_apoderado(old, new, maps["users"], args.dry_run)
             users.migrate_estudiante_contacto(old, new, args.dry_run)
+            docente_cursos.migrate_docente_cursos(old, new, args.dry_run)
             # 5. Matrícula
             enrollment.migrate_enrollment(old, new, args.dry_run)
             matricula_extra.migrate_matricula_extra(old, new, args.dry_run)

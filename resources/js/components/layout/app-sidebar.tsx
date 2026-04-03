@@ -60,7 +60,7 @@ const navigation: NavItem[] = [
         { title: 'Galería',       href: '/institucion/galeria' },
         { title: 'Noticias',      href: '/institucion/noticias' },
     ]},
-    { type: 'link', title: 'Comunicados',     icon: MessageSquare,   href: '/comunicados', roles: ['administrador'] },
+    { type: 'link', title: 'Comunicados',     icon: Newspaper,       href: '/comunicados', roles: ['administrador', 'docente'] },
     { type: 'link', title: 'Pagos',           icon: CreditCard,      href: '/pagos', roles: ['administrador'] },
 
     // ── Información Académica ────────────────────────────────────────
@@ -71,6 +71,7 @@ const navigation: NavItem[] = [
         { title: 'Grados / Secciones', href: '/secciones' },
     ]},
     { type: 'link', title: 'Mis Cursos', icon: BookOpen, href: '/docente/mis-cursos', roles: ['docente'] },
+    { type: 'link', title: 'Mis Alumnos', icon: Users, href: '/docente/mis-alumnos', roles: ['docente'] },
     { type: 'link', title: 'Gestión de Docentes',  icon: UserCheck, href: '/docentes', roles: ['administrador'] },
     { type: 'link', title: 'Gestión de Alumnos', icon: GraduationCap, href: '/estudiantes', roles: ['administrador'] },
 
@@ -98,11 +99,12 @@ const navigation: NavItem[] = [
     { type: 'link', title: 'Mensajes Privados', icon: MessageSquare, href: '/mensajeria' },
 
     // ── Información de Usuarios ──────────────────────────────────────
-    { type: 'section', label: 'INFORMACIÓN DE USUARIOS', roles: ['administrador'] },
+    { type: 'section', label: 'INFORMACIÓN DE USUARIOS', roles: ['administrador', 'docente'] },
     { type: 'group', title: 'Configuración', icon: Settings, roles: ['administrador'], children: [
         { title: 'Usuarios', href: '/usuarios' },
         { title: 'Perfil',   href: '/settings/profile' },
     ]},
+    { type: 'link', title: 'Mi Perfil', icon: Settings, href: '/settings/profile', roles: ['docente'] },
 ];
 
 function NavLinkItem({ item }: { item: Extract<NavItem, { type: 'link' }> }) {
@@ -178,7 +180,8 @@ function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
 
 export function AppSidebar() {
     const { auth } = usePage<any>().props;
-    const userRoles = auth.user?.roles?.map((r: any) => r.name) || [];
+    const rolName = typeof auth.user?.rol === 'string' ? auth.user.rol : auth.user?.rol?.name;
+    const userRoles = rolName ? [rolName] : [];
 
     const filteredNavigation = useMemo(() => {
         return navigation.filter(item => {

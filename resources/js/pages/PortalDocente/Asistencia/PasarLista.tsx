@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Panel Docente', href: '/docente/dashboard' },
+    { title: 'Mis Cursos', href: '/docente/mis-cursos' },
+    { title: 'Pasar Lista', href: '#' },
+];
 
 export default function PasarLista({ docenteCursoId }: { docenteCursoId: number }) {
     const [alumnos, setAlumnos] = useState<any[]>([]);
@@ -48,9 +56,14 @@ export default function PasarLista({ docenteCursoId }: { docenteCursoId: number 
             .finally(() => setSaving(false));
     };
 
-    if (loading) return <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest">Cargando nómina de alumnos...</div>;
+    if (loading) return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest">Cargando nómina de alumnos...</div>
+        </AppLayout>
+    );
 
     return (
+        <AppLayout breadcrumbs={breadcrumbs}>
         <div className="min-h-screen bg-[#FDFDFF] p-4 md:p-10 space-y-10 font-sans">
             <Head title="Pasar Lista" />
 
@@ -153,6 +166,7 @@ export default function PasarLista({ docenteCursoId }: { docenteCursoId: number 
                 </table>
             </div>
         </div>
+        </AppLayout>
     );
 }
 

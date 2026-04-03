@@ -4,6 +4,14 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Save, PlusCircle, Trash2, Eye, Clock, FileText, CheckCircle2, X } from 'lucide-react';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Panel Docente', href: '/docente/dashboard' },
+    { title: 'Mis Cursos', href: '/docente/mis-cursos' },
+    { title: 'Cuestionario', href: '#' },
+];
 
 const generateId = () => Math.random().toString(36).substring(2, 10);
 
@@ -95,11 +103,16 @@ export default function QuizBuilder({ docenteCursoId, actividadId }: { docenteCu
             .finally(() => setSaving(false));
     };
 
-    if (loading) return <div className="p-20 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest text-2xl mt-10">Cargando constructor...</div>;
+    if (loading) return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <div className="p-20 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest text-2xl mt-10">Cargando constructor...</div>
+        </AppLayout>
+    );
 
     const totalPuntos = cuestionario.preguntas?.reduce((acc: number, p: any) => acc + Number(p.valor_nota), 0) || 0;
 
     return (
+        <AppLayout breadcrumbs={breadcrumbs}>
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
             <Head title="Constructor de Examen" />
 
@@ -275,5 +288,6 @@ export default function QuizBuilder({ docenteCursoId, actividadId }: { docenteCu
                 </div>
             </div>
         </div>
+        </AppLayout>
     );
 }

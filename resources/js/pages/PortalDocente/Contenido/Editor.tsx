@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Panel Docente', href: '/docente/dashboard' },
+    { title: 'Mis Cursos', href: '/docente/mis-cursos' },
+    { title: 'Contenido del Curso', href: '#' },
+];
 
 export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: number }) {
     const [unidades, setUnidades] = useState<any[]>([]);
@@ -45,9 +53,14 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
             .then(() => loadContent());
     };
 
-    if (loading) return <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest">Abriendo Gestor de Contenido...</div>;
+    if (loading) return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest">Abriendo Gestor de Contenido...</div>
+        </AppLayout>
+    );
 
     return (
+        <AppLayout breadcrumbs={breadcrumbs}>
         <div className="min-h-screen bg-[#FDFDFF] p-4 md:p-10 space-y-10 font-sans">
             <Head title="Gestor de Contenido" />
 
@@ -166,5 +179,6 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
                 ))}
             </div>
         </div>
+        </AppLayout>
     );
 }

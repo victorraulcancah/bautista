@@ -90,6 +90,7 @@ Route::middleware(['auth.token'])->group(function () {
     Route::prefix('docente')->name('docente.')->middleware('check.role:docente')->group(function () {
         Route::get('/dashboard', fn () => Inertia::render('PortalDocente/Dashboard'))->name('dashboard');
         Route::get('/mis-cursos', fn () => Inertia::render('PortalDocente/MisCursos'))->name('mis-cursos.index');
+        Route::get('/mis-alumnos', fn () => Inertia::render('PortalDocente/MisAlumnos'))->name('mis-alumnos.index');
         Route::get('/cursos/{id}/contenido', fn (int $id) => Inertia::render('PortalDocente/Contenido/Editor', ['docenteCursoId' => $id]))->name('cursos.contenido');
         Route::get('/cursos/{id}/asistencia', fn (int $id) => Inertia::render('PortalDocente/Asistencia/PasarLista', ['docenteCursoId' => $id]))->name('cursos.asistencia');
         Route::get('/cursos/{id}/cuestionario/{actividadId}', fn (int $id, int $actividadId) => Inertia::render('PortalDocente/Contenido/QuizBuilder', [

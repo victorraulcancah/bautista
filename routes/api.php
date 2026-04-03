@@ -166,6 +166,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('check.role:docente')->group(function () {
         Route::get('docente/dashboard', [DocenteApiController::class, 'dashboard']);
         Route::get('docente/mis-cursos', [DocenteApiController::class, 'misCursos']);
+        Route::get('docente/mis-alumnos', [DocenteApiController::class, 'misAlumnos']);
         Route::post('docente/unidad', [DocenteApiController::class, 'crearUnidad']);
         Route::post('docente/clase', [DocenteApiController::class, 'crearClase']);
         Route::post('docente/actividad', [DocenteApiController::class, 'crearActividad']);
