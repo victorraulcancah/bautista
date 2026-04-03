@@ -44,7 +44,7 @@ class EstudianteRepository implements EstudianteRepositoryInterface
             'password' => Hash::make($data['username']),
             'estado'   => '1',
         ]);
-        $user->assignRole('estudiante');
+        $user->assignRole('estudiante'); // llama a User::assignRole() → FK directa
 
         // 2. Crear perfil personal
         $perfil = Perfil::create([

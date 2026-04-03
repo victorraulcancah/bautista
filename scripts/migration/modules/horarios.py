@@ -55,8 +55,8 @@ def migrate_docente_horarios(old, new, dry_run: bool):
         c.execute("SELECT docente_id FROM docentes")
         valid_docentes = {r["docente_id"] for r in c.fetchall()}
     with new.cursor() as c:
-        c.execute("SELECT id FROM docente_horarios")
-        existing = {r["id"] for r in c.fetchall()}
+        c.execute("SELECT horario_archivo_id FROM docente_horarios")
+        existing = {r["horario_archivo_id"] for r in c.fetchall()}
 
     ins = skipped = errors = 0
     with new.cursor() as c:
@@ -71,7 +71,7 @@ def migrate_docente_horarios(old, new, dry_run: bool):
             if not dry_run:
                 c.execute(
                     """INSERT INTO docente_horarios
-                        (id, docente_id, nombre, path, tipo, tamanio, created_at, updated_at)
+                        (horario_archivo_id, docente_id, nombre, path, tipo, tamanio, created_at, updated_at)
                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
                     (r["doh_id"], r.get("docente_id"),
                      f"Horario docente {r['docente_id']}",

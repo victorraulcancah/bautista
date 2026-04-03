@@ -15,8 +15,7 @@ class UserResource extends JsonResource
             'name'        => $this->nombre_completo,
             'email'       => $this->email,
             'estado'      => $this->estado,
-            'roles'       => $this->getRoleNames(),
-            'permisos'    => $this->getAllPermissions()->pluck('name'),
+            'rol'         => $this->rol?->name,
             'perfil'      => $this->whenLoaded('perfil'),
             'institucion' => $this->whenLoaded('institucion', fn () =>
                 $this->institucion?->only(['insti_id', 'insti_razon_social', 'insti_logo'])

@@ -3,6 +3,7 @@
 namespace App\Repositories\Implements;
 
 use App\Models\Perfil;
+use App\Models\Role;
 use App\Models\User;
 use App\Repositories\Interfaces\UsuarioRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -12,7 +13,7 @@ class UsuarioRepository implements UsuarioRepositoryInterface
 {
     public function paginate(int $instiId, string $search = '', int $perPage = 20): LengthAwarePaginator
     {
-        return User::with(['perfil', 'roles'])
+        return User::with(['perfil', 'rol'])
             ->where('insti_id', $instiId)
             ->when($search, function ($q) use ($search) {
                 $q->where('username', 'like', "%{$search}%")
@@ -29,23 +30,24 @@ class UsuarioRepository implements UsuarioRepositoryInterface
 
     public function findById(int $id): User
     {
-        return User::with(['perfil', 'roles'])->findOrFail($id);
+        return User::with(['perfil', 'rol'])->findOrFail($id);
     }
 
     public function create(array $data): User
     {
+        $rolId = isset($data['rol'])
+            ? Role::where('name', $data['rol'])->value('id')
+            : null;
+
         $user = User::create([
             'insti_id' => $data['insti_id'],
+            'rol_id'   => $rolId,
             'username' => $data['username'],
             'name'     => $data['primer_nombre'] . ' ' . $data['apellido_paterno'],
             'email'    => $data['email'] ?? null,
             'password' => Hash::make($data['username']),
             'estado'   => '1',
         ]);
-
-        if ($data['rol'] ?? null) {
-            $user->assignRole($data['rol']);
-        }
 
         Perfil::create([
             'user_id'          => $user->id,
@@ -62,7 +64,7 @@ class UsuarioRepository implements UsuarioRepositoryInterface
             'fecha_registro'   => now()->toDateString(),
         ]);
 
-        return $user->load(['perfil', 'roles']);
+        return $user->load(['perfil', 'rol']);
     }
 
     public function update(User $user, array $data): User
@@ -90,9 +92,9 @@ class UsuarioRepository implements UsuarioRepositoryInterface
         }
 
         if ($data['rol'] ?? null) {
-            $user->syncRoles([$data['rol']]);
+            $user->update(['rol_id' => Role::where('name', $data['rol'])->value('id')]);
         }
 
-        return $user->load(['perfil', 'roles']);
+        return $user->load(['perfil', 'rol']);
     }
 }

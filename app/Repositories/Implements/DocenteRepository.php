@@ -44,7 +44,7 @@ class DocenteRepository implements DocenteRepositoryInterface
             'password' => Hash::make($data['username']),
             'estado'   => '1',
         ]);
-        $user->assignRole('docente');
+        $user->assignRole('docente'); // llama a User::assignRole() → FK directa
 
         // 2. Crear perfil personal
         $perfil = Perfil::create([

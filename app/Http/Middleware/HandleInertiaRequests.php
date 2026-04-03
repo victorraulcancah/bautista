@@ -36,7 +36,7 @@ class HandleInertiaRequests extends Middleware
     {
         // 1. Sesión estándar
         if ($request->user()) {
-            return $request->user()->load('perfil', 'roles');
+            return $request->user()->load('perfil', 'rol');
         }
 
         // 2. Token desde cookie auth_token
@@ -44,7 +44,7 @@ class HandleInertiaRequests extends Middleware
         if ($tokenCookie) {
             $token = PersonalAccessToken::findToken($tokenCookie);
             if ($token && $token->tokenable) {
-                return $token->tokenable->load('perfil', 'roles');
+                return $token->tokenable->load('perfil', 'rol');
             }
         }
 

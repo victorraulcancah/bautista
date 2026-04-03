@@ -4,17 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Middleware de verificación de rol compatible con web (sesión) y API (sanctum token).
- *
- * Spatie's built-in `role:` middleware usa Auth::guard(null)->user() que apunta
- * al guard `web` (sesión). En rutas API autenticadas con sanctum el guard web
- * no tiene usuario, causando una excepción falsa de "no autenticado".
- *
- * Este middleware usa $request->user() que es resuelto por el guard activo
- * (web vía Auth::login() en AuthenticateWithToken, o sanctum en rutas API).
+ * Verifica que el usuario autenticado tenga uno de los roles indicados.
  *
  * Uso en rutas:
  *   ->middleware('check.role:docente')
@@ -27,13 +20,13 @@ class CheckRole
         $user = $request->user();
 
         if (! $user) {
-            throw UnauthorizedException::notLoggedIn();
+            abort(401, 'No autenticado.');
         }
 
         $rolesArray = explode('|', $roles);
 
         if (! $user->hasAnyRole($rolesArray)) {
-            throw UnauthorizedException::forRoles($rolesArray);
+            abort(403, 'No tienes permiso para acceder a esta sección.');
         }
 
         return $next($request);

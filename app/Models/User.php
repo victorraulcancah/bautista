@@ -11,15 +11,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     protected $fillable = [
         'insti_id',
+        'rol_id',
         'username',
         'name',
         'email',
@@ -43,6 +43,29 @@ class User extends Authenticatable
             'password'                => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    public function rol(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'rol_id');
+    }
+
+    public function hasRole(string|array $roles): bool
+    {
+        $roles = is_array($roles) ? $roles : [$roles];
+        return in_array($this->rol?->name, $roles, true);
+    }
+
+    public function hasAnyRole(array $roles): bool
+    {
+        return $this->hasRole($roles);
+    }
+
+    public function assignRole(string $rolName): void
+    {
+        $rol = Role::where('name', $rolName)->firstOrFail();
+        $this->update(['rol_id' => $rol->id]);
+        $this->setRelation('rol', $rol);
     }
 
     public function institucion(): BelongsTo

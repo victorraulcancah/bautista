@@ -58,8 +58,8 @@ def migrate_institucion(old, new, dry_run: bool):
 
     log.info(f"Insertados: {inserted}  |  Omitidos: {skipped}")
 
-def _ensure_spatie_roles(new) -> dict:
-    """Crea los roles Spatie si no existen y devuelve {nombre: id}."""
+def _ensure_roles(new) -> dict:
+    """Crea los roles si no existen y devuelve {nombre: id}."""
     with new.cursor() as c:
         for nombre in SPATIE_ROLES:
             c.execute(
@@ -90,8 +90,8 @@ def migrate_users(old, new, dry_run: bool) -> dict:
             log.err(f"  Duplicado en origen: usuario_id={r['usuario_id']} username={u} (ya procesado como id={seen_in_old[u]}) -> omitido")
         seen_in_old[u] = r["usuario_id"]
 
-    # Asegurar que los roles existen en Spatie antes de insertar usuarios
-    spatie_roles = _ensure_spatie_roles(new) if not dry_run else {}
+    # Asegurar que los roles existen antes de insertar usuarios
+    roles_map = _ensure_roles(new) if not dry_run else {}
 
     id_map = {}
     inserted = skipped = 0
@@ -116,16 +116,23 @@ def migrate_users(old, new, dry_run: bool) -> dict:
             plain = (r["clave"] or username).strip()
             hashed = make_bcrypt(plain) if not dry_run else "DRY_RUN_HASH"
 
+            rol_nombre = ROL_MAP.get(r.get("id_rol"))
+            if not rol_nombre:
+                log.err(f"  id_rol={r.get('id_rol')} sin mapeo para username={username} → usuario sin rol")
+
+            rol_id = roles_map.get(rol_nombre) if rol_nombre else None
+
             sql = """
                 INSERT INTO users
-                    (insti_id, username, name, email, password,
+                    (insti_id, rol_id, username, name, email, password,
                      estado, created_at, updated_at)
                 VALUES
-                    (%(insti_id)s, %(username)s, %(name)s, %(email)s,
+                    (%(insti_id)s, %(rol_id)s, %(username)s, %(name)s, %(email)s,
                      %(password)s, %(estado)s, %(created_at)s, %(updated_at)s)
             """
             params = {
                 "insti_id":   r["insti_id"],
+                "rol_id":     rol_id,
                 "username":   username,
                 "name":       username,
                 "email":      r["email"] or None,
@@ -138,20 +145,10 @@ def migrate_users(old, new, dry_run: bool) -> dict:
             if not dry_run:
                 c.execute(sql, params)
                 new_id = c.lastrowid
-
-                rol_nombre = ROL_MAP.get(r.get("id_rol"), "padre")
-                rol_id = spatie_roles.get(rol_nombre)
-                if rol_id:
-                    c.execute(
-                        "INSERT IGNORE INTO model_has_roles (role_id, model_type, model_id) VALUES (%s, %s, %s)",
-                        (rol_id, "App\\Models\\User", new_id),
-                    )
-                    log.ok(f"  {r['usuario_id']} → id={new_id}  username={username}  rol={rol_nombre}")
-                else:
-                    log.err(f"  rol '{rol_nombre}' no encontrado en Spatie para {username}")
+                log.ok(f"  {r['usuario_id']} → id={new_id}  username={username}  rol={rol_nombre or 'SIN ROL'}")
             else:
                 new_id = -1
-                log.ok(f"  {r['usuario_id']} → id={new_id}  username={username}  rol={ROL_MAP.get(r.get('id_rol'), 'padre')} [DRY]")
+                log.ok(f"  {r['usuario_id']} → id={new_id}  username={username}  rol={rol_nombre or 'SIN ROL'} [DRY]")
 
             id_map[r["usuario_id"]] = new_id
             inserted += 1

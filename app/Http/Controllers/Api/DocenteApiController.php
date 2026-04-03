@@ -58,10 +58,10 @@ class DocenteApiController extends Controller
      */
     public function dashboard(Request $request)
     {
-        // Assuming user is the teacher
-        $docenteId = $request->user()->id; 
+        $docente = \App\Models\Docente::where('id_usuario', $request->user()->id)->firstOrFail();
+        $docenteId = $docente->docente_id;
 
-        $misCursos = DocenteCurso::where('id_docente', $docenteId)
+        $misCursos = DocenteCurso::where('docente_id', $docenteId)
             ->with(['curso', 'seccion.grado'])
             ->get();
 
@@ -92,9 +92,10 @@ class DocenteApiController extends Controller
      */
     public function misCursos(Request $request)
     {
-        $docenteId = $request->user()->id;
+        $docente = \App\Models\Docente::where('id_usuario', $request->user()->id)->firstOrFail();
+        $docenteId = $docente->docente_id;
 
-        $cursos = DocenteCurso::where('id_docente', $docenteId)
+        $cursos = DocenteCurso::where('docente_id', $docenteId)
             ->with(['curso', 'seccion.grado.nivelEducativo', 'apertura'])
             ->get();
 
