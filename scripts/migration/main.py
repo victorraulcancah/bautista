@@ -18,8 +18,10 @@ import modules.complementos as complementos
 import modules.resolucion as resolucion
 import modules.asistencia_qr as asistencia_qr
 import modules.puzzles as puzzles
-import modules.horarios as horarios
 import modules.docente_cursos as docente_cursos
+import modules.grades as grades
+import modules.academic_extras as academic_extras
+import modules.payments_catalog as payments_catalog
 
 TABLAS = {
     # ── Core ──────────────────────────────────────────────────────────────────
@@ -61,6 +63,9 @@ TABLAS = {
     # ── Horarios (archivos adjuntos — horarios_asistencia ya va en enrollment) ──
     "horarios":              lambda old, new, maps, dry: (horarios.migrate_seccion_horarios(old, new, dry), horarios.migrate_docente_horarios(old, new, dry)),
     "docente_cursos":        lambda old, new, maps, dry: docente_cursos.migrate_docente_cursos(old, new, dry),
+    "grades":                lambda old, new, maps, dry: grades.migrate_grades(old, new, dry),
+    "academic_extras":       lambda old, new, maps, dry: academic_extras.migrate_academic_extras(old, new, maps.get("users", {}), dry),
+    "payments_catalog":      lambda old, new, maps, dry: payments_catalog.migrate_payments_catalog(old, new, dry),
     # ── Complementos ──────────────────────────────────────────────────────────
     "complementos":          lambda old, new, maps, dry: complementos.migrate_complementos(old, new, maps.get("users", {}), dry),
 }
@@ -70,6 +75,7 @@ _REQUIEREN_USERS = {
     "perfiles", "docentes", "estudiantes", "mensajeria",
     "padre_apoderado", "estudiante_contacto", "pagos",
     "enrollment", "matricula_padres", "asistencia_clases", "asistencia_qr", "contenido", "resolucion",
+    "academic_extras",
 }
 
 
@@ -140,7 +146,12 @@ def main():
             # 12. Horarios (archivos adjuntos — horarios_asistencia ya fue en enrollment)
             horarios.migrate_seccion_horarios(old, new, args.dry_run)
             horarios.migrate_docente_horarios(old, new, args.dry_run)
-            # 13. Complementos (Historial, Medios, Blog)
+            # 13. Calificaciones y Extras
+            grades.migrate_grades(old, new, args.dry_run)
+            academic_extras.migrate_academic_extras(old, new, maps["users"], args.dry_run)
+            # 14. Pagos (Catálogo)
+            payments_catalog.migrate_payments_catalog(old, new, args.dry_run)
+            # 15. Complementos (Historial, Medios, Blog)
             complementos.migrate_complementos(old, new, maps["users"], args.dry_run)
 
     except Exception as e:
