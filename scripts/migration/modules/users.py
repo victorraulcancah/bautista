@@ -216,7 +216,14 @@ def migrate_padre_apoderado(old, new, user_id_map: dict, dry_run: bool):
 def migrate_estudiante_contacto(old, new, dry_run: bool):
     log.head("B/3  estudiante_contacto")
     with old.cursor() as c:
-        c.execute("SELECT id_estuddiante, id_contacto FROM estudiante_contacto")
+        # Algunos esquemas antiguos pueden tener id_estuddiante (doble d) o id_estudiante
+        c.execute("SHOW COLUMNS FROM estudiante_contacto")
+        cols = {col["Field"] for col in c.fetchall()}
+        
+        id_est_col = "id_estuddiante" if "id_estuddiante" in cols else "id_estudiante"
+        
+        log.info(f"Usando columna '{id_est_col}' para estudiante_contacto de origen")
+        c.execute(f"SELECT {id_est_col}, id_contacto, mensualidad FROM estudiante_contacto")
         rows = c.fetchall()
 
     log.info(f"{len(rows)} relaciones estudiante-contacto encontradas")
@@ -235,7 +242,7 @@ def migrate_estudiante_contacto(old, new, dry_run: bool):
     inserted = skipped = errors = 0
     with new.cursor() as c:
         for r in rows:
-            estu_id  = r["id_estuddiante"]
+            estu_id  = r.get(id_est_col) or r.get("id_estudiante")
             cont_id  = r["id_contacto"]
 
             key = (estu_id, cont_id)
@@ -244,7 +251,7 @@ def migrate_estudiante_contacto(old, new, dry_run: bool):
                 continue
 
             if estu_id not in valid_estudiantes:
-                log.err(f"  id_estuddiante={estu_id} no existe en estudiantes → omitido")
+                log.err(f"  id_estudiante={estu_id} no existe en estudiantes → omitido")
                 errors += 1
                 continue
 
@@ -253,7 +260,10 @@ def migrate_estudiante_contacto(old, new, dry_run: bool):
                 errors += 1
                 continue
 
-            mensualidad = valid_estudiantes[estu_id] or 0
+            # Priorizar mensualidad de la tabla pivot si está disponible, sino de estudiantes
+            mensualidad = r.get("mensualidad")
+            if mensualidad is None:
+                mensualidad = valid_estudiantes[estu_id] or 0
 
             if not dry_run:
                 c.execute(

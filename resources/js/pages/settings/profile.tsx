@@ -40,6 +40,7 @@ export default function Profile() {
         perfil?.foto_perfil ? `/storage/${perfil.foto_perfil}` : null
     );
     const [uploadingFoto, setUploadingFoto] = useState(false);
+    const [fotoSuccess, setFotoSuccess]   = useState('');
 
     const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -52,7 +53,8 @@ export default function Profile() {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setFotoUrl(data.url);
-            setFotoSuccess('Foto actualizada correctamente.');
+            setFotoSuccess('Foto actualizada.');
+            setTimeout(() => setFotoSuccess(''), 3000);
         } catch {
             setFotoSuccess('');
         } finally {
@@ -67,7 +69,6 @@ export default function Profile() {
     const [docNumero, setDocNumero]     = useState(perfil?.doc_numero ?? '');
     const [savingDatos, setSavingDatos] = useState(false);
     const [datosSuccess, setDatosSuccess] = useState('');
-    const [fotoSuccess, setFotoSuccess]   = useState('');
 
     const handleSaveDatos = async () => {
         setSavingDatos(true);
@@ -78,7 +79,7 @@ export default function Profile() {
                 direccion,
                 doc_numero: docNumero,
             });
-            setDatosSuccess('Guardado correctamente.');
+            setDatosSuccess('Cambios guardados con éxito.');
             setTimeout(() => setDatosSuccess(''), 3000);
         } finally {
             setSavingDatos(false);
@@ -94,7 +95,7 @@ export default function Profile() {
     const [savingPass, setSavingPass]       = useState(false);
     const [passSuccess, setPassSuccess]     = useState('');
 
-    const handleChangePass = async (e: { preventDefault(): void }) => {
+    const handleChangePass = async (e: React.FormEvent) => {
         e.preventDefault();
         setPassErrors({});
         setPassSuccess('');
@@ -105,7 +106,7 @@ export default function Profile() {
                 password:              newPass,
                 password_confirmation: confirmPass,
             });
-            setPassSuccess('Contraseña actualizada correctamente.');
+            setPassSuccess('Contraseña actualizada.');
             setCurrentPass(''); setNewPass(''); setConfirmPass('');
             setTimeout(() => { setPassSuccess(''); setPassOpen(false); }, 2000);
         } catch (err: any) {
@@ -128,137 +129,179 @@ export default function Profile() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Mi Perfil" />
 
-            <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
-
-                {/* ── Tarjeta de identidad ─────────────────────────── */}
-                <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-                    <div className="h-24 bg-gradient-to-r from-[#00a65a] to-[#008d4c]" />
-                    <div className="px-6 pb-6">
-                        <div className="flex items-end gap-4 -mt-12 mb-4">
-                            {/* Avatar clicable */}
-                            <div className="relative group cursor-pointer" onClick={() => !uploadingFoto && fotoInputRef.current?.click()}>
-                                <Avatar className="h-24 w-24 border-4 border-white shadow-md">
-                                    {fotoUrl && <AvatarImage src={fotoUrl} alt={nombreCompleto} className="object-cover" />}
-                                    <AvatarFallback className="text-2xl font-bold bg-[#00a65a] text-white">
-                                        {getInitials(nombreCompleto)}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Camera className="size-6 text-white" />
-                                </div>
-                                {uploadingFoto && (
-                                    <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
-                                        <span className="text-white text-xs">...</span>
+            <div className="max-w-4xl mx-auto px-4 py-8">
+                <div className="space-y-8 animate-in fade-in duration-500">
+                    
+                    {/* ── SECCIÓN 1: IDENTIDAD ────────────────────────── */}
+                    <div className="relative rounded-2xl border bg-white shadow-sm overflow-hidden group/card">
+                        <div className="h-40 bg-gradient-to-br from-[#00a65a] via-[#008d4c] to-[#00733e]" />
+                        <div className="px-8 pb-8">
+                            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 -mt-20 sm:-mt-16">
+                                {/* Avatar con interacción premium */}
+                                <div className="relative group cursor-pointer ring-8 ring-white rounded-full transition-transform hover:scale-105" onClick={() => !uploadingFoto && fotoInputRef.current?.click()}>
+                                    <Avatar className="h-40 w-40 border shadow-xl">
+                                        {fotoUrl && <AvatarImage src={fotoUrl} alt={nombreCompleto} className="object-cover" />}
+                                        <AvatarFallback className="text-5xl font-black bg-[#00a65a] text-white">
+                                            {getInitials(nombreCompleto)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px]">
+                                        <Camera className="size-10 text-white" />
                                     </div>
-                                )}
-                            </div>
-                            <input ref={fotoInputRef} type="file" accept="image/*" className="hidden" onChange={handleFotoChange} />
-
-                            <div className="pb-1">
-                                <h2 className="text-xl font-bold text-gray-900">{nombreCompleto}</h2>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                    {rol && (
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
-                                            <ShieldCheck className="size-3" />
-                                            {ROLES_ES[rol] ?? rol}
-                                        </span>
+                                    {uploadingFoto && (
+                                        <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                                            <div className="size-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        </div>
                                     )}
-                                    <span className="text-sm text-gray-500">@{user.username}</span>
                                 </div>
-                                {fotoSuccess && <p className="text-xs text-green-600 mt-1">{fotoSuccess}</p>}
-                            </div>
-                        </div>
-
-                        {/* Info rápida (solo lectura) */}
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                            <InfoTile icon={Mail}   label="Correo"                           value={user.email ?? '—'} />
-                            <InfoTile icon={Phone}  label="Teléfono"                         value={perfil?.telefono ?? '—'} />
-                            <InfoTile icon={IdCard} label={TIPOS_DOC[perfil?.tipo_doc] ?? 'Documento'} value={perfil?.doc_numero ?? '—'} />
-                            <InfoTile icon={MapPin} label="Dirección"                        value={perfil?.direccion ?? '—'} />
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Datos de contacto ─────────────────────────────── */}
-                <div className="rounded-xl border bg-white shadow-sm p-6">
-                    <div className="flex items-center gap-2 mb-5">
-                        <Phone className="size-4 text-[#00a65a]" />
-                        <h3 className="font-semibold text-gray-800">Datos de Contacto</h3>
-                    </div>
-                    <div className="space-y-4">
-                        <div className="grid gap-1.5">
-                            <Label>N° Documento (DNI)</Label>
-                            <Input
-                                value={docNumero}
-                                onChange={(e) => setDocNumero(e.target.value)}
-                                placeholder="Ej: 71234567"
-                            />
-                        </div>
-                        <div className="grid gap-1.5">
-                            <Label>Teléfono</Label>
-                            <Input
-                                value={telefono}
-                                onChange={(e) => setTelefono(e.target.value)}
-                                placeholder="Ej: 987654321"
-                            />
-                        </div>
-                        <div className="grid gap-1.5">
-                            <Label>Dirección</Label>
-                            <Input
-                                value={direccion}
-                                onChange={(e) => setDireccion(e.target.value)}
-                                placeholder="Ej: Av. Principal 123, Lima"
-                            />
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <Button
-                                onClick={handleSaveDatos}
-                                disabled={savingDatos}
-                                className="bg-[#00a65a] hover:bg-[#008d4c] text-white"
-                            >
-                                <Save className="h-4 w-4 mr-2" />
-                                {savingDatos ? 'Guardando...' : 'Guardar cambios'}
-                            </Button>
-                            {datosSuccess && <p className="text-sm text-green-600">{datosSuccess}</p>}
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Datos de acceso (solo lectura) ───────────────── */}
-                <div className="rounded-xl border bg-white shadow-sm p-6">
-                    <div className="flex items-center gap-2 mb-5">
-                        <UserIcon className="size-4 text-[#00a65a]" />
-                        <h3 className="font-semibold text-gray-800">Datos de Acceso</h3>
-                    </div>
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
-                            <UserIcon className="size-4 text-gray-400 shrink-0" />
-                            <div>
-                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Usuario</p>
-                                <p className="text-sm font-medium text-gray-700">{user.username}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
-                            <Mail className="size-4 text-gray-400 shrink-0" />
-                            <div>
-                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">Correo</p>
-                                <p className="text-sm font-medium text-gray-700">{user.email ?? '—'}</p>
+                                <input ref={fotoInputRef} type="file" accept="image/*" className="hidden" onChange={handleFotoChange} />
+                                
+                                <div className="text-center sm:text-left flex-1 space-y-2">
+                                    <h2 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">
+                                        {nombreCompleto}
+                                    </h2>
+                                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                                        <div className="flex items-center gap-1.5 px-4 py-1.5 bg-green-50 text-[#00a65a] rounded-full text-xs font-bold uppercase tracking-widest border border-green-100">
+                                            <ShieldCheck className="size-4" />
+                                            {ROLES_ES[rol] ?? rol}
+                                        </div>
+                                        <span className="text-sm font-semibold text-gray-400 bg-gray-50 px-4 py-1.5 rounded-full border border-gray-100 shadow-sm">
+                                            @{user.username}
+                                        </span>
+                                    </div>
+                                    {fotoSuccess && (
+                                        <div className="inline-flex items-center gap-2 mt-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-black animate-in slide-in-from-left-2">
+                                            <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                                            {fotoSuccess}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t">
-                        <Button
-                            variant="outline"
-                            className="gap-2 border-orange-300 text-orange-600 hover:bg-orange-50"
-                            onClick={() => setPassOpen(true)}
-                        >
-                            <KeyRound className="h-4 w-4" />
-                            Cambiar contraseña
-                        </Button>
+                    {/* ── SECCIÓN 2: INFORMACIÓN ──────────────────────── */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        
+                        {/* Tarjeta: Información de Contacto (Editable) */}
+                        <div className="rounded-2xl border bg-white p-8 shadow-sm hover:shadow-md transition-all">
+                            <div className="flex items-center gap-3 mb-10">
+                                <div className="p-3 rounded-2xl bg-green-50 text-[#00a65a]">
+                                    <Phone className="size-6" />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-gray-900 uppercase tracking-tight text-base">Información de Contacto</h3>
+                                    <p className="text-xs text-gray-400 font-medium tracking-tight">Actualiza tus medios de comunicación</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-8">
+                                <div className="space-y-2.5 group">
+                                    <Label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1 transition-colors group-focus-within:text-[#00a65a]">
+                                        N° Documento ({TIPOS_DOC[perfil?.tipo_doc] ?? 'DNI'})
+                                    </Label>
+                                    <div className="relative">
+                                        <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-300" />
+                                        <Input
+                                            value={docNumero}
+                                            onChange={(e) => setDocNumero(e.target.value)}
+                                            className="pl-12 h-14 bg-gray-50/50 border-gray-200 focus:bg-white transition-all font-bold text-gray-700"
+                                            placeholder="Ej: 71234567"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2.5 group">
+                                    <Label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1 transition-colors group-focus-within:text-[#00a65a]">
+                                        Teléfono / Móvil
+                                    </Label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-300" />
+                                        <Input
+                                            value={telefono}
+                                            onChange={(e) => setTelefono(e.target.value)}
+                                            className="pl-12 h-14 bg-gray-50/50 border-gray-200 focus:bg-white transition-all font-bold text-gray-700"
+                                            placeholder="Ej: 987654321"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2.5 group">
+                                    <Label className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-1 transition-colors group-focus-within:text-[#00a65a]">
+                                        Dirección Domiciliaria
+                                    </Label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-300" />
+                                        <Input
+                                            value={direccion}
+                                            onChange={(e) => setDireccion(e.target.value)}
+                                            className="pl-12 h-14 bg-gray-50/50 border-gray-200 focus:bg-white transition-all font-bold text-gray-700"
+                                            placeholder="Ej: Av. Principal 123, Lima"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="pt-6 flex items-center justify-between gap-4">
+                                    <Button
+                                        onClick={handleSaveDatos}
+                                        disabled={savingDatos}
+                                        className="h-14 px-8 bg-[#00a65a] hover:bg-[#008d4c] text-white font-black uppercase tracking-widest text-[11px] rounded-2xl transition-all shadow-xl shadow-green-100"
+                                    >
+                                        <Save className="size-5 mr-3" />
+                                        {savingDatos ? 'GUARDANDO...' : 'GUARDAR CAMBIOS'}
+                                    </Button>
+                                    {datosSuccess && (
+                                        <p className="text-xs font-black text-emerald-600 animate-in fade-in slide-in-from-right-3 lowercase first-letter:uppercase">
+                                            {datosSuccess}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Tarjeta: Cuenta y Seguridad (Lectura y Acción) */}
+                        <div className="space-y-8">
+                            <div className="rounded-2xl border bg-white p-8 shadow-sm hover:shadow-md transition-all">
+                                <div className="flex items-center gap-3 mb-10">
+                                    <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm shadow-indigo-100">
+                                        <UserIcon className="size-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-black text-gray-900 uppercase tracking-tight text-base">Datos de Acceso</h3>
+                                        <p className="text-xs text-gray-400 font-medium tracking-tight">Tu identidad en la plataforma</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-6">
+                                    <ReadOnlyField icon={UserIcon} label="Nombre de Usuario" value={user.username} />
+                                    <ReadOnlyField icon={Mail}     label="Correo Institucional" value={user.email ?? '—'} />
+                                </div>
+                            </div>
+
+                            <div className="rounded-2xl border bg-white p-8 shadow-sm hover:shadow-md transition-all border-dashed border-gray-200">
+                                <div className="flex items-center gap-3 mb-8">
+                                    <div className="p-3 rounded-2xl bg-orange-50 text-orange-600 shadow-sm shadow-orange-100">
+                                        <KeyRound className="size-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-black text-gray-900 uppercase tracking-tight text-base">Seguridad</h3>
+                                        <p className="text-xs text-gray-400 font-medium tracking-tight">Mantén tu cuenta protegida</p>
+                                    </div>
+                                </div>
+
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-16 gap-4 border-orange-200 text-orange-600 hover:bg-orange-50 hover:border-orange-400 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all"
+                                    onClick={() => setPassOpen(true)}
+                                >
+                                    <Lock className="size-5" />
+                                    Modificar Contraseña Acceso
+                                </Button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-
             </div>
 
             {/* ── Modal cambiar contraseña ─────────────────────────────────────── */}
@@ -313,11 +356,11 @@ export default function Profile() {
 
                         <div className="flex flex-col gap-2 pt-1">
                             <Button type="submit" disabled={savingPass} className="w-full bg-orange-500 hover:bg-orange-600 text-white">
-                                <Save className="h-4 w-4 mr-2" />
+                                <Save className="size-4 mr-2" />
                                 {savingPass ? 'Guardando...' : 'Actualizar contraseña'}
                             </Button>
                             <Button type="button" variant="destructive" className="w-full" onClick={closePassModal}>
-                                <X className="h-4 w-4 mr-2" />
+                                <X className="size-4 mr-2" />
                                 Cancelar
                             </Button>
                         </div>
@@ -328,13 +371,15 @@ export default function Profile() {
     );
 }
 
-function InfoTile({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function ReadOnlyField({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
     return (
-        <div className="flex items-start gap-2 rounded-lg bg-gray-50 px-3 py-2.5">
-            <Icon className="size-4 text-[#00a65a] mt-0.5 shrink-0" />
-            <div className="min-w-0">
-                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">{label}</p>
-                <p className="text-sm text-gray-700 truncate">{value}</p>
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-all group/field">
+            <div className="p-2 rounded-lg bg-white shadow-sm ring-1 ring-gray-100">
+                <Icon className="size-4 text-gray-400 group-hover/field:text-[#00a65a] transition-colors" />
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">{label}</p>
+                <p className="text-sm font-bold text-gray-700 truncate">{value}</p>
             </div>
         </div>
     );

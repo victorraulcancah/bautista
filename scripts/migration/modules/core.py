@@ -120,7 +120,7 @@ def migrate_users(old, new, dry_run: bool) -> dict:
             rol_id = roles_map.get(rol_nombre) if rol_nombre else None
 
             if not rol_id:
-                log.err(f"  id_rol={r.get('id_rol')} sin mapeo para username={username} → omitido (rol_id NOT NULL)")
+                log.err(f"  usuario_id={r.get('usuario_id')} username={username}: id_rol={r.get('id_rol')} sin mapeo → omitido")
                 skipped += 1
                 continue
 
@@ -136,7 +136,7 @@ def migrate_users(old, new, dry_run: bool) -> dict:
                 "insti_id":   r["insti_id"],
                 "rol_id":     rol_id,
                 "username":   username,
-                "name":       username,
+                "name":       r.get("nombre", username),   # Intentar usar nombre real si existe
                 "email":      r["email"] or None,
                 "password":   hashed,
                 "estado":     r["estado"] or "1",
@@ -145,12 +145,17 @@ def migrate_users(old, new, dry_run: bool) -> dict:
             }
 
             if not dry_run:
-                c.execute(sql, params)
-                new_id = c.lastrowid
-                log.ok(f"  {r['usuario_id']} → id={new_id}  username={username}  rol={rol_nombre or 'SIN ROL'}")
+                try:
+                    c.execute(sql, params)
+                    new_id = c.lastrowid
+                    log.ok(f"  {r['usuario_id']} → id={new_id}  username={username}  rol={rol_nombre}")
+                except Exception as ex:
+                    log.err(f"  Error al insertar usuario_id={r['usuario_id']}: {ex}")
+                    skipped += 1
+                    continue
             else:
                 new_id = -1
-                log.ok(f"  {r['usuario_id']} → id={new_id}  username={username}  rol={rol_nombre or 'SIN ROL'} [DRY]")
+                log.ok(f"  {r['usuario_id']} → id={new_id}  username={username}  rol={rol_nombre} [DRY]")
 
             id_map[r["usuario_id"]] = new_id
             inserted += 1

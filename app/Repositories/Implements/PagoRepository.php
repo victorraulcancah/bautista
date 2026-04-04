@@ -15,10 +15,10 @@ class PagoRepository implements PagoRepositoryInterface
     public function paginateEstudiantesConPagador(int $instiId, string $search = '', int $perPage = 20): LengthAwarePaginator
     {
         return DB::table('estudiantes as es')
-            ->join('estudiante_contacto as ec', 'es.estu_id', '=', 'ec.estudiante_id')
+            ->join('estudiante_contacto as ec', 'es.estu_id', '=', 'ec.estu_id')
             ->join('padre_apoderado as p', 'ec.contacto_id', '=', 'p.id_contacto')
-            ->join('users as u', 'p.user_id', '=', 'u.id')
-            ->leftJoin(DB::raw('(SELECT estudiante_id, COUNT(*) as pagos_count FROM pagos GROUP BY estudiante_id) as pag'), 'es.estu_id', '=', 'pag.estudiante_id')
+            ->leftJoin('users as u', 'p.user_id', '=', 'u.id')
+            ->leftJoin(DB::raw('(SELECT estu_id, COUNT(*) as pagos_count FROM pagos GROUP BY estu_id) as pag'), 'es.estu_id', '=', 'pag.estu_id')
             ->where('p.insti_id', $instiId)
             ->where('p.es_pagador', '1')
             ->when($search, function ($q) use ($search) {

@@ -3,16 +3,21 @@
 namespace App\Services\Implements;
 
 use App\Models\Pago;
+use App\Models\PagoNotifica;
+use App\Repositories\Interfaces\PagoNotificaRepositoryInterface;
 use App\Repositories\Interfaces\PagoRepositoryInterface;
 use App\Services\ActividadUsuarioService;
 use App\Services\Interfaces\PagoServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
 
 class PagoService implements PagoServiceInterface
 {
     public function __construct(
         private readonly PagoRepositoryInterface $repo,
+        private readonly PagoNotificaRepositoryInterface $notificaRepo,
         private readonly ActividadUsuarioService $auditoria,
     ) {}
 
@@ -67,5 +72,52 @@ class PagoService implements PagoServiceInterface
         $this->auditoria->registrar('eliminar', 'Pago', $id,
             "Pago eliminado: S/ {$pago->total} — {$pago->pag_mes} {$pago->pag_anual}");
         $this->repo->delete($pago);
+    }
+
+    /**
+     * Vouchers / Notificaciones de Pago
+     */
+    public function subirVoucher(int $pagoId, int $userId, UploadedFile $archivo): PagoNotifica
+    {
+        $pago = $this->repo->findById($pagoId);
+        
+        // Almacenar el archivo de forma segura
+        $path = $archivo->store('vouchers', 'public');
+
+        $notifica = $this->notificaRepo->create([
+            'pag_id'  => $pagoId,
+            'user_id' => $userId,
+            'archivo' => $path,
+            'estado'  => 'Pendiente',
+        ]);
+
+        $this->auditoria->registrar('subir_voucher', 'PagoNotifica', $notifica->id,
+            "Voucher cargado para Pago ID: {$pagoId} — {$pago->pag_mes} {$pago->pag_anual}");
+
+        return $notifica;
+    }
+
+    public function listarVouchers(int $pagoId): Collection
+    {
+        return $this->notificaRepo->porPago($pagoId);
+    }
+
+    public function validarVoucher(int $notificaId, string $estado, ?string $comentario): PagoNotifica
+    {
+        $notifica = $this->notificaRepo->findById($notificaId);
+        $updated  = $this->notificaRepo->actualizarEstado($notifica, $estado, $comentario);
+
+        // Si se aprueba el voucher, marcamos el pago como pagado si aún no lo está
+        if ($estado === 'Aprobado') {
+            $pago = $this->repo->findById($notifica->pag_id);
+            if ($pago->estatus !== 1) {
+                $this->repo->update($pago, ['estatus' => 1]);
+            }
+        }
+
+        $this->auditoria->registrar('validar_voucher', 'PagoNotifica', $notificaId,
+            "Voucher procesado: {$estado}. Comentario: " . ($comentario ?? 'Ninguno'));
+
+        return $updated;
     }
 }

@@ -135,6 +135,7 @@ class ExamenResolucionApiController extends Controller
             $respuestas = PreguntaRespuesta::where('intento_id', $intentoId)->get();
             $puntajeTotal = 0;
 
+            /** @var \App\Models\PreguntaRespuesta $resp */
             foreach ($respuestas as $resp) {
                 $pregunta = PreguntaCuestionario::find($resp->pregunta_id);
                 if (!$pregunta) continue;
