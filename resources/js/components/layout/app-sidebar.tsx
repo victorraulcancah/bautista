@@ -131,11 +131,11 @@ const navigation: NavItem[] = [
 
     // ── Información de Usuarios ──────────────────────────────────────
     { type: 'section', label: 'INFORMACIÓN DE USUARIOS' },
-    { type: 'group', title: 'Configuración', icon: Settings, roles: ['administrador'], children: [
+    { type: 'group', title: 'Gestión de Usuarios', icon: Settings, roles: ['administrador'], children: [
         { title: 'Usuarios', href: '/usuarios' },
         { title: 'Perfil',   href: '/settings/profile' },
     ]},
-    { type: 'link', title: 'Configuración', icon: Settings, href: '/settings/profile', roles: ['docente', 'estudiante'] },
+
 ];
 
 function NavLinkItem({ item }: { item: Extract<NavItem, { type: 'link' }> }) {

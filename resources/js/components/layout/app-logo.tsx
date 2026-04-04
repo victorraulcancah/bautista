@@ -44,3 +44,4 @@ export default function AppLogo({ variant = 'header', className }: AppLogoProps)
         </div>
     );
 }
+

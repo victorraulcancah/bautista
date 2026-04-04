@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import InputError from '@/components/shared/input-error';
 import PasswordInput from '@/components/shared/password-input';
@@ -14,6 +14,7 @@ type Props = {
 };
 
 export default function Login({ status }: Props) {
+    const { branding } = usePage<any>().props;
     const { showSplash, fadeOut } = useSplashScreen();
     const { login, loading, errors } = useLogin();
     const [formData, setFormData] = useState({ username: '', password: '' });
@@ -22,8 +23,6 @@ export default function Login({ status }: Props) {
         e.preventDefault();
         const result = await login(formData);
         if (result.success) {
-            // Full reload so the browser sends the auth_token cookie
-            // and the server can authenticate before Inertia renders
             window.location.href = '/dashboard';
         }
     };
@@ -48,7 +47,7 @@ export default function Login({ status }: Props) {
             <div
                 className="min-h-screen w-full flex flex-col items-center justify-center relative"
                 style={{
-                    backgroundImage: "url('/school.png')",
+                    backgroundImage: branding?.background ? `url(${branding.background})` : "url('/school.png')",
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                 }}
@@ -57,13 +56,15 @@ export default function Login({ status }: Props) {
 
                 <div className="relative z-10 w-full max-w-sm px-4 flex flex-col items-center gap-4">
                     <div className="w-full rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl overflow-hidden">
-                        <div className="flex justify-center pt-8 pb-3">
-                            <img
-                                src="/esama-bg.png"
-                                alt="IEP Bautista La Pascana"
-                                className="h-24 w-auto drop-shadow-lg"
-                            />
-                        </div>
+                            <div className="flex items-center justify-center pt-8 pb-3">
+                                <div className="size-32 rounded-full border-2 border-white/30 bg-white/10 p-2 shadow-2xl backdrop-blur-sm transition-transform hover:scale-110">
+                                    <img
+                                        src={branding?.logo || "/esama-bg.png"}
+                                        alt="IEP Bautista La Pascana"
+                                        className="h-full w-full rounded-full object-contain drop-shadow-lg"
+                                    />
+                                </div>
+                            </div>
 
                         <div className="text-center px-8 pb-5">
                             <h1 className="text-xl font-bold text-white">IEP Bautista La Pascana</h1>
@@ -131,7 +132,7 @@ export default function Login({ status }: Props) {
                     <img
                         src="/esama.png"
                         alt="Esama"
-                        className="h-10 w-auto opacity-80"
+                        className="h-10 w-auto rounded-md opacity-80 shadow-sm transition-opacity hover:opacity-100"
                     />
                 </div>
             </div>

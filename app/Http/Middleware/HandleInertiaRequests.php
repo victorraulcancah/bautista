@@ -23,6 +23,17 @@ class HandleInertiaRequests extends Middleware
             'auth'        => fn () => [
                 'user' => $this->resolveUser($request),
             ],
+            'branding'    => function () use ($request) {
+                $user = $this->resolveUser($request);
+                $institucion = $user ? $user->institucion : \App\Models\InstitucionEducativa::first();
+                
+                if (!$institucion) return null;
+
+                return [
+                    'logo' => $institucion->insti_logo ? asset('storage/' . $institucion->insti_logo) : null,
+                    'background' => $institucion->insti_fondo_login ? asset('storage/' . $institucion->insti_fondo_login) : null,
+                ];
+            },
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
