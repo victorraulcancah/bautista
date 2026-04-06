@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Paginated } from '@/components/shared/ResourceTable';
 import type { Noticia } from '../hooks/useNoticias';
@@ -7,54 +7,58 @@ type Props = {
     noticias:    Paginated<Noticia>;
     onEdit:      (n: Noticia) => void;
     onDelete:    (n: Noticia) => void;
+    onView:      (n: Noticia) => void;
     onPageChange:(page: number) => void;
 };
 
-export default function NoticiasTable({ noticias, onEdit, onDelete, onPageChange }: Props) {
+export default function NoticiasTable({ noticias, onEdit, onDelete, onView, onPageChange }: Props) {
     return (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto bg-white rounded-2xl border border-neutral-100 shadow-sm">
             <table className="w-full text-sm">
                 <thead>
-                    <tr className="bg-[#00a65a] text-white text-center">
-                        <th className="px-3 py-2 w-10">N°</th>
-                        <th className="px-3 py-2 text-left">Título</th>
-                        <th className="px-3 py-2 text-left">Contenido</th>
-                        <th className="px-3 py-2">Fecha</th>
-                        <th className="px-3 py-2">Imagen</th>
-                        <th className="px-3 py-2">Acciones</th>
+                    <tr className="bg-[#00a65a] text-white text-[11px] font-black uppercase tracking-widest text-center shadow-sm">
+                        <th className="px-6 py-4 w-10">N° Edición</th>
+                        <th className="px-6 py-4 text-left">Titulares de Portada</th>
+                        <th className="px-6 py-4 text-left">Resumen Editorial</th>
+                        <th className="px-6 py-4">Fecha Crónica</th>
+                        <th className="px-6 py-4">Fotografía</th>
+                        <th className="px-6 py-4">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-neutral-100">
                     {noticias.data.length === 0 ? (
                         <tr>
-                            <td colSpan={6} className="py-8 text-center text-gray-400">
-                                No hay noticias publicadas.
+                            <td colSpan={6} className="py-12 text-center text-neutral-400 font-medium italic">
+                                La mesa de redacción está vacía. Comience a redactar una nueva crónica.
                             </td>
                         </tr>
                     ) : noticias.data.map((n, i) => (
-                        <tr key={n.not_id} className="border-b border-gray-100 hover:bg-gray-50 text-center">
-                            <td className="px-3 py-2 text-gray-500">{(noticias.from ?? 0) + i}</td>
-                            <td className="px-3 py-2 text-left font-medium text-gray-800 max-w-[200px] truncate">{n.not_titulo}</td>
-                            <td className="px-3 py-2 text-left text-gray-600 max-w-[300px] truncate">{n.not_mensaje || '—'}</td>
-                            <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{n.not_fecha ?? '—'}</td>
-                            <td className="px-3 py-2">
+                        <tr key={n.not_id} className="group hover:bg-neutral-50/50 transition-colors text-center">
+                            <td className="px-6 py-5 text-neutral-400 font-bold">{(noticias.from ?? 0) + i}</td>
+                            <td className="px-6 py-5 text-left font-black text-neutral-900 max-w-[200px] truncate group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{n.not_titulo}</td>
+                            <td className="px-6 py-5 text-left text-neutral-500 max-w-[300px] truncate italic">{n.not_resumen || n.not_mensaje || '—'}</td>
+                            <td className="px-6 py-5 text-neutral-600 whitespace-nowrap font-medium">{n.not_fecha ?? '—'}</td>
+                            <td className="px-6 py-5">
                                 {n.url ? (
                                     <img
                                         src={n.url}
                                         alt={n.not_titulo}
-                                        className="mx-auto h-10 w-16 rounded object-cover"
+                                        className="mx-auto h-12 w-20 rounded-xl object-cover border-2 border-neutral-100 shadow-sm group-hover:scale-105 transition-transform"
                                     />
                                 ) : (
-                                    <span className="text-gray-300">—</span>
+                                    <div className="mx-auto h-12 w-20 rounded-xl border-2 border-dashed border-neutral-200 flex items-center justify-center text-[10px] text-neutral-300 font-black">NO IMAGE</div>
                                 )}
                             </td>
-                            <td className="px-3 py-2">
-                                <div className="flex items-center justify-center gap-1">
-                                    <Button size="icon" variant="ghost" className="size-7 text-blue-600 hover:bg-blue-50" onClick={() => onEdit(n)}>
-                                        <Pencil className="size-3.5" />
+                            <td className="px-6 py-5">
+                                <div className="flex items-center justify-center gap-2">
+                                    <Button size="icon" variant="ghost" className="size-9 rounded-xl text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 border border-transparent hover:border-emerald-100" title="Previsualizar" onClick={() => onView(n)}>
+                                        <Eye className="size-4" />
                                     </Button>
-                                    <Button size="icon" variant="ghost" className="size-7 text-red-500 hover:bg-red-50" onClick={() => onDelete(n)}>
-                                        <Trash2 className="size-3.5" />
+                                    <Button size="icon" variant="ghost" className="size-9 rounded-xl text-blue-600 hover:bg-blue-50 hover:text-blue-700 border border-transparent hover:border-blue-100" title="Editar" onClick={() => onEdit(n)}>
+                                        <Pencil className="size-4" />
+                                    </Button>
+                                    <Button size="icon" variant="ghost" className="size-9 rounded-xl text-rose-500 hover:bg-rose-50 hover:text-rose-600 border border-transparent hover:border-rose-100" title="Eliminar" onClick={() => onDelete(n)}>
+                                        <Trash2 className="size-4" />
                                     </Button>
                                 </div>
                             </td>
