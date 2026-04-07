@@ -106,6 +106,7 @@ export default function HorariosPage({ seccionId }: Props) {
                             </a>
                         )}
                         columns={[
+                            { label: '#', className: 'w-12 text-center text-neutral-400', render: (_, i) => i + 1 },
                             { label: 'Vista Previa', className: 'w-24 text-center', render: (a) => (
                                 <div className="flex justify-center">
                                     {isImage(a.url) ? (

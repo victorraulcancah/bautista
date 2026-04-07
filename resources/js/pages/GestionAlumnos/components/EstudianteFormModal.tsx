@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import FormField from '@/components/shared/FormField';
 import FormSection from '@/components/shared/FormSection';
+import { FormLegend, ReqLabel, OptLabel } from '@/components/shared/FormLabels';
 import type { Estudiante, EstudianteFormData } from '../hooks/useEstudiantes';
 import { useEstudianteForm } from '../hooks/useEstudianteForm';
 
@@ -28,19 +29,21 @@ export default function EstudianteFormModal({ open, onClose, editing, onSave, ap
                     <DialogTitle>{editing ? 'Editar Estudiante' : 'Nuevo Estudiante'}</DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5 px-1">
+                    <FormLegend />
+
                     <FormSection title="Datos de Acceso">
-                        <FormField label="DNI / Usuario *"    value={form.username} onChange={(v) => set('username', v)} error={err('username')} placeholder="Ej: 78901234" />
+                        <FormField label="DNI / Usuario"    required={true} value={form.username} onChange={(v) => set('username', v)} error={err('username')} placeholder="Ej: 78901234" />
                         <FormField label="Correo electrónico" value={form.email}    onChange={(v) => set('email', v)}    error={err('email')}    type="email" />
                     </FormSection>
 
                     <FormSection title="Datos Personales">
-                        <FormField label="Primer Nombre *"    value={form.primer_nombre}    onChange={(v) => set('primer_nombre', v)}    error={err('primer_nombre')} />
-                        <FormField label="Segundo Nombre"     value={form.segundo_nombre}   onChange={(v) => set('segundo_nombre', v)}   error={err('segundo_nombre')} />
-                        <FormField label="Apellido Paterno *" value={form.apellido_paterno} onChange={(v) => set('apellido_paterno', v)} error={err('apellido_paterno')} />
-                        <FormField label="Apellido Materno"   value={form.apellido_materno} onChange={(v) => set('apellido_materno', v)} error={err('apellido_materno')} />
+                        <FormField label="Primer Nombre"    required={true} value={form.primer_nombre}    onChange={(v) => set('primer_nombre', v)}    error={err('primer_nombre')} />
+                        <FormField label="Segundo Nombre"   value={form.segundo_nombre}   onChange={(v) => set('segundo_nombre', v)}   error={err('segundo_nombre')} />
+                        <FormField label="Apellido Paterno" required={true} value={form.apellido_paterno} onChange={(v) => set('apellido_paterno', v)} error={err('apellido_paterno')} />
+                        <FormField label="Apellido Materno" value={form.apellido_materno} onChange={(v) => set('apellido_materno', v)} error={err('apellido_materno')} />
                         <div className="space-y-1">
-                            <Label>Género</Label>
+                            <ReqLabel>Género</ReqLabel>
                             <Select value={form.genero} onValueChange={(v) => set('genero', v)}>
                                 <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                                 <SelectContent>
@@ -75,7 +78,7 @@ export default function EstudianteFormModal({ open, onClose, editing, onSave, ap
 
                     {editing && (
                         <div className="space-y-1">
-                            <Label>Estado</Label>
+                            <OptLabel>Estado</OptLabel>
                             <Select value={form.estado} onValueChange={(v) => set('estado', v)}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>

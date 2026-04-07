@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from '@/components/ui/label';
 import FormField from '@/components/shared/FormField';
 import FormSection from '@/components/shared/FormSection';
+import { FormLegend, ReqLabel, OptLabel } from '@/components/shared/FormLabels';
 import type { Docente, DocenteFormData } from '../hooks/useDocentes';
 import { useDocenteForm } from '../hooks/useDocenteForm';
 
@@ -28,19 +29,21 @@ export default function DocenteFormModal({ open, onClose, editing, onSave, apiEr
                     <DialogTitle>{editing ? 'Editar Docente' : 'Nuevo Docente'}</DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5 px-1">
+                    <FormLegend />
+
                     <FormSection title="Datos de Acceso">
-                        <FormField label="DNI / Usuario *"      value={form.username}  onChange={(v) => set('username', v)}  error={err('username')}  placeholder="Ej: 78901234" />
+                        <FormField label="DNI / Usuario"        required={true} value={form.username}  onChange={(v) => set('username', v)}  error={err('username')}  placeholder="Ej: 78901234" />
                         <FormField label="Correo Electrónico"   value={form.email}     onChange={(v) => set('email', v)}     error={err('email')}     type="email" placeholder="Ej: docente@correo.com" />
                     </FormSection>
 
                     <FormSection title="Datos Personales">
-                        <FormField label="Primer Nombre *"   value={form.primer_nombre}    onChange={(v) => set('primer_nombre', v)}    error={err('primer_nombre')}    placeholder="Ej: Juan" />
-                        <FormField label="Segundo Nombre"    value={form.segundo_nombre}   onChange={(v) => set('segundo_nombre', v)}   error={err('segundo_nombre')}   placeholder="Ej: Carlos" />
-                        <FormField label="Apellido Paterno *" value={form.apellido_paterno} onChange={(v) => set('apellido_paterno', v)} error={err('apellido_paterno')} placeholder="Ej: García" />
-                        <FormField label="Apellido Materno"  value={form.apellido_materno} onChange={(v) => set('apellido_materno', v)} error={err('apellido_materno')} placeholder="Ej: López" />
+                        <FormField label="Primer Nombre"    required={true} value={form.primer_nombre}    onChange={(v) => set('primer_nombre', v)}    error={err('primer_nombre')}    placeholder="Ej: Juan" />
+                        <FormField label="Segundo Nombre"   value={form.segundo_nombre}   onChange={(v) => set('segundo_nombre', v)}   error={err('segundo_nombre')}   placeholder="Ej: Carlos" />
+                        <FormField label="Apellido Paterno" required={true} value={form.apellido_paterno} onChange={(v) => set('apellido_paterno', v)} error={err('apellido_paterno')} placeholder="Ej: García" />
+                        <FormField label="Apellido Materno" value={form.apellido_materno} onChange={(v) => set('apellido_materno', v)} error={err('apellido_materno')} placeholder="Ej: López" />
                         <div className="space-y-1">
-                            <Label>Género</Label>
+                            <ReqLabel>Género</ReqLabel>
                             <Select value={form.genero} onValueChange={(v) => set('genero', v)}>
                                 <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                                 <SelectContent>
@@ -58,7 +61,7 @@ export default function DocenteFormModal({ open, onClose, editing, onSave, apiEr
                     <FormSection title="Datos Profesionales">
                         <FormField label="Especialidad" value={form.especialidad} onChange={(v) => set('especialidad', v)} error={err('especialidad')} placeholder="Ej: Matemáticas" />
                         <div className="space-y-1">
-                            <Label>Planilla</Label>
+                            <ReqLabel>Planilla</ReqLabel>
                             <Select value={form.planilla} onValueChange={(v) => set('planilla', v)}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
@@ -72,7 +75,7 @@ export default function DocenteFormModal({ open, onClose, editing, onSave, apiEr
 
                     {editing && (
                         <div className="space-y-1">
-                            <Label>Estado</Label>
+                            <OptLabel>Estado</OptLabel>
                             <Select value={form.estado} onValueChange={(v) => set('estado', v)}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
