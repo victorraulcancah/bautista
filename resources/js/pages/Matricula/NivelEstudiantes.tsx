@@ -8,6 +8,7 @@ import { useOptions } from '@/hooks/useOptions';
 import MatricularModal from './components/MatricularModal';
 import HistorialModal from './components/HistorialModal';
 import ResetUserModal from './components/ResetUserModal';
+import FotocheckModal from './components/FotocheckModal';
 import EstudianteFormModal from '../GestionAlumnos/components/EstudianteFormModal';
 import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import type { Estudiante, EstudianteFormData } from '../GestionAlumnos/hooks/useEstudiantes';
@@ -53,6 +54,11 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
     const [editEstOpen, setEditEstOpen]       = useState(false);
     const [editEstudiante, setEditEstudiante] = useState<Estudiante | null>(null);
     const [editEstApiErrors, setEditEstApiErrors] = useState<Record<string, string[]>>({});
+
+    // Fotocheck modal
+    const [fotoOpen, setFotoOpen]           = useState(false);
+    const [fotoEstId, setFotoEstId]         = useState<number | null>(null);
+    const [fotoEstNombre, setFotoEstNombre] = useState('');
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard',           href: '/dashboard' },
@@ -155,6 +161,14 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
         setResetOpen(true);
     };
 
+    const openFotocheck = (m: Matricula) => {
+        if (!m.estu_id) return;
+        const nombre = [m.estudiante?.primer_nombre, m.estudiante?.apellido_paterno].filter(Boolean).join(' ');
+        setFotoEstId(m.estu_id);
+        setFotoEstNombre(nombre);
+        setFotoOpen(true);
+    };
+
     return (
         <>
             <Head title={`Matriculados — ${nivelNombre}`} />
@@ -220,7 +234,7 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                                             <tr className="bg-[#00a65a]">
                                                 <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">#</th>
                                                 <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Grado / Sección</th>
-                                                <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Nombre Completo</th>
+                                                <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase lg:hidden">Nombre Completo</th>
                                                 <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase lg:table-cell hidden">Primer Nombre</th>
                                                 <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase xl:table-cell hidden">Segundo Nombre</th>
                                                 <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase lg:table-cell hidden">Ap. Paterno</th>
@@ -228,7 +242,7 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                                                 <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">DNI</th>
                                                 <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase hidden lg:table-cell">Matriculado</th>
                                                 <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Estado</th>
-                                                <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase w-[200px]">Acciones</th>
+                                                <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase w-[220px]">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -295,6 +309,16 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                                                         </td>
                                                         <td className="px-4 py-4">
                                                             <div className="flex items-center justify-center gap-1.5">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    className="h-8 w-8 p-0 text-emerald-600 hover:bg-emerald-50"
+                                                                    title="Imprimir Fotocheck"
+                                                                    onClick={() => openFotocheck(m)}
+                                                                >
+                                                                    <Printer className="h-3.5 w-3.5" />
+                                                                </Button>
+                                                                <div className="w-px h-4 bg-neutral-200 mx-1" />
                                                                 <Button
                                                                     size="sm"
                                                                     variant="ghost"
@@ -394,45 +418,55 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                                                     </div>
                                                 </div>
 
-                                                <div className="grid grid-cols-4 gap-2 mt-1">
+                                                <div className="grid grid-cols-5 gap-2 mt-1">
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="h-10 border-neutral-200 text-neutral-600 gap-1.5"
+                                                        className="h-10 border-emerald-100 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 p-0 flex flex-col items-center justify-center"
+                                                        onClick={() => openFotocheck(m)}
+                                                        title="Fotocheck"
+                                                    >
+                                                        <Printer className="h-3.5 w-3.5" />
+                                                        <span className="text-[9px] font-bold">Foto</span>
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-10 border-neutral-200 text-neutral-600 p-0 flex flex-col items-center justify-center"
                                                         onClick={() => openEditEst(m)}
                                                         disabled={!student?.estu_id}
                                                     >
                                                         <Pencil className="h-3.5 w-3.5" />
-                                                        <span className="text-[10px] font-bold">Editar</span>
+                                                        <span className="text-[9px] font-bold">Editar</span>
                                                     </Button>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="h-10 border-neutral-200 text-neutral-600 gap-1.5"
+                                                        className="h-10 border-neutral-200 text-neutral-600 p-0 flex flex-col items-center justify-center"
                                                         onClick={() => openHistorial(m)}
                                                         disabled={!student?.user_id}
                                                     >
                                                         <History className="h-3.5 w-3.5" />
-                                                        <span className="text-[10px] font-bold">Bitácora</span>
+                                                        <span className="text-[9px] font-bold">Log</span>
                                                     </Button>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="h-10 border-neutral-200 text-neutral-600 gap-1.5"
+                                                        className="h-10 border-neutral-200 text-neutral-600 p-0 flex flex-col items-center justify-center"
                                                         onClick={() => openReset(m)}
                                                         disabled={!student?.user_id}
                                                     >
                                                         <KeyRound className="h-3.5 w-3.5" />
-                                                        <span className="text-[10px] font-bold">Clave</span>
+                                                        <span className="text-[9px] font-bold">Clave</span>
                                                     </Button>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="h-10 border-red-100 bg-red-50 text-red-500 hover:bg-red-100 gap-1.5"
+                                                        className="h-10 border-red-100 bg-red-50 text-red-500 hover:bg-red-100 p-0 flex flex-col items-center justify-center"
                                                         onClick={() => setDeletingId(m.matricula_id)}
                                                     >
                                                         <Trash2 className="h-3.5 w-3.5" />
-                                                        <span className="text-[10px] font-bold">Anular</span>
+                                                        <span className="text-[9px] font-bold">Anular</span>
                                                     </Button>
                                                 </div>
                                             </div>
@@ -473,6 +507,13 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                 onClose={() => setResetOpen(false)}
                 userId={resetUserId}
                 nombre={resetNombre}
+            />
+
+            <FotocheckModal
+                open={fotoOpen}
+                onClose={() => setFotoOpen(false)}
+                estudianteId={fotoEstId}
+                estudianteNombre={fotoEstNombre}
             />
 
             <EstudianteFormModal
