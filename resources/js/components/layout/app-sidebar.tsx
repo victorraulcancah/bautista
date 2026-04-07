@@ -142,7 +142,7 @@ function NavLinkItem({ item }: { item: Extract<NavItem, { type: 'link' }> }) {
     const page = usePage();
     const path = page.url;
     const isActive = path.startsWith(item.href);
-    const { state } = useSidebar();
+    const { state, isMobile } = useSidebar();
 
     const btnClass = cn(
         'transition-colors',
@@ -156,7 +156,7 @@ function NavLinkItem({ item }: { item: Extract<NavItem, { type: 'link' }> }) {
             <SidebarMenuButton asChild tooltip={item.title} className={btnClass}>
                 <Link href={item.href}>
                     <item.icon className="size-4" />
-                    {state === 'expanded' && (
+                    {(state === 'expanded' || isMobile) && (
                         <span className="text-xs font-semibold uppercase tracking-tight">{item.title}</span>
                     )}
                 </Link>
@@ -168,7 +168,7 @@ function NavLinkItem({ item }: { item: Extract<NavItem, { type: 'link' }> }) {
 function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
     const page = usePage();
     const path = page.url;
-    const { state } = useSidebar();
+    const { state, isMobile } = useSidebar();
     const [open, setOpen] = useState(() =>
         item.children.some((c) => path.startsWith(c.href)),
     );
@@ -187,7 +187,7 @@ function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
                 )}
             >
                 <item.icon className="size-4" />
-                {state === 'expanded' && (
+                {(state === 'expanded' || isMobile) && (
                     <>
                         <span className="flex-1 text-xs font-black uppercase tracking-tighter">{item.title}</span>
                         <ChevronRight className={cn('size-3.5 transition-transform duration-200', open && 'rotate-90')} />
@@ -195,14 +195,14 @@ function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
                 )}
             </SidebarMenuButton>
 
-            {open && state === 'expanded' && (
+            {open && (state === 'expanded' || isMobile) && (
                 <div className="ml-6 mt-0.5 flex flex-col gap-0.5 border-l border-sidebar-border pl-3">
                     {item.children.map((child) => (
                         <Link
                             key={child.href}
                             href={child.href}
                             className={cn(
-                                'rounded-md px-2 py-1.5 text-[10px] font-bold uppercase tracking-tight transition-colors',
+                                'rounded-md px-2 py-1.5 text-xs font-bold uppercase tracking-tight transition-colors',
                                 path === child.href
                                     ? 'font-medium text-white'
                                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white',

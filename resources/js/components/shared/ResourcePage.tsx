@@ -27,7 +27,7 @@ export default function ResourcePage({
 }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="flex flex-col gap-6 p-6">
+            <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6">
                 <PageHeader icon={icon} title={pageTitle} subtitle={subtitle} iconColor={iconColor} />
 
                 {flashSuccess && (
@@ -43,7 +43,7 @@ export default function ResourcePage({
                                 value={search}
                                 onChange={(e) => onSearch(e.target.value)}
                                 placeholder="Buscar..."
-                                className="w-full sm:w-64 flex-1"
+                                className="flex-1 sm:w-64"
                             />
                             <Button variant="outline" size="icon" className="shrink-0">
                                 <Search className="size-4" />

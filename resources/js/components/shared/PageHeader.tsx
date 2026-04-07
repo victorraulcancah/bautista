@@ -10,7 +10,7 @@ type Props = {
 export default function PageHeader({ icon: Icon, title, subtitle, iconColor = 'bg-blue-500' }: Props) {
     return (
         <div className="flex items-center gap-3">
-            <div className={`rounded-lg ${iconColor} p-2`}>
+            <div className={`rounded-lg ${iconColor} p-2 shrink-0`}>
                 <Icon className="size-5 text-white" />
             </div>
             <div>
