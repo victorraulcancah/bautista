@@ -1,30 +1,75 @@
+import { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import TitleForm from '@/components/TitleForm';
 import { ReqLabel, OptLabel, SELECT_CLS } from '@/components/shared/FormLabels';
 import type { ContactoForm } from './types';
 
+import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
 type Props = {
     tipo:  'padre' | 'madre' | 'apoderado';
     data:  ContactoForm;
     onChange: (k: keyof ContactoForm, v: string | boolean) => void;
+    onSearch: (dni: string) => void;
+    searching?: boolean;
 };
 
-export default function ContactoTab({ tipo, data, onChange: s }: Props) {
+export default function ContactoTab({ tipo, data, onChange: s, onSearch, searching }: Props) {
     const label = tipo === 'padre' ? 'Padre' : tipo === 'madre' ? 'Madre' : 'Apoderado';
+
+    // Auto-search when DNI reaches 8 digits
+    useEffect(() => {
+        if (data.tipo_doc === '1' && data.numero_doc.length === 8) {
+            onSearch(data.numero_doc);
+        }
+    }, [data.numero_doc, data.tipo_doc]);
 
     return (
         <div className="space-y-6">
+            
+            {/* Cabecera: Responsable y Documento */}
+            <div className="flex flex-wrap items-end gap-4 bg-emerald-50/30 p-4 rounded-xl border border-emerald-100/50">
+                <label className="flex items-center gap-2 cursor-pointer bg-white px-4 h-10 rounded-xl border border-emerald-100 shadow-sm shrink-0">
+                    <input
+                        type="checkbox"
+                        checked={data.es_pagador}
+                        onChange={e => s('es_pagador', e.target.checked)}
+                        className="h-4 w-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span className="text-sm font-bold text-emerald-800">Responsable de pago</span>
+                </label>
 
-            {/* Responsable de pago */}
-            <label className="flex items-center gap-2 cursor-pointer w-fit bg-emerald-50/50 px-3 py-2 rounded-lg border border-emerald-100">
-                <input
-                    type="checkbox"
-                    checked={data.es_pagador}
-                    onChange={e => s('es_pagador', e.target.checked)}
-                    className="h-4 w-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500"
-                />
-                <span className="text-sm font-bold text-emerald-800">Responsable de pago</span>
-            </label>
+                <div className="flex-1 min-w-[200px] space-y-1.5">
+                    <ReqLabel>Tipo Documento</ReqLabel>
+                    <select value={data.tipo_doc} onChange={e => s('tipo_doc', e.target.value)} className={SELECT_CLS}>
+                        <option value="1">DNI</option>
+                        <option value="2">Pasaporte</option>
+                        <option value="3">Carnet Extran.</option>
+                    </select>
+                </div>
+
+                <div className="flex-[1.5] min-w-[200px] space-y-1.5">
+                    <ReqLabel>Nro. Documento</ReqLabel>
+                    <div className="flex gap-2">
+                        <Input 
+                            className="h-10 text-sm rounded-xl bg-white flex-1" 
+                            value={data.numero_doc} 
+                            onChange={e => s('numero_doc', e.target.value)} 
+                            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), onSearch(data.numero_doc))}
+                            placeholder="00000000" 
+                        />
+                        <Button
+                            type="button" size="sm"
+                            onClick={() => onSearch(data.numero_doc)}
+                            disabled={searching || !data.numero_doc || data.tipo_doc !== '1'}
+                            className="bg-[#00a65a] hover:bg-[#008d4c] text-white h-10 px-3 shrink-0"
+                        >
+                            <Search className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
 
             {/* Datos Personales */}
             <div>
@@ -43,18 +88,6 @@ export default function ContactoTab({ tipo, data, onChange: s }: Props) {
                     <div className="space-y-1.5">
                         <OptLabel>Email</OptLabel>
                         <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" type="email" value={data.email_contacto} onChange={e => s('email_contacto', e.target.value)} placeholder="correo@..." />
-                    </div>
-                    <div className="space-y-1.5">
-                        <ReqLabel>Tipo Documento</ReqLabel>
-                        <select value={data.tipo_doc} onChange={e => s('tipo_doc', e.target.value)} className={SELECT_CLS}>
-                            <option value="1">DNI</option>
-                            <option value="2">Pasaporte</option>
-                            <option value="3">Carnet Extran.</option>
-                        </select>
-                    </div>
-                    <div className="space-y-1.5">
-                        <ReqLabel>Nro. Documento</ReqLabel>
-                        <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" value={data.numero_doc} onChange={e => s('numero_doc', e.target.value)} placeholder="00000000" />
                     </div>
                     <div className="space-y-1.5">
                         <ReqLabel>Familia Constituida</ReqLabel>

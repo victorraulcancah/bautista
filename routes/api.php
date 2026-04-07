@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\CalificacionApiController;
 use App\Http\Controllers\Api\ExamenResolucionApiController;
 use App\Http\Controllers\Api\AlumnoApiController;
 use App\Http\Controllers\Api\MatriculaPadresController;
+use App\Http\Controllers\Api\ReniecApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -208,6 +209,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('asistencia/usuario/{id}/export', [AsistenciaGeneralApiController::class, 'export']);
     Route::post('asistencia/marcar-qr', [AsistenciaGeneralApiController::class, 'marcarQR']);
     Route::get('asistencia/historial', [AsistenciaGeneralApiController::class, 'historial']);
+
+    // Reniec
+    Route::get('reniec/dni/{dni}', [ReniecApiController::class, 'searchDni']);
 
     // Portal Padre — detalle de hijos
     Route::middleware('check.role:padre_familia|madre_familia|apoderado')->group(function () {

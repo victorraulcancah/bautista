@@ -107,8 +107,47 @@ export default function MatricularModal({
                 });
                 setMatricula(prev => ({ ...prev, estu_id: found.estu_id.toString() }));
             } else {
-                setAlumno({ ...defaultAlumno(), username: dniSearch.trim() });
-                setMatricula(prev => ({ ...prev, estu_id: '' }));
+                // Si no existe localmente, buscar en RENIEC via APIPeru
+                try {
+                    const reniecRes = await api.get(`/reniec/dni/${dniSearch.trim()}`);
+                    if (reniecRes.data.success) {
+                        const d = reniecRes.data.data;
+                        setAlumno({
+                            ...defaultAlumno(),
+                            username:         d.dni,
+                            primer_nombre:    d.nombres,
+                            apellido_paterno: d.apellidoPaterno,
+                            apellido_materno: d.apellidoMaterno,
+                        });
+                        setMatricula(prev => ({ ...prev, estu_id: '' }));
+                    } else {
+                        setAlumno({ ...defaultAlumno(), username: dniSearch.trim() });
+                        setMatricula(prev => ({ ...prev, estu_id: '' }));
+                    }
+                } catch (e) {
+                    setAlumno({ ...defaultAlumno(), username: dniSearch.trim() });
+                    setMatricula(prev => ({ ...prev, estu_id: '' }));
+                }
+            }
+        } finally {
+            setSearching(false);
+        }
+    };
+
+    const handleContactoSearch = async (tipo: 'padre' | 'madre' | 'apoderado', dni: string) => {
+        if (!dni.trim()) return;
+        setSearching(true);
+        try {
+            const res = await api.get(`/reniec/dni/${dni.trim()}`);
+            if (res.data.success) {
+                const d = res.data.data;
+                const fn = tipo === 'padre' ? setPadre : tipo === 'madre' ? setMadre : setApoderado;
+                fn(prev => ({
+                    ...prev,
+                    nombres:   d.nombres,
+                    apellidos: `${d.apellidoPaterno} ${d.apellidoMaterno}`.trim(),
+                    numero_doc: d.dni
+                }));
             }
         } finally {
             setSearching(false);
@@ -234,6 +273,8 @@ export default function MatricularModal({
                                         tipo={tipo}
                                         data={data}
                                         onChange={(k, v) => setC(tipo, k, v)}
+                                        onSearch={(dni: string) => handleContactoSearch(tipo, dni)}
+                                        searching={searching}
                                     />
                                 </TabsContent>
                             );
