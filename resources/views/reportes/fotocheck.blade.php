@@ -14,6 +14,7 @@
             position: relative;
             overflow: hidden;
             color: #1e293b;
+            line-height: 1.2;
         }
 
         /* 1. Header (Deep Emerald Gradient) */
@@ -74,12 +75,14 @@
             margin-bottom: 6pt; text-transform: uppercase;
         }
         .last-names {
-            margin: 0; padding: 0 5pt; font-size: 9.5pt; font-weight: 800;
-            color: #0f172a; line-height: 1; text-transform: uppercase;
+            margin: 0; padding: 0 4pt; font-size: 10pt; font-weight: 900;
+            color: #0f172a; line-height: 1.1; text-transform: uppercase;
+            letter-spacing: -0.2pt;
         }
         .first-names {
-            margin: 3pt 0 0; font-size: 7.5pt; font-weight: 500;
-            color: #475569; text-transform: uppercase;
+            margin: 2pt 0 0; font-size: 7.5pt; font-weight: 500;
+            color: #64748b; text-transform: uppercase;
+            letter-spacing: 0.1pt;
         }
 
         /* 4. Bottom Data (Avoiding Collisions) */
