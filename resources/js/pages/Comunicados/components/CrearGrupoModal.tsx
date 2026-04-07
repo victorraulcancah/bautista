@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Users, X, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,6 +17,9 @@ type Props = {
 
 export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
     const [nombre, setNombre]     = useState('');
+    const [foto, setFoto]         = useState<File | null>(null);
+    const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+    const fileInputRef            = useRef<HTMLInputElement>(null);
     const [tipoAgrupacion, setTipoAgrupacion] = useState<Estrategia>('curso');
     const [opciones, setOpciones] = useState<OpcionAgrupacion[]>([]);
     const [opcionId, setOpcionId] = useState('');
@@ -29,6 +32,7 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
     useEffect(() => {
         if (!open) {
             setNombre(''); setOpcionId(''); setAlumnos([]); setSel([]); setError(''); setTipoAgrupacion('curso');
+            setFoto(null); setFotoPreview(null);
             return;
         }
 
@@ -77,6 +81,14 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
         e.target.value = '';
     };
 
+    const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setFoto(file);
+            setFotoPreview(URL.createObjectURL(file));
+        }
+    };
+
     const quitar = (uid: number) => setSel((prev) => prev.filter((s) => s.user_id !== uid));
 
     const handleSubmit = async (e: { preventDefault(): void }) => {
@@ -84,10 +96,17 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
         if (!nombre.trim())        { setError('El nombre del grupo es requerido.'); return; }
         if (seleccionados.length < 1) { setError('Selecciona al menos un alumno.'); return; }
         setSaving(true); setError('');
+        
         try {
-            await api.post('/mensajeria/grupos', {
-                nombre,
-                user_ids: seleccionados.map((s) => s.user_id),
+            const formData = new FormData();
+            formData.append('nombre', nombre);
+            formData.append('user_ids', JSON.stringify(seleccionados.map((s) => s.user_id)));
+            if (foto) {
+                formData.append('foto', foto);
+            }
+
+            await api.post('/mensajeria/grupos', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             onSaved(); onClose();
         } catch {
@@ -111,6 +130,25 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
                 <TitleForm>Datos del Grupo</TitleForm>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Imagen del Grupo */}
+                    <div className="flex flex-col items-center gap-2">
+                        <div 
+                            className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden cursor-pointer hover:bg-gray-100 transition-colors relative group"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            {fotoPreview ? (
+                                <img src={fotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                            ) : (
+                                <Users className="w-8 h-8 text-gray-300 group-hover:text-gray-400" />
+                            )}
+                            <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center">
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">Cambiar<br/>Foto</span>
+                            </div>
+                        </div>
+                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFotoChange} />
+                        <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Icono del Grupo (Opcional)</label>
+                    </div>
+
                     {/* Nombre del grupo */}
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-neutral-600">Nombre del grupo:</label>

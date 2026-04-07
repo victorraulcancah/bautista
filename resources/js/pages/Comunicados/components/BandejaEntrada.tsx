@@ -74,9 +74,12 @@ export default function BandejaEntrada({ mensajes, loading, onSelect, onRefresh,
                                     <div className="relative shrink-0">
                                         <Avatar className="size-12 ring-2 ring-transparent transition-all group-hover:ring-emerald-100">
                                             {m.grupo ? (
-                                                <AvatarFallback className="bg-emerald-100 text-emerald-700">
-                                                    <Users className="size-6" />
-                                                </AvatarFallback>
+                                                <>
+                                                    <AvatarImage src={m.grupo.foto || ''} alt={m.grupo.nombre} />
+                                                    <AvatarFallback className="bg-emerald-100 text-emerald-700">
+                                                        <Users className="size-6" />
+                                                    </AvatarFallback>
+                                                </>
                                             ) : (
                                                 <>
                                                     <AvatarImage src={m.remitente?.foto || ''} alt={m.remitente?.nombre} />

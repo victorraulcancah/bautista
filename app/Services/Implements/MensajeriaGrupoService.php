@@ -25,6 +25,7 @@ class MensajeriaGrupoService implements MensajeriaGrupoServiceInterface
         $grupo = MensajeriaGrupo::create([
             'insti_id'    => $instiId,
             'nombre'      => $data['nombre'],
+            'foto'        => $data['foto'] ?? null,
             'docente_id'  => $docenteId,
         ]);
 

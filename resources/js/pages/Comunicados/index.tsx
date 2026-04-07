@@ -81,11 +81,11 @@ export default function MensajesPage() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Mensajes" />
 
-            <div className="flex h-[calc(100vh-8rem)] flex-col gap-4 p-6">
+            <div className="flex h-[calc(100vh-8rem)] flex-col gap-2 md:gap-4 p-2 sm:p-4 md:p-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-blue-500">
                             <Inbox className="size-5 text-white" />
                         </div>
                         <div>
@@ -95,7 +95,7 @@ export default function MensajesPage() {
                             )}
                         </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <Button
                             onClick={() => setModalGrupo(true)}
                             variant="outline"
@@ -115,9 +115,9 @@ export default function MensajesPage() {
                 </div>
 
                 {/* Layout 2 columnas */}
-                <div className="flex flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white">
-                    {/* Sidebar izquierdo */}
-                    <div className="w-80 shrink-0 border-r border-gray-100 overflow-hidden flex flex-col">
+                <div className="flex flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white relative">
+                    {/* Sidebar izquierdo (Lista de mensajes) */}
+                    <div className={`${seleccionado ? 'hidden md:flex' : 'flex'} w-full md:w-80 shrink-0 border-r border-gray-100 overflow-hidden flex-col`}>
                         <BandejaEntrada
                             mensajes={mensajes}
                             loading={loading}
@@ -127,8 +127,8 @@ export default function MensajesPage() {
                         />
                     </div>
 
-                    {/* Panel derecho */}
-                    <div className="flex-1 overflow-hidden">
+                    {/* Panel derecho (Chat Abierto) */}
+                    <div className={`${!seleccionado ? 'hidden md:flex' : 'flex'} flex-1 overflow-hidden flex-col w-full bg-[#f0f2f5]`}>
                         {seleccionado ? (
                             <Conversacion
                                 mensajeId={seleccionado}

@@ -35,8 +35,8 @@ export default function MensajeriaIndex() {
     const loadMessages = () => {
         setLoading(true);
         Promise.all([
-            api.get('/mensajes/recibidos'),
-            api.get('/mensajes/enviados')
+            api.get('/mensajes-legacy/recibidos'),
+            api.get('/mensajes-legacy/enviados')
         ]).then(([rec, env]) => {
             setRecibidos(rec.data);
             setEnviados(env.data);
@@ -46,13 +46,13 @@ export default function MensajeriaIndex() {
 
     const handleSearchContact = (q: string) => {
         if (q.length < 2) return setContactos([]);
-        api.get(`/mensajes/contactos?q=${q}`).then(res => setContactos(res.data));
+        api.get(`/mensajes-legacy/contactos?q=${q}`).then(res => setContactos(res.data));
     };
 
     const handleSend = () => {
         if (!destinatario || !asunto || !cuerpo) return alert("Completa todos los campos.");
         setSending(true);
-        api.post('/mensajes/enviar', {
+        api.post('/mensajes-legacy/enviar', {
             destinatario_id: destinatario.id,
             asunto,
             cuerpo

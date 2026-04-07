@@ -32,7 +32,7 @@ class MensajeResource extends JsonResource
             'grupo'          => $this->whenLoaded('grupo', fn () => $this->grupo ? [
                 'id'     => $this->grupo->id,
                 'nombre' => $this->grupo->nombre,
-                'foto'   => null, // Opcional: foto del grupo
+                'foto'   => $this->grupo->foto ? asset("storage/{$this->grupo->foto}") : null,
             ] : null),
             'respuestas'     => $this->whenLoaded('respuestas', fn () =>
                 $this->respuestas->map(fn ($r) => [

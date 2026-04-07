@@ -184,14 +184,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Mensajería
-    Route::get('mensajes/recibidos', [MensajeriaApiController::class, 'recibidos']);
-    Route::get('mensajes/enviados', [MensajeriaApiController::class, 'enviados']);
-    Route::get('mensajes/grupos', [MensajeriaApiController::class, 'listarGrupos']);
-    Route::post('mensajes/grupos', [MensajeriaApiController::class, 'crearGrupo']);
-    Route::get('mensajes/contactos', [MensajeriaApiController::class, 'buscarContactos']);
-    Route::post('mensajes/enviar', [MensajeriaApiController::class, 'enviar']);
-    Route::get('mensajes/{id}', [MensajeriaApiController::class, 'ver']);
-    Route::post('mensajes/{id}/responder', [MensajeriaApiController::class, 'responder']);
+    Route::get('mensajes-legacy/recibidos', [MensajeriaApiController::class, 'recibidos']);
+    Route::get('mensajes-legacy/enviados', [MensajeriaApiController::class, 'enviados']);
+    Route::get('mensajes-legacy/grupos', [MensajeriaApiController::class, 'listarGrupos']);
+    Route::post('mensajes-legacy/grupos', [MensajeriaApiController::class, 'crearGrupo']);
+    Route::get('mensajes-legacy/contactos', [MensajeriaApiController::class, 'buscarContactos']);
+    Route::post('mensajes-legacy/enviar', [MensajeriaApiController::class, 'enviar']);
+    Route::get('mensajes-legacy/{id}', [MensajeriaApiController::class, 'ver']);
+    Route::post('mensajes-legacy/{id}/responder', [MensajeriaApiController::class, 'responder']);
 
     // Blog y Noticias
     Route::get('blog', [BlogApiController::class, 'index']);

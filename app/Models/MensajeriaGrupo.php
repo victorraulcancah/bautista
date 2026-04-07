@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class MensajeriaGrupo extends Model
 {
     protected $table    = 'mensajeria_grupos';
-    protected $fillable = ['insti_id', 'nombre', 'docente_id'];
+    protected $fillable = ['insti_id', 'nombre', 'foto', 'docente_id'];
 
     public function miembros(): BelongsToMany
     {

@@ -23,15 +23,17 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
     }, [mensajeId]);
 
     const loadMessage = () => {
-        api.get(`/mensajes/${mensajeId}`)
-            .then(res => setMensaje(res.data))
-            .finally(() => setLoading(false));
+        api.get(`/mensajes-legacy/${mensajeId}`)
+            .then(res => {
+                setMensaje(res.data);
+                setLoading(false);
+            });
     };
 
     const handleReply = () => {
         if (!respuesta) return;
         setSending(true);
-        api.post(`/mensajes/${mensajeId}/responder`, { respuesta })
+        api.post(`/mensajes-legacy/${mensajeId}/responder`, { respuesta })
             .then(() => {
                 setRespuesta("");
                 loadMessage();

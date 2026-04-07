@@ -16,7 +16,7 @@ type Respuesta = {
     id:         number;
     respuesta:  string;
     created_at: string;
-    autor: { id: number; nombre: string };
+    autor: { id: number; nombre: string; foto?: string | null };
 };
 
 type MensajeDetalle = {
@@ -25,9 +25,9 @@ type MensajeDetalle = {
     cuerpo:      string;
     leido:       boolean;
     created_at:  string;
-    remitente:   { id: number; nombre: string } | null;
-    destinatario:{ id: number; nombre: string } | null;
-    grupo:       { id: number; nombre: string } | null;
+    remitente:   { id: number; nombre: string; foto?: string | null } | null;
+    destinatario:{ id: number; nombre: string; foto?: string | null } | null;
+    grupo:       { id: number; nombre: string; foto?: string | null } | null;
     respuestas:  Respuesta[];
 };
 
@@ -81,43 +81,58 @@ export default function Conversacion({ mensajeId, userId, onBack }: Props) {
 
     if (!mensaje) return null;
 
-    const destino = mensaje.grupo?.nombre ?? mensaje.destinatario?.nombre ?? '—';
+    const otro = mensaje.remitente?.id === userId ? mensaje.destinatario : mensaje.remitente;
+    const destinoNombre = mensaje.grupo?.nombre ?? otro?.nombre ?? '—';
+    const destinoFoto = mensaje.grupo?.foto ?? otro?.foto ?? null;
 
     return (
         <div className="flex h-full flex-col">
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-3">
+            <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-3 bg-white">
                 <button onClick={onBack} className="rounded p-1 hover:bg-gray-100">
-                    <ArrowLeft className="size-4 text-gray-500" />
+                    <ArrowLeft className="size-5 text-gray-500" />
                 </button>
-                <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-gray-800">{mensaje.asunto}</p>
-                    <p className="text-xs text-gray-500">
-                        De: <strong>{mensaje.remitente?.nombre ?? '—'}</strong>
-                        {' '} → {' '}
-                        Para: <strong>{destino}</strong>
-                    </p>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 overflow-hidden border border-gray-100 flex items-center justify-center text-gray-500 font-bold">
+                        {destinoFoto ? (
+                            <img src={destinoFoto} alt={destinoNombre} className="w-full h-full object-cover" />
+                        ) : (
+                            destinoNombre.charAt(0).toUpperCase()
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        <p className="truncate font-bold text-gray-900">{destinoNombre}</p>
+                        <p className="text-xs text-gray-500 truncate">{mensaje.asunto}</p>
+                    </div>
                 </div>
-                <span className="whitespace-nowrap text-xs text-gray-400">{fmtDate(mensaje.created_at)}</span>
-
             </div>
 
             {/* Chat */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-[#E5DDD5]">
                 {mensaje.respuestas.map((r) => {
                     const esMio = r.autor.id === userId;
                     return (
                         <div key={r.id} className={`flex ${esMio ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[75%] rounded-xl px-3 py-2 text-sm ${esMio ? 'bg-[#00a65a] text-white' : 'bg-gray-100 text-gray-800'}`}>
+                            {!esMio && (
+                                <div className="flex-shrink-0 mr-2 mt-auto mb-1">
+                                    {r.autor.foto ? (
+                                        <img src={r.autor.foto} alt="Avatar" className="w-8 h-8 rounded-full object-cover shadow-sm" />
+                                    ) : (
+                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-xs font-bold text-gray-500 shadow-sm">
+                                            {r.autor.nombre?.charAt(0) ?? '?'}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            <div className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm ${esMio ? 'bg-[#dcf8c6] text-gray-900 rounded-br-sm' : 'bg-white text-gray-800 rounded-bl-sm'}`}>
                                 {!esMio && (
-                                    <p className="mb-1 text-xs font-semibold text-green-700">{r.autor.nombre}</p>
+                                    <p className="mb-1 text-xs font-bold text-[#075e54]">{r.autor.nombre}</p>
                                 )}
                                 <div
                                     className="prose prose-sm max-w-none whitespace-pre-wrap break-words"
                                     dangerouslySetInnerHTML={{ __html: r.respuesta }}
                                 />
-                                <p className={`mt-1 text-right text-xs ${esMio ? 'text-green-100' : 'text-gray-400'}`}>{fmtDate(r.created_at)}</p>
-
+                                <p className="mt-1 text-right text-[10px] text-gray-500 font-medium">{fmtDate(r.created_at)}</p>
                             </div>
                         </div>
                     );

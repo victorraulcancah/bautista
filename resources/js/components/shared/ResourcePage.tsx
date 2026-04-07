@@ -37,20 +37,20 @@ export default function ResourcePage({
                 )}
 
                 <SectionCard title={`Listado de ${pageTitle}`}>
-                    <div className="mb-4 flex items-center justify-between gap-3">
-                        <div className="flex gap-2">
+                    <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex w-full sm:w-auto gap-2">
                             <Input
                                 value={search}
                                 onChange={(e) => onSearch(e.target.value)}
                                 placeholder="Buscar..."
-                                className="w-64"
+                                className="w-full sm:w-64 flex-1"
                             />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" className="shrink-0">
                                 <Search className="size-4" />
                             </Button>
                         </div>
                         {btnLabel && onNew && (
-                            <Button onClick={onNew} className="bg-[#00a65a] hover:bg-[#008d4c] text-white gap-2">
+                            <Button onClick={onNew} className="bg-[#00a65a] w-full sm:w-auto hover:bg-[#008d4c] text-white gap-2">
                                 <Plus className="size-4" /> {btnLabel}
                             </Button>
                         )}

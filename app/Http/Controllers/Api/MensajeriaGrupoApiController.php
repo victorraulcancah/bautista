@@ -143,20 +143,38 @@ class MensajeriaGrupoApiController extends Controller
     {
         $request->validate([
             'nombre'   => ['required', 'string', 'max:150'],
-            'user_ids' => ['required', 'array', 'min:1'],
-            'user_ids.*' => ['integer'],
+            'user_ids' => ['required', 'string'], // or array if sending as JSON
+            'foto'     => ['nullable', 'image', 'max:4096'],
         ]);
+
+        $data = $request->only('nombre');
+        
+        // As it's FormData, user_ids might be a comma-separated string, array, or JSON string. Let's parse it safely:
+        $userIds = $request->input('user_ids');
+        if (is_string($userIds)) {
+            $data['user_ids'] = json_decode($userIds, true) ?? explode(',', $userIds);
+        } else {
+            $data['user_ids'] = (array) $userIds;
+        }
+
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = \Illuminate\Support\Str::random(40) . '.' . $file->extension();
+            $path = $file->storeAs("mensajeria/grupos", $filename, 'public');
+            $data['foto'] = $path;
+        }
 
         $grupo = $this->service->crear(
             instiId:   $request->user()->insti_id,
             docenteId: $request->user()->id,
-            data:      $request->only('nombre', 'user_ids'),
+            data:      $data,
         );
 
         return response()->json([
             'id'             => $grupo->id,
             'nombre'         => $grupo->nombre,
-            'miembros_count' => $grupo->miembros_count,
+            'foto'           => $grupo->foto ? asset('storage/' . $grupo->foto) : null,
+            'miembros_count' => $grupo->miembros_count ?? count($data['user_ids']),
         ], 201);
     }
 }
