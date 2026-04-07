@@ -74,14 +74,18 @@ export default function AsignarCursosModal({ open, onClose, docente }: Props) {
                 next.seccion_id = '';
                 next.curso_id   = '';
                 setGradosFilt((grados as any[]).filter(g => String(g.nivel_id) === val));
-                setCursosFilt([]);
+                setCursosFilt((cursos as any[]).filter(c => String(c.nivel_id) === val));
                 setSeccionesFilt([]);
             }
             if (key === 'grado_id') {
                 next.seccion_id = '';
                 next.curso_id   = '';
                 setSeccionesFilt((secciones as any[]).filter(s => String(s.grado_id) === val));
-                setCursosFilt((cursos as any[]).filter(c => String(c.grado_id) === val));
+                // Ver cursos del nivel con o sin grado asignado (pool del nivel)
+                setCursosFilt((cursos as any[]).filter(c => 
+                    String(c.nivel_id) === next.nivel_id && 
+                    (!c.grado_id || String(c.grado_id) === val)
+                ));
             }
             return next;
         });
