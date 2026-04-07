@@ -15,10 +15,10 @@ class DocenteCursoApiController extends Controller
     {
         $cursos = DocenteCurso::with(['apertura', 'curso', 'nivel', 'grado', 'seccion'])
             ->where('docente_id', $docenteId)
-            ->orderByDesc('id')
+            ->orderByDesc('docen_curso_id')
             ->get()
             ->map(fn ($dc) => [
-                'id'       => $dc->id,
+                'id'       => $dc->docen_curso_id,
                 'apertura' => $dc->apertura ? ['id' => $dc->apertura->apertura_id, 'nombre' => $dc->apertura->nombre] : null,
                 'curso'    => $dc->curso    ? ['id' => $dc->curso->curso_id,       'nombre' => $dc->curso->nombre]    : null,
                 'nivel'    => $dc->nivel    ? ['id' => $dc->nivel->nivel_id,        'nombre' => $dc->nivel->nombre_nivel]    : null,
@@ -48,7 +48,7 @@ class DocenteCursoApiController extends Controller
         $dc->load(['apertura', 'curso', 'nivel', 'grado', 'seccion']);
 
         return response()->json([
-            'id'       => $dc->id,
+            'id'       => $dc->docen_curso_id,
             'apertura' => $dc->apertura ? ['id' => $dc->apertura->apertura_id, 'nombre' => $dc->apertura->nombre] : null,
             'curso'    => $dc->curso    ? ['id' => $dc->curso->curso_id,       'nombre' => $dc->curso->nombre]    : null,
             'nivel'    => $dc->nivel    ? ['id' => $dc->nivel->nivel_id,        'nombre' => $dc->nivel->nombre_nivel]    : null,

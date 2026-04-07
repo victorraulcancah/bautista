@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import ResourceTable, { Column } from '@/components/shared/ResourceTable';
+import { ReqLabel } from '@/components/shared/FormLabels';
 import http from '@/services/http';
 import type { Docente } from '../hooks/useDocentes';
 import { nombreCompleto } from '../hooks/useDocentes';
@@ -45,11 +47,11 @@ export default function AsignarCursosModal({ open, onClose, docente }: Props) {
         setLoading(true);
         Promise.all([
             http.get(`/docentes/${docente.docente_id}/cursos`),
-            http.get('/matriculas/aperturas'),
-            http.get('/niveles'),
-            http.get('/grados'),
-            http.get('/secciones'),
-            http.get('/cursos'),
+            http.get('/matriculas/aperturas?per_page=500'),
+            http.get('/niveles?per_page=500'),
+            http.get('/grados?per_page=500'),
+            http.get('/secciones?per_page=500'),
+            http.get('/cursos?per_page=500'),
         ]).then(([asig, ap, niv, gr, sec, cur]) => {
             setAsignaciones(asig.data);
             setAperturas((ap.data?.data ?? ap.data).map((a: any) => ({ id: a.apertura_id, nombre: a.nombre })));
@@ -111,12 +113,12 @@ export default function AsignarCursosModal({ open, onClose, docente }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
+            <DialogContent className="w-[95vw] sm:max-w-3xl p-0 overflow-hidden">
+                <DialogHeader className="p-6 pb-0">
                     <DialogTitle>Asignar Cursos — {docente ? nombreCompleto(docente) : ''}</DialogTitle>
                 </DialogHeader>
 
-                <Tabs defaultValue="lista">
+                <Tabs defaultValue="lista" className="p-6 pt-2">
                     <TabsList className="w-full">
                         <TabsTrigger value="lista"   className="flex-1">Lista</TabsTrigger>
                         <TabsTrigger value="agregar" className="flex-1">Agregar</TabsTrigger>
@@ -129,95 +131,90 @@ export default function AsignarCursosModal({ open, onClose, docente }: Props) {
                         ) : asignaciones.length === 0 ? (
                             <p className="py-8 text-center text-sm text-gray-400">Sin asignaciones registradas.</p>
                         ) : (
-                            <div className="rounded-lg border overflow-hidden">
-                                <table className="w-full text-xs">
-                                    <thead>
-                                        <tr className="bg-[#00a65a] text-white">
-                                            <th className="px-3 py-2 text-center">#</th>
-                                            <th className="px-3 py-2 text-left">Nivel</th>
-                                            <th className="px-3 py-2 text-left">Grado</th>
-                                            <th className="px-3 py-2 text-left">Curso</th>
-                                            <th className="px-3 py-2 text-left">Sección</th>
-                                            <th className="px-3 py-2 text-center">Eliminar</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {asignaciones.map((a, i) => (
-                                            <tr key={a.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                                <td className="px-3 py-2 text-center text-gray-400">{i + 1}</td>
-                                                <td className="px-3 py-2">{a.nivel?.nombre   ?? '—'}</td>
-                                                <td className="px-3 py-2">{a.grado?.nombre   ?? '—'}</td>
-                                                <td className="px-3 py-2">{a.curso?.nombre   ?? '—'}</td>
-                                                <td className="px-3 py-2">{a.seccion?.nombre ?? '—'}</td>
-                                                <td className="px-3 py-2 text-center">
-                                                    <Button size="icon" variant="ghost"
-                                                        className="size-6 text-red-500 hover:bg-red-50"
-                                                        onClick={() => handleRemove(a)}
-                                                    >
-                                                        <Trash2 className="size-3" />
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <ResourceTable
+                                rows={{
+                                    data:         asignaciones,
+                                    current_page: 1,
+                                    last_page:    1,
+                                    per_page:     asignaciones.length,
+                                    total:        asignaciones.length,
+                                    from:         1,
+                                    to:           asignaciones.length,
+                                }}
+                                getKey={(a) => a.id}
+                                onDelete={(a) => handleRemove(a)}
+                                onPageChange={() => {}}
+                                columns={[
+                                    { label: '#', className: 'w-10 text-center text-neutral-400', render: (_, i) => i + 1 },
+                                    { label: 'Información Académica', render: (a) => (
+                                        <div className="flex flex-col text-left space-y-0.5">
+                                            <div className="flex flex-wrap gap-1">
+                                                <span className="bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded text-[10px] whitespace-nowrap font-medium">🏷️ {a.nivel?.nombre ?? '—'}</span>
+                                                <span className="bg-[#00a65a]/10 text-[#00a65a] px-1.5 py-0.5 rounded text-[10px] whitespace-nowrap font-bold">🏫 {a.grado?.nombre ?? '—'} - {a.seccion?.nombre ?? '—'}</span>
+                                            </div>
+                                            <span className="font-bold text-neutral-900 text-sm">{a.curso?.nombre ?? '—'}</span>
+                                            {a.apertura && (
+                                                <span className="text-[10px] text-neutral-400 italic">Periodicidad: {a.apertura.nombre}</span>
+                                            )}
+                                        </div>
+                                    )},
+                                ]}
+                            />
                         )}
                     </TabsContent>
 
                     {/* ── Tab Agregar ── */}
                     <TabsContent value="agregar" className="mt-3">
                         <div className="rounded-lg border p-4 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-semibold uppercase">Nivel</Label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <ReqLabel>Nivel</ReqLabel>
                                     <Select value={form.nivel_id} onValueChange={(v) => setF('nivel_id', v)}>
-                                        <SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger>
+                                        <SelectTrigger className="h-9"><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger>
                                         <SelectContent>
                                             {niveles.map(n => <SelectItem key={n.id} value={String(n.id)}>{n.nombre}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-semibold uppercase">Grado</Label>
+                                <div className="space-y-1.5">
+                                    <ReqLabel>Grado</ReqLabel>
                                     <Select value={form.grado_id} onValueChange={(v) => setF('grado_id', v)} disabled={!form.nivel_id}>
-                                        <SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger>
+                                        <SelectTrigger className="h-9"><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger>
                                         <SelectContent>
                                             {gradosFilt.map(g => <SelectItem key={g.id} value={String(g.id)}>{g.nombre}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-semibold uppercase">Curso</Label>
+                                <div className="space-y-1.5">
+                                    <ReqLabel>Curso</ReqLabel>
                                     <Select value={form.curso_id} onValueChange={(v) => setF('curso_id', v)} disabled={!form.grado_id}>
-                                        <SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger>
+                                        <SelectTrigger className="h-9"><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger>
                                         <SelectContent>
                                             {cursosFilt.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.nombre}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-semibold uppercase">Sección</Label>
+                                <div className="space-y-1.5">
+                                    <ReqLabel>Sección</ReqLabel>
                                     <Select value={form.seccion_id} onValueChange={(v) => setF('seccion_id', v)} disabled={!form.grado_id}>
-                                        <SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger>
+                                        <SelectTrigger className="h-9"><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger>
                                         <SelectContent>
                                             {seccionesFilt.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.nombre}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
-                            <div className="flex gap-2 pt-1">
+                            <div className="flex flex-col sm:flex-row gap-2 pt-2">
                                 <Button
-                                    className="flex-1 bg-[#00a65a] hover:bg-[#008d4c] text-white"
+                                    className="flex-1 bg-[#00a65a] hover:bg-[#008d4c] text-white font-bold order-1 sm:order-2"
                                     disabled={saving || !form.curso_id}
                                     onClick={handleAdd}
                                 >
                                     <Save className="h-4 w-4 mr-2" />
-                                    {saving ? 'Guardando...' : 'Guardar'}
+                                    {saving ? 'Guardando...' : 'Asignar Curso'}
                                 </Button>
-                                <Button type="button" variant="destructive" className="flex-1" onClick={onClose}>
-                                    <X className="h-4 w-4 mr-2" />
-                                    Cerrar
+                                <Button type="button" variant="outline" className="flex-1 order-2 sm:order-1 font-bold" onClick={onClose}>
+                                    Cancelar
                                 </Button>
                             </div>
                         </div>

@@ -139,7 +139,7 @@ export default function HorariosPage({ seccionId }: Props) {
 
             {/* Modal de Vista Previa de Imagen */}
             <Dialog open={!!viewingImage} onOpenChange={(v) => !v && setViewingImage(null)}>
-                <DialogContent className="max-w-3xl overflow-hidden p-0 border-none bg-transparent shadow-none">
+                <DialogContent className="w-[95vw] sm:max-w-3xl overflow-hidden p-0 border-none bg-transparent shadow-none">
                     <DialogHeader className="sr-only">
                         <DialogTitle>Vista previa de horario</DialogTitle>
                     </DialogHeader>
@@ -163,7 +163,7 @@ export default function HorariosPage({ seccionId }: Props) {
 
             {/* Modal simple: solo un archivo */}
             <Dialog open={modalOpen} onOpenChange={(v) => !v && setModalOpen(false)}>
-                <DialogContent className="max-w-sm">
+                <DialogContent className="w-[95vw] sm:max-w-sm">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <ImagePlus className="h-5 w-5" />
@@ -183,14 +183,14 @@ export default function HorariosPage({ seccionId }: Props) {
                         />
                     </label>
 
-                    <DialogFooter className="flex-col gap-2 sm:flex-col">
-                        <Button type="button" disabled={uploading} className="w-full bg-[#00a65a] hover:bg-[#008d4c] text-white"
+                    <DialogFooter className="flex-col sm:flex-row gap-2">
+                        <Button type="button" variant="destructive" className="w-full sm:order-1" onClick={() => setModalOpen(false)}>
+                            Cerrar
+                        </Button>
+                        <Button type="button" disabled={uploading} className="w-full bg-[#00a65a] hover:bg-[#008d4c] text-white sm:order-2"
                             onClick={() => inputRef.current?.click()}
                         >
                             Guardar
-                        </Button>
-                        <Button type="button" variant="destructive" className="w-full" onClick={() => setModalOpen(false)}>
-                            Cerrar
                         </Button>
                     </DialogFooter>
                 </DialogContent>
