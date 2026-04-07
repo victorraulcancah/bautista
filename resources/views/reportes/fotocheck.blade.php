@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <title>Fotocheck Estudiante</title>
     <style>
-        /*
-          High-End Identity Card Design
-          Dimensions: 54x86 mm (153.07pt x 243.78pt)
-         */
+        /* Modern Vertical ID Card Spec (54x86mm) */
         @page { margin: 0; padding: 0; }
         body {
             margin: 0; padding: 0;
@@ -16,197 +13,182 @@
             width: 153.07pt; height: 243.78pt;
             position: relative;
             overflow: hidden;
+            color: #1e293b;
         }
 
-        /* Institutional Header (Premium Gradient) */
-        .header-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 65pt;
-            background: linear-gradient(180deg, #007a41 0%, #00a65a 100%);
-            border-bottom: 2pt solid #eab308; /* Gold Accent Line */
-            z-index: 1;
+        /* 1. Header (Deep Emerald Gradient) */
+        .header-top {
+            position: absolute; top: 0; left: 0; width: 100%; height: 50pt;
+            background: linear-gradient(135deg, #007a41 0%, #00a65a 100%);
+            border-bottom: 1.5pt solid #eab308;
+            z-index: 10;
         }
-
-        /* Decorative Background Pattern */
-        .security-pattern {
-            position: absolute; top: 65pt; left: 0; width: 100%; height: 178pt;
-            background-color: #ffffff;
-            background-image:  radial-gradient(#00a65a10 0.5pt, transparent 0.5pt);
-            background-size: 10pt 10pt;
-            z-index: 0;
+        .header-content {
+            position: absolute; top: 6pt; left: 0; width: 100%;
+            text-align: center; z-index: 11;
         }
-
-        /* Institution Header Text */
-        .institution-header {
-            position: absolute; top: 8pt; left: 0; width: 100%;
-            text-align: center; z-index: 2;
-        }
-        .shield-icon {
-            width: 18pt; height: 20pt; margin: 0 auto 3pt;
+        .shield {
+            width: 14pt; height: 16pt; margin: 0 auto;
             background: #ffffff;
             clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            line-height: 20pt; font-weight: 900; color: #007a41; font-size: 10pt;
+            line-height: 16pt; font-weight: bold; color: #007a41; font-size: 8pt;
         }
         .school-name {
-            margin: 0; font-size: 6.5pt; font-weight: 800; color: #ffffff;
-            letter-spacing: 0.5pt; text-shadow: 0 1pt 2pt rgba(0,0,0,0.2);
+            margin: 2pt 0 0; font-size: 5.5pt; font-weight: 800; color: #ffffff;
+            text-transform: uppercase; letter-spacing: 0.2pt;
         }
-        .doc-title {
-            margin: 1pt 0 0; font-size: 5pt; font-weight: 400; color: #facc15;
-            letter-spacing: 1.5pt; text-transform: uppercase;
+        .card-type {
+            margin: 0; font-size: 4pt; font-weight: 400; color: #eab308;
+            letter-spacing: 1.2pt; text-transform: uppercase;
         }
 
-        /* Foto del Estudiante (Frame Premium) */
-        .foto-outer {
-            position: absolute; top: 42pt; left: 50%;
+        /* 2. Photo (High Visual Impact) */
+        .photo-outer {
+            position: absolute; top: 38pt; left: 50%;
             transform: translateX(-50%);
-            width: 76pt; height: 88pt;
+            width: 72pt; height: 84pt;
             background: #ffffff;
-            border-radius: 8pt;
-            padding: 3pt;
-            box-shadow: 0 4pt 12pt rgba(0,0,0,0.15);
-            z-index: 5;
+            border-radius: 6pt; padding: 2.5pt;
+            box-shadow: 0 3pt 8pt rgba(0,0,0,0.12);
+            z-index: 20;
         }
-        .foto-inner {
-            width: 100%; height: 100%;
-            border-radius: 5pt;
-            overflow: hidden;
-            background: #f1f5f9;
+        .photo-inner {
+            width: 100%; height: 100%; border-radius: 4pt;
+            overflow: hidden; background: #f8fafc;
         }
-        .foto-inner img { width: 100%; height: 100%; object-fit: cover; }
-        .foto-placeholder {
-            width: 100%; height: 100%; text-align: center; line-height: 88pt;
-            font-size: 30pt; color: #cbd5e1; font-weight: bold;
+        .photo-inner img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-placeholder {
+            width: 100%; height: 100%; text-align: center; line-height: 84pt;
+            font-size: 24pt; color: #cbd5e1; font-weight: bold;
         }
 
-        /* Badge ALUMNO(A) */
-        .badge-alumno {
-            position: absolute; top: 135pt; left: 50%;
-            transform: translateX(-50%);
+        /* 3. Identity Section */
+        .identity-area {
+            position: absolute; top: 125pt; left: 0; width: 100%;
+            text-align: center; z-index: 30;
+        }
+        .badge {
+            display: inline-block; padding: 1.5pt 10pt;
             background: #00a65a; color: #ffffff;
-            font-size: 6.5pt; font-weight: 800;
-            padding: 2.5pt 14pt; border-radius: 20pt;
-            box-shadow: 0 2pt 4pt rgba(0,166,90,0.3);
-            z-index: 6; letter-spacing: 0.5pt;
-        }
-
-        /* Nombres y Apellidos (Clean Layout) */
-        .name-container {
-            position: absolute; top: 152pt; left: 0; width: 100%;
-            text-align: center; z-index: 5; padding: 0 5pt; box-sizing: border-box;
+            font-size: 6pt; font-weight: 800; border-radius: 10pt;
+            margin-bottom: 6pt; text-transform: uppercase;
         }
         .last-names {
-            margin: 0; font-size: 10pt; font-weight: 800; color: #1e293b;
-            line-height: 1.1; text-transform: uppercase;
+            margin: 0; padding: 0 5pt; font-size: 9.5pt; font-weight: 800;
+            color: #0f172a; line-height: 1; text-transform: uppercase;
         }
         .first-names {
-            margin: 2pt 0 0; font-size: 8.5pt; font-weight: 400; color: #475569;
-            text-transform: uppercase;
+            margin: 3pt 0 0; font-size: 7.5pt; font-weight: 500;
+            color: #475569; text-transform: uppercase;
         }
 
-        /* Data List */
-        .data-list {
-            position: absolute; bottom: 35pt; left: 12pt;
-            width: 90pt; z-index: 5;
+        /* 4. Bottom Data (Avoiding Collisions) */
+        .bottom-data {
+            position: absolute; bottom: 32pt; left: 10pt;
+            width: 95pt; z-index: 40;
         }
-        .data-row { margin-bottom: 3pt; }
-        .data-label {
-            font-size: 5.5pt; font-weight: 700; color: #94a3b8;
-            text-transform: uppercase; display: block;
+        .data-row { margin-bottom: 3.5pt; }
+        .label {
+            font-size: 5pt; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; line-height: 1;
         }
-        .data-value {
+        .value {
             font-size: 7.5pt; font-weight: 700; color: #334155;
-            display: block; line-height: 1;
+            display: block; line-height: 1.1; margin-top: 0.5pt;
         }
 
-        /* QR Positioning (Fixed Bottom Right) */
-        .qr-frame {
-            position: absolute; bottom: 35pt; right: 12pt;
-            width: 34pt; height: 34pt;
-            background: #ffffff; border: 1pt solid #e2e8f0;
-            padding: 2pt; border-radius: 4pt; z-index: 7;
+        /* 5. Fixed QR (Isolated) */
+        .qr-anchor {
+            position: absolute; bottom: 32pt; right: 8pt;
+            width: 32pt; height: 32pt;
+            background: #ffffff; border: 0.5pt solid #e2e8f0;
+            padding: 2pt; border-radius: 3pt; z-index: 50;
         }
-        .qr-frame img { width: 100%; height: 100%; }
+        .qr-anchor img { width: 100%; height: 100%; }
 
-        /* Footer Accent */
-        .footer-banner {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 28pt;
-            background: #f8fafc; border-top: 1pt solid #e2e8f0;
-            text-align: center; z-index: 4;
+        /* 6. Footer (Clean Bottom) */
+        .footer-bar {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 26pt;
+            background: #f1f5f9; border-top: 0.5pt solid #e2e8f0;
+            text-align: center; z-index: 5;
         }
         .footer-text {
-            line-height: 28pt; font-size: 7pt; font-weight: 800; color: #64748b;
-            letter-spacing: 0.5pt;
+            line-height: 26pt; font-size: 6.5pt; font-weight: 800;
+            color: #64748b; letter-spacing: 0.3pt;
         }
         .footer-line {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 3pt;
             background: #00a65a;
         }
 
-        /* Watermark */
+        /* Background Effects */
+        .bg-pattern {
+            position: absolute; top: 50pt; left: 0; width: 100%; height: 160pt;
+            background: radial-gradient(circle at 50% 50%, #00a65a08 0.5pt, transparent 0.5pt);
+            background-size: 8pt 8pt; z-index: 0;
+        }
         .watermark {
-            position: absolute; top: 160pt; left: 10pt; font-size: 40pt;
-            color: rgba(0,166,90,0.03); font-weight: 900; transform: rotate(-45deg);
-            z-index: 0; pointer-events: none;
+            position: absolute; top: 155pt; left: 15pt;
+            font-size: 30pt; font-weight: 900; color: #00a65a03;
+            transform: rotate(-15deg); z-index: 1; pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-bg"></div>
-    <div class="security-pattern"></div>
-    <div class="watermark">BAUTISTA</div>
-
-    <div class="institution-header">
-        <div class="shield-icon">B</div>
-        <h1 class="school-name">{{ config('app.name', 'IEP BAUTISTA LA PASCANA') }}</h1>
-        <div class="doc-title">CARNET DE MATRÍCULA</div>
+    <div class="header-top"></div>
+    <div class="header-content">
+        <div class="shield">B</div>
+        <h1 class="school-name">{{ config('app.name', 'BAUTISTA LA PASCANA') }}</h1>
+        <p class="card-type">Cédula de Identidad Escolar</p>
     </div>
 
-    <!-- Badge -->
-    <div class="badge-alumno">ALUMNO(A)</div>
+    <div class="bg-pattern"></div>
+    <div class="watermark">INSTITUCIONAL</div>
 
-    <!-- Foto -->
-    <div class="foto-outer">
-        <div class="foto-inner">
+    <!-- Foto Central -->
+    <div class="photo-outer">
+        <div class="photo-inner">
             @if($fotoSrc)
-                <img src="{{ $fotoSrc }}" alt="Foto Estudiante" />
+                <img src="{{ $fotoSrc }}" alt="F" />
             @else
-                <div class="foto-placeholder">?</div>
+                <div class="photo-placeholder">?</div>
             @endif
         </div>
     </div>
 
-    <!-- Names Section -->
-    <div class="name-container">
-        <p class="last-names">
+    <!-- Identidad -->
+    <div class="identity-area">
+        <div class="badge">ALUMNO(A)</div>
+        <h2 class="last-names">
             {{ mb_strtoupper($estudiante->perfil->apellido_paterno) }}<br>
             {{ mb_strtoupper($estudiante->perfil->apellido_materno) }}
-        </p>
+        </h2>
         <p class="first-names">
             {{ mb_strtoupper($estudiante->perfil->primer_nombre . ' ' . $estudiante->perfil->segundo_nombre) }}
         </p>
     </div>
 
-    <!-- Info List -->
-    <div class="data-list">
+    <!-- Datos Inferiores -->
+    <div class="bottom-data">
         <div class="data-row">
-            <span class="data-label">Código Estudiante</span>
-            <span class="data-value">EST-{{ str_pad($estudiante->estu_id, 6, '0', STR_PAD_LEFT) }}</span>
+            <span class="label">ID Sistema</span>
+            <span class="value">EST-{{ str_pad($estudiante->estu_id, 6, '0', STR_PAD_LEFT) }}</span>
         </div>
         <div class="data-row">
-            <span class="data-label">Nro Documento</span>
-            <span class="data-value">{{ $estudiante->perfil->doc_numero ?? '--------' }}</span>
+            <span class="label">Nro Documento</span>
+            <span class="value">{{ $estudiante->perfil->doc_numero ?? '--------' }}</span>
         </div>
     </div>
 
-    <!-- QR Code -->
-    <div class="qr-frame">
-        <img src="{{ $qrSrc }}" alt="QR Code" />
+    <!-- Código QR (Anclado) -->
+    <div class="qr-anchor">
+        <img src="{{ $qrSrc }}" alt="QR" />
     </div>
 
     <!-- Footer -->
-    <div class="footer-banner">
-        <span class="footer-text">AÑO ACADÉMICO {{ $periodo }}</span>
+    <div class="footer-bar">
+        <div class="footer-text">VIGENTE PERIODO {{ $periodo }}</div>
         <div class="footer-line"></div>
     </div>
 

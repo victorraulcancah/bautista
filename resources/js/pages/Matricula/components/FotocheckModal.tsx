@@ -25,9 +25,9 @@ export default function FotocheckModal({ open, onClose, estudianteId, estudiante
 
     return (
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
-            <DialogContent className="max-w-[340px] p-0 overflow-hidden border-none shadow-2xl bg-white rounded-3xl">
+            <DialogContent className="max-w-[280px] p-0 overflow-hidden border-none shadow-2xl bg-white rounded-[2rem]">
                 <DialogHeader className="px-6 py-4 bg-white border-b flex flex-row items-center justify-between space-y-0">
-                    <DialogTitle className="text-base font-bold text-neutral-900">
+                    <DialogTitle className="text-sm font-bold text-neutral-900">
                         Fotocheck del Alumno
                     </DialogTitle>
                 </DialogHeader>
