@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InstitucionNoticia extends Model
 {
@@ -27,4 +28,9 @@ class InstitucionNoticia extends Model
         'not_estatus',
         'autor',
     ];
+
+    public function comentarios(): HasMany
+    {
+        return $this->hasMany(NoticiaComentario::class, 'noticia_id', 'not_id')->whereNull('parent_id');
+    }
 }

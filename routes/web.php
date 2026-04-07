@@ -27,7 +27,9 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/institucion',         fn () => Inertia::render('Institucion/index'))->name('institucion.index');
     Route::get('/institucion/galeria',   fn () => Inertia::render('Institucion/Galeria/index'))->name('institucion.galeria');
     Route::get('/institucion/noticias',  fn () => Inertia::render('Institucion/Noticias/index'))->name('institucion.noticias');
-    Route::get('/institucion/noticias/portada', fn () => Inertia::render('Institucion/Noticias/NoticiasDiario'))->name('institucion.noticias.portada');
+    Route::get('/institucion/noticias/portada', [\App\Http\Controllers\Admin\NoticiaController::class, 'portada'])->name('institucion.noticias.portada');
+    Route::get('/institucion/noticias/diario/{id}', [\App\Http\Controllers\Admin\NoticiaController::class, 'showDiario'])->name('institucion.noticias.diario');
+    Route::post('/institucion/noticias/{id}/comentarios', [\App\Http\Controllers\Admin\NoticiaController::class, 'storeComentario'])->name('institucion.noticias.comentarios.store');
     Route::get('/mensajes',              fn () => Inertia::render('Comunicados/index'))->name('mensajes.index');
     Route::get('/estudiantes',  fn () => Inertia::render('GestionAlumnos/index'))->name('estudiantes.index');
     Route::get('/estudiantes/{id}/fotocheck', [\App\Http\Controllers\Admin\FotocheckController::class, 'generate'])->name('estudiantes.fotocheck');

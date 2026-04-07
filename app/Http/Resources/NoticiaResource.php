@@ -29,6 +29,9 @@ class NoticiaResource extends JsonResource
             'url'                   => $this->not_imagen
                 ? asset('storage/noticias/' . $this->not_imagen)
                 : null,
+            'comentarios'           => $this->relationLoaded('comentarios')
+                ? NoticiaComentarioResource::collection($this->comentarios)->resolve()
+                : [],
         ];
     }
 }

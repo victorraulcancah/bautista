@@ -8,25 +8,24 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import NoticiasTable from './components/NoticiasTable';
 import NoticiaFormModal from './components/NoticiaFormModal';
-import NoticiaDetalleModal from './components/NoticiaDetalleModal';
 import type { Noticia } from './hooks/useNoticias';
 import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard',   href: '/dashboard' },
+    { title: 'Dashboard', href: '/dashboard' },
     { title: 'Institución', href: '/institucion' },
-    { title: 'Noticias',    href: '/institucion/noticias' },
+    { title: 'Noticias', href: '/institucion/noticias' },
 ];
 
 export default function NoticiasPage() {
     const res = useResource<Noticia>('/noticias');
-    const [modalOpen, setModalOpen]     = useState(false);
-    const [editing, setEditing]         = useState<Noticia | null>(null);
-    const [deleting, setDeleting]       = useState<Noticia | null>(null);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editing, setEditing] = useState<Noticia | null>(null);
+    const [deleting, setDeleting] = useState<Noticia | null>(null);
     const [noticiaView, setNoticiaView] = useState<Noticia | null>(null);
 
     const openCreate = () => { setEditing(null); setModalOpen(true); };
-    const openEdit   = (n: Noticia) => { setEditing(n); setModalOpen(true); };
+    const openEdit = (n: Noticia) => { setEditing(n); setModalOpen(true); };
 
     const handleSave = async (data: FormData): Promise<void> => {
         if (editing) {
@@ -83,10 +82,6 @@ export default function NoticiasPage() {
                 {res.loading && <p className="py-6 text-center text-sm text-neutral-400 font-medium">Consultando archivos de prensa...</p>}
             </ResourcePage>
 
-            <NoticiaDetalleModal
-                noticia={noticiaView}
-                onClose={() => setNoticiaView(null)}
-            />
 
             <NoticiaFormModal
                 open={modalOpen}
