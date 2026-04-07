@@ -23,6 +23,7 @@ class GradoApiController extends Controller
             instiId: $request->user()->insti_id,
             search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
+            nivelId: $request->get('nivel_id') ? (int) $request->get('nivel_id') : null,
         ));
     }
 

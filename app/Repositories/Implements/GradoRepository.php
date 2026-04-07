@@ -9,10 +9,11 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class GradoRepository implements GradoRepositoryInterface
 {
-    public function paginate(int $instiId, string $search = '', int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $instiId, string $search = '', int $perPage = 15, ?int $nivelId = null): LengthAwarePaginator
     {
         return Grado::with('nivel')
             ->whereHas('nivel', fn ($q) => $q->where('insti_id', $instiId))
+            ->when($nivelId, fn ($q) => $q->where('nivel_id', $nivelId))
             ->when($search, fn ($q) => $q->where('nombre_grado', 'like', "%{$search}%"))
             ->latest('grado_id')
             ->paginate($perPage);

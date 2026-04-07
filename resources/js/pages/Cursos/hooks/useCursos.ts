@@ -30,6 +30,7 @@ export type CursoFormData = {
     nivel_academico_id: string;
     grado_academico:    string;
     estado:             string;
+    logo:               any;
 };
 
 export const defaultForm: CursoFormData = {
@@ -38,4 +39,5 @@ export const defaultForm: CursoFormData = {
     nivel_academico_id: '',
     grado_academico:    '',
     estado:             '1',
+    logo:               null,
 };

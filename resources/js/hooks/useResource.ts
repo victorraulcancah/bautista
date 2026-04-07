@@ -21,7 +21,7 @@ export type ResourceState<T> = {
     clearSuccess:() => void;
 };
 
-export function useResource<T>(endpoint: string): ResourceState<T> {
+export function useResource<T>(endpoint: string, initialParams: Record<string, any> = {}): ResourceState<T> {
     const [rows, setRows]         = useState<Paginated<T> | null>(null);
     const [loading, setLoading]   = useState(false);
     const [search, setSearch]     = useState('');
@@ -32,12 +32,14 @@ export function useResource<T>(endpoint: string): ResourceState<T> {
     const fetch = useCallback(async () => {
         setLoading(true);
         try {
-            const { data } = await api.get(endpoint, { params: { search, page } });
+            const { data } = await api.get(endpoint, { 
+                params: { ...initialParams, search, page } 
+            });
             setRows(data);
         } finally {
             setLoading(false);
         }
-    }, [endpoint, search, page]);
+    }, [endpoint, search, page, JSON.stringify(initialParams)]);
 
     useEffect(() => { fetch(); }, [fetch]);
 

@@ -14,9 +14,9 @@ class GradoService implements GradoServiceInterface
         private readonly GradoRepositoryInterface $repository,
     ) {}
 
-    public function listar(int $instiId, string $search = '', int $perPage = 15): LengthAwarePaginator
+    public function listar(int $instiId, string $search = '', int $perPage = 15, ?int $nivelId = null): LengthAwarePaginator
     {
-        return $this->repository->paginate($instiId, $search, $perPage);
+        return $this->repository->paginate($instiId, $search, $perPage, $nivelId);
     }
 
     public function todos(int $instiId): Collection

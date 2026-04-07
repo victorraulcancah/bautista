@@ -8,7 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 interface GradoServiceInterface
 {
-    public function listar(int $instiId, string $search = '', int $perPage = 15): LengthAwarePaginator;
+    public function listar(int $instiId, string $search = '', int $perPage = 15, ?int $nivelId = null): LengthAwarePaginator;
     public function todos(int $instiId): Collection;
     public function obtener(int $id): Grado;
     public function crear(array $data): Grado;

@@ -1,5 +1,5 @@
-import { Head } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, usePage } from '@inertiajs/react';
+import { useState, useMemo, useEffect } from 'react';
 import { GraduationCap } from 'lucide-react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
@@ -16,7 +16,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function GradosPage() {
-    const res     = useResource<Grado>('/grados');
+    const { url } = usePage();
+    const queryParams = useMemo(() => new URLSearchParams(url.split('?')[1] || ''), [url]);
+    const queryNivelId = queryParams.get('nivel_id');
+
+    const res     = useResource<Grado>('/grados', queryNivelId ? { nivel_id: queryNivelId } : {});
     const niveles = useOptions<Nivel>('/niveles');
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Grado | null>(null);
@@ -35,7 +39,7 @@ export default function GradosPage() {
             <ResourcePage
                 breadcrumbs={breadcrumbs}
                 pageTitle="Grados"
-                subtitle={res.rows ? `${res.rows.total} registrados` : '…'}
+                subtitle={res.rows ? `${res.rows.total} grados en este nivel` : '…'}
                 icon={GraduationCap}
                 iconColor="bg-blue-600"
                 search={res.search}
@@ -44,6 +48,20 @@ export default function GradosPage() {
                 btnLabel="Nuevo Grado"
                 onNew={openCreate}
             >
+                {queryNivelId && (
+                    <div className="mb-4 flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-100">
+                        <div className="flex items-center gap-2 text-blue-800">
+                            <span className="text-sm font-medium">Filtrando por Nivel ID: </span>
+                            <span className="font-bold">{queryNivelId}</span>
+                        </div>
+                        <button 
+                            onClick={() => window.location.href = '/grados'}
+                            className="text-xs text-blue-600 hover:underline font-bold"
+                        >
+                            Ver todos los grados
+                        </button>
+                    </div>
+                )}
                 {res.rows && (
                     <ResourceTable
                         rows={res.rows}

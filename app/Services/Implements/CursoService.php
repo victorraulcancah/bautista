@@ -7,6 +7,8 @@ use App\Repositories\Interfaces\CursoRepositoryInterface;
 use App\Services\Interfaces\CursoServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 
 class CursoService implements CursoServiceInterface
 {
@@ -31,12 +33,26 @@ class CursoService implements CursoServiceInterface
 
     public function crear(array $data): Curso
     {
+        if (isset($data['logo']) && $data['logo'] instanceof UploadedFile) {
+            $data['logo'] = $data['logo']->store('cursos/logos', 'public');
+        }
         return $this->repository->create($data);
     }
 
     public function actualizar(int $id, array $data): Curso
     {
         $curso = $this->repository->findById($id);
+        
+        if (isset($data['logo']) && $data['logo'] instanceof UploadedFile) {
+            if ($curso->logo) {
+                Storage::disk('public')->delete($curso->logo);
+            }
+            $data['logo'] = $data['logo']->store('cursos/logos', 'public');
+        } else {
+            // No se subió archivo nuevo, mantener el que está (o quitarlo del array de update)
+            unset($data['logo']);
+        }
+        
         return $this->repository->update($curso, $data);
     }
 
