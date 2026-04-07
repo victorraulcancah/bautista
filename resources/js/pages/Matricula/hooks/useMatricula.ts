@@ -12,7 +12,7 @@ export type MatriculaApertura = {
 export type Matricula = {
     matricula_id:    number;
     apertura_id:     number;
-    estudiante_id:   number;
+    estu_id:         number;
     seccion_id:      number | null;
     anio:            number;
     estado:          '1' | '0';
@@ -83,14 +83,14 @@ export const defaultAperturaForm: AperturaFormData = {
 
 export type MatriculaFormData = {
     apertura_id:   string;
-    estudiante_id: string;
+    estu_id:       string;
     seccion_id:    string;
     anio:          string;
 };
 
 export const defaultMatriculaForm: MatriculaFormData = {
     apertura_id:   '',
-    estudiante_id: '',
+    estu_id:       '',
     seccion_id:    '',
     anio:          new Date().getFullYear().toString(),
 };

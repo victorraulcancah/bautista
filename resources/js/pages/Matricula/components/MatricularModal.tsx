@@ -105,10 +105,10 @@ export default function MatricularModal({
                     fecha_pago:          found.fecha_pago ?? '',
                     foto:                null,
                 });
-                setMatricula(prev => ({ ...prev, estudiante_id: found.estu_id.toString() }));
+                setMatricula(prev => ({ ...prev, estu_id: found.estu_id.toString() }));
             } else {
                 setAlumno({ ...defaultAlumno(), username: dniSearch.trim() });
-                setMatricula(prev => ({ ...prev, estudiante_id: '' }));
+                setMatricula(prev => ({ ...prev, estu_id: '' }));
             }
         } finally {
             setSearching(false);
@@ -158,7 +158,7 @@ export default function MatricularModal({
                 estudianteId = res.data.data?.estu_id ?? res.data.estu_id;
             }
 
-            await onSave({ ...matricula, estudiante_id: String(estudianteId) });
+            await onSave({ ...matricula, estu_id: String(estudianteId) });
 
             await Promise.allSettled(
                 [

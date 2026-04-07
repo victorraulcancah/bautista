@@ -12,7 +12,7 @@ class MatriculaResource extends JsonResource
         return [
             'matricula_id'  => $this->matricula_id,
             'apertura_id'   => $this->apertura_id,
-            'estudiante_id' => $this->estudiante_id,
+            'estu_id'       => $this->estu_id,
             'seccion_id'    => $this->seccion_id,
             'anio'          => $this->anio,
             'estado'        => $this->estado,

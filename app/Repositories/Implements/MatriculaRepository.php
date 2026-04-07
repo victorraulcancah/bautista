@@ -68,15 +68,15 @@ class MatriculaRepository implements MatriculaRepositoryInterface
     public function countByNivel(int $aperturaId): \Illuminate\Support\Collection
     {
         return DB::table('matriculas')
-            ->join('secciones', 'matriculas.seccion_id', '=', 'secciones.seccion_id')
-            ->join('grados', 'secciones.id_grado', '=', 'grados.grado_id')
-            ->join('niveles_educativos', 'grados.nivel_id', '=', 'niveles_educativos.nivel_id')
+            ->leftJoin('secciones', 'matriculas.seccion_id', '=', 'secciones.seccion_id')
+            ->leftJoin('grados', 'secciones.id_grado', '=', 'grados.grado_id')
+            ->leftJoin('niveles_educativos', 'grados.nivel_id', '=', 'niveles_educativos.nivel_id')
             ->where('matriculas.apertura_id', $aperturaId)
             ->where('matriculas.estado', '1')
             ->groupBy('niveles_educativos.nivel_id', 'niveles_educativos.nombre_nivel')
             ->select(
                 'niveles_educativos.nivel_id',
-                'niveles_educativos.nombre_nivel',
+                DB::raw('COALESCE(niveles_educativos.nombre_nivel, "POR ASIGNAR") as nombre_nivel'),
                 DB::raw('COUNT(*) as total')
             )
             ->orderBy('niveles_educativos.nivel_id')
@@ -104,7 +104,7 @@ class MatriculaRepository implements MatriculaRepositoryInterface
     public function estudiantesNoMatriculados(int $instiId, int $aperturaId): Collection
     {
         $yaMatriculados = Matricula::where('apertura_id', $aperturaId)
-            ->pluck('estudiante_id');
+            ->pluck('estu_id');
 
         return Estudiante::with('perfil')
             ->where('insti_id', $instiId)

@@ -12,7 +12,7 @@ class StoreMatriculaRequest extends FormRequest
     {
         return [
             'apertura_id'   => ['required', 'exists:matricula_aperturas,apertura_id'],
-            'estudiante_id' => ['required', 'exists:estudiantes,estu_id'],
+            'estu_id'       => ['required', 'exists:estudiantes,estu_id'],
             'seccion_id'    => ['nullable', 'exists:secciones,seccion_id'],
             'anio'          => ['required', 'integer', 'min:2000', 'max:2100'],
         ];
@@ -21,8 +21,8 @@ class StoreMatriculaRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'estudiante_id.required' => 'Debes seleccionar un estudiante.',
-            'apertura_id.exists'     => 'La apertura de matrícula no es válida.',
+            'estu_id.required'   => 'Debes seleccionar un estudiante.',
+            'apertura_id.exists' => 'La apertura de matrícula no es válida.',
         ];
     }
 }

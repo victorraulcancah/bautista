@@ -91,9 +91,6 @@ export default function MatriculaGestion() {
                         <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
                             <div className="bg-[#00a65a] px-4 sm:px-6 py-4 flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-white font-bold text-lg">
-                                        Matrícula {selectedApertura.anio}
-                                    </h2>
                                     <p className="text-white/80 text-sm">{selectedApertura.nombre}</p>
                                 </div>
                                 <span className="text-white/80 text-sm font-medium">
