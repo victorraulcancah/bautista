@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Curso;
 use App\Models\Estudiante;
+use App\Models\Grado;
+use App\Models\Seccion;
+use App\Models\Matricula;
 use App\Services\Interfaces\MensajeriaGrupoServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -46,6 +49,71 @@ class MensajeriaGrupoApiController extends Controller
             ->when($curso->grado_academico, fn ($q) =>
                 $q->whereHas('perfil')   // solo con perfil cargado
             )
+            ->with('perfil:perfil_id,user_id,primer_nombre,apellido_paterno', 'user:id,username,insti_id')
+            ->get();
+
+        return response()->json($estudiantes->map(fn ($e) => [
+            'user_id' => $e->user_id,
+            'nombre'  => $e->perfil
+                ? trim("{$e->perfil->primer_nombre} {$e->perfil->apellido_paterno}")
+                : ($e->user?->username ?? '—'),
+        ]));
+    }
+
+    public function grados(Request $request): JsonResponse
+    {
+        $grados = Grado::whereHas('nivel', fn($q) => $q->where('insti_id', $request->user()->insti_id))
+            ->with(['nivel:nivel_id,nombre_nivel'])
+            ->orderBy('nombre_grado')
+            ->get();
+
+        return response()->json($grados->map(fn ($g) => [
+            'grado_id' => $g->grado_id,
+            'nombre'   => $g->nombre_grado,
+            'nivel'    => $g->nivel?->nombre_nivel,
+        ]));
+    }
+
+    public function aulas(Request $request): JsonResponse
+    {
+        $secciones = Seccion::whereHas('grado.nivel', fn($q) => $q->where('insti_id', $request->user()->insti_id))
+            ->with(['grado.nivel'])
+            ->orderBy('nombre')
+            ->get();
+
+        return response()->json($secciones->map(fn ($s) => [
+            'seccion_id' => $s->seccion_id,
+            'nombre'     => $s->nombre,
+            'grado'      => $s->grado?->nombre_grado,
+            'nivel'      => $s->grado?->nivel?->nombre_nivel,
+        ]));
+    }
+
+    public function alumnosPorGrado(Request $request, int $gradoId): JsonResponse
+    {
+        $estudiantes = Estudiante::where('insti_id', $request->user()->insti_id)
+            ->where('estado', '1')
+            ->whereIn('estu_id', Matricula::select('estu_id')
+                ->whereIn('seccion_id', Seccion::where('id_grado', $gradoId)->select('seccion_id'))
+            )
+            ->whereHas('user', fn ($q) => $q->whereHas('rol', fn ($r) => $r->where('name', 'estudiante')))
+            ->with('perfil:perfil_id,user_id,primer_nombre,apellido_paterno', 'user:id,username,insti_id')
+            ->get();
+
+        return response()->json($estudiantes->map(fn ($e) => [
+            'user_id' => $e->user_id,
+            'nombre'  => $e->perfil
+                ? trim("{$e->perfil->primer_nombre} {$e->perfil->apellido_paterno}")
+                : ($e->user?->username ?? '—'),
+        ]));
+    }
+
+    public function alumnosPorAula(Request $request, int $aulaId): JsonResponse
+    {
+        $estudiantes = Estudiante::where('insti_id', $request->user()->insti_id)
+            ->where('estado', '1')
+            ->whereIn('estu_id', Matricula::select('estu_id')->where('seccion_id', $aulaId))
+            ->whereHas('user', fn ($q) => $q->whereHas('rol', fn ($r) => $r->where('name', 'estudiante')))
             ->with('perfil:perfil_id,user_id,primer_nombre,apellido_paterno', 'user:id,username,insti_id')
             ->get();
 

@@ -74,6 +74,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('mensajeria/grupos',              [MensajeriaGrupoApiController::class, 'store']);
     Route::get('mensajeria/cursos',               [MensajeriaGrupoApiController::class, 'cursos']);
     Route::get('mensajeria/cursos/{id}/alumnos',  [MensajeriaGrupoApiController::class, 'alumnosPorCurso']);
+    Route::get('mensajeria/grados',               [MensajeriaGrupoApiController::class, 'grados']);
+    Route::get('mensajeria/grados/{id}/alumnos',  [MensajeriaGrupoApiController::class, 'alumnosPorGrado']);
+    Route::get('mensajeria/aulas',                [MensajeriaGrupoApiController::class, 'aulas']);
+    Route::get('mensajeria/aulas/{id}/alumnos',   [MensajeriaGrupoApiController::class, 'alumnosPorAula']);
     Route::get('usuarios/buscar',                 UsuarioBusquedaApiController::class);
 
     // Estudiantes
