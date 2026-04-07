@@ -1,6 +1,6 @@
 import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, Clock, MapPin, User as UserIcon, Calendar, Share2, Printer, ChevronRight, Download } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, User as UserIcon, Calendar, Share2, Printer, ChevronRight, Download, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import NoticiaComentarios from './components/NoticiaComentarios';
 import { type Noticia } from './hooks/useNoticias';
@@ -36,14 +36,14 @@ export default function NoticiaDetalle({ noticia, recientes }: Props) {
             </nav>
 
             <main className="max-w-7xl mx-auto px-6 mt-12">
-                <div className={`grid grid-cols-1 ${recientes.length > 0 ? 'lg:grid-cols-12' : ''} gap-12 justify-center`}>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                     
                     {/* Columna Izquierda: Artículo */}
-                    <article className={`${recientes.length > 0 ? 'lg:col-span-8' : 'max-w-5xl mx-auto text-center'} bg-white p-10 lg:p-16 rounded-[1.5rem] shadow-sm border border-neutral-100 w-full`}>
+                    <article className="lg:col-span-8 bg-white p-10 lg:p-16 rounded-[1.5rem] shadow-sm border border-neutral-100 w-full">
                         
                         {/* Metadatos Superiores */}
                         <header className="space-y-8 mb-12">
-                            <div className={`flex flex-wrap items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#00a65a] font-sans ${recientes.length === 0 ? 'justify-center' : ''}`}>
+                            <div className="flex flex-wrap items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#00a65a] font-sans">
                                 <span className="bg-emerald-50 px-3 py-1 rounded-full shrink-0">Crónica Institucional</span>
                                 <span className="text-neutral-300">/</span>
                                 <span className="flex items-center gap-1 shrink-0"><Clock className="w-4 h-4" /> {noticia.not_fecha}</span>
@@ -53,28 +53,28 @@ export default function NoticiaDetalle({ noticia, recientes }: Props) {
                                 </Button>
                             </div>
 
-                            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] text-neutral-900 tracking-tight ${recientes.length === 0 ? 'text-center' : ''}`}>
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] text-neutral-900 tracking-tight">
                                 {noticia.not_titulo}
                             </h1>
 
                             {noticia.not_resumen && (
-                                <p className={`text-xl lg:text-2xl text-neutral-500 font-medium leading-relaxed italic border-emerald-100 pl-8 py-2 ${recientes.length === 0 ? 'border-l-0 border-y py-6 text-center pl-0' : 'border-l-4'}`}>
+                                <p className="text-xl lg:text-2xl text-neutral-500 font-medium leading-relaxed italic border-emerald-100 pl-8 py-2 border-l-4">
                                     {noticia.not_resumen}
                                 </p>
                             )}
 
-                            <div className={`flex items-center justify-between py-6 border-y border-neutral-100 mt-10 ${recientes.length === 0 ? 'flex-col sm:flex-row gap-6' : ''}`}>
+                            <div className="flex items-center justify-between py-6 border-y border-neutral-100 mt-10">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-neutral-900 text-white rounded-full lg:rounded-[1.5rem]">
                                         <UserIcon className="w-5 h-5" />
                                     </div>
-                                    <div className={recientes.length === 0 ? 'text-left' : ''}>
+                                    <div>
                                         <p className="text-[10px] font-black uppercase tracking-widest text-[#00a65a] font-sans">Redactado por</p>
                                         <p className="text-sm font-bold text-neutral-900 font-sans">{noticia.autor || 'Redacción El Bautista'}</p>
                                     </div>
                                 </div>
                                 {(noticia.not_lugar_evento || noticia.not_fecha_evento) && (
-                                    <div className={`${recientes.length === 0 ? 'text-center' : 'text-right'} hidden sm:block`}>
+                                    <div className="text-right hidden sm:block">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 font-sans">Datos del Evento</p>
                                         <p className="text-sm font-bold text-neutral-700 font-sans flex items-center justify-end gap-2">
                                             <MapPin className="w-3 h-3 text-[#00a65a]" /> {noticia.not_lugar_evento}
@@ -98,8 +98,8 @@ export default function NoticiaDetalle({ noticia, recientes }: Props) {
                         )}
 
                         {/* Cuerpo del Artículo en Columnas */}
-                        <div className={`prose prose-neutral max-w-none ${recientes.length === 0 ? 'text-left' : ''}`}>
-                            <div className={`sm:columns-2 gap-10 text-neutral-700 leading-relaxed text-lg lg:text-xl text-justify font-normal first-letter:text-7xl first-letter:font-black first-letter:mr-3 first-letter:float-left first-letter:text-[#00a65a] first-letter:font-sans`}>
+                        <div className="prose prose-neutral max-w-none text-left">
+                            <div className="sm:columns-2 gap-10 text-neutral-700 leading-relaxed text-lg lg:text-xl text-justify font-normal first-letter:text-7xl first-letter:font-black first-letter:mr-3 first-letter:float-left first-letter:text-[#00a65a] first-letter:font-sans">
                                <div dangerouslySetInnerHTML={{ __html: noticia.not_contenido_html || '' }} />
                             </div>
                         </div>
@@ -138,10 +138,29 @@ export default function NoticiaDetalle({ noticia, recientes }: Props) {
                     </article>
 
                     {/* Columna Derecha: Sidebar */}
-                    {recientes.length > 0 && (
-                        <aside className="lg:col-span-4 space-y-12 font-sans">
-                            {/* Crónicas Recientes */}
-                            <div className="bg-white p-8 rounded-[2rem] border border-neutral-100 shadow-sm sticky top-28">
+                    <aside className="lg:col-span-4 space-y-8 font-sans">
+                        
+                        {/* Comunicación / Chat Box */}
+                        <div className="bg-emerald-900 border-4 border-emerald-100 p-8 rounded-[2rem] shadow-xl text-center sticky top-28 bg-[url('/bg-pattern.svg')] bg-cover">
+                            <div className="bg-white/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-white/20">
+                                <MessageCircle className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="text-xl font-black text-white mb-2 leading-tight tracking-tight">
+                                Centro de <br/>Comunicación
+                            </h3>
+                            <p className="text-emerald-100/80 text-sm font-medium mb-8 leading-relaxed px-4">
+                                Conéctate con directivos, docentes y otros miembros.
+                            </p>
+                            <Link href="/mensajeria" className="block">
+                                <Button className="w-full bg-white hover:bg-neutral-100 text-emerald-900 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-lg h-12 transition-all">
+                                    Abrir Chat
+                                </Button>
+                            </Link>
+                        </div>
+
+                        {/* Crónicas Recientes */}
+                        {recientes.length > 0 && (
+                            <div className="bg-white p-8 rounded-[2rem] border border-neutral-100 shadow-sm">
                                 <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-8 flex items-center gap-2">
                                     <span className="w-2 h-2 bg-[#00a65a] rounded-full"></span>
                                     Crónicas Recientes
@@ -166,8 +185,8 @@ export default function NoticiaDetalle({ noticia, recientes }: Props) {
                                     ))}
                                 </div>
                             </div>
-                        </aside>
-                    )}
+                        )}
+                    </aside>
                 </div>
             </main>
         </div>

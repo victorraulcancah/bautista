@@ -40,7 +40,7 @@ class MensajeriaGrupoApiController extends Controller
         $estudiantes = Estudiante::where('insti_id', $request->user()->insti_id)
             ->where('estado', '1')
             ->whereHas('user', fn ($q) => $q->whereHas(
-                'roles',
+                'rol',
                 fn ($r) => $r->where('name', 'estudiante')
             ))
             ->when($curso->grado_academico, fn ($q) =>
