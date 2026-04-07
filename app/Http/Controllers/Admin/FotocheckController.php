@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Estudiante;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelLow;
-use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\Response;
 
@@ -19,17 +19,18 @@ class FotocheckController extends Controller
         $estudiante = Estudiante::with(['perfil', 'user'])->findOrFail($id);
 
         // ── Generar QR en base64 (PNG) ──────────────────────────────────
-        $result = Builder::create()
-            ->writer(new PngWriter())
-            ->data($estudiante->estu_id . ',1')
-            ->encoding(new Encoding('UTF-8'))
-            ->errorCorrectionLevel(new ErrorCorrectionLevelLow())
-            ->size(120)
-            ->margin(0)
-            ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
-            ->build();
+        $qrCode = new QrCode(
+            data: $estudiante->estu_id . ',1',
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::Low,
+            size: 120,
+            margin: 0,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin
+        );
 
-        $qrSrc = $result->getDataUri();
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+        $qrSrc  = $result->getDataUri();
 
         // ── Foto del estudiante en base64 ────────────────────────────────
         $fotoPath    = public_path('images/fotos_alumnos/' . $estudiante->foto);

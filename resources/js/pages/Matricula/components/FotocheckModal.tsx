@@ -25,30 +25,21 @@ export default function FotocheckModal({ open, onClose, estudianteId, estudiante
 
     return (
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
-            <DialogContent className="max-w-md sm:max-w-lg p-0 overflow-hidden border-none shadow-2xl bg-neutral-900/95 backdrop-blur-sm">
+            <DialogContent className="max-w-[340px] p-0 overflow-hidden border-none shadow-2xl bg-white rounded-3xl">
                 <DialogHeader className="px-6 py-4 bg-white border-b flex flex-row items-center justify-between space-y-0">
-                    <DialogTitle className="text-lg font-bold text-neutral-900">
+                    <DialogTitle className="text-base font-bold text-neutral-900">
                         Fotocheck del Alumno
                     </DialogTitle>
-                    <button 
-                        onClick={onClose}
-                        className="text-neutral-400 hover:text-neutral-600 transition-colors"
-                    >
-                        <X className="h-5 w-5" />
-                    </button>
                 </DialogHeader>
 
-                <div className="bg-neutral-800 p-4 sm:p-8 flex items-center justify-center min-h-[400px]">
-                    <div className="relative group w-full max-w-[280px] aspect-[54/86] bg-white rounded-xl shadow-2xl overflow-hidden border border-white/10">
+                <div className="bg-neutral-50 flex items-center justify-center p-0 overflow-hidden">
+                    <div className="w-full aspect-[153/243] bg-white shadow-inner overflow-hidden">
                         {/* Iframe to show the PDF */}
                         <iframe 
                             src={`${fotocheckUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                            className="w-full h-full border-none"
+                            className="w-full h-full border-none pointer-events-none scale-[1.01]"
                             title="Fotocheck Preview"
                         />
-                        
-                        {/* Overlay for better visual when the iframe is loading or not interactive */}
-                        <div className="absolute inset-0 pointer-events-none border-[8px] border-white/5 rounded-xl"></div>
                     </div>
                 </div>
 
