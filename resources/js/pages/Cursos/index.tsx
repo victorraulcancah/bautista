@@ -13,13 +13,13 @@ import type { Grado, GradoFormData, Nivel } from '../Grados/hooks/useGrados';
 import CursoFormModal from './components/CursoFormModal';
 import type { Curso, CursoFormData, NivelOption } from './hooks/useCursos';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Cursos', href: '/cursos' },
-];
-
 export default function CursosPage() {
     const niveles = useOptions<NivelOption>('/niveles');
+
+    // Leer nivel_id de la URL
+    const [nivelIdFromUrl, setNivelIdFromUrl] = useState<string | null>(null);
+    const [nivelNombre, setNivelNombre] = useState<string>('');
+    const [modoNivelDirecto, setModoNivelDirecto] = useState(false); // Nuevo estado
 
     // Grados list (main view)
     const [grados, setGrados] = useState<Grado[]>([]);
@@ -55,13 +55,71 @@ export default function CursosPage() {
         processing: boolean;
     }>({ open: false, title: '', message: '', onConfirm: async () => { }, processing: false });
 
-    // Load all grados on mount
+    // Breadcrumbs dinámicos según el contexto
+    const dynamicBreadcrumbs: BreadcrumbItem[] = useMemo(() => {
+        const base = [{ title: 'Dashboard', href: '/dashboard' }];
+        
+        if (nivelIdFromUrl && nivelNombre) {
+            base.push({ title: 'Niveles', href: '/niveles' });
+            base.push({ title: nivelNombre, href: `/cursos?nivel_id=${nivelIdFromUrl}` });
+        } else {
+            base.push({ title: 'Cursos', href: '/cursos' });
+        }
+        
+        return base;
+    }, [nivelIdFromUrl, nivelNombre]);
+
+    // Leer nivel_id de la URL al montar el componente
     useEffect(() => {
-        setLoadingG(true);
-        api.get('/grados', { params: { per_page: 500 } })
-            .then((res) => setGrados(res.data.data ?? []))
-            .finally(() => setLoadingG(false));
+        const params = new URLSearchParams(window.location.search);
+        const nivel = params.get('nivel_id');
+        setNivelIdFromUrl(nivel);
     }, []);
+
+    // Obtener el nombre del nivel cuando cambia nivelIdFromUrl
+    useEffect(() => {
+        if (nivelIdFromUrl && niveles.length > 0) {
+            const nivel = niveles.find(n => n.nivel_id.toString() === nivelIdFromUrl);
+            setNivelNombre(nivel?.nombre_nivel ?? '');
+        }
+    }, [nivelIdFromUrl, niveles]);
+
+    // Cargar grados del nivel para el modal
+    useEffect(() => {
+        if (nivelIdFromUrl) {
+            api.get('/grados', { params: { nivel_id: nivelIdFromUrl, per_page: 500 } })
+                .then((res) => setGrados(res.data.data ?? []));
+        }
+    }, [nivelIdFromUrl]);
+
+    // Load grados (filtrados por nivel si viene de URL)
+    useEffect(() => {
+        // Si viene nivel_id, cargar cursos directamente en lugar de grados
+        if (nivelIdFromUrl) {
+            setModoNivelDirecto(true);
+            setLoadingC(true);
+            api.get('/cursos', { 
+                params: { 
+                    nivel_academico_id: nivelIdFromUrl, 
+                    per_page: 500 
+                } 
+            })
+                .then((res) => {
+                    setCursos(res.data.data ?? []);
+                })
+                .finally(() => setLoadingC(false));
+        } else {
+            // Modo normal: cargar grados
+            setModoNivelDirecto(false);
+            setLoadingG(true);
+            api.get('/grados', { params: { per_page: 500 } })
+                .then((res) => {
+                    const gradosData = res.data.data ?? [];
+                    setGrados(gradosData);
+                })
+                .finally(() => setLoadingG(false));
+        }
+    }, [nivelIdFromUrl, nivelNombre]);
 
     // Load cursos when a grade is selected
     const loadCursos = useCallback(async () => {
@@ -114,9 +172,15 @@ return;
     };
 
     const handleBack = () => {
-        setSelectedGrado(null);
-        setCursos([]);
-        setSearchGrado('');
+        if (modoNivelDirecto) {
+            // Si estamos en modo nivel directo, volver a /niveles
+            window.location.href = '/niveles';
+        } else {
+            // Modo normal: volver a la lista de grados
+            setSelectedGrado(null);
+            setCursos([]);
+            setSearchGrado('');
+        }
     };
 
     // ── Curso handlers ──
@@ -138,7 +202,15 @@ return;
                 await api.post('/cursos', data);
             }
 
-            await loadCursos();
+            // Recargar cursos según el modo
+            if (modoNivelDirecto) {
+                const res = await api.get('/cursos', {
+                    params: { nivel_academico_id: nivelIdFromUrl, per_page: 500 },
+                });
+                setCursos(res.data.data ?? []);
+            } else {
+                await loadCursos();
+            }
         } catch (e: any) {
             setApiErrors(e?.response?.data?.errors ?? {});
 
@@ -156,7 +228,16 @@ return;
                 setDeleteModal((p) => ({ ...p, processing: true }));
                 await api.delete(`/cursos/${c.curso_id}`);
                 setDeleteModal((p) => ({ ...p, open: false, processing: false }));
-                await loadCursos();
+                
+                // Recargar cursos según el modo
+                if (modoNivelDirecto) {
+                    const res = await api.get('/cursos', {
+                        params: { nivel_academico_id: nivelIdFromUrl, per_page: 500 },
+                    });
+                    setCursos(res.data.data ?? []);
+                } else {
+                    await loadCursos();
+                }
             },
         });
     };
@@ -196,9 +277,14 @@ return;
     };
 
     // Pre-fill modal when creating from drill-down
-    const formDefaults: Partial<CursoFormData> | undefined = selectedGrado
+    const formDefaults: Partial<CursoFormData> | undefined = modoNivelDirecto
         ? {
-            grado_academico: selectedGrado.grado_id.toString(),
+            grado_academico: '',
+            nivel_academico_id: nivelIdFromUrl ?? '',
+        }
+        : selectedGrado
+        ? {
+            grado_academico: selectedGrado.grado_id > 0 ? selectedGrado.grado_id.toString() : '',
             nivel_academico_id: selectedGrado.nivel_id?.toString() ?? '',
         }
         : undefined;
@@ -206,11 +292,11 @@ return;
     return (
         <>
             <Head title="Cursos" />
-            <AppLayout breadcrumbs={breadcrumbs}>
+            <AppLayout breadcrumbs={dynamicBreadcrumbs}>
                 <div className="space-y-6 p-3 sm:p-6">
 
                     {/* ── VISTA PRINCIPAL: tabla de Grados ── */}
-                    {!selectedGrado ? (
+                    {!selectedGrado && !modoNivelDirecto ? (
                         <>
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <div className="flex items-center gap-3">
@@ -218,7 +304,9 @@ return;
                                         <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                                     </div>
                                     <div>
-                                        <h1 className="text-xl sm:text-2xl font-black text-neutral-950">Cursos</h1>
+                                        <h1 className="text-xl sm:text-2xl font-black text-neutral-950">
+                                            Cursos{nivelNombre ? ` - ${nivelNombre}` : ''}
+                                        </h1>
                                         <p className="text-xs sm:text-sm text-neutral-500">
                                             {loadingGrados ? '…' : `${grados.length} grados registrados`}
                                         </p>
@@ -360,7 +448,7 @@ return;
                             </div>
                         </>
                     ) : (
-                        /* ── VISTA DETALLE: cursos del grado seleccionado ── */
+                        /* ── VISTA DETALLE: cursos del grado/nivel seleccionado ── */
                         <>
                             <div className="flex flex-col gap-3">
                                 <div className="flex items-center gap-2">
@@ -373,11 +461,17 @@ return;
                                     </Button>
                                     <div className="flex-1">
                                         <h1 className="text-lg sm:text-2xl font-black text-neutral-950">
-                                            {selectedGrado.nombre_grado}
-                                            <span className="ml-2 text-neutral-400 font-normal text-sm sm:text-lg">· Cursos</span>
+                                            {modoNivelDirecto 
+                                                ? `Cursos ${nivelNombre}` 
+                                                : selectedGrado?.nombre_grado
+                                            }
+                                            {!modoNivelDirecto && <span className="ml-2 text-neutral-400 font-normal text-sm sm:text-lg">· Cursos</span>}
                                         </h1>
                                         <p className="text-xs sm:text-sm text-neutral-500">
-                                            {selectedGrado.nivel?.nombre_nivel ?? '—'}
+                                            {modoNivelDirecto 
+                                                ? nivelNombre
+                                                : selectedGrado?.nivel?.nombre_nivel ?? '—'
+                                            }
                                             {' · '}
                                             <span className="font-semibold text-emerald-600">{cursos.length} cursos</span>
                                         </p>
@@ -525,6 +619,7 @@ return;
                 onClose={handleClose}
                 editing={editing}
                 niveles={niveles}
+                grados={grados}
                 defaults={formDefaults}
                 onSave={handleSave}
                 apiErrors={apiErrors}

@@ -1,4 +1,4 @@
-import { Camera, Image as ImageIcon, Plus, Save, X } from 'lucide-react';
+import { Camera, Image as ImageIcon, Plus, Save } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import FormField from '@/components/shared/FormField';
 import { FormLegend } from '@/components/shared/FormLabels';
@@ -13,17 +13,31 @@ type Props = {
     onClose:     () => void;
     editing:     Curso | null;
     niveles:     NivelOption[];
+    grados:      Array<{ grado_id: number; nombre_grado: string; nivel_id?: number }>;
     defaults?:   Partial<CursoFormData>;
     onSave:      (data: CursoFormData) => Promise<void>;
     apiErrors:   Record<string, string[]>;
     clearErrors: () => void;
 };
 
-export default function CursoFormModal({ open, onClose, editing, niveles, defaults, onSave, apiErrors, clearErrors }: Props) {
+export default function CursoFormModal({ open, onClose, editing, niveles, grados, defaults, onSave, apiErrors, clearErrors }: Props) {
     const { form, set, processing, handleSubmit, preview, handleFileChange } = useCursoForm({ editing, open, defaults, onSave, onClose, clearErrors });
     const fileInputRef = useRef<HTMLInputElement>(null);
     
     const nivelNombre = niveles.find(n => n.nivel_id.toString() === form.nivel_academico_id)?.nombre_nivel || '—';
+    
+    // Filtrar grados por el nivel seleccionado
+    const gradosFiltrados = form.nivel_academico_id 
+        ? grados.filter(g => g.nivel_id?.toString() === form.nivel_academico_id)
+        : grados;
+    
+    // Auto-seleccionar el primer grado si viene de un nivel y no hay grado seleccionado
+    useEffect(() => {
+        if (form.nivel_academico_id && !form.grado_academico && gradosFiltrados.length > 0 && !editing) {
+            set('grado_academico', gradosFiltrados[0].grado_id.toString());
+        }
+    }, [form.nivel_academico_id, gradosFiltrados, form.grado_academico, editing]);
+    
     const err = (key: keyof CursoFormData) => apiErrors[key]?.[0];
 
     return (
@@ -33,6 +47,11 @@ export default function CursoFormModal({ open, onClose, editing, niveles, defaul
                     <DialogTitle className="text-base sm:text-xl font-bold flex items-center gap-2">
                         <Plus className="size-4 sm:size-5 text-emerald-600" />
                         {editing ? 'Editar Curso' : 'Agregar Curso'}
+                        {nivelNombre !== '—' && (
+                            <span className="text-sm sm:text-base font-normal text-neutral-500">
+                                · {nivelNombre}
+                            </span>
+                        )}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -91,7 +110,7 @@ export default function CursoFormModal({ open, onClose, editing, niveles, defaul
                                     label="Nombre del Curso" 
                                     required={true} 
                                     value={form.nombre} 
-                                    onChange={(v) => set('nombre', v)} 
+                                    onChange={(v) => set('nombre', v.toUpperCase())} 
                                     error={err('nombre')} 
                                     placeholder="Ej: MATEMÁTICA, COMUNICACIÓN..."
                                 />
@@ -99,9 +118,9 @@ export default function CursoFormModal({ open, onClose, editing, niveles, defaul
                                 <div className="space-y-1 sm:col-span-2">
                                     <label className="text-xs sm:text-sm font-medium text-neutral-700 uppercase">Descripción</label>
                                     <textarea
-                                        className="flex min-h-[80px] sm:min-h-[100px] w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all placeholder:text-neutral-300"
+                                        className="flex min-h-[80px] sm:min-h-[100px] w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all placeholder:text-neutral-300 uppercase"
                                         value={form.descripcion}
-                                        onChange={(e) => set('descripcion', e.target.value)}
+                                        onChange={(e) => set('descripcion', e.target.value.toUpperCase())}
                                         placeholder="Ingrese una descripción breve del curso..."
                                     />
                                     {err('descripcion') && <p className="text-xs text-red-500">{err('descripcion')}</p>}
