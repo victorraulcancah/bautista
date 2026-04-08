@@ -1,11 +1,11 @@
 import { Head } from '@inertiajs/react';
 import { Star, TrendingUp, AlertCircle, FileText } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
-import AppLayout from '@/layouts/app-layout';
 import PageHeader from '@/components/shared/PageHeader';
-import StatCard from '@/components/shared/StatCard';
 import SectionCard from '@/components/shared/SectionCard';
+import StatCard from '@/components/shared/StatCard';
+import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -23,7 +23,9 @@ export default function AlumnoNotasPage() {
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <div className="p-10 text-center font-black animate-pulse text-amber-500">Cargando tus calificaciones...</div>;
+    if (loading) {
+return <div className="p-10 text-center font-black animate-pulse text-amber-500">Cargando tus calificaciones...</div>;
+}
 
     const promedio = (notas.length > 0) ? (notas.reduce((acc, n) => acc + parseFloat(n.nota), 0) / (notas.length)).toFixed(1) : '---';
 

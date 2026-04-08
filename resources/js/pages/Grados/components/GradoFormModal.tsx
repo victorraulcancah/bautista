@@ -1,8 +1,8 @@
+import TitleForm from '@/components/TitleForm';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import TitleForm from '@/components/TitleForm';
-import type { Grado, GradoFormData, Nivel } from '../hooks/useGrados';
 import { useGradoForm } from '../hooks/useGradoForm';
+import type { Grado, GradoFormData, Nivel } from '../hooks/useGrados';
 
 type Props = {
     open:        boolean;

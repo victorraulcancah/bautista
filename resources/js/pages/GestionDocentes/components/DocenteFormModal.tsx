@@ -1,12 +1,12 @@
+import FormField from '@/components/shared/FormField';
+import { FormLegend, ReqLabel, OptLabel } from '@/components/shared/FormLabels';
+import FormSection from '@/components/shared/FormSection';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import FormField from '@/components/shared/FormField';
-import FormSection from '@/components/shared/FormSection';
-import { FormLegend, ReqLabel, OptLabel } from '@/components/shared/FormLabels';
-import type { Docente, DocenteFormData } from '../hooks/useDocentes';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useDocenteForm } from '../hooks/useDocenteForm';
+import type { Docente, DocenteFormData } from '../hooks/useDocentes';
 
 type Props = {
     open:        boolean;

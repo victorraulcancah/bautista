@@ -28,6 +28,7 @@ export const docentesColumns: Column<Docente>[] = [
                 '5': { label: 'Bloqueado', cls: 'bg-red-100 text-red-600' },
             };
             const entry = map[d.estado] ?? { label: d.estado, cls: 'bg-gray-100 text-gray-600' };
+
             return (
                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${entry.cls}`}>
                     {entry.label}

@@ -1,10 +1,10 @@
 import { Head } from '@inertiajs/react';
 import { ScanLine, ShieldCheck, Clock } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import api from '@/lib/api';
-import AppLayout from '@/layouts/app-layout';
+import { useState, useEffect } from 'react';
 import PageHeader from '@/components/shared/PageHeader';
+import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [

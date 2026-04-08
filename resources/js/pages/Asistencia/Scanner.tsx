@@ -1,11 +1,11 @@
 import { Head } from '@inertiajs/react';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import { QrCode, Shield, Clock, UserCheck, AlertCircle, History, Zap, Settings } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-import api from '@/lib/api';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -52,7 +52,10 @@ export default function AsistenciaScanner() {
     };
 
     function onScanSuccess(decodedText: string) {
-        if (scanningRef.current) return;
+        if (scanningRef.current) {
+return;
+}
+
         setScanning(true);
         api.post('/asistencia/marcar-qr', { qr_data: decodedText, tipo_marcado: tipoRef.current })
             .then(res => {

@@ -62,6 +62,7 @@ export function nombreCompleto(d: Docente): string {
         return [d.perfil.primer_nombre, d.perfil.apellido_paterno, d.perfil.apellido_materno]
             .filter(Boolean).join(' ');
     }
+
     return d.user?.username ?? '—';
 }
 

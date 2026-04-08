@@ -1,10 +1,10 @@
 import { Head } from '@inertiajs/react';
 import { Image, File, Film, Music, Upload, Trash2, Search, Filter, Folder, Grid, List as ListIcon, MoreVertical, Plus } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -28,7 +28,10 @@ export default function MediosIndex() {
 
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+
+        if (!file) {
+return;
+}
 
         const formData = new FormData();
         formData.append('archivo', file);
@@ -39,23 +42,38 @@ export default function MediosIndex() {
     };
 
     const handleDelete = (id: number) => {
-        if (!confirm("¿Seguro que deseas eliminar este archivo?")) return;
+        if (!confirm("¿Seguro que deseas eliminar este archivo?")) {
+return;
+}
+
         api.delete(`/medios/${id}`).then(() => loadMedios());
     };
 
     const getIcon = (tipo: string) => {
         const t = tipo.toLowerCase();
-        if (['jpg', 'png', 'jpeg', 'gif', 'svg'].includes(t)) return <Image className="w-6 h-6 text-emerald-500" />;
-        if (['mp4', 'mov', 'avi'].includes(t)) return <Film className="w-6 h-6 text-indigo-500" />;
-        if (['mp3', 'wav'].includes(t)) return <Music className="w-6 h-6 text-rose-500" />;
+
+        if (['jpg', 'png', 'jpeg', 'gif', 'svg'].includes(t)) {
+return <Image className="w-6 h-6 text-emerald-500" />;
+}
+
+        if (['mp4', 'mov', 'avi'].includes(t)) {
+return <Film className="w-6 h-6 text-indigo-500" />;
+}
+
+        if (['mp3', 'wav'].includes(t)) {
+return <Music className="w-6 h-6 text-rose-500" />;
+}
+
         return <File className="w-6 h-6 text-amber-500" />;
     };
 
-    if (loading) return (
+    if (loading) {
+return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest">Abriendo tu Biblioteca...</div>
         </AppLayout>
     );
+}
 
     const filtered = medios.filter(m => m.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -128,7 +146,9 @@ export default function MediosIndex() {
                                 </p>
 
                                 <button 
-                                    onClick={(e) => { e.stopPropagation(); handleDelete(m.id_medio); }}
+                                    onClick={(e) => {
+ e.stopPropagation(); handleDelete(m.id_medio); 
+}}
                                     className="absolute top-3 right-3 p-2 bg-rose-50 text-rose-400 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-500 hover:text-white"
                                 >
                                     <Trash2 className="w-3 h-3" />

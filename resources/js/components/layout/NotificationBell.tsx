@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Bell, Cake, CreditCard, X, ChevronRight } from 'lucide-react';
 import { Link } from '@inertiajs/react';
+import { Bell, Cake, CreditCard, X, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -25,21 +25,37 @@ export function NotificationBell() {
         fetchNotifications();
         // Opcional: Polling cada 5 minutos
         const interval = setInterval(fetchNotifications, 5 * 60 * 1000);
+
         return () => clearInterval(interval);
     }, []);
 
     const unreadCount = notifications.length;
 
     const getIcon = (id: string) => {
-        if (id === 'pending_payments') return <CreditCard className="size-5 text-amber-600" />;
-        if (id === 'birthdays')        return <Cake className="size-5 text-pink-600" />;
+        if (id === 'pending_payments') {
+return <CreditCard className="size-5 text-amber-600" />;
+}
+
+        if (id === 'birthdays')        {
+return <Cake className="size-5 text-pink-600" />;
+}
+
         return <Bell className="size-5 text-emerald-600" />;
     };
 
     const getBgColor = (type: string) => {
-        if (type === 'success') return 'bg-green-50 border-green-100';
-        if (type === 'warning') return 'bg-amber-50 border-amber-100';
-        if (type === 'error')   return 'bg-red-50 border-red-100';
+        if (type === 'success') {
+return 'bg-green-50 border-green-100';
+}
+
+        if (type === 'warning') {
+return 'bg-amber-50 border-amber-100';
+}
+
+        if (type === 'error')   {
+return 'bg-red-50 border-red-100';
+}
+
         return 'bg-blue-50 border-blue-100';
     };
 

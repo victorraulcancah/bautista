@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { Plus, ChevronRight, FileText, Layout, Settings, BookOpen, Trash2, Edit3, Save, X, PlusCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -30,7 +30,10 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
     };
 
     const addUnidad = () => {
-        if (!nuevaUnidad) return;
+        if (!nuevaUnidad) {
+return;
+}
+
         api.post('/docente/unidad', { docente_curso_id: docenteCursoId, titulo: nuevaUnidad })
             .then(() => {
                 setNuevaUnidad('');
@@ -41,23 +44,33 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
 
     const addClase = (unidadId: number) => {
         const titulo = prompt('Título de la nueva sesión:');
-        if (!titulo) return;
+
+        if (!titulo) {
+return;
+}
+
         api.post('/docente/clase', { unidad_id: unidadId, titulo })
             .then(() => loadContent());
     };
 
     const addActividad = (claseId: number, tipoId: number) => {
         const nombre = prompt(tipoId === 3 ? 'Nombre del Cuestionario/Examen:' : 'Nombre de la actividad/tarea:');
-        if (!nombre) return;
+
+        if (!nombre) {
+return;
+}
+
         api.post('/docente/actividad', { id_clase_curso: claseId, nombre_actividad: nombre, tipo_id: tipoId })
             .then(() => loadContent());
     };
 
-    if (loading) return (
+    if (loading) {
+return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest">Abriendo Gestor de Contenido...</div>
         </AppLayout>
     );
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

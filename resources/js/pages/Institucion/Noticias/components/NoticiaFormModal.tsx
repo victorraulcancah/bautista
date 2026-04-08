@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
 import { Newspaper, Calendar, Type, Image as ImageIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useEffect, useRef, useState } from 'react';
 import FormField from '@/components/shared/FormField';
 import TitleForm from '@/components/TitleForm';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Noticia, NoticiaFormData } from '../hooks/useNoticias';
 import { defaultForm } from '../hooks/useNoticias';
 
@@ -26,7 +26,11 @@ export default function NoticiaFormModal({ open, onClose, editing, onSave, apiEr
     useEffect(() => {
         clearErrors();
         setImagenFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+
+        if (fileInputRef.current) {
+fileInputRef.current.value = '';
+}
+
         setForm(editing
             ? {
                 not_titulo:            editing.not_titulo            ?? '',
@@ -57,6 +61,7 @@ export default function NoticiaFormModal({ open, onClose, editing, onSave, apiEr
     const handleSubmit = async (e: { preventDefault(): void }) => {
         e.preventDefault();
         setProcessing(true);
+
         try {
             const fd = new FormData();
             fd.append('not_titulo',            form.not_titulo);
@@ -71,7 +76,9 @@ export default function NoticiaFormModal({ open, onClose, editing, onSave, apiEr
             fd.append('not_fecha_expiracion',  form.not_fecha_expiracion);
             fd.append('autor',                 form.autor);
             
-            if (imagenFile) fd.append('imagen', imagenFile);
+            if (imagenFile) {
+fd.append('imagen', imagenFile);
+}
             
             await onSave(fd);
             onClose();

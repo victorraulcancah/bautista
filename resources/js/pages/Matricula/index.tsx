@@ -1,16 +1,16 @@
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { ClipboardList, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
 import type { Column } from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
-import { useResource } from '@/hooks/useResource';
+import { Button } from '@/components/ui/button';
 import { useOptions } from '@/hooks/useOptions';
+import { useResource } from '@/hooks/useResource';
+import type { BreadcrumbItem } from '@/types';
 import AperturaFormModal from './components/AperturaFormModal';
 import MatriculasDrawer from './components/MatriculasDrawer';
-import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import type { MatriculaApertura, AperturaFormData, SeccionOption } from './hooks/useMatricula';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -28,12 +28,21 @@ export default function MatriculaPage() {
     const [selected, setSelected]     = useState<MatriculaApertura | null>(null);
     const [deleting, setDeleting]     = useState<MatriculaApertura | null>(null);
 
-    const openCreate = () => { setEditing(null); setModalOpen(true); };
-    const openEdit   = (a: MatriculaApertura) => { setEditing(a); setModalOpen(true); };
-    const openDetail = (a: MatriculaApertura) => { setSelected(a); setDrawerOpen(true); };
+    const openCreate = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit   = (a: MatriculaApertura) => {
+ setEditing(a); setModalOpen(true); 
+};
+    const openDetail = (a: MatriculaApertura) => {
+ setSelected(a); setDrawerOpen(true); 
+};
 
     const handleDelete = async () => {
-        if (!deleting) return;
+        if (!deleting) {
+return;
+}
+
         await res.remove(deleting.apertura_id);
         setDeleting(null);
     };
@@ -64,7 +73,9 @@ export default function MatriculaPage() {
                         size="sm"
                         variant="ghost"
                         className="h-6 px-2 text-xs text-blue-600 hover:text-blue-800"
-                        onClick={(e) => { e.stopPropagation(); openDetail(a); }}
+                        onClick={(e) => {
+ e.stopPropagation(); openDetail(a); 
+}}
                     >
                         <Users className="mr-1 h-3 w-3" />
                         Ver
@@ -112,7 +123,9 @@ export default function MatriculaPage() {
 
             <AperturaFormModal
                 open={modalOpen}
-                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                onClose={() => {
+ setModalOpen(false); res.clearSuccess(); 
+}}
                 editing={editing}
                 onSave={editing
                     ? (data: AperturaFormData) => res.update(editing.apertura_id, data)

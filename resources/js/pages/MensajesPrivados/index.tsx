@@ -1,13 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
 import { Mail, Send, Inbox, Search, Plus, MoreVertical, User, ChevronRight, MessageSquare, Trash2, Edit3, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -45,12 +45,18 @@ export default function MensajeriaIndex() {
     };
 
     const handleSearchContact = (q: string) => {
-        if (q.length < 2) return setContactos([]);
+        if (q.length < 2) {
+return setContactos([]);
+}
+
         api.get(`/mensajes-legacy/contactos?q=${q}`).then(res => setContactos(res.data));
     };
 
     const handleSend = () => {
-        if (!destinatario || !asunto || !cuerpo) return alert("Completa todos los campos.");
+        if (!destinatario || !asunto || !cuerpo) {
+return alert("Completa todos los campos.");
+}
+
         setSending(true);
         api.post('/mensajes-legacy/enviar', {
             destinatario_id: destinatario.id,
@@ -65,11 +71,13 @@ export default function MensajeriaIndex() {
         }).finally(() => setSending(false));
     };
 
-    if (loading) return (
+    if (loading) {
+return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest">Abriendo Bandeja de Entrada...</div>
         </AppLayout>
     );
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -119,7 +127,9 @@ export default function MensajeriaIndex() {
                                                     {contactos.map(c => (
                                                         <button 
                                                             key={c.id} 
-                                                            onClick={() => { setDestinatario(c); setContactos([]); }}
+                                                            onClick={() => {
+ setDestinatario(c); setContactos([]); 
+}}
                                                             className="w-full p-4 flex items-center hover:bg-indigo-50 transition-colors text-left"
                                                         >
                                                             <div className="w-8 h-8 bg-gray-100 rounded-full mr-3 flex items-center justify-center text-[10px] font-black text-gray-400">{c.perfil?.primer_nombre?.[0]}</div>

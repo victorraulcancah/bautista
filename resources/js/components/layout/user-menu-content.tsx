@@ -1,16 +1,16 @@
 import { Link, router } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
+import { UserInfo } from '@/components/layout/user-info';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { UserInfo } from '@/components/layout/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { edit } from '@/routes/profile';
-import { clearAuthToken } from '@/plugins/inertia-token-plugin';
 import api from '@/lib/api';
+import { clearAuthToken } from '@/plugins/inertia-token-plugin';
+import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 
 type Props = {

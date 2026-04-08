@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import { Download, Trash2, Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import api from '@/lib/api';
@@ -35,8 +35,13 @@ export default function SeccionHorarioModal({ open, seccionId, onClose }: Props)
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file || !seccionId) return;
+
+        if (!file || !seccionId) {
+return;
+}
+
         setUploading(true);
+
         try {
             const fd = new FormData();
             fd.append('archivo', file);
@@ -46,7 +51,10 @@ export default function SeccionHorarioModal({ open, seccionId, onClose }: Props)
             setArchivos((prev) => [r.data, ...prev]);
         } finally {
             setUploading(false);
-            if (inputRef.current) inputRef.current.value = '';
+
+            if (inputRef.current) {
+inputRef.current.value = '';
+}
         }
     };
 

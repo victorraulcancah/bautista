@@ -57,7 +57,7 @@ export const defaultContacto = (): ContactoForm => ({
 });
 
 /** Mapea un contacto API -> ContactoForm */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export const mapContacto = (c: any): ContactoForm => ({
     nombres:        c.nombres        ?? '',
     apellidos:      c.apellidos      ?? '',

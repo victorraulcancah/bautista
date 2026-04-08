@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
+import FormField from '@/components/shared/FormField';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import FormField from '@/components/shared/FormField';
 import api from '@/lib/api';
 import type { TipoActividad } from '../index';
 
@@ -87,6 +87,7 @@ export default function ActividadFormModal({
     const handleSubmit = async (e: { preventDefault(): void }) => {
         e.preventDefault();
         setProc(true);
+
         try {
             await onSave(form);
             onClose();

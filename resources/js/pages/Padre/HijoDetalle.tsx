@@ -1,8 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
 import { GraduationCap, ClipboardCheck, CreditCard, ChevronLeft, Star, Clock, AlertCircle, FileText, Upload } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import api from '@/lib/api';
 import SubirVoucherModal from '@/pages/PortalPadre/components/SubirVoucherModal';
 
 export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
@@ -18,7 +18,9 @@ export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
             .finally(() => setLoading(false));
     }, [hijoId]);
 
-    if (loading) return <div className="p-10 text-center font-black animate-pulse text-rose-500">Cargando detalles...</div>;
+    if (loading) {
+return <div className="p-10 text-center font-black animate-pulse text-rose-500">Cargando detalles...</div>;
+}
 
     return (
         <>
@@ -232,7 +234,9 @@ export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
                                                 variant="ghost"
                                                 title="Subir comprobante"
                                                 className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 h-8 w-8 p-0"
-                                                onClick={() => { setVoucherPagId(p.pag_id ?? p.pago_id); setVoucherMes(p.mes ?? p.tipo_pago ?? ''); }}
+                                                onClick={() => {
+ setVoucherPagId(p.pag_id ?? p.pago_id); setVoucherMes(p.mes ?? p.tipo_pago ?? ''); 
+}}
                                             >
                                                 <Upload className="h-4 w-4" />
                                             </Button>

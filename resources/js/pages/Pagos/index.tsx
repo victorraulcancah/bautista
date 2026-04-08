@@ -1,12 +1,12 @@
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { Wallet, PlusCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
 import type { Column } from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
+import { Button } from '@/components/ui/button';
 import { useResource } from '@/hooks/useResource';
+import type { BreadcrumbItem } from '@/types';
 import PagosDrawer from './components/PagosDrawer';
 import type { Pagador } from './hooks/usePago';
 
@@ -21,7 +21,9 @@ export default function PagosPage() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selected, setSelected]     = useState<Pagador | null>(null);
 
-    const openDrawer = (p: Pagador) => { setSelected(p); setDrawerOpen(true); };
+    const openDrawer = (p: Pagador) => {
+ setSelected(p); setDrawerOpen(true); 
+};
 
     const columns: Column<Pagador>[] = [
         {
@@ -58,7 +60,9 @@ export default function PagosPage() {
                 <Button
                     size="sm"
                     className="bg-[#00a65a] hover:bg-[#008d4c] text-white h-7 px-3"
-                    onClick={(e) => { e.stopPropagation(); openDrawer(p); }}
+                    onClick={(e) => {
+ e.stopPropagation(); openDrawer(p); 
+}}
                 >
                     <PlusCircle className="h-3.5 w-3.5" />
                 </Button>

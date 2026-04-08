@@ -224,7 +224,10 @@ export function AppSidebar() {
 
     const filteredNavigation = useMemo(() => {
         return navigation.filter(item => {
-            if (!item.roles) return true;
+            if (!item.roles) {
+return true;
+}
+
             return item.roles.some(role => userRoles.includes(role));
         });
     }, [userRoles]);
@@ -236,14 +239,24 @@ export function AppSidebar() {
 
         filteredNavigation.forEach((item) => {
             if (item.type === 'section') {
-                if (currentGroup) result.push(currentGroup);
+                if (currentGroup) {
+result.push(currentGroup);
+}
+
                 currentGroup = { section: item.label, items: [] };
             } else {
-                if (!currentGroup) currentGroup = { items: [] };
+                if (!currentGroup) {
+currentGroup = { items: [] };
+}
+
                 currentGroup.items.push(item);
             }
         });
-        if (currentGroup) result.push(currentGroup);
+
+        if (currentGroup) {
+result.push(currentGroup);
+}
+
         return result;
     }, [filteredNavigation]);
 
@@ -268,9 +281,11 @@ export function AppSidebar() {
                                         if (item.type === 'group') {
                                             return <NavGroupItem key={item.title} item={item} />;
                                         }
+
                                         if (item.type === 'link') {
                                             return <NavLinkItem key={item.href} item={item} />;
                                         }
+
                                         return null;
                                     })}
                                 </SidebarMenu>

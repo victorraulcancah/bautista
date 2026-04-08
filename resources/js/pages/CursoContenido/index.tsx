@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { BookOpen, Plus } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import api from '@/lib/api';
-import type { Unidad, UnidadFormData } from './hooks/useCursoContenido';
-import UnidadItem from './components/UnidadItem';
+import type { BreadcrumbItem } from '@/types';
 import UnidadFormModal from './components/UnidadFormModal';
+import UnidadItem from './components/UnidadItem';
+import type { Unidad, UnidadFormData } from './hooks/useCursoContenido';
 
 type Props = {
     cursoId: number;
@@ -28,6 +28,7 @@ export default function CursoContenidoPage({ cursoId }: Props) {
 
     const cargar = useCallback(async () => {
         setLoading(true);
+
         try {
             const { data } = await api.get(`/contenido/cursos/${cursoId}`);
             setUnidades(data);
@@ -36,7 +37,9 @@ export default function CursoContenidoPage({ cursoId }: Props) {
         }
     }, [cursoId]);
 
-    useEffect(() => { cargar(); }, [cargar]);
+    useEffect(() => {
+ cargar(); 
+}, [cargar]);
 
     const handleCreateUnidad = async (data: UnidadFormData) => {
         setApiErrors({});
@@ -45,20 +48,30 @@ export default function CursoContenidoPage({ cursoId }: Props) {
     };
 
     const handleUpdateUnidad = async (data: UnidadFormData) => {
-        if (!editing) return;
+        if (!editing) {
+return;
+}
+
         setApiErrors({});
         await api.put(`/contenido/unidades/${editing.unidad_id}`, { ...data, estado: '1' });
         await cargar();
     };
 
     const handleDeleteUnidad = async (id: number) => {
-        if (!confirm('¿Eliminar esta unidad y todas sus clases?')) return;
+        if (!confirm('¿Eliminar esta unidad y todas sus clases?')) {
+return;
+}
+
         await api.delete(`/contenido/unidades/${id}`);
         await cargar();
     };
 
-    const openEdit = (u: Unidad) => { setEditing(u); setModalOpen(true); };
-    const openCreate = () => { setEditing(null); setModalOpen(true); };
+    const openEdit = (u: Unidad) => {
+ setEditing(u); setModalOpen(true); 
+};
+    const openCreate = () => {
+ setEditing(null); setModalOpen(true); 
+};
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

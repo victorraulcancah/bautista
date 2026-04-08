@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
+import TitleForm from '@/components/TitleForm';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import TitleForm from '@/components/TitleForm';
 
 type Props = {
     open:       boolean;

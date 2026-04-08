@@ -1,17 +1,17 @@
 import { Head } from '@inertiajs/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, BookOpen, Pencil, Plus, Search, Trash2 } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import api from '@/lib/api';
 import { useOptions } from '@/hooks/useOptions';
-import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
-import CursoFormModal from './components/CursoFormModal';
-import GradoFormModal from '../Grados/components/GradoFormModal';
-import type { Curso, CursoFormData, NivelOption } from './hooks/useCursos';
-import type { Grado, GradoFormData, Nivel } from '../Grados/hooks/useGrados';
+import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
+import GradoFormModal from '../Grados/components/GradoFormModal';
+import type { Grado, GradoFormData, Nivel } from '../Grados/hooks/useGrados';
+import CursoFormModal from './components/CursoFormModal';
+import type { Curso, CursoFormData, NivelOption } from './hooks/useCursos';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -65,8 +65,12 @@ export default function CursosPage() {
 
     // Load cursos when a grade is selected
     const loadCursos = useCallback(async () => {
-        if (!selectedGrado) return;
+        if (!selectedGrado) {
+return;
+}
+
         setLoadingC(true);
+
         try {
             const res = await api.get('/cursos', {
                 params: { grado_id: selectedGrado.grado_id, per_page: 500 },
@@ -77,11 +81,14 @@ export default function CursosPage() {
         }
     }, [selectedGrado]);
 
-    useEffect(() => { loadCursos(); }, [loadCursos]);
+    useEffect(() => {
+ loadCursos(); 
+}, [loadCursos]);
 
     // Filtered lists
     const gradosFiltrados = useMemo(() => {
         const q = searchGrado.toLowerCase();
+
         return grados.filter((g) =>
             !q ||
             g.nombre_grado.toLowerCase().includes(q) ||
@@ -92,6 +99,7 @@ export default function CursosPage() {
 
     const cursosFiltrados = useMemo(() => {
         const q = searchCurso.toLowerCase();
+
         return cursos.filter((c) =>
             !q ||
             c.nombre.toLowerCase().includes(q) ||
@@ -112,9 +120,15 @@ export default function CursosPage() {
     };
 
     // ── Curso handlers ──
-    const openCreate = () => { setEditing(null); setApiErrors({}); setModalOpen(true); };
-    const openEdit = (c: Curso) => { setEditing(c); setApiErrors({}); setModalOpen(true); };
-    const handleClose = () => { setModalOpen(false); setEditing(null); setApiErrors({}); };
+    const openCreate = () => {
+ setEditing(null); setApiErrors({}); setModalOpen(true); 
+};
+    const openEdit = (c: Curso) => {
+ setEditing(c); setApiErrors({}); setModalOpen(true); 
+};
+    const handleClose = () => {
+ setModalOpen(false); setEditing(null); setApiErrors({}); 
+};
 
     const handleSave = async (data: CursoFormData) => {
         try {
@@ -123,9 +137,11 @@ export default function CursosPage() {
             } else {
                 await api.post('/cursos', data);
             }
+
             await loadCursos();
         } catch (e: any) {
             setApiErrors(e?.response?.data?.errors ?? {});
+
             throw e;
         }
     };
@@ -146,7 +162,9 @@ export default function CursosPage() {
     };
 
     // ── Grado handlers ──
-    const openEditGrado = (g: Grado) => { setEditingGrado(g); setGradoApiErrors({}); setGradoModalOpen(true); };
+    const openEditGrado = (g: Grado) => {
+ setEditingGrado(g); setGradoApiErrors({}); setGradoModalOpen(true); 
+};
 
     const handleSaveGrado = async (data: GradoFormData) => {
         try {
@@ -157,6 +175,7 @@ export default function CursosPage() {
             }
         } catch (e: any) {
             setGradoApiErrors(e?.response?.data?.errors ?? {});
+
             throw e;
         }
     };
@@ -399,7 +418,9 @@ export default function CursosPage() {
 
             <GradoFormModal
                 open={gradoModalOpen}
-                onClose={() => { setGradoModalOpen(false); setEditingGrado(null); setGradoApiErrors({}); }}
+                onClose={() => {
+ setGradoModalOpen(false); setEditingGrado(null); setGradoApiErrors({}); 
+}}
                 editing={editingGrado}
                 niveles={niveles as Nivel[]}
                 onSave={handleSaveGrado}

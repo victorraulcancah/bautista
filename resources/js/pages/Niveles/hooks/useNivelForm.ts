@@ -32,6 +32,7 @@ export function useNivelForm({ editing, open, onSave, onClose, clearErrors }: Pr
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setProc(true);
+
         try {
             await onSave(form);
             onClose();

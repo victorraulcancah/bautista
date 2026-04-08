@@ -1,17 +1,17 @@
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { BookOpen, Clock, UserCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
+import { Button } from '@/components/ui/button';
 import { useResource } from '@/hooks/useResource';
-import DocenteFormModal from './components/DocenteFormModal';
+import type { BreadcrumbItem } from '@/types';
 import AsignarCursosModal from './components/AsignarCursosModal';
+import DocenteFormModal from './components/DocenteFormModal';
 import HorarioModal from './components/HorarioModal';
-import { docentesColumns } from './hooks/useDocentesColumns';
 import type { Docente } from './hooks/useDocentes';
 import { nombreCompleto } from './hooks/useDocentes';
+import { docentesColumns } from './hooks/useDocentesColumns';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard',  href: '/dashboard' },
@@ -25,8 +25,12 @@ export default function DocentesPage() {
     const [asignarDocente, setAsignarDocente] = useState<Docente | null>(null);
     const [horarioDocente, setHorarioDocente] = useState<Docente | null>(null);
 
-    const openCreate   = () => { setEditing(null); setModalOpen(true); };
-    const openEdit     = (d: Docente) => { setEditing(d); setModalOpen(true); };
+    const openCreate   = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit     = (d: Docente) => {
+ setEditing(d); setModalOpen(true); 
+};
     const handleDelete = (d: Docente) => {
         if (confirm(`¿Eliminar al docente "${nombreCompleto(d)}"?`)) {
             res.remove(d.docente_id);
@@ -85,7 +89,9 @@ export default function DocentesPage() {
 
             <DocenteFormModal
                 open={modalOpen}
-                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                onClose={() => {
+ setModalOpen(false); res.clearSuccess(); 
+}}
                 editing={editing}
                 onSave={editing
                     ? (data) => res.update(editing.docente_id, data)

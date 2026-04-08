@@ -1,8 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
 import { User, ChevronRight, Heart, Bell, Calendar, GraduationCap, CreditCard } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import api from '@/lib/api';
 
 export default function PadreDashboard() {
     const [hijos, setHijos] = useState<any[]>([]);
@@ -14,7 +14,9 @@ export default function PadreDashboard() {
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <div className="p-10 text-center font-black animate-pulse text-rose-500 uppercase tracking-widest">Cargando Portal Familiar...</div>;
+    if (loading) {
+return <div className="p-10 text-center font-black animate-pulse text-rose-500 uppercase tracking-widest">Cargando Portal Familiar...</div>;
+}
 
     return (
         <div className="min-h-screen bg-[#FFFBFB] p-4 md:p-10 space-y-10 font-sans selection:bg-rose-100">

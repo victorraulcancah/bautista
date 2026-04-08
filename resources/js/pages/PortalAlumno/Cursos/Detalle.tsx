@@ -14,10 +14,10 @@ import {
     Library
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
+import PageHeader from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import PageHeader from '@/components/shared/PageHeader';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 export default function CursoDetalle({ cursoId }: { cursoId: number }) {
@@ -36,7 +36,9 @@ export default function CursoDetalle({ cursoId }: { cursoId: number }) {
         { title: 'Contenido', href: '#' },
     ];
 
-    if (loading) return <div className="p-10 text-center font-black animate-pulse text-blue-600">Sincronizando contenido académico...</div>;
+    if (loading) {
+return <div className="p-10 text-center font-black animate-pulse text-blue-600">Sincronizando contenido académico...</div>;
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

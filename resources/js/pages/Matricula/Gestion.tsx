@@ -1,11 +1,11 @@
 import { Head, router } from '@inertiajs/react';
-import { useCallback, useEffect, useState } from 'react';
 import { ClipboardList, Eye } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
-import type { MatriculaApertura, NivelCount } from './hooks/useMatricula';
 import type { BreadcrumbItem } from '@/types';
+import type { MatriculaApertura, NivelCount } from './hooks/useMatricula';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -25,16 +25,22 @@ export default function MatriculaGestion() {
         const res = await api.get('/matriculas/aperturas', { params: { per_page: 100 } });
         const lista: MatriculaApertura[] = res.data.data ?? [];
         setAperturas(lista);
+
         if (lista.length > 0 && !selectedAperturaId) {
             setSelectedAperturaId(lista[0].apertura_id.toString());
         }
     }, [selectedAperturaId]);
 
-    useEffect(() => { cargarAperturas(); }, []);
+    useEffect(() => {
+ cargarAperturas(); 
+}, []);
 
     // ── Cargar niveles cuando cambia la apertura ──────────────────────────────
     useEffect(() => {
-        if (!selectedAperturaId) return;
+        if (!selectedAperturaId) {
+return;
+}
+
         setLoadingNiveles(true);
         api.get(`/matriculas/aperturas/${selectedAperturaId}/por-nivel`)
             .then(res => setNiveles(res.data ?? []))

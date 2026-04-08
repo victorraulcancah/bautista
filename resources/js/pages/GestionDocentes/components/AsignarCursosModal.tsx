@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
 import { Save, Trash2, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ReqLabel } from '@/components/shared/FormLabels';
+import ResourceTable, { Column } from '@/components/shared/ResourceTable';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import ResourceTable, { Column } from '@/components/shared/ResourceTable';
-import { ReqLabel } from '@/components/shared/FormLabels';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import http from '@/services/http';
 import type { Docente } from '../hooks/useDocentes';
 import { nombreCompleto } from '../hooks/useDocentes';
@@ -43,7 +43,10 @@ export default function AsignarCursosModal({ open, onClose, docente }: Props) {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!open || !docente) return;
+        if (!open || !docente) {
+return;
+}
+
         setLoading(true);
         Promise.all([
             http.get(`/docentes/${docente.docente_id}/cursos`),
@@ -69,6 +72,7 @@ export default function AsignarCursosModal({ open, onClose, docente }: Props) {
     const setF = (key: keyof typeof form, val: string) => {
         setForm(prev => {
             const next = { ...prev, [key]: val };
+
             if (key === 'nivel_id') {
                 next.grado_id   = '';
                 next.seccion_id = '';
@@ -77,6 +81,7 @@ export default function AsignarCursosModal({ open, onClose, docente }: Props) {
                 setCursosFilt((cursos as any[]).filter(c => String(c.nivel_id) === val));
                 setSeccionesFilt([]);
             }
+
             if (key === 'grado_id') {
                 next.seccion_id = '';
                 next.curso_id   = '';
@@ -87,20 +92,41 @@ export default function AsignarCursosModal({ open, onClose, docente }: Props) {
                     (!c.grado_id || String(c.grado_id) === val)
                 ));
             }
+
             return next;
         });
     };
 
     const handleAdd = async () => {
-        if (!docente) return;
+        if (!docente) {
+return;
+}
+
         setSaving(true);
+
         try {
             const payload: Record<string, number> = {};
-            if (form.apertura_id) payload.apertura_id = Number(form.apertura_id);
-            if (form.nivel_id)    payload.nivel_id    = Number(form.nivel_id);
-            if (form.grado_id)    payload.grado_id    = Number(form.grado_id);
-            if (form.seccion_id)  payload.seccion_id  = Number(form.seccion_id);
-            if (form.curso_id)    payload.curso_id    = Number(form.curso_id);
+
+            if (form.apertura_id) {
+payload.apertura_id = Number(form.apertura_id);
+}
+
+            if (form.nivel_id)    {
+payload.nivel_id    = Number(form.nivel_id);
+}
+
+            if (form.grado_id)    {
+payload.grado_id    = Number(form.grado_id);
+}
+
+            if (form.seccion_id)  {
+payload.seccion_id  = Number(form.seccion_id);
+}
+
+            if (form.curso_id)    {
+payload.curso_id    = Number(form.curso_id);
+}
+
             const res = await http.post(`/docentes/${docente.docente_id}/cursos`, payload);
             setAsignaciones(prev => [res.data, ...prev]);
             setForm({ apertura_id: '', nivel_id: '', grado_id: '', seccion_id: '', curso_id: '' });
@@ -110,7 +136,10 @@ export default function AsignarCursosModal({ open, onClose, docente }: Props) {
     };
 
     const handleRemove = async (asig: Asignacion) => {
-        if (!docente || !confirm('¿Quitar esta asignación?')) return;
+        if (!docente || !confirm('¿Quitar esta asignación?')) {
+return;
+}
+
         await http.delete(`/docentes/${docente.docente_id}/cursos/${asig.id}`);
         setAsignaciones(prev => prev.filter(a => a.id !== asig.id));
     };

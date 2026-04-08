@@ -1,10 +1,10 @@
 import { Head } from '@inertiajs/react';
 import { GraduationCap, Save, Search, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import api from '@/lib/api';
 
 type EstudianteNota = {
     estu_id: number;
@@ -35,9 +35,12 @@ export default function NotasPage() {
     const fetchNotas = async () => {
         if (!selectedActividad || !seccionId || !aperturaId) {
             alert('Por favor complete todos los filtros antes de cargar.');
+
             return;
         }
+
         setLoading(true);
+
         try {
             const { data } = await api.get(`/actividades/${selectedActividad}/notas?seccion_id=${seccionId}&apertura_id=${aperturaId}`);
             setEstudiantes(data.estudiantes);
@@ -54,6 +57,7 @@ export default function NotasPage() {
 
     const saveNotas = async () => {
         setSaving(true);
+
         try {
             await api.post(`/actividades/${selectedActividad}/calificar`, {
                 notas: estudiantes.map(e => ({

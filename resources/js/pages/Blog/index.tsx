@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { Newspaper, Calendar, User, ChevronRight, Bookmark, Share2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -30,17 +30,21 @@ export default function BlogIndex() {
     }, []);
 
 
-    if (loading) return (
+    if (loading) {
+return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="p-10 text-center font-black animate-pulse text-rose-600 uppercase tracking-widest">Cargando noticias y blog...</div>
         </AppLayout>
     );
+}
 
-    if (error) return (
+    if (error) {
+return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="p-10 text-center text-sm text-neutral-500">{error}</div>
         </AppLayout>
     );
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

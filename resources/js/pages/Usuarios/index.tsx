@@ -1,13 +1,13 @@
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { Users } from 'lucide-react';
+import { useState } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
 import { useResource } from '@/hooks/useResource';
+import type { BreadcrumbItem } from '@/types';
 import UsuarioFormModal from './components/UsuarioFormModal';
-import { usuariosColumns } from './hooks/useUsuariosColumns';
 import type { Usuario } from './hooks/useUsuarios';
+import { usuariosColumns } from './hooks/useUsuariosColumns';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -19,8 +19,12 @@ export default function UsuariosPage() {
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Usuario | null>(null);
 
-    const openCreate = () => { setEditing(null); setModalOpen(true); };
-    const openEdit   = (u: Usuario) => { setEditing(u); setModalOpen(true); };
+    const openCreate = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit   = (u: Usuario) => {
+ setEditing(u); setModalOpen(true); 
+};
 
     return (
         <>
@@ -51,7 +55,9 @@ export default function UsuariosPage() {
 
             <UsuarioFormModal
                 open={modalOpen}
-                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                onClose={() => {
+ setModalOpen(false); res.clearSuccess(); 
+}}
                 editing={editing}
                 onSave={editing
                     ? (data) => res.update(editing.id, data)

@@ -1,8 +1,8 @@
 import { School, Phone, User, Image as ImageIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import FormField from '@/components/shared/FormField';
 import TitleForm from '@/components/TitleForm';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Institucion, InstitucionFormData } from '../hooks/useInstitucion';
 import { useInstitucionForm } from '../hooks/useInstitucionForm';
 

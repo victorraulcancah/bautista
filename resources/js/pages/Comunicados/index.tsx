@@ -1,14 +1,14 @@
 import { Head, usePage } from '@inertiajs/react';
-import { useCallback, useEffect, useState } from 'react';
 import { Inbox, Plus, Users } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 import BandejaEntrada from './components/BandejaEntrada';
 import Conversacion from './components/Conversacion';
-import EnviarMensajeModal from './components/EnviarMensajeModal';
 import CrearGrupoModal from './components/CrearGrupoModal';
+import EnviarMensajeModal from './components/EnviarMensajeModal';
 
 type Mensaje = {
     id:          number;
@@ -42,6 +42,7 @@ export default function MensajesPage() {
 
     const cargarBandeja = useCallback(async () => {
         setLoading(true);
+
         try {
             const { data } = await api.get('/mensajes', { params: { page } });
             setMensajes(data);
@@ -65,7 +66,9 @@ export default function MensajesPage() {
         cargarNoLeidos();
     }, [cargarBandeja]);
 
-    useEffect(() => { cargarGrupos(); }, []);
+    useEffect(() => {
+ cargarGrupos(); 
+}, []);
 
     const handleSelectMensaje = (id: number) => {
         setSeleccionado(id);
@@ -148,7 +151,9 @@ export default function MensajesPage() {
             <EnviarMensajeModal
                 open={modalEnviar}
                 onClose={() => setModalEnviar(false)}
-                onSent={() => { cargarBandeja(); cargarNoLeidos(); }}
+                onSent={() => {
+ cargarBandeja(); cargarNoLeidos(); 
+}}
                 grupos={grupos}
             />
             <CrearGrupoModal

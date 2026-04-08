@@ -1,15 +1,15 @@
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { CalendarDays, LayoutList } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
-import { useResource } from '@/hooks/useResource';
+import { Button } from '@/components/ui/button';
 import { useOptions } from '@/hooks/useOptions';
+import { useResource } from '@/hooks/useResource';
+import type { BreadcrumbItem } from '@/types';
 import SeccionFormModal from './components/SeccionFormModal';
-import { seccionesColumns } from './hooks/useSeccionesColumns';
 import type { Seccion, GradoOption } from './hooks/useSecciones';
+import { seccionesColumns } from './hooks/useSeccionesColumns';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -22,8 +22,12 @@ export default function SeccionesPage() {
     const [modalOpen, setModalOpen]         = useState(false);
     const [editing, setEditing]             = useState<Seccion | null>(null);
 
-    const openCreate   = () => { setEditing(null); setModalOpen(true); };
-    const openEdit     = (s: Seccion) => { setEditing(s); setModalOpen(true); };
+    const openCreate   = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit     = (s: Seccion) => {
+ setEditing(s); setModalOpen(true); 
+};
     const handleDelete = (s: Seccion) => {
         if (confirm(`¿Eliminar la sección "${s.nombre}"?`)) {
             res.remove(s.seccion_id);
@@ -71,7 +75,9 @@ export default function SeccionesPage() {
 
             <SeccionFormModal
                 open={modalOpen}
-                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                onClose={() => {
+ setModalOpen(false); res.clearSuccess(); 
+}}
                 editing={editing}
                 grados={grados}
                 onSave={editing

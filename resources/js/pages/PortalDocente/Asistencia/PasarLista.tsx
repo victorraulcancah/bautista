@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { ChevronLeft, Users, Calendar, Check, X, Clock, AlertCircle, Save, UserCheck } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -40,7 +40,9 @@ export default function PasarLista({ docenteCursoId }: { docenteCursoId: number 
     };
 
     const handleSave = () => {
-        if (!selectedClase) return alert("Por favor, selecciona una sesión de clase.");
+        if (!selectedClase) {
+return alert("Por favor, selecciona una sesión de clase.");
+}
         
         setSaving(true);
         api.post('/docente/asistencia/iniciar', { id_clase_curso: selectedClase, fecha: new Date().toISOString().split('T')[0] })
@@ -50,17 +52,20 @@ export default function PasarLista({ docenteCursoId }: { docenteCursoId: number 
                     id_estudiante: parseInt(id),
                     estado: st
                 }));
+
                 return api.post(`/docente/asistencia/${sessionId}/marcar`, { asistencias: payload });
             })
             .then(() => alert("¡Asistencia guardada correctamente!"))
             .finally(() => setSaving(false));
     };
 
-    if (loading) return (
+    if (loading) {
+return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest">Cargando nómina de alumnos...</div>
         </AppLayout>
     );
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

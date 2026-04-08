@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { ChevronDown, ChevronUp, FolderOpen, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import type { Unidad, UnidadFormData, ClaseFormData } from '../hooks/useCursoContenido';
@@ -31,7 +31,10 @@ export default function UnidadItem({ unidad, onEdit, onDelete, onReload }: Props
     };
 
     const handleDeleteClase = async (id: number) => {
-        if (!confirm('¿Eliminar esta clase y sus archivos?')) return;
+        if (!confirm('¿Eliminar esta clase y sus archivos?')) {
+return;
+}
+
         await api.delete(`/contenido/clases/${id}`);
         onReload();
     };

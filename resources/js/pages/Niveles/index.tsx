@@ -1,15 +1,15 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
 import { Layers, GraduationCap, BookOpen } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
-import { useResource } from '@/hooks/useResource';
+import { Button } from '@/components/ui/button';
 import { useOptions } from '@/hooks/useOptions';
+import { useResource } from '@/hooks/useResource';
+import type { BreadcrumbItem } from '@/types';
 import NivelFormModal from './components/NivelFormModal';
-import { nivelesColumns } from './hooks/useNivelesColumns';
 import type { Nivel } from './hooks/useNiveles';
+import { nivelesColumns } from './hooks/useNivelesColumns';
 
 type Institucion = {
     insti_id: number;
@@ -27,8 +27,12 @@ export default function NivelesPage() {
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Nivel | null>(null);
 
-    const openCreate   = () => { setEditing(null); setModalOpen(true); };
-    const openEdit     = (n: Nivel) => { setEditing(n); setModalOpen(true); };
+    const openCreate   = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit     = (n: Nivel) => {
+ setEditing(n); setModalOpen(true); 
+};
     const handleDelete = (n: Nivel) => {
         if (confirm(`¿Eliminar el nivel "${n.nombre_nivel}"?`)) {
             res.remove(n.nivel_id);
@@ -91,7 +95,9 @@ export default function NivelesPage() {
 
             <NivelFormModal
                 open={modalOpen}
-                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                onClose={() => {
+ setModalOpen(false); res.clearSuccess(); 
+}}
                 editing={editing}
                 instituciones={instituciones}
                 onSave={editing

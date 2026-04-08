@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
 import { Download, ImagePlus, Plus, Trash2, Upload, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import ResourceTable, { Column } from '@/components/shared/ResourceTable';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ResourceTable, { Column } from '@/components/shared/ResourceTable';
 import api from '@/lib/api';
 import type { Docente } from '../hooks/useDocentes';
 import { nombreCompleto } from '../hooks/useDocentes';
@@ -31,7 +31,10 @@ export default function HorarioModal({ open, onClose, docente }: Props) {
     const isImage = (url: string) => /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(url);
 
     useEffect(() => {
-        if (!open || !docente) return;
+        if (!open || !docente) {
+return;
+}
+
         setLoading(true);
         api.get(`/docentes/${docente.docente_id}/horarios`)
             .then(r => setArchivos(r.data))
@@ -41,8 +44,13 @@ export default function HorarioModal({ open, onClose, docente }: Props) {
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file || !docente) return;
+
+        if (!file || !docente) {
+return;
+}
+
         setUploading(true);
+
         try {
             const fd = new FormData();
             fd.append('archivo', file);
@@ -52,12 +60,18 @@ export default function HorarioModal({ open, onClose, docente }: Props) {
             setArchivos(prev => [r.data, ...prev]);
         } finally {
             setUploading(false);
-            if (inputRef.current) inputRef.current.value = '';
+
+            if (inputRef.current) {
+inputRef.current.value = '';
+}
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('¿Eliminar este archivo?')) return;
+        if (!confirm('¿Eliminar este archivo?')) {
+return;
+}
+
         await api.delete(`/docentes/horarios/${id}`);
         setArchivos(prev => prev.filter(a => a.horario_archivo_id !== id));
     };

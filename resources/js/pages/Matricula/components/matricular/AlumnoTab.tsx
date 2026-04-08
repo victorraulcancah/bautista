@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import TitleForm from '@/components/TitleForm';
+import { useEffect } from 'react';
 import { ReqLabel, OptLabel, SELECT_CLS } from '@/components/shared/FormLabels';
-import type { AlumnoForm } from './types';
+import TitleForm from '@/components/TitleForm';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { GradoOption, SeccionOption, MatriculaFormData } from '../../hooks/useMatricula';
+import type { AlumnoForm } from './types';
 
 type Props = {
     alumno:         AlumnoForm;
@@ -91,7 +91,9 @@ export default function AlumnoTab({
                     <ReqLabel>Grupo Académico</ReqLabel>
                     <select
                         value={selectedGrado}
-                        onChange={e => { setSelectedGrado(e.target.value); setM('seccion_id', ''); }}
+                        onChange={e => {
+ setSelectedGrado(e.target.value); setM('seccion_id', ''); 
+}}
                         className={SELECT_CLS}
                     >
                         <option value="">Seleccionar…</option>

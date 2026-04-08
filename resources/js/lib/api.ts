@@ -11,9 +11,11 @@ const api = axios.create({
 // Interceptor para agregar token Bearer
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('auth_token');
+
     if (token) {
         config.headers['Authorization'] = `Bearer ${token}`;
     }
+
     return config;
 });
 
@@ -27,6 +29,7 @@ api.interceptors.response.use(
             localStorage.removeItem('auth_token');
             document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
         }
+
         return Promise.reject(error);
     }
 );

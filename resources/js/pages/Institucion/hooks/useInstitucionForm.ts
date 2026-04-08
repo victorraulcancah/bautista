@@ -19,7 +19,11 @@ export function useInstitucionForm({ editing, open, onSave, onClose, clearErrors
     useEffect(() => {
         clearErrors();
         setLogoFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+
+        if (fileInputRef.current) {
+fileInputRef.current.value = '';
+}
+
         setForm(editing
             ? {
                 insti_ruc:          editing.insti_ruc          ?? '',
@@ -41,12 +45,17 @@ export function useInstitucionForm({ editing, open, onSave, onClose, clearErrors
     const handleSubmit = async (e: { preventDefault(): void }) => {
         e.preventDefault();
         setProc(true);
+
         try {
             const fd = new FormData();
             (Object.keys(form) as (keyof InstitucionFormData)[]).forEach((k) => {
                 fd.append(k, form[k]);
             });
-            if (logoFile) fd.append('logo', logoFile);
+
+            if (logoFile) {
+fd.append('logo', logoFile);
+}
+
             await onSave(fd);
             onClose();
         } catch {

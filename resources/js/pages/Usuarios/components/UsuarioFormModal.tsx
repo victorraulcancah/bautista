@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import FormField from '@/components/shared/FormField';
+import { ReqLabel, OptLabel } from '@/components/shared/FormLabels';
 import FormSection from '@/components/shared/FormSection';
 import TitleForm from '@/components/TitleForm';
-import { ReqLabel, OptLabel } from '@/components/shared/FormLabels';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Usuario, UsuarioFormData } from '../hooks/useUsuarios';
 import { defaultForm, ROLES, TIPOS_DOC } from '../hooks/useUsuarios';
 
@@ -24,8 +24,12 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+return;
+}
+
         clearErrors();
+
         if (editing) {
             setForm({
                 username:         editing.username,
@@ -56,6 +60,7 @@ export default function UsuarioFormModal({ open, onClose, editing, onSave, apiEr
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
+
         try {
             await onSave(form);
             onClose();

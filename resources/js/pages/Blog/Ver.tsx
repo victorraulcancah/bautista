@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { ChevronLeft, Calendar, User, Share2, Facebook, Twitter, MessageCircle, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 export default function BlogVer({ postId }: { postId: number }) {
@@ -22,11 +22,13 @@ export default function BlogVer({ postId }: { postId: number }) {
             .finally(() => setLoading(false));
     }, [postId]);
 
-    if (loading) return (
+    if (loading) {
+return (
         <AppLayout breadcrumbs={[{ title: 'Comunicados', href: '/comunicados' }]}>
             <div className="p-10 text-center font-black animate-pulse text-rose-600 uppercase tracking-widest text-lg">Cargando artículo...</div>
         </AppLayout>
     );
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

@@ -1,7 +1,7 @@
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { NotificationBell } from './NotificationBell';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import { NotificationBell } from './NotificationBell';
 
 export function AppSidebarHeader({
     breadcrumbs = [],

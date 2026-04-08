@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
 import { useForm, usePage } from '@inertiajs/react';
-import { MessageSquare, Send, Reply, User as UserIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { MessageSquare, Send, Reply, User as UserIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 interface CommentUser {
     id: number;

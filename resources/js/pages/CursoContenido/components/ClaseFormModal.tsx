@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import FormField from '@/components/shared/FormField';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import type { Clase, ClaseFormData } from '../hooks/useCursoContenido';
 
 type Props = {
@@ -32,8 +32,12 @@ export default function ClaseFormModal({ open, onClose, unidadId, editing, onSav
     const handleSubmit = async (e: { preventDefault(): void }) => {
         e.preventDefault();
         setProc(true);
-        try { await onSave(form); onClose(); }
-        finally { setProc(false); }
+
+        try {
+ await onSave(form); onClose(); 
+} finally {
+ setProc(false); 
+}
     };
 
     return (

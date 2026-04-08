@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
 import { UserPlus, Trash2, Lock, Unlock, FileText, History } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import api from '@/lib/api';
 import { useOptions } from '@/hooks/useOptions';
+import api from '@/lib/api';
 import type { Matricula, MatriculaApertura, EstudianteDisponible, SeccionOption, GradoOption, MatriculaFormData } from '../hooks/useMatricula';
 import MatricularModal from './MatricularModal';
-import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 
 type Props = {
     open:        boolean;
@@ -28,11 +28,19 @@ export default function MatriculasDrawer({ open, onClose, apertura, secciones, n
     const [deletingId, setDeletingId]   = useState<number | null>(null);
 
     const cargar = useCallback(async () => {
-        if (!apertura) return;
+        if (!apertura) {
+return;
+}
+
         setLoading(true);
+
         try {
             const params: Record<string, unknown> = { per_page: 200 };
-            if (nivelId) params.nivel_id = nivelId;
+
+            if (nivelId) {
+params.nivel_id = nivelId;
+}
+
             const [matRes, dispRes] = await Promise.all([
                 api.get(`/matriculas/aperturas/${apertura.apertura_id}/estudiantes`, { params }),
                 api.get(`/matriculas/aperturas/${apertura.apertura_id}/disponibles`),
@@ -45,7 +53,9 @@ export default function MatriculasDrawer({ open, onClose, apertura, secciones, n
     }, [apertura, nivelId]);
 
     useEffect(() => {
-        if (open && apertura) cargar();
+        if (open && apertura) {
+cargar();
+}
     }, [open, apertura, cargar]);
 
     const handleMatricular = async (data: MatriculaFormData) => {
@@ -55,8 +65,12 @@ export default function MatriculasDrawer({ open, onClose, apertura, secciones, n
     };
 
     const handleAnular = async () => {
-        if (!deletingId) return;
+        if (!deletingId) {
+return;
+}
+
         setLoading(true);
+
         try {
             await api.delete(`/matriculas/${deletingId}`);
             setDeletingId(null);
@@ -73,8 +87,12 @@ export default function MatriculasDrawer({ open, onClose, apertura, secciones, n
 
 
     const handleToggleBloqueo = async (m: Matricula) => {
-        if (!m.estudiante?.user_id) return;
+        if (!m.estudiante?.user_id) {
+return;
+}
+
         setToggling(m.matricula_id);
+
         try {
             await api.patch(`/usuarios/${m.estudiante.user_id}/estado`);
             setMatriculas((prev) =>
@@ -95,7 +113,9 @@ export default function MatriculasDrawer({ open, onClose, apertura, secciones, n
         }
     };
 
-    if (!apertura) return null;
+    if (!apertura) {
+return null;
+}
 
     return (
         <>
@@ -147,6 +167,7 @@ export default function MatriculasDrawer({ open, onClose, apertura, secciones, n
                                 <tbody>
                                     {matriculas.map((m, idx) => {
                                         const bloqueado = m.estudiante?.estado_user === '5';
+
                                         return (
                                             <tr
                                                 key={m.matricula_id}

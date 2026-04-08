@@ -29,6 +29,7 @@ type Props<T> = {
 
 export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDelete, extraActions, onPageChange }: Props<T>) {
     const showActions = !!(onEdit || onDelete || extraActions);
+
     return (
         <div>
             {/* View Desktop */}

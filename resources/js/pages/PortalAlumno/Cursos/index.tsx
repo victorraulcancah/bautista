@@ -1,9 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import { Book, GraduationCap, ChevronRight, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
-import AppLayout from '@/layouts/app-layout';
 import PageHeader from '@/components/shared/PageHeader';
+import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -21,7 +21,9 @@ export default function AlumnoCursosPage() {
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <div className="p-10 text-center font-black animate-pulse text-primary">Cargando tus cursos...</div>;
+    if (loading) {
+return <div className="p-10 text-center font-black animate-pulse text-primary">Cargando tus cursos...</div>;
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { KeyRound } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import api from '@/lib/api';
@@ -27,12 +27,25 @@ export default function ResetUserModal({ open, onClose, userId, nombre }: Props)
     };
 
     const handleSave = async () => {
-        if (!userId) return;
-        if (!username.trim()) { setError('El usuario es requerido.'); return; }
-        if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return; }
+        if (!userId) {
+return;
+}
+
+        if (!username.trim()) {
+ setError('El usuario es requerido.');
+
+ return; 
+}
+
+        if (password.length < 6) {
+ setError('La contraseña debe tener al menos 6 caracteres.');
+
+ return; 
+}
 
         setSaving(true);
         setError('');
+
         try {
             await api.patch(`/usuarios/${userId}/credenciales`, { username, password });
             handleClose();

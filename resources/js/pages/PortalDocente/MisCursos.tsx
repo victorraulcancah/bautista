@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { Book, GraduationCap, Users, Search, Filter, MoreVertical, LayoutGrid, List, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -23,11 +23,13 @@ export default function DocenteMisCursosPage() {
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return (
+    if (loading) {
+return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="p-10 text-center font-black animate-pulse text-indigo-600">Cargando mis materias...</div>
         </AppLayout>
     );
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

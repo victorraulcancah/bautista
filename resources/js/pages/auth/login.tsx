@@ -22,6 +22,7 @@ export default function Login({ status }: Props) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const result = await login(formData);
+
         if (result.success) {
             window.location.href = '/dashboard';
         }

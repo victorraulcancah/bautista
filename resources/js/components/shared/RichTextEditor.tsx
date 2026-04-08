@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
 import Quill from 'quill';
+import { useEffect, useRef } from 'react';
 import 'quill/dist/quill.snow.css';
 
 type Props = {
@@ -26,7 +26,9 @@ export default function RichTextEditor({ value, onChange, placeholder = '', minH
     onChangeRef.current = onChange;
 
     useEffect(() => {
-        if (!containerRef.current || quillRef.current) return;
+        if (!containerRef.current || quillRef.current) {
+return;
+}
 
         const q = new Quill(containerRef.current, {
             theme:       'snow',
@@ -37,7 +39,9 @@ export default function RichTextEditor({ value, onChange, placeholder = '', minH
         });
 
         // Sync inicial
-        if (value) q.clipboard.dangerouslyPasteHTML(value);
+        if (value) {
+q.clipboard.dangerouslyPasteHTML(value);
+}
 
         q.on('text-change', () => {
             const html = q.getSemanticHTML();
@@ -50,9 +54,14 @@ export default function RichTextEditor({ value, onChange, placeholder = '', minH
     // Actualizar contenido desde fuera (ej. al resetear el modal)
     useEffect(() => {
         const q = quillRef.current;
-        if (!q) return;
+
+        if (!q) {
+return;
+}
+
         const current = q.getSemanticHTML();
         const normalized = current === '<p></p>' ? '' : current;
+
         if (value !== normalized) {
             q.clipboard.dangerouslyPasteHTML(value ?? '');
         }

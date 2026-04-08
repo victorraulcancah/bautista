@@ -1,9 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import { ChevronLeft, FileText, Download, Upload, PlayCircle, ClipboardList, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
+import api from '@/lib/api';
 
 export default function ClaseVer({ claseId }: { claseId: number }) {
     const [clase, setClase] = useState<any>(null);
@@ -21,7 +21,10 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
         input.type = 'file';
         input.onchange = (e: any) => {
             const file = e.target.files[0];
-            if (!file) return;
+
+            if (!file) {
+return;
+}
 
             const formData = new FormData();
             formData.append('archivo', file);
@@ -38,7 +41,9 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
         input.click();
     };
 
-    if (loading) return <div className="p-10 text-center font-black animate-pulse text-indigo-600">Preparando el aula virtual...</div>;
+    if (loading) {
+return <div className="p-10 text-center font-black animate-pulse text-indigo-600">Preparando el aula virtual...</div>;
+}
 
     return (
         <AppSidebarLayout>

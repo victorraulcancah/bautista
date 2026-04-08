@@ -37,6 +37,7 @@ export function useCursoForm({ editing, open, defaults, onSave, onClose, clearEr
 
     const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setForm(prev => ({ ...prev, logo: file }));
             setPreview(URL.createObjectURL(file));
@@ -46,6 +47,7 @@ export function useCursoForm({ editing, open, defaults, onSave, onClose, clearEr
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setProc(true);
+
         try {
             await onSave(form);
             onClose();

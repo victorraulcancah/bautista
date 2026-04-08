@@ -1,10 +1,10 @@
 import { Plus, Search } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
 import PageHeader from '@/components/shared/PageHeader';
 import SectionCard from '@/components/shared/SectionCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
 type Props = {

@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
-import SectionCard from '@/components/shared/SectionCard';
 import { ClipboardCheck, UserPlus, UserCheck, CalendarDays, Search } from 'lucide-react';
+import SectionCard from '@/components/shared/SectionCard';
 
 const icons: Record<string, any> = {
     'Nueva Matrícula':       ClipboardCheck,
@@ -22,6 +22,7 @@ export default function AccesosRapidos() {
             <div className="grid grid-cols-2 gap-3">
                 {links.map((link) => {
                     const Icon = icons[link.label] || Search;
+
                     return (
                         <Link
                             key={link.href}

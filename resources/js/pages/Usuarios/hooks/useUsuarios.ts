@@ -70,6 +70,7 @@ export function nombreCompleto(u: Usuario): string {
         return [u.perfil.primer_nombre, u.perfil.apellido_paterno, u.perfil.apellido_materno]
             .filter(Boolean).join(' ');
     }
+
     return u.name ?? u.username;
 }
 

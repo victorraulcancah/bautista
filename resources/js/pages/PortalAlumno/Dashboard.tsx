@@ -1,12 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
 import { BookOpen, Calendar, ChevronRight, GraduationCap, LayoutDashboard, Star, User, MessageSquare, Newspaper, Folder } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
+import PageHeader from '@/components/shared/PageHeader';
+import SectionCard from '@/components/shared/SectionCard';
+import StatCard from '@/components/shared/StatCard';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import PageHeader from '@/components/shared/PageHeader';
-import StatCard from '@/components/shared/StatCard';
-import SectionCard from '@/components/shared/SectionCard';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -23,7 +23,9 @@ export default function AlumnoDashboard() {
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <div className="p-10 text-center animate-pulse text-primary font-bold uppercase tracking-widest">Iniciando Portal Alumno...</div>;
+    if (loading) {
+return <div className="p-10 text-center animate-pulse text-primary font-bold uppercase tracking-widest">Iniciando Portal Alumno...</div>;
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

@@ -1,9 +1,9 @@
-import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Clock, MapPin, User as UserIcon, Calendar, Share2, Printer, ChevronRight, Download, MessageCircle } from 'lucide-react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import NoticiaComentarios from './components/NoticiaComentarios';
-import { type Noticia } from './hooks/useNoticias';
+import type {Noticia} from './hooks/useNoticias';
 
 interface Props {
     noticia: Noticia & { comentarios: any[] };

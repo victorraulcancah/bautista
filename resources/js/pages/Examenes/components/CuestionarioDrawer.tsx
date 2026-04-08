@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import api from '@/lib/api';
 import type { Actividad, Pregunta } from '../index';
@@ -55,8 +55,12 @@ export default function CuestionarioDrawer({ open, onClose, actividad }: Props) 
     const [loading, setLoading] = useState(false);
 
     const cargar = useCallback(async () => {
-        if (!actividad) return;
+        if (!actividad) {
+return;
+}
+
         setLoading(true);
+
         try {
             const { data } = await api.get(`/actividades/${actividad.actividad_id}`);
             setDetail(data.data ?? data);
@@ -66,10 +70,14 @@ export default function CuestionarioDrawer({ open, onClose, actividad }: Props) 
     }, [actividad]);
 
     useEffect(() => {
-        if (open && actividad) cargar();
+        if (open && actividad) {
+cargar();
+}
     }, [open, actividad, cargar]);
 
-    if (!actividad) return null;
+    if (!actividad) {
+return null;
+}
 
     const cuestionario = detail?.cuestionario;
 

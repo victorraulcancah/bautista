@@ -1,13 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
 import { BookOpen, PlusCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
 import type { Column } from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useResource } from '@/hooks/useResource';
+import type { BreadcrumbItem } from '@/types';
 import ActividadFormModal from './components/ActividadFormModal';
 import CuestionarioDrawer from './components/CuestionarioDrawer';
 
@@ -58,8 +58,12 @@ const TIPO_COLORS: Record<string, string> = {
 };
 
 function TipoBadge({ nombre }: { nombre?: string }) {
-    if (!nombre) return <span className="text-gray-400 text-xs">—</span>;
+    if (!nombre) {
+return <span className="text-gray-400 text-xs">—</span>;
+}
+
     const cls = TIPO_COLORS[nombre] ?? 'bg-gray-100 text-gray-600';
+
     return (
         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>
             {nombre}
@@ -84,9 +88,15 @@ export default function ExamenesPage({ cursoId }: { cursoId?: number }) {
     const [drawerOpen, setDrawerOpen]   = useState(false);
     const [selected, setSelected]       = useState<Actividad | null>(null);
 
-    const openCreate = () => { setEditing(null); setModalOpen(true); };
-    const openEdit   = (a: Actividad) => { setEditing(a); setModalOpen(true); };
-    const openDrawer = (a: Actividad) => { setSelected(a); setDrawerOpen(true); };
+    const openCreate = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit   = (a: Actividad) => {
+ setEditing(a); setModalOpen(true); 
+};
+    const openDrawer = (a: Actividad) => {
+ setSelected(a); setDrawerOpen(true); 
+};
 
     const columns: Column<Actividad>[] = [
         {
@@ -137,7 +147,9 @@ export default function ExamenesPage({ cursoId }: { cursoId?: number }) {
                         variant="ghost" 
                         size="sm" 
                         className="h-8 rounded-lg font-bold text-gray-400"
-                        onClick={(e) => { e.stopPropagation(); openEdit(a); }}
+                        onClick={(e) => {
+ e.stopPropagation(); openEdit(a); 
+}}
                     >
                         Editar
                     </Button>

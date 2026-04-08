@@ -95,6 +95,7 @@ export function nombreCompleto(e: Estudiante): string {
         return [e.perfil.primer_nombre, e.perfil.apellido_paterno, e.perfil.apellido_materno]
             .filter(Boolean).join(' ');
     }
+
     return e.user?.username ?? '—';
 }
 

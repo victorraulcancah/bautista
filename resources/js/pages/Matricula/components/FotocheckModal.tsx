@@ -1,6 +1,6 @@
+import { Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Download, X } from 'lucide-react';
 
 interface Props {
     open: boolean;
@@ -10,7 +10,9 @@ interface Props {
 }
 
 export default function FotocheckModal({ open, onClose, estudianteId, estudianteNombre }: Props) {
-    if (!estudianteId) return null;
+    if (!estudianteId) {
+return null;
+}
 
     const fotocheckUrl = `/estudiantes/${estudianteId}/fotocheck`;
 

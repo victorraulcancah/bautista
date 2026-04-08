@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { useRef, useState, useEffect } from 'react';
 import { Eraser, RefreshCw, Save, ArrowLeft, Paintbrush, Palette } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 
@@ -25,9 +25,16 @@ export default function Dibujo({ actividad }: { actividad: any }) {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+
+        if (!canvas) {
+return;
+}
+
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+
+        if (!ctx) {
+return;
+}
 
         // Background white
         ctx.fillStyle = 'white';
@@ -36,9 +43,16 @@ export default function Dibujo({ actividad }: { actividad: any }) {
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+
+        if (!canvas) {
+return;
+}
+
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+
+        if (!ctx) {
+return;
+}
 
         const rect = canvas.getBoundingClientRect();
         const x = ('clientX' in e ? e.clientX : e.touches[0].clientX) - rect.left;
@@ -54,11 +68,21 @@ export default function Dibujo({ actividad }: { actividad: any }) {
     };
 
     const draw = (e: React.MouseEvent | React.TouchEvent) => {
-        if (!isDrawing) return;
+        if (!isDrawing) {
+return;
+}
+
         const canvas = canvasRef.current;
-        if (!canvas) return;
+
+        if (!canvas) {
+return;
+}
+
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+
+        if (!ctx) {
+return;
+}
 
         const rect = canvas.getBoundingClientRect();
         const x = ('clientX' in e ? e.clientX : e.touches[0].clientX) - rect.left;
@@ -74,16 +98,27 @@ export default function Dibujo({ actividad }: { actividad: any }) {
 
     const clearCanvas = () => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+
+        if (!canvas) {
+return;
+}
+
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+
+        if (!ctx) {
+return;
+}
+
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
 
     const handleSave = async () => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+
+        if (!canvas) {
+return;
+}
         
         setSaving(true);
         const dataUrl = canvas.toDataURL('image/png');
@@ -138,7 +173,9 @@ export default function Dibujo({ actividad }: { actividad: any }) {
                             {COLORS.map((c) => (
                                 <button
                                     key={c}
-                                    onClick={() => { setColor(c); setIsEraser(false); }}
+                                    onClick={() => {
+ setColor(c); setIsEraser(false); 
+}}
                                     className={`w-10 h-10 rounded-xl border-4 transition-transform hover:scale-110 active:scale-95 ${color === c && !isEraser ? 'border-indigo-600 scale-110' : 'border-transparent'}`}
                                     style={{ backgroundColor: c }}
                                 />

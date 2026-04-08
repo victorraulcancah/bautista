@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
+import FormField from '@/components/shared/FormField';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import FormField from '@/components/shared/FormField';
 import type { Pago } from '../hooks/usePago';
 import { MESES } from '../hooks/usePago';
 
@@ -81,6 +81,7 @@ export default function PagoFormModal({
     const handleSubmit = async (e: { preventDefault(): void }) => {
         e.preventDefault();
         setProc(true);
+
         try {
             await onSave(form);
             onClose();
@@ -91,7 +92,7 @@ export default function PagoFormModal({
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg sm:max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         {editing ? 'Editar Pago' : 'Registrar Pago'}
@@ -105,7 +106,7 @@ export default function PagoFormModal({
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {!editing && (
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="space-y-1">
                                 <Label>Año *</Label>
                                 <Select value={form.pag_anual} onValueChange={(v) => set('pag_anual', v)}>
@@ -143,7 +144,7 @@ export default function PagoFormModal({
                         placeholder="0.00"
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1">
                             <Label>Concepto adicional 1</Label>
                             <Select
@@ -168,7 +169,7 @@ export default function PagoFormModal({
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1">
                             <Label>Concepto adicional 2</Label>
                             <Select
@@ -193,7 +194,7 @@ export default function PagoFormModal({
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1">
                             <Label>Notificado</Label>
                             <Select value={form.pag_notifica} onValueChange={(v) => set('pag_notifica', v)}>

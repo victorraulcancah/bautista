@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import api from '@/lib/api';
 import type { Paginated } from '@/components/shared/ResourceTable';
+import api from '@/lib/api';
 
 type ApiErrors = Record<string, string[]>;
 
@@ -31,6 +31,7 @@ export function useResource<T>(endpoint: string, initialParams: Record<string, a
 
     const fetch = useCallback(async () => {
         setLoading(true);
+
         try {
             const { data } = await api.get(endpoint, { 
                 params: { ...initialParams, search, page } 
@@ -41,7 +42,9 @@ export function useResource<T>(endpoint: string, initialParams: Record<string, a
         }
     }, [endpoint, search, page, JSON.stringify(initialParams)]);
 
-    useEffect(() => { fetch(); }, [fetch]);
+    useEffect(() => {
+ fetch(); 
+}, [fetch]);
 
     const create = async (payload: unknown) => {
         setErrors({});
@@ -70,16 +73,20 @@ export function useResource<T>(endpoint: string, initialParams: Record<string, a
                 await fn(...args);
             } catch (err: unknown) {
                 const e = err as { response?: { status?: number; data?: { errors?: ApiErrors } } };
+
                 if (e.response?.status === 422 && e.response.data?.errors) {
                     setErrors(e.response.data.errors);
                 }
+
                 throw err;
             }
         };
 
     return {
         rows, loading, search, page,
-        setSearch: (v) => { setSearch(v); setPage(1); },
+        setSearch: (v) => {
+ setSearch(v); setPage(1); 
+},
         setPage,
         reload: fetch,
         create:  wrap(create),

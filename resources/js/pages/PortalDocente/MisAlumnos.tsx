@@ -1,9 +1,9 @@
 import { Head } from '@inertiajs/react';
 import { Users, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -42,6 +42,7 @@ export default function MisAlumnosPage() {
         const q = search.toLowerCase();
         const nombre = `${a.primer_nombre} ${a.segundo_nombre} ${a.apellido_paterno} ${a.apellido_materno}`.toLowerCase();
         const dni = (a.doc_numero ?? '').toLowerCase();
+
         return nombre.includes(q) || dni.includes(q);
     });
 

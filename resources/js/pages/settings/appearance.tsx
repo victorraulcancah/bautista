@@ -1,13 +1,13 @@
 import { Head, usePage, useForm } from '@inertiajs/react';
+import { Image as ImageIcon, Upload, Eye, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import AppearanceTabs from '@/components/shared/appearance-tabs';
 import Heading from '@/components/shared/heading';
-import AppLayout from '@/layouts/app-layout';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Image as ImageIcon, Upload, Eye, Loader2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import AppLayout from '@/layouts/app-layout';
 
 export default function Appearance() {
     const { auth, branding } = usePage<any>().props;
@@ -23,12 +23,18 @@ export default function Appearance() {
 
     // Actualizar previsualizaciones si cambian desde el servidor
     useEffect(() => {
-        if (branding?.logo) setLogoPreview(branding.logo);
-        if (branding?.background) setBackgroundPreview(branding.background);
+        if (branding?.logo) {
+setLogoPreview(branding.logo);
+}
+
+        if (branding?.background) {
+setBackgroundPreview(branding.background);
+}
     }, [branding]);
 
     const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setData('logo', file);
             const reader = new FileReader();
@@ -39,6 +45,7 @@ export default function Appearance() {
 
     const handleBackgroundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setData('background', file);
             const reader = new FileReader();

@@ -1,12 +1,22 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
 import { CalendarDays, QrCode, Search, Eye, Download, GraduationCap, UserCheck, ChevronLeft, ChevronRight } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
-import api from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -15,19 +25,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/Table';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Asistencia', href: '/asistencia' },
@@ -53,6 +53,7 @@ export default function AsistenciaIndex() {
 
     const loadUsers = async () => {
         setLoading(true);
+
         try {
             const res = await api.get('/asistencia/usuarios', {
                 params: { tipo, search, page }
@@ -73,6 +74,7 @@ export default function AsistenciaIndex() {
 
     const loadHistory = async (id: number, month: string) => {
         setHistoryLoading(true);
+
         try {
             const res = await api.get(`/asistencia/usuario/${id}`, {
                 params: { tipo, mes: month }
@@ -125,13 +127,17 @@ export default function AsistenciaIndex() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-3xl border border-neutral-200 shadow-sm">
                     <div className="flex bg-neutral-100 p-1 rounded-2xl border border-neutral-200">
                         <button 
-                            onClick={() => { setTipo('E'); setPage(1); }}
+                            onClick={() => {
+ setTipo('E'); setPage(1); 
+}}
                             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${tipo === 'E' ? 'bg-indigo-600 text-white' : 'text-neutral-500 hover:text-white'}`}
                         >
                             <GraduationCap className="h-4 w-4" /> ESTUDIANTES
                         </button>
                         <button 
-                            onClick={() => { setTipo('D'); setPage(1); }}
+                            onClick={() => {
+ setTipo('D'); setPage(1); 
+}}
                             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${tipo === 'D' ? 'bg-amber-600 text-white' : 'text-neutral-500 hover:text-white'}`}
                         >
                             <UserCheck className="h-4 w-4" /> DOCENTES

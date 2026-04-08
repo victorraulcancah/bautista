@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
 import { Users, X, CheckSquare } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import TitleForm from '@/components/TitleForm';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import TitleForm from '@/components/TitleForm';
 import api from '@/lib/api';
 
 type Estrategia = 'curso' | 'grado' | 'aula';
@@ -33,6 +33,7 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
         if (!open) {
             setNombre(''); setOpcionId(''); setAlumnos([]); setSel([]); setError(''); setTipoAgrupacion('curso');
             setFoto(null); setFotoPreview(null);
+
             return;
         }
 
@@ -40,15 +41,33 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
         setOpcionId('');
 
         let endpoint = '';
-        if (tipoAgrupacion === 'curso') endpoint = '/mensajeria/cursos';
-        if (tipoAgrupacion === 'grado') endpoint = '/mensajeria/grados';
-        if (tipoAgrupacion === 'aula') endpoint = '/mensajeria/aulas';
+
+        if (tipoAgrupacion === 'curso') {
+endpoint = '/mensajeria/cursos';
+}
+
+        if (tipoAgrupacion === 'grado') {
+endpoint = '/mensajeria/grados';
+}
+
+        if (tipoAgrupacion === 'aula') {
+endpoint = '/mensajeria/aulas';
+}
 
         api.get(endpoint).then(({ data }) => {
             const mapeado = data.map((item: any) => {
-                if (tipoAgrupacion === 'curso') return { id: item.curso_id, nombre: item.nombre, detalle: item.grado ? `— ${item.grado}` : null };
-                if (tipoAgrupacion === 'grado') return { id: item.grado_id, nombre: item.nombre, detalle: item.nivel ? `— ${item.nivel}` : null };
-                if (tipoAgrupacion === 'aula') return { id: item.seccion_id, nombre: item.nombre, detalle: item.grado ? `— ${item.grado}` : null };
+                if (tipoAgrupacion === 'curso') {
+return { id: item.curso_id, nombre: item.nombre, detalle: item.grado ? `— ${item.grado}` : null };
+}
+
+                if (tipoAgrupacion === 'grado') {
+return { id: item.grado_id, nombre: item.nombre, detalle: item.nivel ? `— ${item.nivel}` : null };
+}
+
+                if (tipoAgrupacion === 'aula') {
+return { id: item.seccion_id, nombre: item.nombre, detalle: item.grado ? `— ${item.grado}` : null };
+}
+
                 return null;
             });
             setOpciones(mapeado);
@@ -59,12 +78,24 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
     // Cargar alumnos al seleccionar la opción (curso, grado o aula)
     useEffect(() => {
         setAlumnos([]); setSel([]);
-        if (!opcionId) return;
+
+        if (!opcionId) {
+return;
+}
 
         let endpoint = '';
-        if (tipoAgrupacion === 'curso') endpoint = `/mensajeria/cursos/${opcionId}/alumnos`;
-        if (tipoAgrupacion === 'grado') endpoint = `/mensajeria/grados/${opcionId}/alumnos`;
-        if (tipoAgrupacion === 'aula') endpoint = `/mensajeria/aulas/${opcionId}/alumnos`;
+
+        if (tipoAgrupacion === 'curso') {
+endpoint = `/mensajeria/cursos/${opcionId}/alumnos`;
+}
+
+        if (tipoAgrupacion === 'grado') {
+endpoint = `/mensajeria/grados/${opcionId}/alumnos`;
+}
+
+        if (tipoAgrupacion === 'aula') {
+endpoint = `/mensajeria/aulas/${opcionId}/alumnos`;
+}
 
         api.get(endpoint).then(({ data }) => {
             setAlumnos(data);
@@ -74,9 +105,17 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
 
     const seleccionarAlumno = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const uid = Number(e.target.value);
-        if (!uid) return;
+
+        if (!uid) {
+return;
+}
+
         const alumno = alumnos.find((a) => a.user_id === uid);
-        if (!alumno || seleccionados.find((s) => s.user_id === uid)) return;
+
+        if (!alumno || seleccionados.find((s) => s.user_id === uid)) {
+return;
+}
+
         setSel((prev) => [...prev, alumno]);
         e.target.value = '';
     };
@@ -93,14 +132,26 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
 
     const handleSubmit = async (e: { preventDefault(): void }) => {
         e.preventDefault();
-        if (!nombre.trim())        { setError('El nombre del grupo es requerido.'); return; }
-        if (seleccionados.length < 1) { setError('Selecciona al menos un alumno.'); return; }
+
+        if (!nombre.trim())        {
+ setError('El nombre del grupo es requerido.');
+
+ return; 
+}
+
+        if (seleccionados.length < 1) {
+ setError('Selecciona al menos un alumno.');
+
+ return; 
+}
+
         setSaving(true); setError('');
         
         try {
             const formData = new FormData();
             formData.append('nombre', nombre);
             formData.append('user_ids', JSON.stringify(seleccionados.map((s) => s.user_id)));
+
             if (foto) {
                 formData.append('foto', foto);
             }

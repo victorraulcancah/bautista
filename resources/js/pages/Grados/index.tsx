@@ -1,14 +1,14 @@
 import { Head, usePage } from '@inertiajs/react';
-import { useState, useMemo, useEffect } from 'react';
 import { GraduationCap } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
-import { useResource } from '@/hooks/useResource';
 import { useOptions } from '@/hooks/useOptions';
+import { useResource } from '@/hooks/useResource';
+import type { BreadcrumbItem } from '@/types';
 import GradoFormModal from './components/GradoFormModal';
-import { gradosColumns } from './hooks/useGradosColumns';
 import type { Grado, Nivel } from './hooks/useGrados';
+import { gradosColumns } from './hooks/useGradosColumns';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -25,8 +25,12 @@ export default function GradosPage() {
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Grado | null>(null);
 
-    const openCreate   = () => { setEditing(null); setModalOpen(true); };
-    const openEdit     = (g: Grado) => { setEditing(g); setModalOpen(true); };
+    const openCreate   = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit     = (g: Grado) => {
+ setEditing(g); setModalOpen(true); 
+};
     const handleDelete = (g: Grado) => {
         if (confirm(`¿Eliminar el grado "${g.nombre_grado}"?`)) {
             res.remove(g.grado_id);
@@ -77,7 +81,9 @@ export default function GradosPage() {
 
             <GradoFormModal
                 open={modalOpen}
-                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                onClose={() => {
+ setModalOpen(false); res.clearSuccess(); 
+}}
                 editing={editing}
                 niveles={niveles}
                 onSave={editing

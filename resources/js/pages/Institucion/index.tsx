@@ -1,14 +1,14 @@
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { Building2 } from 'lucide-react';
+import { useState } from 'react';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
 import { useResource } from '@/hooks/useResource';
+import type { BreadcrumbItem } from '@/types';
 import InstitucionFormModal from './components/InstitucionFormModal';
-import { institucionColumns } from './hooks/useInstitucionColumns';
 import type { Institucion } from './hooks/useInstitucion';
-import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
+import { institucionColumns } from './hooks/useInstitucionColumns';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard',   href: '/dashboard' },
@@ -21,11 +21,18 @@ export default function InstitucionPage() {
     const [editing, setEditing]     = useState<Institucion | null>(null);
     const [deleting, setDeleting]   = useState<Institucion | null>(null);
 
-    const openCreate   = () => { setEditing(null); setModalOpen(true); };
-    const openEdit     = (i: Institucion) => { setEditing(i); setModalOpen(true); };
+    const openCreate   = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit     = (i: Institucion) => {
+ setEditing(i); setModalOpen(true); 
+};
     
     const handleDelete = async () => {
-        if (!deleting) return;
+        if (!deleting) {
+return;
+}
+
         await res.remove(deleting.insti_id);
         setDeleting(null);
     };
@@ -60,7 +67,9 @@ export default function InstitucionPage() {
 
             <InstitucionFormModal
                 open={modalOpen}
-                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                onClose={() => {
+ setModalOpen(false); res.clearSuccess(); 
+}}
                 editing={editing}
                 onSave={editing
                     ? (data) => res.update(editing.insti_id, data)

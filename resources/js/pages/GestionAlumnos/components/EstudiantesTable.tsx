@@ -1,7 +1,7 @@
 import { Pencil, Printer, Trash2 } from 'lucide-react';
+import type { Paginated } from '@/components/shared/ResourceTable';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import type { Paginated } from '@/components/shared/ResourceTable';
 import type { Estudiante } from '../hooks/useEstudiantes';
 import { nombreCompleto, dniEstudiante } from '../hooks/useEstudiantes';
 
@@ -13,8 +13,14 @@ type Props = {
 };
 
 const estadoBadge = (estado: string) => {
-    if (estado === '1') return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Activo</Badge>;
-    if (estado === '5') return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Bloqueado</Badge>;
+    if (estado === '1') {
+return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Activo</Badge>;
+}
+
+    if (estado === '5') {
+return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Bloqueado</Badge>;
+}
+
     return <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100">Inactivo</Badge>;
 };
 

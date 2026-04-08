@@ -1,11 +1,11 @@
+import { Search } from 'lucide-react';
 import { useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import TitleForm from '@/components/TitleForm';
 import { ReqLabel, OptLabel, SELECT_CLS } from '@/components/shared/FormLabels';
+import TitleForm from '@/components/TitleForm';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import type { ContactoForm } from './types';
 
-import { Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 type Props = {
     tipo:  'padre' | 'madre' | 'apoderado';

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { History } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import api from '@/lib/api';
 
@@ -25,7 +25,10 @@ export default function HistorialModal({ open, onClose, userId, nombre }: Props)
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!open || !userId) return;
+        if (!open || !userId) {
+return;
+}
+
         setLoading(true);
         api.get(`/usuarios/${userId}/historial`)
             .then(r => setRows(r.data ?? []))

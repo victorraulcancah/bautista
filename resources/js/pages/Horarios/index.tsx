@@ -1,14 +1,14 @@
 import { Head } from '@inertiajs/react';
 import { Clock } from 'lucide-react';
+import { useState } from 'react';
+import FormField from '@/components/shared/FormField';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
 import type { Column } from '@/components/shared/ResourceTable';
-import type { BreadcrumbItem } from '@/types';
-import { useResource } from '@/hooks/useResource';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import FormField from '@/components/shared/FormField';
+import { useResource } from '@/hooks/useResource';
+import type { BreadcrumbItem } from '@/types';
 
 type Horario = {
     id: number;
@@ -68,11 +68,13 @@ export default function HorariosPage() {
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
+
         if (editing) {
             await res.update(editing.id, form);
         } else {
             await res.create(form);
         }
+
         setOpen(false);
     };
 

@@ -1,11 +1,11 @@
 import { Head } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
 import { Images, Trash2, Upload } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
+import { useEffect, useRef, useState } from 'react';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import PageHeader from '@/components/shared/PageHeader';
 import SectionCard from '@/components/shared/SectionCard';
 import { Button } from '@/components/ui/button';
-import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
+import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
@@ -41,16 +41,22 @@ export default function GaleriaPage() {
         }).finally(() => setLoading(false));
     };
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => {
+ load(); 
+}, []);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+
+        if (!file) {
+return;
+}
 
         const fd = new FormData();
         fd.append('imagen', file);
 
         setUploading(true);
+
         try {
             await api.post('/galeria', fd);
             setSuccess('Foto subida correctamente.');
@@ -58,12 +64,18 @@ export default function GaleriaPage() {
             load();
         } finally {
             setUploading(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
+
+            if (fileInputRef.current) {
+fileInputRef.current.value = '';
+}
         }
     };
 
     const handleDelete = async () => {
-        if (!deleting) return;
+        if (!deleting) {
+return;
+}
+
         await api.delete(`/galeria/${deleting.gal_id}`);
         setSuccess('Foto eliminada.');
         setTimeout(() => setSuccess(''), 3000);
@@ -156,7 +168,9 @@ export default function GaleriaPage() {
 
             <ConfirmDeleteModal
                 open={confirmOpen}
-                onClose={() => { setConfirmOpen(false); setDeleting(null); }}
+                onClose={() => {
+ setConfirmOpen(false); setDeleting(null); 
+}}
                 onConfirm={handleDelete}
                 title="Eliminar Foto"
                 message={`¿Estás seguro de que deseas eliminar la foto en posición ${deleting?.gal_posicion}? Esta acción no se puede deshacer.`}
@@ -197,8 +211,14 @@ function FotoCard({ foto, onDelete, onReplace }: {
                         className="hidden"
                         onChange={(e) => {
                             const f = e.target.files?.[0];
-                            if (f) onReplace(f);
-                            if (replaceRef.current) replaceRef.current.value = '';
+
+                            if (f) {
+onReplace(f);
+}
+
+                            if (replaceRef.current) {
+replaceRef.current.value = '';
+}
                         }}
                     />
                     <button

@@ -1,15 +1,15 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
 import { Newspaper, LayoutGrid, Eye } from 'lucide-react';
+import { useState } from 'react';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import ResourcePage from '@/components/shared/ResourcePage';
-import type { BreadcrumbItem } from '@/types';
+import { Button } from '@/components/ui/button';
 import { useResource } from '@/hooks/useResource';
 import api from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import NoticiasTable from './components/NoticiasTable';
+import type { BreadcrumbItem } from '@/types';
 import NoticiaFormModal from './components/NoticiaFormModal';
+import NoticiasTable from './components/NoticiasTable';
 import type { Noticia } from './hooks/useNoticias';
-import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -24,8 +24,12 @@ export default function NoticiasPage() {
     const [deleting, setDeleting] = useState<Noticia | null>(null);
     const [noticiaView, setNoticiaView] = useState<Noticia | null>(null);
 
-    const openCreate = () => { setEditing(null); setModalOpen(true); };
-    const openEdit = (n: Noticia) => { setEditing(n); setModalOpen(true); };
+    const openCreate = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit = (n: Noticia) => {
+ setEditing(n); setModalOpen(true); 
+};
 
     const handleSave = async (data: FormData): Promise<void> => {
         if (editing) {
@@ -38,7 +42,10 @@ export default function NoticiasPage() {
     };
 
     const handleDelete = async () => {
-        if (!deleting) return;
+        if (!deleting) {
+return;
+}
+
         await res.remove(deleting.not_id);
         setDeleting(null);
     };
@@ -85,7 +92,9 @@ export default function NoticiasPage() {
 
             <NoticiaFormModal
                 open={modalOpen}
-                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                onClose={() => {
+ setModalOpen(false); res.clearSuccess(); 
+}}
                 editing={editing}
                 onSave={handleSave}
                 apiErrors={res.apiErrors}

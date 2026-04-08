@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, type LucideIcon } from 'lucide-react';
+import { ArrowRight  } from 'lucide-react';
+import type {LucideIcon} from 'lucide-react';
 
 type Props = {
     title: string;

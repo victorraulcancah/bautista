@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { ChevronLeft, Send, User, MessageCircle, Clock, CheckCheck, MoreVertical, Paperclip } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
@@ -31,7 +31,10 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
     };
 
     const handleReply = () => {
-        if (!respuesta) return;
+        if (!respuesta) {
+return;
+}
+
         setSending(true);
         api.post(`/mensajes-legacy/${mensajeId}/responder`, { respuesta })
             .then(() => {
@@ -41,11 +44,13 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
             .finally(() => setSending(false));
     };
 
-    if (loading) return (
+    if (loading) {
+return (
         <AppLayout breadcrumbs={[{ title: 'Mensajería', href: '/mensajeria' }]}>
             <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest text-lg">Cifrando conversación...</div>
         </AppLayout>
     );
+}
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

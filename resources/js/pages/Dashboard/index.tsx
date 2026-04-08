@@ -1,10 +1,10 @@
 import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
+import { useEffect, useState } from 'react';
 import PageHeader from '@/components/shared/PageHeader';
-import type { BreadcrumbItem } from '@/types';
+import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
+import type { BreadcrumbItem } from '@/types';
 import AccesosRapidos from './components/AccesosRapidos';
 import NotificacionesPendientes from './components/NotificacionesPendientes';
 import StatsCards from './components/StatsCards';

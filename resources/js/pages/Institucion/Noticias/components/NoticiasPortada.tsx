@@ -1,8 +1,8 @@
-import React from 'react';
 import { router } from '@inertiajs/react';
 import { Calendar, User as UserIcon, MessageSquare, ArrowRight, Clock, MapPin, ChevronRight, Newspaper as NewspaperIcon } from 'lucide-react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { type Noticia } from '../hooks/useNoticias';
+import type {Noticia} from '../hooks/useNoticias';
 
 interface Props {
     noticias: Noticia[];

@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { ChevronDown, ChevronRight, FileText, Paperclip, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import type { Clase, ClaseFormData, ArchivoClase } from '../hooks/useCursoContenido';
 import { formatTamanio } from '../hooks/useCursoContenido';
@@ -22,10 +22,15 @@ export default function ClaseItem({ clase, onUpdate, onDelete, onReload }: Props
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+
+        if (!file) {
+return;
+}
+
         setUploading(true);
         const fd = new FormData();
         fd.append('archivo', file);
+
         try {
             await api.post(`/contenido/clases/${clase.clase_id}/archivos`, fd, {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -38,7 +43,10 @@ export default function ClaseItem({ clase, onUpdate, onDelete, onReload }: Props
     };
 
     const handleDeleteArchivo = async (archivoId: number) => {
-        if (!confirm('¿Eliminar este archivo?')) return;
+        if (!confirm('¿Eliminar este archivo?')) {
+return;
+}
+
         await api.delete(`/contenido/archivos/${archivoId}`);
         onReload();
     };

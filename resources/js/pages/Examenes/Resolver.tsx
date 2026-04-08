@@ -1,9 +1,9 @@
 import { Head } from '@inertiajs/react';
 import { Clock, ChevronLeft, ChevronRight, Send, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import api from '@/lib/api';
 
 type ExamenState = {
     intento_id: number;
@@ -33,10 +33,13 @@ export default function ResolverExamenPage({ actividadId, estudianteId }: { acti
     useEffect(() => {
         if (timeLeft <= 0 && examen) {
             finalizeExam();
+
             return;
         }
+
         if (timeLeft > 0) {
             const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+
             return () => clearInterval(timer);
         }
     }, [timeLeft, examen]);
@@ -45,11 +48,15 @@ export default function ResolverExamenPage({ actividadId, estudianteId }: { acti
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
         const s = seconds % 60;
+
         return `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
     const handleAnswer = async (preguntaId: number, value: { alternativa_id?: number, texto?: string }) => {
-        if (!examen) return;
+        if (!examen) {
+return;
+}
+
         try {
             await api.post(`/examenes/${examen.intento_id}/responder`, {
                 pregunta_id: preguntaId,
@@ -70,8 +77,12 @@ export default function ResolverExamenPage({ actividadId, estudianteId }: { acti
     };
 
     const finalizeExam = async () => {
-        if (!examen || submitting) return;
+        if (!examen || submitting) {
+return;
+}
+
         setSubmitting(true);
+
         try {
             const { data } = await api.post(`/examenes/${examen.intento_id}/finalizar`);
             alert(`Examen finalizado. Puntaje obtenido: ${data.puntaje}`);
@@ -82,7 +93,9 @@ export default function ResolverExamenPage({ actividadId, estudianteId }: { acti
         }
     };
 
-    if (!examen) return <div className="p-10 text-center font-medium animate-pulse text-purple-600">Cargando examen...</div>;
+    if (!examen) {
+return <div className="p-10 text-center font-medium animate-pulse text-purple-600">Cargando examen...</div>;
+}
 
     const currentPregunta = examen.preguntas[currentIndex];
     const answeredCount = examen.preguntas.filter(p => p.respuesta_estudiante.alternativa_id || p.respuesta_estudiante.texto).length;
@@ -122,7 +135,11 @@ export default function ResolverExamenPage({ actividadId, estudianteId }: { acti
                 <Button 
                     variant="destructive" 
                     className="shadow-lg shadow-red-500/20 hover:scale-105 transition-transform"
-                    onClick={() => { if(confirm('¿Seguro que deseas finalizar? Tus respuestas se enviarán ahora.')) finalizeExam(); }} 
+                    onClick={() => {
+ if(confirm('¿Seguro que deseas finalizar? Tus respuestas se enviarán ahora.')) {
+finalizeExam();
+} 
+}} 
                     disabled={submitting}
                 >
                     <Send className="w-4 h-4 mr-2" />
@@ -155,6 +172,7 @@ export default function ResolverExamenPage({ actividadId, estudianteId }: { acti
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {currentPregunta.alternativas.map((alt: any) => {
                                         const isSelected = currentPregunta.respuesta_estudiante.alternativa_id === alt.alternativa_id;
+
                                         return (
                                             <button
                                                 key={alt.alternativa_id}
@@ -212,6 +230,7 @@ export default function ResolverExamenPage({ actividadId, estudianteId }: { acti
                             {examen.preguntas.map((_, idx) => {
                                 const isCurrent = currentIndex === idx;
                                 const isAnswered = examen.preguntas[idx].respuesta_estudiante.alternativa_id || examen.preguntas[idx].respuesta_estudiante.texto;
+
                                 return (
                                     <button
                                         key={idx}

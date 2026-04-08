@@ -1,6 +1,6 @@
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { Trophy, Clock, Play, HelpCircle } from 'lucide-react';
+import React from 'react';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 
 interface Puzzle {

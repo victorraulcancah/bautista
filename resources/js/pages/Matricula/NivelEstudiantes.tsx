@@ -1,17 +1,18 @@
 import { Head, router } from '@inertiajs/react';
-import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, UserPlus, Lock, Unlock, Pencil, Printer, History, Trash2, KeyRound } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import { Button } from '@/components/ui/button';
+import { useOptions } from '@/hooks/useOptions';
 import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
-import { useOptions } from '@/hooks/useOptions';
-import MatricularModal from './components/MatricularModal';
-import HistorialModal from './components/HistorialModal';
-import ResetUserModal from './components/ResetUserModal';
-import FotocheckModal from './components/FotocheckModal';
+import type { BreadcrumbItem } from '@/types';
 import EstudianteFormModal from '../GestionAlumnos/components/EstudianteFormModal';
-import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import type { Estudiante, EstudianteFormData } from '../GestionAlumnos/hooks/useEstudiantes';
+import FotocheckModal from './components/FotocheckModal';
+import HistorialModal from './components/HistorialModal';
+import MatricularModal from './components/MatricularModal';
+import ResetUserModal from './components/ResetUserModal';
 import type {
     Matricula,
     MatriculaApertura,
@@ -20,7 +21,6 @@ import type {
     GradoOption,
     MatriculaFormData,
 } from './hooks/useMatricula';
-import type { BreadcrumbItem } from '@/types';
 
 type Props = {
     aperturaId: number;
@@ -68,6 +68,7 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
 
     const cargar = useCallback(async () => {
         setLoading(true);
+
         try {
             const [matRes, dispRes, aperRes, nivelRes] = await Promise.all([
                 api.get(`/matriculas/aperturas/${aperturaId}/estudiantes`, {
@@ -86,7 +87,9 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
         }
     }, [aperturaId, nivelId]);
 
-    useEffect(() => { cargar(); }, [cargar]);
+    useEffect(() => {
+ cargar(); 
+}, [cargar]);
 
     const handleMatricular = async (data: MatriculaFormData) => {
         await api.post('/matriculas/', data);
@@ -94,8 +97,12 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
     };
 
     const handleAnular = async () => {
-        if (!deletingId) return;
+        if (!deletingId) {
+return;
+}
+
         setLoading(true);
+
         try {
             await api.delete(`/matriculas/${deletingId}`);
             setDeletingId(null);
@@ -112,8 +119,12 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
 
 
     const handleToggleBloqueo = async (m: Matricula) => {
-        if (!m.estudiante?.user_id) return;
+        if (!m.estudiante?.user_id) {
+return;
+}
+
         setToggling(m.matricula_id);
+
         try {
             await api.patch(`/usuarios/${m.estudiante.user_id}/estado`);
             setMatriculas(prev => prev.map(item =>
@@ -127,7 +138,10 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
     };
 
     const openHistorial = (m: Matricula) => {
-        if (!m.estudiante?.user_id) return;
+        if (!m.estudiante?.user_id) {
+return;
+}
+
         const nombre = [m.estudiante.primer_nombre, m.estudiante.apellido_paterno].filter(Boolean).join(' ');
         setHistorialUserId(m.estudiante.user_id);
         setHistorialNombre(nombre);
@@ -135,14 +149,20 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
     };
 
     const openEditEst = async (m: Matricula) => {
-        if (!m.estudiante?.estu_id) return;
+        if (!m.estudiante?.estu_id) {
+return;
+}
+
         const res = await api.get(`/estudiantes/${m.estudiante.estu_id}`);
         setEditEstudiante(res.data.data ?? res.data);
         setEditEstOpen(true);
     };
 
     const handleSaveEstudiante = async (data: EstudianteFormData) => {
-        if (!editEstudiante) return;
+        if (!editEstudiante) {
+return;
+}
+
         try {
             await api.put(`/estudiantes/${editEstudiante.estu_id}`, data);
             setEditEstOpen(false);
@@ -154,7 +174,10 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
     };
 
     const openReset = (m: Matricula) => {
-        if (!m.estudiante?.user_id) return;
+        if (!m.estudiante?.user_id) {
+return;
+}
+
         const nombre = [m.estudiante.primer_nombre, m.estudiante.apellido_paterno].filter(Boolean).join(' ');
         setResetUserId(m.estudiante.user_id);
         setResetNombre(nombre);
@@ -162,7 +185,10 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
     };
 
     const openFotocheck = (m: Matricula) => {
-        if (!m.estu_id) return;
+        if (!m.estu_id) {
+return;
+}
+
         const nombre = [m.estudiante?.primer_nombre, m.estudiante?.apellido_paterno].filter(Boolean).join(' ');
         setFotoEstId(m.estu_id);
         setFotoEstNombre(nombre);
@@ -249,6 +275,7 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                                             {matriculas.map((m, idx) => {
                                                 const bloqueado = m.estudiante?.estado_user === '5';
                                                 const student = m.estudiante;
+
                                                 return (
                                                     <tr
                                                         key={m.matricula_id}
@@ -373,6 +400,7 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                                     {matriculas.map((m, idx) => {
                                         const student = m.estudiante;
                                         const bloqueado = student?.estado_user === '5';
+
                                         return (
                                             <div key={m.matricula_id} className={`p-4 flex flex-col gap-3 transition-colors ${bloqueado ? 'bg-red-50' : 'bg-white'}`}>
                                                 <div className="flex items-start justify-between">
@@ -518,7 +546,9 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
 
             <EstudianteFormModal
                 open={editEstOpen}
-                onClose={() => { setEditEstOpen(false); setEditEstudiante(null); setEditEstApiErrors({}); }}
+                onClose={() => {
+ setEditEstOpen(false); setEditEstudiante(null); setEditEstApiErrors({}); 
+}}
                 editing={editEstudiante}
                 onSave={handleSaveEstudiante}
                 apiErrors={editEstApiErrors}

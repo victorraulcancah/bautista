@@ -1,6 +1,6 @@
 import { Pencil, Trash2, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import type { Paginated } from '@/components/shared/ResourceTable';
+import { Button } from '@/components/ui/button';
 import type { Noticia } from '../hooks/useNoticias';
 
 type Props = {

@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Send } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 
 const fmtDate = (iso: string) => {
     const d = new Date(iso);
+
     return d.toLocaleDateString('es-PE', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit',
@@ -46,6 +47,7 @@ export default function Conversacion({ mensajeId, userId, onBack }: Props) {
 
     const load = async () => {
         setLoading(true);
+
         try {
             const { data } = await api.get(`/mensajes/${mensajeId}`);
             setMensaje(data.data ?? data);
@@ -54,15 +56,21 @@ export default function Conversacion({ mensajeId, userId, onBack }: Props) {
         }
     };
 
-    useEffect(() => { load(); }, [mensajeId]);
+    useEffect(() => {
+ load(); 
+}, [mensajeId]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [mensaje?.respuestas]);
 
     const enviarRespuesta = async () => {
-        if (!respuesta.trim()) return;
+        if (!respuesta.trim()) {
+return;
+}
+
         setSending(true);
+
         try {
             const { data } = await api.post(`/mensajes/${mensajeId}/responder`, { respuesta });
             setMensaje((prev) => prev ? {
@@ -79,7 +87,9 @@ export default function Conversacion({ mensajeId, userId, onBack }: Props) {
         return <div className="flex h-full items-center justify-center text-sm text-gray-400">Cargando...</div>;
     }
 
-    if (!mensaje) return null;
+    if (!mensaje) {
+return null;
+}
 
     const otro = mensaje.remitente?.id === userId ? mensaje.destinatario : mensaje.remitente;
     const destinoNombre = mensaje.grupo?.nombre ?? otro?.nombre ?? '—';
@@ -111,6 +121,7 @@ export default function Conversacion({ mensajeId, userId, onBack }: Props) {
             <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-[#E5DDD5]">
                 {mensaje.respuestas.map((r) => {
                     const esMio = r.autor.id === userId;
+
                     return (
                         <div key={r.id} className={`flex ${esMio ? 'justify-end' : 'justify-start'}`}>
                             {!esMio && (
@@ -147,7 +158,9 @@ export default function Conversacion({ mensajeId, userId, onBack }: Props) {
                         value={respuesta}
                         onChange={(e) => setRespuesta(e.target.value)}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarRespuesta(); }
+                            if (e.key === 'Enter' && !e.shiftKey) {
+ e.preventDefault(); enviarRespuesta(); 
+}
                         }}
                         rows={2}
                         placeholder="Escribe un mensaje... (Enter para enviar)"

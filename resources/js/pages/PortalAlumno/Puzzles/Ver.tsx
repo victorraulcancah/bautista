@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Timer, Send, RefreshCw, Star, Play } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 
@@ -20,6 +20,7 @@ const PuzzleVer = ({ puzzle }: Props) => {
 
     useEffect(() => {
         let interval: any = null;
+
         if (isActive) {
             interval = setInterval(() => {
                 setSeconds((seconds) => seconds + 1);
@@ -27,12 +28,14 @@ const PuzzleVer = ({ puzzle }: Props) => {
         } else if (!isActive && seconds !== 0) {
             clearInterval(interval);
         }
+
         return () => clearInterval(interval);
     }, [isActive, seconds]);
 
     const formatTime = (totalSeconds: number) => {
         const mins = Math.floor(totalSeconds / 60);
         const secs = totalSeconds % 60;
+
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 

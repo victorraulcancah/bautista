@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react';
 import { Camera, Image as ImageIcon, Plus, Save, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import FormField from '@/components/shared/FormField';
+import { FormLegend } from '@/components/shared/FormLabels';
+import FormSection from '@/components/shared/FormSection';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import FormField from '@/components/shared/FormField';
-import FormSection from '@/components/shared/FormSection';
-import { FormLegend } from '@/components/shared/FormLabels';
-import type { Curso, CursoFormData, NivelOption } from '../hooks/useCursos';
 import { useCursoForm } from '../hooks/useCursoForm';
+import type { Curso, CursoFormData, NivelOption } from '../hooks/useCursos';
 
 type Props = {
     open:        boolean;

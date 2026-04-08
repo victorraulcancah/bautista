@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, Download, ImagePlus, Plus, Trash2 } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
+import { useEffect, useRef, useState } from 'react';
+import ResourceTable, { Column } from '@/components/shared/ResourceTable';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import ResourceTable, { Column } from '@/components/shared/ResourceTable';
-import { type BreadcrumbItem } from '@/types';
+import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
+import type {BreadcrumbItem} from '@/types';
 
 type Archivo = {
     horario_archivo_id: number;
@@ -40,8 +40,13 @@ export default function HorariosPage({ seccionId }: Props) {
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+
+        if (!file) {
+return;
+}
+
         setUploading(true);
+
         try {
             const fd = new FormData();
             fd.append('archivo', file);
@@ -52,12 +57,18 @@ export default function HorariosPage({ seccionId }: Props) {
             setModalOpen(false);
         } finally {
             setUploading(false);
-            if (inputRef.current) inputRef.current.value = '';
+
+            if (inputRef.current) {
+inputRef.current.value = '';
+}
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('¿Eliminar este archivo?')) return;
+        if (!confirm('¿Eliminar este archivo?')) {
+return;
+}
+
         await api.delete(`/secciones/horarios/${id}`);
         setArchivos((prev) => prev.filter((a) => a.horario_archivo_id !== id));
     };

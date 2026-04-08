@@ -16,6 +16,7 @@ export function useEstudianteForm({ editing, open, onSave, onClose, clearErrors 
 
     useEffect(() => {
         clearErrors();
+
         if (editing) {
             setForm({
                 username:            editing.user?.username           ?? '',
@@ -50,6 +51,7 @@ export function useEstudianteForm({ editing, open, onSave, onClose, clearErrors 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setProc(true);
+
         try {
             await onSave(form);
             onClose();

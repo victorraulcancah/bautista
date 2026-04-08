@@ -1,11 +1,11 @@
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
 import { GraduationCap } from 'lucide-react';
+import { useState } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
-import type { BreadcrumbItem } from '@/types';
 import { useResource } from '@/hooks/useResource';
-import EstudiantesTable from './components/EstudiantesTable';
+import type { BreadcrumbItem } from '@/types';
 import EstudianteFormModal from './components/EstudianteFormModal';
+import EstudiantesTable from './components/EstudiantesTable';
 import type { Estudiante } from './hooks/useEstudiantes';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -18,8 +18,12 @@ export default function EstudiantesPage() {
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Estudiante | null>(null);
 
-    const openCreate = () => { setEditing(null); setModalOpen(true); };
-    const openEdit   = (e: Estudiante) => { setEditing(e); setModalOpen(true); };
+    const openCreate = () => {
+ setEditing(null); setModalOpen(true); 
+};
+    const openEdit   = (e: Estudiante) => {
+ setEditing(e); setModalOpen(true); 
+};
 
     return (
         <>
@@ -53,7 +57,9 @@ export default function EstudiantesPage() {
 
             <EstudianteFormModal
                 open={modalOpen}
-                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
+                onClose={() => {
+ setModalOpen(false); res.clearSuccess(); 
+}}
                 editing={editing}
                 onSave={editing
                     ? (data) => res.update(editing.estu_id, data)

@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft, Save, PlusCircle, Trash2, Eye, Clock, FileText, CheckCircle2, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Save, PlusCircle, Trash2, Eye, Clock, FileText, CheckCircle2, X } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -68,15 +68,20 @@ export default function QuizBuilder({ docenteCursoId, actividadId }: { docenteCu
 
     const deleteAlternativa = (pIndex: number, aIndex: number) => {
         const p = [...cuestionario.preguntas];
+
         if (p[pIndex].alternativas.length <= 2) {
             alert('Una pregunta debe tener al menos 2 alternativas.');
+
             return;
         }
+
         p[pIndex].alternativas.splice(aIndex, 1);
+
         // Si borró la respuesta correcta, marca la primera
         if (!p[pIndex].alternativas.find((a: any) => a.estado_res === '1')) {
             p[pIndex].alternativas[0].estado_res = '1';
         }
+
         setCuestionario({ ...cuestionario, preguntas: p });
     };
 
@@ -103,11 +108,13 @@ export default function QuizBuilder({ docenteCursoId, actividadId }: { docenteCu
             .finally(() => setSaving(false));
     };
 
-    if (loading) return (
+    if (loading) {
+return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="p-20 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest text-2xl mt-10">Cargando constructor...</div>
         </AppLayout>
     );
+}
 
     const totalPuntos = cuestionario.preguntas?.reduce((acc: number, p: any) => acc + Number(p.valor_nota), 0) || 0;
 

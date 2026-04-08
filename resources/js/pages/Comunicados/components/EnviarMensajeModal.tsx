@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
 import { Send } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useEffect, useRef, useState } from 'react';
 import RichTextEditor from '@/components/shared/RichTextEditor';
 import TitleForm from '@/components/TitleForm';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import api from '@/lib/api';
 
 
@@ -39,10 +39,20 @@ export default function EnviarMensajeModal({ open, onClose, onSent, grupos }: Pr
     const buscarUsuario = (q: string) => {
         setQuery(q);
         setDestinatario(null);
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        if (q.length < 2) { setResults([]); return; }
+
+        if (debounceRef.current) {
+clearTimeout(debounceRef.current);
+}
+
+        if (q.length < 2) {
+ setResults([]);
+
+ return; 
+}
+
         debounceRef.current = setTimeout(async () => {
             setSearching(true);
+
             try {
                 const { data } = await api.get('/usuarios/buscar', { params: { q } });
                 setResults(data);
@@ -61,10 +71,27 @@ export default function EnviarMensajeModal({ open, onClose, onSent, grupos }: Pr
 
     const handleSubmit = async (e: { preventDefault(): void }) => {
         e.preventDefault();
-        if (!grupoId && !destinatario) { setError('Busque y seleccione un usuario, o elija un grupo.'); return; }
-        if (!asunto.trim())            { setError('El asunto es requerido.');                            return; }
-        if (!cuerpo.trim())            { setError('El mensaje no puede estar vacío.');                   return; }
+
+        if (!grupoId && !destinatario) {
+ setError('Busque y seleccione un usuario, o elija un grupo.');
+
+ return; 
+}
+
+        if (!asunto.trim())            {
+ setError('El asunto es requerido.');
+
+                            return; 
+}
+
+        if (!cuerpo.trim())            {
+ setError('El mensaje no puede estar vacío.');
+
+                   return; 
+}
+
         setSending(true); setError('');
+
         try {
             await api.post('/mensajes', {
                 destinatario_id: destinatario?.id ?? null,
@@ -100,7 +127,9 @@ export default function EnviarMensajeModal({ open, onClose, onSent, grupos }: Pr
                         <label className="text-sm font-medium text-neutral-600">Grupo:</label>
                         <select
                             value={grupoId}
-                            onChange={(e) => { setGrupoId(e.target.value); setDestinatario(null); setQuery(''); }}
+                            onChange={(e) => {
+ setGrupoId(e.target.value); setDestinatario(null); setQuery(''); 
+}}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a65a]"
                         >
                             <option value="">Seleccionar grupo</option>

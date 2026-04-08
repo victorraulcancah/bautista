@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
 import { PlusCircle, Pencil, Trash2, Calendar, FileText, X, AlertCircle, Receipt } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -30,8 +30,12 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
     const [voucherPagId, setVoucherPagId] = useState<number | null>(null);
 
     const cargar = useCallback(async () => {
-        if (!pagador) return;
+        if (!pagador) {
+return;
+}
+
         setLoading(true);
+
         try {
             const { data } = await api.get(`/pagos/contactos/${pagador.id_contacto}`);
             const pagosList = data.data ?? data;
@@ -43,19 +47,27 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
     }, [pagador]);
 
     useEffect(() => {
-        if (open && pagador) cargar();
+        if (open && pagador) {
+cargar();
+}
     }, [open, pagador, cargar]);
 
     const handleFilter = () => {
         if (!fecIni || !fecFin) {
             setFilteredPagos(pagos);
+
             return;
         }
+
         const filtered = pagos.filter((p) => {
-            if (!p.pag_fecha) return false;
+            if (!p.pag_fecha) {
+return false;
+}
+
             const fecha = new Date(p.pag_fecha);
             const inicio = new Date(fecIni);
             const fin = new Date(fecFin);
+
             return fecha >= inicio && fecha <= fin;
         });
         setFilteredPagos(filtered);
@@ -68,8 +80,12 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
     };
 
     const handleGenerarMensualidad = async () => {
-        if (!pagador) return;
+        if (!pagador) {
+return;
+}
+
         setGenerando(true);
+
         try {
             const currentYear = new Date().getFullYear();
             const currentMonth = new Date().getMonth() + 1;
@@ -102,56 +118,74 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
 
     const handleCreate = async (data: PagoFormData) => {
         setApiErrors({});
+
         try {
             await api.post('/pagos/', data);
             await cargar();
         } catch (err: unknown) {
             const e = err as { response?: { status?: number; data?: { errors?: Record<string, string[]> } } };
+
             if (e.response?.status === 422 && e.response.data?.errors) {
                 setApiErrors(e.response.data.errors);
             }
+
             throw err;
         }
     };
 
     const handleUpdate = async (data: PagoUpdateData) => {
-        if (!editPago) return;
+        if (!editPago) {
+return;
+}
+
         setApiErrors({});
+
         try {
             await api.put(`/pagos/${editPago.pag_id}`, data);
             await cargar();
         } catch (err: unknown) {
             const e = err as { response?: { status?: number; data?: { errors?: Record<string, string[]> } } };
+
             if (e.response?.status === 422 && e.response.data?.errors) {
                 setApiErrors(e.response.data.errors);
             }
+
             throw err;
         }
     };
 
     const handleDelete = async (pagoId: number) => {
-        if (!confirm('¿Eliminar este pago?')) return;
+        if (!confirm('¿Eliminar este pago?')) {
+return;
+}
+
         await api.delete(`/pagos/${pagoId}`);
         await cargar();
     };
 
-    const openCreate = () => { setEditPago(null); setModalOpen(true); };
-    const openEdit   = (p: Pago) => { setEditPago(p); setModalOpen(true); };
+    const openCreate = () => {
+ setEditPago(null); setModalOpen(true); 
+};
+    const openEdit   = (p: Pago) => {
+ setEditPago(p); setModalOpen(true); 
+};
 
-    if (!pagador) return null;
+    if (!pagador) {
+return null;
+}
 
     return (
         <>
             <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-                <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
+                <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col w-[95vw]">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center justify-between">
-                            <div>
+                        <DialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                            <div className="flex flex-col">
                                 <span className="font-semibold">
                                     {pagador.nombres} {pagador.apellidos}
                                 </span>
                                 {pagador.mensualidad && (
-                                    <span className="ml-2 text-sm font-normal text-gray-500">
+                                    <span className="text-sm font-normal text-gray-500">
                                         Mensualidad:
                                         <span className="ml-1 text-green-600 font-medium">
                                             S/ {pagador.mensualidad}
@@ -166,7 +200,8 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
                                     onClick={() => setConfirmGenerar(true)}
                                 >
                                     <Calendar className="mr-1 h-4 w-4" />
-                                    Generar Mensualidad
+                                    <span className="hidden sm:inline">Generar Mensualidad</span>
+                                    <span className="sm:hidden">Generar</span>
                                 </Button>
                                 <Button
                                     size="sm"
@@ -174,15 +209,16 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
                                     onClick={openCreate}
                                 >
                                     <PlusCircle className="mr-1 h-4 w-4" />
-                                    Agregar Pago
+                                    <span className="hidden sm:inline">Agregar Pago</span>
+                                    <span className="sm:hidden">Agregar</span>
                                 </Button>
                             </div>
                         </DialogTitle>
                     </DialogHeader>
 
                     {/* Filtros por fecha */}
-                    <div className="flex items-end gap-3 pb-4 border-b">
-                        <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row items-end gap-2 sm:gap-3 pb-4 border-b">
+                        <div className="flex-1 w-full">
                             <Label className="text-xs">Fecha Inicio</Label>
                             <Input
                                 type="date"
@@ -191,7 +227,7 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
                                 className="h-9"
                             />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 w-full">
                             <Label className="text-xs">Fecha Fin</Label>
                             <Input
                                 type="date"
@@ -200,38 +236,38 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
                                 className="h-9"
                             />
                         </div>
-                        <Button
-                            size="sm"
-                            onClick={handleFilter}
-                            className="bg-blue-500 hover:bg-blue-600 text-white h-9"
-                        >
-                            Buscar
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={handleClearFilter}
-                            className="h-9"
-                        >
-                            <X className="h-4 w-4 mr-1" />
-                            Limpiar
-                        </Button>
-                        <Button
-                            size="sm"
-                            className="bg-orange-500 hover:bg-orange-600 text-white h-9"
-                            onClick={() => {
-                                const params = new URLSearchParams({
-                                    contacto_id: pagador.id_contacto.toString(),
-                                    estudiante_id: pagador.estu_id.toString(),
-                                    ...(fecIni && { fecha_inicio: fecIni }),
-                                    ...(fecFin && { fecha_fin: fecFin }),
-                                });
-                                window.open(`/api/pagos/reporte-pdf?${params.toString()}`, '_blank');
-                            }}
-                        >
-                            <FileText className="h-4 w-4 mr-1" />
-                            PDF
-                        </Button>
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            <Button
+                                size="sm"
+                                onClick={handleFilter}
+                                className="bg-blue-500 hover:bg-blue-600 text-white h-9 flex-1 sm:flex-none"
+                            >
+                                Buscar
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleClearFilter}
+                                className="h-9"
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                size="sm"
+                                className="bg-orange-500 hover:bg-orange-600 text-white h-9"
+                                onClick={() => {
+                                    const params = new URLSearchParams({
+                                        contacto_id: pagador.id_contacto.toString(),
+                                        estudiante_id: pagador.estu_id.toString(),
+                                        ...(fecIni && { fecha_inicio: fecIni }),
+                                        ...(fecFin && { fecha_fin: fecFin }),
+                                    });
+                                    window.open(`/api/pagos/reporte-pdf?${params.toString()}`, '_blank');
+                                }}
+                            >
+                                <FileText className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto">
@@ -246,7 +282,8 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
                         )}
 
                         {!loading && filteredPagos.length > 0 && (
-                            <table className="w-full text-sm">
+                            <div className="overflow-x-auto">
+                            <table className="w-full text-sm min-w-[700px]">
                                 <thead>
                                     <tr className="border-b text-left text-xs text-gray-500 uppercase bg-gray-50">
                                         <th className="py-2 px-3">#</th>
@@ -327,6 +364,7 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
                         )}
                     </div>
                 </DialogContent>
@@ -351,7 +389,9 @@ export default function PagosDrawer({ open, onClose, pagador }: Props) {
             {modalOpen && editPago && (
                 <PagoFormModal
                     open={modalOpen}
-                    onClose={() => { setModalOpen(false); setEditPago(null); }}
+                    onClose={() => {
+ setModalOpen(false); setEditPago(null); 
+}}
                     contactoId={pagador.id_contacto}
                     estudianteId={pagador.estu_id}
                     mensualidad={pagador.mensualidad}

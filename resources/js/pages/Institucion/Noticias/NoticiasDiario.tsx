@@ -1,12 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
 import { Newspaper, ArrowLeft, Printer, Share2 } from 'lucide-react';
-import { useResource } from '@/hooks/useResource';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useResource } from '@/hooks/useResource';
 import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 import NoticiasPortada from './components/NoticiasPortada';
 import type { Noticia } from './hooks/useNoticias';
-import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },

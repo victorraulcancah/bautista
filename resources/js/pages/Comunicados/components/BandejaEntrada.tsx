@@ -6,9 +6,11 @@ const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').trim();
 const fmtDate = (iso: string) => {
     const d = new Date(iso);
     const today = new Date();
+
     if (d.toDateString() === today.toDateString()) {
         return d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
     }
+
     return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' });
 };
 

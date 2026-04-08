@@ -1,6 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
-import { useRef, useState } from 'react';
 import { Camera, IdCard, KeyRound, Lock, Mail, MapPin, Phone, Save, ShieldCheck, User as UserIcon, X } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -44,8 +44,13 @@ export default function Profile() {
 
     const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+
+        if (!file) {
+return;
+}
+
         setUploadingFoto(true);
+
         try {
             const fd = new FormData();
             fd.append('foto', file);
@@ -59,7 +64,10 @@ export default function Profile() {
             setFotoSuccess('');
         } finally {
             setUploadingFoto(false);
-            if (fotoInputRef.current) fotoInputRef.current.value = '';
+
+            if (fotoInputRef.current) {
+fotoInputRef.current.value = '';
+}
         }
     };
 
@@ -73,6 +81,7 @@ export default function Profile() {
     const handleSaveDatos = async () => {
         setSavingDatos(true);
         setDatosSuccess('');
+
         try {
             await api.patch('/me/perfil', {
                 telefono,
@@ -100,6 +109,7 @@ export default function Profile() {
         setPassErrors({});
         setPassSuccess('');
         setSavingPass(true);
+
         try {
             await api.put('/me/password', {
                 current_password:      currentPass,
@@ -108,11 +118,15 @@ export default function Profile() {
             });
             setPassSuccess('Contraseña actualizada.');
             setCurrentPass(''); setNewPass(''); setConfirmPass('');
-            setTimeout(() => { setPassSuccess(''); setPassOpen(false); }, 2000);
+            setTimeout(() => {
+ setPassSuccess(''); setPassOpen(false); 
+}, 2000);
         } catch (err: any) {
             const errors = err?.response?.data?.errors ?? {};
             const mapped: Record<string, string> = {};
-            Object.entries(errors).forEach(([k, v]) => { mapped[k] = (v as string[])[0]; });
+            Object.entries(errors).forEach(([k, v]) => {
+ mapped[k] = (v as string[])[0]; 
+});
             setPassErrors(mapped);
         } finally {
             setSavingPass(false);

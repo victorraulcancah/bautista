@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, Clock, ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 type Voucher = {
     id: number;
@@ -42,7 +42,10 @@ export default function VoucherModal({ open, onClose, pagId }: Props) {
     const [procesando, setProcesando]   = useState<number | null>(null);
 
     useEffect(() => {
-        if (!open || !pagId) return;
+        if (!open || !pagId) {
+return;
+}
+
         setLoading(true);
         axios.get(`/api/pagos/${pagId}/vouchers`)
             .then(r => setVouchers(r.data.data ?? r.data))
@@ -51,6 +54,7 @@ export default function VoucherModal({ open, onClose, pagId }: Props) {
 
     const validar = async (notificaId: number, estado: 'validado' | 'rechazado') => {
         setProcesando(notificaId);
+
         try {
             const { data } = await axios.patch(`/api/pagos/vouchers/${notificaId}/estado`, {
                 estado,

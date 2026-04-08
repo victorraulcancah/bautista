@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
 import { CheckCircle, Users, FileText, GraduationCap, Clock, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 
@@ -29,11 +29,18 @@ export default function MatriculaWizard() {
             // Determinar el paso actual basado en los checks del backend
             if (res.data.matricula) {
                 const m = res.data.matricula;
-                if (!m.termino) setActiveStep(0);
-                else if (!m.datos_padres) setActiveStep(1);
-                else if (!m.datos_alumnos) setActiveStep(2);
-                else if (!m.estado_verifica) setActiveStep(3);
-                else setActiveStep(4);
+
+                if (!m.termino) {
+setActiveStep(0);
+} else if (!m.datos_padres) {
+setActiveStep(1);
+} else if (!m.datos_alumnos) {
+setActiveStep(2);
+} else if (!m.estado_verifica) {
+setActiveStep(3);
+} else {
+setActiveStep(4);
+}
             }
         } catch (err) {
             console.error(err);
@@ -43,9 +50,12 @@ export default function MatriculaWizard() {
     };
 
     const nextStep = async () => {
-        if (!matricula) return;
+        if (!matricula) {
+return;
+}
         
         const stepKey = STEPS[activeStep].key;
+
         try {
             await api.post('/padre/matricula/step', {
                 matri_padre_id: matricula.matri_padre_id,
@@ -57,9 +67,12 @@ export default function MatriculaWizard() {
         }
     };
 
-    if (loading) return <div className="p-20 text-center">Cargando Asistente de Matrícula...</div>;
+    if (loading) {
+return <div className="p-20 text-center">Cargando Asistente de Matrícula...</div>;
+}
 
-    if (!matricula) return (
+    if (!matricula) {
+return (
         <div className="p-20 text-center space-y-4">
             <h1 className="text-3xl font-black text-gray-900">Sin Matrícula Asignada</h1>
             <p className="text-gray-500">No tienes un proceso de matrícula activo para este periodo.</p>
@@ -68,6 +81,7 @@ export default function MatriculaWizard() {
             </Link>
         </div>
     );
+}
 
     return (
         <div className="min-h-screen bg-[#FDFCFD] p-4 md:p-12 space-y-12 font-sans selection:bg-purple-200">

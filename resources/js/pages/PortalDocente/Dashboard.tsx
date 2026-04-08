@@ -1,11 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import { BookOpen, Users, GraduationCap, QrCode, MessageSquare, Library, UserCheck } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import api from '@/lib/api';
-import AppLayout from '@/layouts/app-layout';
 import PageHeader from '@/components/shared/PageHeader';
-import StatCard from '@/components/shared/StatCard';
 import SectionCard from '@/components/shared/SectionCard';
+import StatCard from '@/components/shared/StatCard';
+import AppLayout from '@/layouts/app-layout';
+import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [

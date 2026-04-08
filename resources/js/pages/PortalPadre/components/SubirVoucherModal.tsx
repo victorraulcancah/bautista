@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react';
 import axios from 'axios';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Upload, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 type Voucher = {
     id: number;
@@ -36,14 +36,20 @@ export default function SubirVoucherModal({ open, onClose, pagId, mes }: Props) 
     const [loaded, setLoaded]   = useState(false);
 
     const cargarVouchers = async () => {
-        if (!pagId) return;
+        if (!pagId) {
+return;
+}
+
         const { data } = await axios.get(`/api/pagos/${pagId}/vouchers`);
         setVouchers(data.data ?? data);
         setLoaded(true);
     };
 
     const handleOpen = (isOpen: boolean) => {
-        if (isOpen && !loaded) cargarVouchers();
+        if (isOpen && !loaded) {
+cargarVouchers();
+}
+
         if (!isOpen) {
             onClose();
             setArchivo(null);
@@ -54,16 +60,29 @@ export default function SubirVoucherModal({ open, onClose, pagId, mes }: Props) 
 
     const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
         const f = e.target.files?.[0];
-        if (!f) return;
-        if (f.size > 5 * 1024 * 1024) { setError('El archivo no puede superar 5 MB.'); return; }
+
+        if (!f) {
+return;
+}
+
+        if (f.size > 5 * 1024 * 1024) {
+ setError('El archivo no puede superar 5 MB.');
+
+ return; 
+}
+
         setArchivo(f);
         setError('');
     };
 
     const handleSubir = async () => {
-        if (!archivo || !pagId) return;
+        if (!archivo || !pagId) {
+return;
+}
+
         setSubiendo(true);
         setError('');
+
         try {
             const form = new FormData();
             form.append('archivo', archivo);
@@ -72,7 +91,10 @@ export default function SubirVoucherModal({ open, onClose, pagId, mes }: Props) 
             });
             setVouchers(prev => [data.data ?? data, ...prev]);
             setArchivo(null);
-            if (inputRef.current) inputRef.current.value = '';
+
+            if (inputRef.current) {
+inputRef.current.value = '';
+}
         } catch (e: any) {
             setError(e.response?.data?.message ?? 'Error al subir el comprobante.');
         } finally {
@@ -95,6 +117,7 @@ export default function SubirVoucherModal({ open, onClose, pagId, mes }: Props) 
                         </p>
                         {vouchers.map(v => {
                             const cfg = ESTADO_CONFIG[v.estado];
+
                             return (
                                 <div key={v.id} className="flex items-center justify-between border rounded p-2 text-sm">
                                     <a

@@ -1,7 +1,7 @@
+import { Link } from '@inertiajs/react';
 import { Eye } from 'lucide-react';
 import SectionCard from '@/components/shared/SectionCard';
 import type { MensajePendiente } from '../hooks/useDashboard';
-import { Link } from '@inertiajs/react';
 
 type Props = {
     messages?: MensajePendiente[];
