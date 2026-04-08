@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Mensaje;
-use App\Models\MensajeRespuesta;
+use App\Models\MensajePrivado;
+use App\Models\MensajePrivadoRespuesta;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -15,7 +15,7 @@ class MensajeriaApiController extends Controller
      */
     public function recibidos(Request $request)
     {
-        $mensajes = Mensaje::where('destinatario_id', $request->user()->id)
+        $mensajes = MensajePrivado::bandejaEntrada($request->user()->id)
             ->with(['remitente.perfil'])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -28,7 +28,7 @@ class MensajeriaApiController extends Controller
      */
     public function enviados(Request $request)
     {
-        $mensajes = Mensaje::where('remitente_id', $request->user()->id)
+        $mensajes = MensajePrivado::enviados($request->user()->id)
             ->with(['destinatario.perfil'])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -47,12 +47,13 @@ class MensajeriaApiController extends Controller
             'cuerpo' => 'required|string',
         ]);
 
-        $mensaje = Mensaje::create([
+        $mensaje = MensajePrivado::create([
             'remitente_id' => $request->user()->id,
             'destinatario_id' => $validated['destinatario_id'],
             'asunto' => $validated['asunto'],
             'cuerpo' => $validated['cuerpo'],
-            'leido' => false,
+            'leido_remitente' => true,
+            'leido_destinatario' => false,
         ]);
 
         return response()->json($mensaje);
@@ -63,15 +64,19 @@ class MensajeriaApiController extends Controller
      */
     public function ver(Request $request, int $id)
     {
-        $mensaje = Mensaje::where(function($q) use ($request) {
+        $mensaje = MensajePrivado::where(function($q) use ($request) {
                 $q->where('destinatario_id', $request->user()->id)
                   ->orWhere('remitente_id', $request->user()->id);
             })
             ->with(['remitente.perfil', 'destinatario.perfil', 'respuestas.autor.perfil'])
             ->findOrFail($id);
 
-        if ($mensaje->destinatario_id == $request->user()->id && !$mensaje->leido) {
-            $mensaje->update(['leido' => true]);
+        // Marcar como leído según quién lo está viendo
+        if ($mensaje->destinatario_id == $request->user()->id && !$mensaje->leido_destinatario) {
+            $mensaje->update([
+                'leido_destinatario' => true,
+                'leido_en' => now(),
+            ]);
         }
 
         return response()->json($mensaje);
@@ -86,8 +91,8 @@ class MensajeriaApiController extends Controller
             'respuesta' => 'required|string',
         ]);
 
-        $reply = MensajeRespuesta::create([
-            'mensaje_id' => $id,
+        $reply = MensajePrivadoRespuesta::create([
+            'mensaje_privado_id' => $id,
             'user_id' => $request->user()->id,
             'respuesta' => $validated['respuesta'],
         ]);

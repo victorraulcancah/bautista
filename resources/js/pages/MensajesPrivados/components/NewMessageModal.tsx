@@ -1,13 +1,13 @@
-import { Plus, Send, X } from 'lucide-react';
+import { Send, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
 import type { Contacto } from '../hooks/useNewMessage';
 
@@ -45,43 +45,57 @@ export default function NewMessageModal({
     onClose,
 }: Props) {
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => {
-            setIsOpen(open);
-            if (!open) onClose();
-        }}>
-            <DialogTrigger asChild>
-                <Button className="rounded-2xl h-14 px-8 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 font-black text-xs uppercase tracking-widest">
-                    <Plus className="w-4 h-4 mr-2" /> Redactar Mensaje
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="rounded-[3rem] p-8 max-w-2xl border-none shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] bg-white/95 backdrop-blur-xl">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-black tracking-tighter">
-                        Nuevo Mensaje
-                    </DialogTitle>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                setIsOpen(open);
+                if (!open) onClose();
+            }}
+        >
+            <DialogContent className="max-w-2xl bg-white border-neutral-200 rounded-3xl p-0 overflow-hidden shadow-2xl">
+                <DialogHeader className="p-6 pb-4 border-b border-neutral-100 bg-indigo-50">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center">
+                            <Send className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                            <DialogTitle className="text-xl font-black text-neutral-950 tracking-tight">
+                                Nuevo Mensaje
+                            </DialogTitle>
+                            <p className="text-xs text-indigo-600 font-bold uppercase tracking-widest">
+                                Enviar mensaje privado
+                            </p>
+                        </div>
+                    </div>
                 </DialogHeader>
-                <div className="space-y-6 mt-6">
+
+                <div className="p-6 space-y-4">
                     {/* Destinatario */}
                     <div className="space-y-2 relative">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                        <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
                             Para:
-                        </label>
+                        </Label>
                         {destinatario ? (
-                            <div className="bg-indigo-50 p-4 rounded-2xl flex items-center justify-between border border-indigo-100">
+                            <div className="bg-indigo-50 p-4 rounded-xl flex items-center justify-between border border-indigo-100">
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
-                                        {destinatario.perfil?.primer_nombre?.[0]}
+                                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
+                                        <User className="w-5 h-5" />
                                     </div>
-                                    <span className="font-bold text-indigo-900">
-                                        {destinatario.perfil?.primer_nombre}{' '}
-                                        {destinatario.perfil?.apellido_paterno}
-                                    </span>
+                                    <div>
+                                        <p className="font-bold text-neutral-900 text-sm">
+                                            {destinatario.perfil?.primer_nombre}{' '}
+                                            {destinatario.perfil?.apellido_paterno}
+                                        </p>
+                                        <p className="text-xs text-neutral-500 font-medium">
+                                            {destinatario.id_rol === 1 ? 'Estudiante' : 'Docente'}
+                                        </p>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => setDestinatario(null)}
-                                    className="text-indigo-400 hover:text-rose-500"
+                                    className="text-neutral-400 hover:text-rose-500 transition-colors"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
                         ) : (
@@ -89,10 +103,10 @@ export default function NewMessageModal({
                                 <Input
                                     placeholder="Buscar por nombre..."
                                     onChange={(e) => onSearchContact(e.target.value)}
-                                    className="h-14 rounded-2xl border-gray-100 font-bold focus:ring-indigo-100"
+                                    className="h-11 rounded-xl border-neutral-200 font-medium"
                                 />
                                 {contactos.length > 0 && (
-                                    <div className="absolute z-50 w-full top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
+                                    <div className="absolute z-50 w-full top-full mt-2 bg-white rounded-xl shadow-2xl border border-neutral-200 overflow-hidden divide-y divide-neutral-100 max-h-60 overflow-y-auto">
                                         {contactos.map((c) => (
                                             <button
                                                 key={c.id}
@@ -100,18 +114,18 @@ export default function NewMessageModal({
                                                     setDestinatario(c);
                                                     setContactos([]);
                                                 }}
-                                                className="w-full p-4 flex items-center hover:bg-indigo-50 transition-colors text-left"
+                                                className="w-full p-3 flex items-center hover:bg-indigo-50 transition-colors text-left"
                                             >
-                                                <div className="w-8 h-8 bg-gray-100 rounded-full mr-3 flex items-center justify-center text-[10px] font-black text-gray-400">
-                                                    {c.perfil?.primer_nombre?.[0]}
+                                                <div className="w-10 h-10 bg-neutral-100 rounded-xl mr-3 flex items-center justify-center">
+                                                    <User className="w-5 h-5 text-neutral-400" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-gray-800 text-sm">
+                                                    <p className="font-bold text-neutral-800 text-sm">
                                                         {c.perfil?.primer_nombre}{' '}
                                                         {c.perfil?.apellido_paterno}
                                                     </p>
-                                                    <p className="text-[10px] text-gray-400 font-black uppercase">
-                                                        {c.id_rol === 1 ? 'Alumno' : 'Docente'}
+                                                    <p className="text-xs text-neutral-500 font-medium">
+                                                        {c.id_rol === 1 ? 'Estudiante' : 'Docente'}
                                                     </p>
                                                 </div>
                                             </button>
@@ -124,39 +138,61 @@ export default function NewMessageModal({
 
                     {/* Asunto */}
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                        <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
                             Asunto:
-                        </label>
+                        </Label>
                         <Input
                             placeholder="Motivo del mensaje..."
                             value={asunto}
                             onChange={(e) => setAsunto(e.target.value)}
-                            className="h-14 rounded-2xl border-gray-100 font-bold"
+                            className="h-11 rounded-xl border-neutral-200 font-medium"
                         />
                     </div>
 
                     {/* Cuerpo */}
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                            Contenido:
-                        </label>
+                        <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
+                            Mensaje:
+                        </Label>
                         <Textarea
                             placeholder="Escribe aquí tu mensaje..."
                             value={cuerpo}
                             onChange={(e) => setCuerpo(e.target.value)}
-                            className="min-h-[150px] rounded-3xl border-gray-100 font-medium p-6"
+                            className="min-h-[150px] rounded-xl border-neutral-200 font-medium resize-none"
                         />
                     </div>
 
-                    {/* Botón enviar */}
-                    <Button
-                        onClick={onSend}
-                        disabled={sending}
-                        className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-indigo-100"
-                    >
-                        {sending ? 'Enviando...' : 'Enviar Mensaje'}{' '}
-                        <Send className="w-4 h-4 ml-3" />
-                    </Button>
+                    {/* Botones */}
+                    <div className="flex gap-3 pt-2">
+                        <Button
+                            onClick={() => {
+                                setIsOpen(false);
+                                onClose();
+                            }}
+                            variant="outline"
+                            className="flex-1 h-11 rounded-xl border-neutral-200 font-bold text-sm"
+                            disabled={sending}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={onSend}
+                            disabled={sending || !destinatario || !asunto || !cuerpo}
+                            className="flex-1 h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm gap-2"
+                        >
+                            {sending ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Enviando...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="h-4 w-4" />
+                                    Enviar
+                                </>
+                            )}
+                        </Button>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>

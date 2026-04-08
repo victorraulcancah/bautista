@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { User, ChevronRight } from 'lucide-react';
+import { User, ChevronRight, Mail, MailOpen } from 'lucide-react';
 import type { Mensaje } from '../hooks/useMensajes';
 
 type Props = {
@@ -9,54 +9,64 @@ type Props = {
 
 export default function MessageRow({ message, type }: Props) {
     const contact = type === 'inbox' ? message.remitente : message.destinatario;
+    const isUnread = type === 'inbox' && !message.leido;
 
     return (
         <Link
             href={`/mensajeria/ver/${message.id}`}
-            className={`flex items-center p-8 hover:bg-indigo-50/50 transition-all group ${
-                type === 'inbox' && !message.leido ? 'bg-indigo-50/30' : ''
+            className={`flex items-center p-6 hover:bg-indigo-50 transition-all group ${
+                isUnread ? 'bg-indigo-50/50' : ''
             }`}
         >
+            {/* Avatar */}
             <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center mr-6 border transition-colors ${
-                    type === 'inbox' && !message.leido
-                        ? 'bg-indigo-600 text-white border-indigo-500'
-                        : 'bg-white text-gray-400 border-gray-100 group-hover:bg-indigo-100 group-hover:text-indigo-600'
+                className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 transition-colors ${
+                    isUnread
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-neutral-100 text-neutral-400 group-hover:bg-indigo-100 group-hover:text-indigo-600'
                 }`}
             >
-                <User className="w-6 h-6" />
+                <User className="w-5 h-5" />
             </div>
 
-            <div className="flex-1 min-w-0 pr-6">
+            {/* Content */}
+            <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                     <p
-                        className={`text-sm tracking-tight ${
-                            type === 'inbox' && !message.leido
-                                ? 'font-black text-indigo-900'
-                                : 'font-bold text-gray-800'
+                        className={`text-sm truncate ${
+                            isUnread
+                                ? 'font-black text-neutral-900'
+                                : 'font-bold text-neutral-700'
                         }`}
                     >
                         {contact?.perfil?.primer_nombre} {contact?.perfil?.apellido_paterno}
                     </p>
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        {new Date(message.created_at).toLocaleDateString()}
+                    <span className="text-xs font-medium text-neutral-400 ml-2 flex-shrink-0">
+                        {new Date(message.created_at).toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'short',
+                        })}
                     </span>
                 </div>
                 <h4
-                    className={`text-sm truncate ${
-                        type === 'inbox' && !message.leido
-                            ? 'font-black text-indigo-600'
-                            : 'font-medium text-gray-500'
+                    className={`text-sm truncate mb-1 ${
+                        isUnread ? 'font-bold text-indigo-600' : 'font-medium text-neutral-600'
                     }`}
                 >
                     {message.asunto}
                 </h4>
-                <p className="text-xs text-gray-400 truncate line-clamp-1 mt-1 font-medium italic">
+                <p className="text-xs text-neutral-400 truncate font-medium">
                     {message.cuerpo}
                 </p>
             </div>
 
-            <ChevronRight className="w-5 h-5 text-gray-200 group-hover:text-indigo-300 transition-colors" />
+            {/* Icon */}
+            <div className="ml-4 flex items-center gap-2 flex-shrink-0">
+                {isUnread && (
+                    <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                )}
+                <ChevronRight className="w-5 h-5 text-neutral-300 group-hover:text-indigo-400 transition-colors" />
+            </div>
         </Link>
     );
 }

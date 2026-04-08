@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
-import { MessageSquare } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
+import { Mail } from 'lucide-react';
+import ResourcePage from '@/components/shared/ResourcePage';
 import NewMessageModal from './components/NewMessageModal';
 import MessagesList from './components/MessagesList';
 import { useMensajes } from './hooks/useMensajes';
@@ -8,7 +8,8 @@ import { useNewMessage } from './hooks/useNewMessage';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Mensajería Interna', href: '/mensajeria' },
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Mensajería', href: '/mensajeria' },
 ];
 
 export default function MensajeriaIndex() {
@@ -38,58 +39,57 @@ export default function MensajeriaIndex() {
         resetForm,
     } = useNewMessage(reloadMessages);
 
-    if (loading) {
-        return (
-            <AppLayout breadcrumbs={breadcrumbs}>
-                <div className="p-10 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest">
-                    Abriendo Bandeja de Entrada...
-                </div>
-            </AppLayout>
-        );
-    }
+    const totalMensajes = recibidos.length + enviados.length;
+    const noLeidos = recibidos.filter((m) => !m.leido).length;
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Mensajería Interna" />
-            <div className="bg-[#FDFDFF] font-sans pb-20">
-                <div className="max-w-6xl mx-auto p-4 md:p-10 space-y-10">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="space-y-2">
-                            <h1 className="text-4xl font-black text-gray-900 tracking-tighter flex items-center">
-                                <MessageSquare className="w-8 h-8 mr-4 text-indigo-600" />{' '}
-                                Comunicación Interna
-                            </h1>
-                            <p className="text-gray-500 font-medium italic">
-                                Gestiona tus mensajes con alumnos, docentes y administrativos.
-                            </p>
+        <>
+            <Head title="Mensajería" />
+
+            <ResourcePage
+                breadcrumbs={breadcrumbs}
+                pageTitle="Mensajería"
+                subtitle={`${totalMensajes} mensajes${noLeidos > 0 ? ` • ${noLeidos} sin leer` : ''}`}
+                icon={Mail}
+                iconColor="bg-indigo-600"
+                search={searchTerm}
+                onSearch={setSearchTerm}
+                btnLabel="Nuevo Mensaje"
+                onNew={() => setIsOpen(true)}
+            >
+                {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                            <p className="text-sm text-gray-400 font-bold">Cargando mensajes...</p>
                         </div>
-
-                        <NewMessageModal
-                            isOpen={isOpen}
-                            setIsOpen={setIsOpen}
-                            destinatario={destinatario}
-                            setDestinatario={setDestinatario}
-                            contactos={contactos}
-                            setContactos={setContactos}
-                            asunto={asunto}
-                            setAsunto={setAsunto}
-                            cuerpo={cuerpo}
-                            setCuerpo={setCuerpo}
-                            sending={sending}
-                            onSearchContact={handleSearchContact}
-                            onSend={handleSend}
-                            onClose={resetForm}
-                        />
                     </div>
-
+                ) : (
                     <MessagesList
                         recibidos={recibidos}
                         enviados={enviados}
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                     />
-                </div>
-            </div>
-        </AppLayout>
+                )}
+            </ResourcePage>
+
+            <NewMessageModal
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+                destinatario={destinatario}
+                setDestinatario={setDestinatario}
+                contactos={contactos}
+                setContactos={setContactos}
+                asunto={asunto}
+                setAsunto={setAsunto}
+                cuerpo={cuerpo}
+                setCuerpo={setCuerpo}
+                sending={sending}
+                onSearchContact={handleSearchContact}
+                onSend={handleSend}
+                onClose={resetForm}
+            />
+        </>
     );
 }

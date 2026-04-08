@@ -16,7 +16,12 @@ export function useMensajeDetalle(mensajeId: number) {
         setLoading(true);
         try {
             const res = await api.get(`/mensajes-legacy/${mensajeId}`);
-            setMensaje(res.data);
+            // Mapear el campo leido según si es remitente o destinatario
+            const data = res.data;
+            setMensaje({
+                ...data,
+                leido: data.leido_destinatario || data.leido_remitente,
+            });
         } catch (error) {
             console.error('Error al cargar mensaje:', error);
         } finally {

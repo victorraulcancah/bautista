@@ -5,7 +5,9 @@ export type Mensaje = {
     id: number;
     asunto: string;
     cuerpo: string;
-    leido: boolean;
+    leido: boolean; // Calculado en el frontend según el tipo
+    leido_remitente: boolean;
+    leido_destinatario: boolean;
     created_at: string;
     remitente_id: number;
     destinatario_id: number;
@@ -43,8 +45,20 @@ export function useMensajes() {
                 api.get('/mensajes-legacy/recibidos'),
                 api.get('/mensajes-legacy/enviados'),
             ]);
-            setRecibidos(rec.data);
-            setEnviados(env.data);
+            
+            // Mapear el campo leido según el tipo de mensaje
+            const recibidosData = rec.data.map((m: any) => ({
+                ...m,
+                leido: m.leido_destinatario, // Para recibidos, usar leido_destinatario
+            }));
+            
+            const enviadosData = env.data.map((m: any) => ({
+                ...m,
+                leido: m.leido_remitente, // Para enviados, usar leido_remitente
+            }));
+            
+            setRecibidos(recibidosData);
+            setEnviados(enviadosData);
         } catch (error) {
             console.error('Error al cargar mensajes:', error);
         } finally {
