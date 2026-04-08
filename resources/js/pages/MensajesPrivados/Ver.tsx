@@ -1,9 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, User, Send } from 'lucide-react';
+import { ArrowLeft, Send, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import ResourcePage from '@/components/shared/ResourcePage';
 import MessageThread from './components/MessageThread';
+import UserAvatar from './components/UserAvatar';
 import { useMensajeDetalle } from './hooks/useMensajeDetalle';
 import type { BreadcrumbItem } from '@/types';
 
@@ -23,7 +24,7 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
                 breadcrumbs={breadcrumbs}
                 pageTitle="Cargando..."
                 subtitle=""
-                icon={User}
+                icon={Mail}
                 iconColor="bg-indigo-600"
             >
                 <div className="flex items-center justify-center py-20">
@@ -42,7 +43,7 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
                 breadcrumbs={breadcrumbs}
                 pageTitle="Mensaje no encontrado"
                 subtitle=""
-                icon={User}
+                icon={Mail}
                 iconColor="bg-indigo-600"
             >
                 <div className="p-20 text-center text-neutral-500">
@@ -60,7 +61,7 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
                 breadcrumbs={breadcrumbs}
                 pageTitle={mensaje.asunto}
                 subtitle={`De: ${mensaje.remitente?.perfil?.primer_nombre} ${mensaje.remitente?.perfil?.apellido_paterno}`}
-                icon={User}
+                icon={Mail}
                 iconColor="bg-indigo-600"
                 hideSearch
                 hideButton
@@ -82,9 +83,11 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
                 <div className="bg-white rounded-2xl border border-neutral-200 p-4 sm:p-8 mb-6">
                     {/* Header del mensaje */}
                     <div className="flex flex-col sm:flex-row items-start gap-4 mb-6 pb-6 border-b border-neutral-100">
-                        <div className="w-14 h-14 rounded-xl bg-indigo-600 flex items-center justify-center text-white flex-shrink-0">
-                            <User className="w-7 h-7" />
-                        </div>
+                        <UserAvatar
+                            fotoPerfil={mensaje.remitente?.perfil?.foto_perfil}
+                            nombre={`${mensaje.remitente?.perfil?.primer_nombre} ${mensaje.remitente?.perfil?.apellido_paterno}`}
+                            size="lg"
+                        />
                         <div className="flex-1 w-full">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
                                 <div className="flex-1">

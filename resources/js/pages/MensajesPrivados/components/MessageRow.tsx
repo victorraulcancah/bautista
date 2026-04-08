@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { User, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import UserAvatar from './UserAvatar';
 import type { Mensaje } from '../hooks/useMensajes';
 
 type Props = {
@@ -19,14 +20,17 @@ export default function MessageRow({ message, type }: Props) {
             }`}
         >
             {/* Avatar */}
-            <div
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 transition-colors ${
-                    isUnread
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-neutral-100 text-neutral-400 group-hover:bg-indigo-100 group-hover:text-indigo-600'
-                }`}
-            >
-                <User className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="mr-3 sm:mr-4">
+                <UserAvatar
+                    fotoPerfil={contact?.perfil?.foto_perfil}
+                    nombre={`${contact?.perfil?.primer_nombre} ${contact?.perfil?.apellido_paterno}`}
+                    size="md"
+                    className={`transition-all ${
+                        isUnread
+                            ? 'ring-2 ring-indigo-600'
+                            : 'group-hover:ring-2 group-hover:ring-indigo-200'
+                    }`}
+                />
             </div>
 
             {/* Content */}

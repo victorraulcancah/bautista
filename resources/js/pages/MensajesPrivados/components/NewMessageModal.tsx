@@ -1,4 +1,4 @@
-import { Send, X, User } from 'lucide-react';
+import { Send, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import UserAvatar from './UserAvatar';
 import type { Contacto } from '../hooks/useNewMessage';
 
 type Props = {
@@ -78,9 +79,11 @@ export default function NewMessageModal({
                         {destinatario ? (
                             <div className="bg-indigo-50 p-4 rounded-xl flex items-center justify-between border border-indigo-100">
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
-                                        <User className="w-5 h-5" />
-                                    </div>
+                                    <UserAvatar
+                                        fotoPerfil={destinatario.perfil?.foto_perfil}
+                                        nombre={`${destinatario.perfil?.primer_nombre} ${destinatario.perfil?.apellido_paterno}`}
+                                        size="md"
+                                    />
                                     <div>
                                         <p className="font-bold text-neutral-900 text-sm">
                                             {destinatario.perfil?.primer_nombre}{' '}
@@ -116,9 +119,12 @@ export default function NewMessageModal({
                                                 }}
                                                 className="w-full p-3 flex items-center hover:bg-indigo-50 transition-colors text-left"
                                             >
-                                                <div className="w-10 h-10 bg-neutral-100 rounded-xl mr-3 flex items-center justify-center">
-                                                    <User className="w-5 h-5 text-neutral-400" />
-                                                </div>
+                                                <UserAvatar
+                                                    fotoPerfil={c.perfil?.foto_perfil}
+                                                    nombre={`${c.perfil?.primer_nombre} ${c.perfil?.apellido_paterno}`}
+                                                    size="md"
+                                                    className="mr-3"
+                                                />
                                                 <div>
                                                     <p className="font-bold text-neutral-800 text-sm">
                                                         {c.perfil?.primer_nombre}{' '}

@@ -16,7 +16,7 @@ class MensajeriaApiController extends Controller
     public function recibidos(Request $request)
     {
         $mensajes = MensajePrivado::bandejaEntrada($request->user()->id)
-            ->with(['remitente.perfil'])
+            ->with(['remitente.perfil:perfil_id,user_id,primer_nombre,segundo_nombre,apellido_paterno,apellido_materno,foto_perfil'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -29,7 +29,7 @@ class MensajeriaApiController extends Controller
     public function enviados(Request $request)
     {
         $mensajes = MensajePrivado::enviados($request->user()->id)
-            ->with(['destinatario.perfil'])
+            ->with(['destinatario.perfil:perfil_id,user_id,primer_nombre,segundo_nombre,apellido_paterno,apellido_materno,foto_perfil'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -68,7 +68,11 @@ class MensajeriaApiController extends Controller
                 $q->where('destinatario_id', $request->user()->id)
                   ->orWhere('remitente_id', $request->user()->id);
             })
-            ->with(['remitente.perfil', 'destinatario.perfil', 'respuestas.autor.perfil'])
+            ->with([
+                'remitente.perfil:perfil_id,user_id,primer_nombre,segundo_nombre,apellido_paterno,apellido_materno,foto_perfil',
+                'destinatario.perfil:perfil_id,user_id,primer_nombre,segundo_nombre,apellido_paterno,apellido_materno,foto_perfil',
+                'respuestas.autor.perfil:perfil_id,user_id,primer_nombre,segundo_nombre,apellido_paterno,apellido_materno,foto_perfil'
+            ])
             ->findOrFail($id);
 
         // Marcar como leído según quién lo está viendo
@@ -110,7 +114,7 @@ class MensajeriaApiController extends Controller
             $q->where('primer_nombre', 'like', "%$query%")
               ->orWhere('apellido_paterno', 'like', "%$query%");
         })
-        ->with('perfil')
+        ->with('perfil:perfil_id,user_id,primer_nombre,segundo_nombre,apellido_paterno,apellido_materno,foto_perfil')
         ->limit(10)
         ->get();
 

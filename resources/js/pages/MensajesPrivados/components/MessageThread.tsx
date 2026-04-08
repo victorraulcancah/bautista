@@ -1,4 +1,4 @@
-import { User } from 'lucide-react';
+import UserAvatar from './UserAvatar';
 
 type Respuesta = {
     id: number;
@@ -9,6 +9,7 @@ type Respuesta = {
         perfil?: {
             primer_nombre: string;
             apellido_paterno: string;
+            foto_perfil?: string | null;
         };
     };
 };
@@ -40,15 +41,12 @@ export default function MessageThread({ respuestas, remitenteId }: Props) {
                         >
                             {/* Avatar y nombre */}
                             <div className="flex items-center gap-3 mb-3">
-                                <div
-                                    className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                        isFromRemitente
-                                            ? 'bg-neutral-100 text-neutral-600'
-                                            : 'bg-indigo-500 text-white'
-                                    }`}
-                                >
-                                    <User className="w-4 h-4" />
-                                </div>
+                                <UserAvatar
+                                    fotoPerfil={resp.autor?.perfil?.foto_perfil}
+                                    nombre={`${resp.autor?.perfil?.primer_nombre} ${resp.autor?.perfil?.apellido_paterno}`}
+                                    size="sm"
+                                    className={isFromRemitente ? '' : 'ring-2 ring-indigo-500'}
+                                />
                                 <div className="flex-1 min-w-0">
                                     <p
                                         className={`text-xs font-bold truncate ${

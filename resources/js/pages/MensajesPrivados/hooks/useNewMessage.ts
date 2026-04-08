@@ -7,6 +7,7 @@ export type Contacto = {
     perfil?: {
         primer_nombre: string;
         apellido_paterno: string;
+        foto_perfil?: string | null;
     };
 };
 

@@ -16,6 +16,7 @@ export type Mensaje = {
         perfil?: {
             primer_nombre: string;
             apellido_paterno: string;
+            foto_perfil?: string | null;
         };
     };
     destinatario?: {
@@ -23,6 +24,7 @@ export type Mensaje = {
         perfil?: {
             primer_nombre: string;
             apellido_paterno: string;
+            foto_perfil?: string | null;
         };
     };
     respuestas?: any[];
