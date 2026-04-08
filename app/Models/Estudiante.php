@@ -74,6 +74,11 @@ class Estudiante extends Model
         return $this->hasMany(Pago::class, 'estu_id', 'estu_id');
     }
 
+    public function matriculas(): HasMany
+    {
+        return $this->hasMany(Matricula::class, 'estu_id', 'estu_id');
+    }
+
     public function getNombreCompletoAttribute(): string
     {
         if ($this->perfil) {

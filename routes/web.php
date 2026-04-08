@@ -33,6 +33,7 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/mensajes',              fn () => Inertia::render('Comunicados/index'))->name('mensajes.index');
     Route::get('/estudiantes',  fn () => Inertia::render('GestionAlumnos/index'))->name('estudiantes.index');
     Route::get('/estudiantes/{id}/fotocheck', [\App\Http\Controllers\Admin\FotocheckController::class, 'generate'])->name('estudiantes.fotocheck');
+    Route::get('/matriculas/aperturas/{aperturaId}/niveles/{nivelId}/fotochecks', [\App\Http\Controllers\Admin\FotocheckController::class, 'generateBulk'])->name('matriculas.fotochecks.bulk');
     Route::get('/docentes',     fn () => Inertia::render('GestionDocentes/index'))->name('docentes.index');
     Route::get('/niveles',      fn () => Inertia::render('Niveles/index'))->name('niveles.index');
     Route::get('/grados',       fn () => Inertia::render('Grados/index'))->name('grados.index');

@@ -61,4 +61,70 @@ class FotocheckController extends Controller
 
         return $pdf->stream($filename);
     }
+
+    public function generateBulk(int $aperturaId, int $nivelId): Response
+    {
+        $estudiantes = Estudiante::with(['perfil', 'user'])
+            ->whereHas('matriculas', function ($query) use ($aperturaId, $nivelId) {
+                $query->where('apertura_id', $aperturaId)
+                      ->whereHas('seccion.grado', function ($q) use ($nivelId) {
+                          $q->where('nivel_id', $nivelId);
+                      });
+            })
+            ->orderBy('estu_id')
+            ->get();
+
+        if ($estudiantes->isEmpty()) {
+            abort(404, 'No se encontraron estudiantes matriculados en este nivel');
+        }
+
+        $fotochecksData = [];
+
+        foreach ($estudiantes as $estudiante) {
+            // ── Generar QR ──────────────────────────────────────────────
+            $qrCode = new QrCode(
+                data: $estudiante->estu_id . ',1',
+                encoding: new Encoding('UTF-8'),
+                errorCorrectionLevel: ErrorCorrectionLevel::Low,
+                size: 120,
+                margin: 0,
+                roundBlockSizeMode: RoundBlockSizeMode::Margin
+            );
+
+            $writer = new PngWriter();
+            $result = $writer->write($qrCode);
+            $qrSrc  = $result->getDataUri();
+
+            // ── Foto del estudiante ─────────────────────────────────────
+            $fotoPath    = public_path('images/fotos_alumnos/' . $estudiante->foto);
+            $defaultPath = public_path('images/default-avatar.png');
+            $imgPath     = (file_exists($fotoPath) && !empty($estudiante->foto))
+                            ? $fotoPath
+                            : $defaultPath;
+
+            $fotoSrc = '';
+            if (file_exists($imgPath)) {
+                $mime    = mime_content_type($imgPath);
+                $fotoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($imgPath));
+            }
+
+            $fotochecksData[] = [
+                'estudiante' => $estudiante,
+                'qrSrc'      => $qrSrc,
+                'fotoSrc'    => $fotoSrc,
+            ];
+        }
+
+        // ── Renderizar PDF con múltiples fotochecks ──────────────────────
+        $pdf = Pdf::loadView('reportes.fotocheck-bulk', [
+                    'fotochecks' => $fotochecksData,
+                    'periodo'    => date('Y'),
+                 ])
+                 ->setPaper('a4', 'portrait');
+
+        $nivelNombre = $estudiantes->first()->matriculas->first()->seccion->grado->nivel->nombre_nivel ?? 'NIVEL';
+        $filename = 'fotochecks_' . strtoupper($nivelNombre) . '_' . date('Y-m-d') . '.pdf';
+
+        return $pdf->stream($filename);
+    }
 }
