@@ -9,10 +9,9 @@ class Medio extends Model
 {
     protected $table      = 'mis_medios';
     protected $primaryKey = 'id_medio';
-    public $timestamps    = false;
 
     protected $fillable = [
-        'usuario',
+        'user_id',
         'nombre',
         'tipo',
         'ruta',
@@ -20,6 +19,6 @@ class Medio extends Model
 
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'usuario');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

@@ -14,7 +14,7 @@ class MediosApiController extends Controller
      */
     public function index(Request $request)
     {
-        $medios = Medio::where('usuario', $request->user()->id)
+        $medios = Medio::where('user_id', $request->user()->id)
             ->orderBy('id_medio', 'desc')
             ->get();
 
@@ -34,7 +34,7 @@ class MediosApiController extends Controller
         $path = $file->store('mis_medios', 'public');
 
         $medio = Medio::create([
-            'usuario' => $request->user()->id,
+            'user_id' => $request->user()->id,
             'nombre' => $file->getClientOriginalName(),
             'tipo' => $file->getClientOriginalExtension(),
             'ruta' => $path,
@@ -48,7 +48,7 @@ class MediosApiController extends Controller
      */
     public function destroy(Request $request, int $id)
     {
-        $medio = Medio::where('usuario', $request->user()->id)->findOrFail($id);
+        $medio = Medio::where('user_id', $request->user()->id)->findOrFail($id);
         Storage::disk('public')->delete($medio->ruta);
         $medio->delete();
 
