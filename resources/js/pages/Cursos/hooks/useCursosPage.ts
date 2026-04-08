@@ -68,10 +68,9 @@ export function useCursosPage() {
 
         setLoadingC(true);
         try {
-            const res = await api.get('/cursos', {
-                params: { grado_id: selectedGrado.grado_id, per_page: 500 },
-            });
-            setCursos(res.data.data ?? []);
+            // Cargar cursos ASIGNADOS al grado (desde grados_cursos)
+            const res = await api.get(`/grados/${selectedGrado.grado_id}/cursos`);
+            setCursos(res.data ?? []);
         } finally {
             setLoadingC(false);
         }

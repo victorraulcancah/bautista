@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
 import GradoFormModal from '../Grados/components/GradoFormModal';
 import type { Grado, GradoFormData, Nivel } from '../Grados/hooks/useGrados';
+import AsignarCursoModal from './components/AsignarCursoModal';
 import CursoFormModal from './components/CursoFormModal';
 import CursosTable from './components/CursosTable';
 import GradosTable from './components/GradosTable';
@@ -38,10 +39,13 @@ export default function CursosPage() {
         setGrados,
     } = useCursosPage();
 
-    // Curso modal
-    const [modalOpen, setModalOpen] = useState(false);
+    // Modal para CREAR cursos (desde nivel)
+    const [modalCrearOpen, setModalCrearOpen] = useState(false);
     const [editing, setEditing] = useState<Curso | null>(null);
     const [apiErrors, setApiErrors] = useState<Record<string, string[]>>({});
+
+    // Modal para ASIGNAR cursos (desde grado)
+    const [modalAsignarOpen, setModalAsignarOpen] = useState(false);
 
     // Grado edit modal
     const [gradoModalOpen, setGradoModalOpen] = useState(false);
@@ -65,26 +69,14 @@ export default function CursosPage() {
         }
     }, [nivelIdFromUrl, niveles, setNivelNombre]);
 
-    // ── Curso handlers ──
-    const openCreate = () => {
+    // ── Handlers para CREAR cursos (modo nivel directo) ──
+    const openCreateCurso = () => {
         setEditing(null);
         setApiErrors({});
-        setModalOpen(true);
+        setModalCrearOpen(true);
     };
 
-    const openEdit = (c: Curso) => {
-        setEditing(c);
-        setApiErrors({});
-        setModalOpen(true);
-    };
-
-    const handleClose = () => {
-        setModalOpen(false);
-        setEditing(null);
-        setApiErrors({});
-    };
-
-    const handleSave = async (data: CursoFormData) => {
+    const handleSaveCrearCurso = async (data: CursoFormData) => {
         try {
             // Si hay un archivo, usar FormData
             if (data.logo instanceof File) {
@@ -109,14 +101,14 @@ export default function CursosPage() {
             } else {
                 // Sin archivo, enviar JSON sin el campo logo
                 const { logo, ...dataWithoutLogo } = data;
-                
+
                 if (editing) {
                     await api.put(`/cursos/${editing.curso_id}`, dataWithoutLogo);
                 } else {
                     await api.post('/cursos', dataWithoutLogo);
                 }
             }
-            
+
             await reloadCursos();
         } catch (e: any) {
             setApiErrors(e?.response?.data?.errors ?? {});
@@ -124,15 +116,34 @@ export default function CursosPage() {
         }
     };
 
-    const confirmDeleteCurso = (c: Curso) => {
+    // ── Handlers para ASIGNAR cursos (modo grado seleccionado) ──
+    const openAsignarCurso = () => {
+        setModalAsignarOpen(true);
+    };
+
+    const confirmDeleteCurso = (c: Curso & { grac_id?: number }) => {
+        // En modo nivel directo, eliminar el curso
+        // En modo grado, desasignar el curso
+        const isAsignacion = selectedGrado && !modoNivelDirecto;
+
         setDeleteModal({
             open: true,
-            title: 'Eliminar Curso',
-            message: `¿Estás seguro de que deseas eliminar el curso "${c.nombre}"? Esta acción no se puede deshacer.`,
+            title: isAsignacion ? 'Desasignar Curso' : 'Eliminar Curso',
+            message: isAsignacion
+                ? `¿Estás seguro de que deseas desasignar el curso "${c.nombre}" de este grado?`
+                : `¿Estás seguro de que deseas eliminar el curso "${c.nombre}"? Esta acción no se puede deshacer.`,
             processing: false,
             onConfirm: async () => {
                 setDeleteModal((p) => ({ ...p, processing: true }));
-                await api.delete(`/cursos/${c.curso_id}`);
+
+                if (isAsignacion && c.grac_id) {
+                    // Desasignar curso del grado
+                    await api.delete(`/grados/${selectedGrado.grado_id}/cursos/${c.grac_id}`);
+                } else {
+                    // Eliminar curso completamente
+                    await api.delete(`/cursos/${c.curso_id}`);
+                }
+
                 setDeleteModal((p) => ({ ...p, open: false, processing: false }));
                 await reloadCursos();
             },
@@ -200,8 +211,8 @@ export default function CursosPage() {
                             search={searchCurso}
                             onSearchChange={setSearchCurso}
                             onBack={handleBack}
-                            onCreate={openCreate}
-                            onEdit={openEdit}
+                            onCreate={modoNivelDirecto ? openCreateCurso : openAsignarCurso}
+                            onEdit={() => {}} // No se edita en modo asignación
                             onDelete={confirmDeleteCurso}
                             title={modoNivelDirecto ? `Cursos ${nivelNombre}` : selectedGrado?.nombre_grado ?? ''}
                             subtitle={modoNivelDirecto ? nivelNombre : selectedGrado?.nivel?.nombre_nivel ?? '—'}
@@ -211,17 +222,29 @@ export default function CursosPage() {
                 </div>
             </AppLayout>
 
+            {/* Modal para CREAR cursos (modo nivel directo) */}
             <CursoFormModal
-                open={modalOpen}
-                onClose={handleClose}
+                open={modalCrearOpen}
+                onClose={() => setModalCrearOpen(false)}
                 editing={editing}
                 niveles={niveles}
                 grados={grados}
                 defaults={formDefaults}
-                onSave={handleSave}
+                onSave={handleSaveCrearCurso}
                 apiErrors={apiErrors}
                 clearErrors={() => setApiErrors({})}
             />
+
+            {/* Modal para ASIGNAR cursos (modo grado seleccionado) */}
+            {selectedGrado && (
+                <AsignarCursoModal
+                    open={modalAsignarOpen}
+                    onClose={() => setModalAsignarOpen(false)}
+                    gradoId={selectedGrado.grado_id}
+                    nivelNombre={selectedGrado.nivel?.nombre_nivel ?? ''}
+                    onSuccess={reloadCursos}
+                />
+            )}
 
             <GradoFormModal
                 open={gradoModalOpen}

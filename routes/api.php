@@ -111,6 +111,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Cursos
     Route::apiResource('cursos', CursoApiController::class);
 
+    // Grados - Cursos (asignación)
+    Route::get('grados/{gradoId}/cursos', [\App\Http\Controllers\Api\GradoCursoApiController::class, 'index']);
+    Route::get('grados/{gradoId}/cursos-disponibles', [\App\Http\Controllers\Api\GradoCursoApiController::class, 'cursosDisponibles']);
+    Route::post('grados/{gradoId}/cursos', [\App\Http\Controllers\Api\GradoCursoApiController::class, 'store']);
+    Route::delete('grados/{gradoId}/cursos/{gracId}', [\App\Http\Controllers\Api\GradoCursoApiController::class, 'destroy']);
+
     // Contenido de Curso (Unidades y Clases)
     Route::prefix('contenido')->group(function () {
         Route::get('cursos/{cursoId}',                           [CursoContenidoApiController::class, 'show']);
