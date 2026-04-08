@@ -135,15 +135,6 @@ return;
                     {/* Lista de niveles */}
                     {selectedApertura && (
                         <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-                            <div className="bg-[#00a65a] px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-                                <div>
-                                    <p className="text-white/80 text-xs sm:text-sm font-medium">{selectedApertura.nombre}</p>
-                                </div>
-                                <span className="text-white/80 text-xs sm:text-sm font-medium">
-                                    {niveles.length} nivel{niveles.length !== 1 ? 'es' : ''}
-                                </span>
-                            </div>
-
                             {loadingNiveles ? (
                                 <div className="py-16 flex flex-col items-center justify-center gap-3">
                                     <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>

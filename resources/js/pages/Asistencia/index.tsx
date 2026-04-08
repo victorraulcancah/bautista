@@ -1,313 +1,239 @@
 import { Head, Link } from '@inertiajs/react';
-import { CalendarDays, QrCode, Search, Eye, Download, GraduationCap, UserCheck, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { CalendarDays, QrCode, Eye, GraduationCap, UserCheck } from 'lucide-react';
+import ResourcePage from '@/components/shared/ResourcePage';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/Table';
-import AppLayout from '@/layouts/app-layout';
-import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
+import HistorialModal from './components/HistorialModal';
+import { useAsistencia } from './hooks/useAsistencia';
+import { useHistorialAsistencia } from './hooks/useHistorialAsistencia';
+import type { Usuario } from './hooks/useAsistencia';
+import type { Column } from '@/components/shared/ResourceTable';
 
 const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Dashboard', href: '/dashboard' },
     { title: 'Asistencia', href: '/asistencia' },
 ];
 
 export default function AsistenciaIndex() {
-    const [tipo, setTipo] = useState<'E' | 'D'>('E');
-    const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-    const [rows, setRows] = useState<any>(null);
-    const [loading, setLoading] = useState(false);
-    
-    // Monthly history modal
-    const [showModal, setShowModal] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<any>(null);
-    const [history, setHistory] = useState<any[]>([]);
-    const [historyLoading, setHistoryLoading] = useState(false);
-    const [selectedMonth, setSelectedMonth] = useState(String(new Date().getMonth() + 1));
+    const {
+        tipo,
+        search,
+        allUsers,
+        loading,
+        hasMore,
+        totalCount,
+        scrollContainerRef,
+        handleScroll,
+        setSearch,
+        changeTipo,
+    } = useAsistencia();
 
-    useEffect(() => {
-        loadUsers();
-    }, [tipo, page, search]);
+    const {
+        showModal,
+        selectedUser,
+        history,
+        historyLoading,
+        selectedMonth,
+        setSelectedMonth,
+        openHistory,
+        closeModal,
+    } = useHistorialAsistencia(tipo);
 
-    const loadUsers = async () => {
-        setLoading(true);
-
-        try {
-            const res = await api.get('/asistencia/usuarios', {
-                params: { tipo, search, page }
-            });
-            setRows(res.data);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const openHistory = async (user: any) => {
-        setSelectedUser(user);
-        setShowModal(true);
-        loadHistory(user.estu_id || user.docente_id, selectedMonth);
-    };
-
-    const loadHistory = async (id: number, month: string) => {
-        setHistoryLoading(true);
-
-        try {
-            const res = await api.get(`/asistencia/usuario/${id}`, {
-                params: { tipo, mes: month }
-            });
-            setHistory(res.data);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setHistoryLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (selectedUser) {
-            loadHistory(selectedUser.estu_id || selectedUser.docente_id, selectedMonth);
-        }
-    }, [selectedMonth]);
-
-    const months = [
-        { v: '1', l: 'Enero' }, { v: '2', l: 'Febrero' }, { v: '3', l: 'Marzo' },
-        { v: '4', l: 'Abril' }, { v: '5', l: 'Mayo' }, { v: '6', l: 'Junio' },
-        { v: '7', l: 'Julio' }, { v: '8', l: 'Agosto' }, { v: '9', l: 'Septiembre' },
-        { v: '10', l: 'Octubre' }, { v: '11', l: 'Noviembre' }, { v: '12', l: 'Diciembre' }
+    const columns: Column<Usuario>[] = [
+        {
+            label: 'DNI',
+            render: (user) => (
+                <span className="font-mono text-indigo-600">
+                    {user.perfil?.doc_numero}
+                </span>
+            ),
+        },
+        {
+            label: 'Apellidos',
+            render: (user) => (
+                <span className="font-bold text-neutral-900 uppercase text-sm">
+                    {user.perfil?.apellido_paterno} {user.perfil?.apellido_materno}
+                </span>
+            ),
+        },
+        {
+            label: 'Nombres',
+            render: (user) => (
+                <span className="font-bold text-neutral-900 uppercase text-sm">
+                    {user.perfil?.primer_nombre}
+                </span>
+            ),
+        },
     ];
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Gestión de Asistencia" />
-            
-            <div className="p-6 space-y-6">
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                        <h1 className="text-3xl font-black text-neutral-950 tracking-tight flex items-center">
-                            <CalendarDays className="mr-3 h-8 w-8 text-indigo-600" />
-                            GESTIÓN <span className="ml-2 text-indigo-600">ASISTENCIA</span>
-                        </h1>
-                        <p className="text-sm text-neutral-400 font-medium">Administración y control de accesos institucionales.</p>
+            <ResourcePage
+                breadcrumbs={breadcrumbs}
+                pageTitle="Gestión de Asistencia"
+                subtitle={totalCount > 0 ? `${totalCount} registros` : 'Administración y control de accesos'}
+                icon={CalendarDays}
+                iconColor="bg-indigo-600"
+                search={search}
+                onSearch={setSearch}
+            >
+                {/* Filtro de tipo y botón scanner */}
+                <div className="mb-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                    <div className="flex bg-neutral-100 p-1 rounded-2xl border border-neutral-200 w-full sm:w-auto">
+                        <button 
+                            onClick={() => changeTipo('E')}
+                            className={`flex-1 sm:flex-none sm:px-6 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${
+                                tipo === 'E' 
+                                    ? 'bg-indigo-600 text-white' 
+                                    : 'text-neutral-500 hover:bg-neutral-200'
+                            }`}
+                        >
+                            <GraduationCap className="h-4 w-4" /> Estudiantes
+                        </button>
+                        <button 
+                            onClick={() => changeTipo('D')}
+                            className={`flex-1 sm:flex-none sm:px-6 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${
+                                tipo === 'D' 
+                                    ? 'bg-amber-600 text-white' 
+                                    : 'text-neutral-500 hover:bg-neutral-200'
+                            }`}
+                        >
+                            <UserCheck className="h-4 w-4" /> Docentes
+                        </button>
                     </div>
 
                     <Link href="/asistencia/scanner">
-                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-6 rounded-2xl shadow-lg shadow-indigo-600/20 transition-all hover:scale-105 active:scale-95 gap-2">
+                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all gap-2 w-full sm:w-auto">
                             <QrCode className="h-5 w-5" />
-                            ABRIR SCANNER QR
+                            Escáner QR
                         </Button>
                     </Link>
                 </div>
 
-                {/* Filters Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-3xl border border-neutral-200 shadow-sm">
-                    <div className="flex bg-neutral-100 p-1 rounded-2xl border border-neutral-200">
-                        <button 
-                            onClick={() => {
- setTipo('E'); setPage(1); 
-}}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${tipo === 'E' ? 'bg-indigo-600 text-white' : 'text-neutral-500 hover:text-white'}`}
+                {/* Tabla con scroll infinito */}
+                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
+                    {/* Vista Desktop */}
+                    <div className="hidden md:block overflow-x-auto">
+                        <div 
+                            ref={scrollContainerRef}
+                            onScroll={handleScroll}
+                            className="overflow-y-auto max-h-[600px] rounded-lg"
                         >
-                            <GraduationCap className="h-4 w-4" /> ESTUDIANTES
-                        </button>
-                        <button 
-                            onClick={() => {
- setTipo('D'); setPage(1); 
-}}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${tipo === 'D' ? 'bg-amber-600 text-white' : 'text-neutral-500 hover:text-white'}`}
-                        >
-                            <UserCheck className="h-4 w-4" /> DOCENTES
-                        </button>
-                    </div>
-
-                    <div className="relative col-span-2">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                        <Input 
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            placeholder="Buscar por nombre, apellidos o DNI..."
-                            className="w-full bg-neutral-50 border-neutral-200 pl-12 h-14 rounded-2xl text-sm focus:ring-indigo-500/20 focus:border-indigo-500/50"
-                        />
-                    </div>
-                </div>
-
-                {/* Table Section */}
-                <div className="bg-white rounded-3xl border border-neutral-200 overflow-hidden shadow-sm">
-                    <Table>
-                        <TableHeader className="bg-neutral-50">
-                            <TableRow className="hover:bg-transparent border-neutral-100">
-                                <TableHead className="text-neutral-400 font-bold uppercase text-[10px] tracking-widest pl-6">DNI</TableHead>
-                                <TableHead className="text-neutral-400 font-bold uppercase text-[10px] tracking-widest">Nombres y Apellidos</TableHead>
-                                <TableHead className="text-neutral-400 font-bold uppercase text-[10px] tracking-widest text-center">Acciones</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="h-64 text-center">
-                                        <div className="flex flex-col items-center gap-2 opacity-50">
-                                            <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                                            <span className="text-xs font-bold">CARGANDO REGISTROS...</span>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ) : rows?.data?.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="h-64 text-center text-neutral-500">
-                                        No se encontraron resultados
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                rows?.data?.map((item: any) => (
-                                    <TableRow key={item.estu_id || item.docente_id} className="border-neutral-50 hover:bg-neutral-50/50">
-                                        <TableCell className="pl-6 font-mono text-indigo-600">{item.perfil?.doc_numero}</TableCell>
-                                        <TableCell>
-                                            <div className="font-bold text-neutral-900 uppercase text-sm tracking-tight">{item.perfil?.apellido_paterno} {item.perfil?.apellido_materno}, {item.perfil?.primer_nombre}</div>
-                                            <div className="text-[10px] text-neutral-500 font-medium">{tipo === 'E' ? 'Estudiante Regular' : 'Personal Docente'}</div>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <Button 
-                                                onClick={() => openHistory(item)}
-                                                variant="ghost" 
-                                                className="h-10 w-10 p-0 rounded-xl hover:bg-indigo-500/20 hover:text-indigo-400 transition-colors"
-                                            >
-                                                <Eye className="h-5 w-5" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-
-                    {/* Pagination */}
-                    {rows && rows.total > rows.per_page && (
-                        <div className="p-6 border-t border-neutral-100 flex items-center justify-between">
-                            <span className="text-xs text-neutral-500 font-medium">
-                                Mostrando {rows.from} a {rows.to} de {rows.total} resultados
-                            </span>
-                            <div className="flex gap-2">
-                                <Button 
-                                    disabled={page === 1}
-                                    onClick={() => setPage(page - 1)}
-                                    variant="outline" size="icon" className="h-10 w-10 border-neutral-200 rounded-xl"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </Button>
-                                <Button 
-                                    disabled={page === rows.last_page}
-                                    onClick={() => setPage(page + 1)}
-                                    variant="outline" size="icon" className="h-10 w-10 border-neutral-200 rounded-xl"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* History Modal */}
-            <Dialog open={showModal} onOpenChange={setShowModal}>
-                <DialogContent className="max-w-2xl bg-white border-neutral-200 rounded-[2.5rem] p-0 overflow-hidden shadow-2xl">
-                    <DialogHeader className="p-8 pb-4 border-b border-neutral-100 flex flex-row items-center justify-between bg-neutral-50">
-                        <div className="space-y-1">
-                            <DialogTitle className="text-2xl font-black text-neutral-950 tracking-tight uppercase">
-                                Historial Mensual
-                            </DialogTitle>
-                            <p className="text-xs text-indigo-600 font-bold uppercase tracking-widest">
-                                {selectedUser?.perfil?.primer_nombre} {selectedUser?.perfil?.apellido_paterno}
-                            </p>
-                        </div>
-                        
-                        <div className="flex gap-3">
-                            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                <SelectTrigger className="w-32 bg-white border-neutral-200 h-10 rounded-xl text-xs font-bold">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white border-neutral-200">
-                                    {months.map(m => (
-                                        <SelectItem key={m.v} value={m.v} className="text-xs font-medium">{m.l}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Button 
-                                onClick={() => {
-                                    const id = selectedUser.estu_id || selectedUser.docente_id;
-                                    window.open(`/api/asistencia/usuario/${id}/export?tipo=${tipo}&mes=${selectedMonth}`, '_blank');
-                                }}
-                                variant="outline" 
-                                className="h-10 border-white/10 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-400 gap-2 font-bold text-xs uppercase"
-                            >
-                                <Download className="h-4 w-4" /> CSV
-                            </Button>
-                        </div>
-                    </DialogHeader>
-
-                    <div className="p-8">
-                        <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-                            <Table>
-                                <TableHeader className="bg-neutral-50/50">
-                                    <TableRow className="border-neutral-100 hover:bg-transparent">
-                                        <TableHead className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 text-center">Fecha</TableHead>
-                                        <TableHead className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 text-center">Turno</TableHead>
-                                        <TableHead className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 text-center text-emerald-500">Entrada</TableHead>
-                                        <TableHead className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 text-center text-rose-500">Salida</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {historyLoading ? (
-                                        <TableRow>
-                                            <TableCell colSpan={4} className="h-48 text-center text-xs font-bold opacity-30 animate-pulse">CARGANDO...</TableCell>
-                                        </TableRow>
-                                    ) : history.length === 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={4} className="h-48 text-center text-neutral-500 text-xs">No hay registros para este mes.</TableCell>
-                                        </TableRow>
+                            <table className="w-full text-sm border-separate border-spacing-0">
+                                <thead className="sticky top-0 z-20">
+                                    <tr className="bg-[#00a65a] text-white text-center">
+                                        {columns.map((c, idx) => (
+                                            <th key={`col-${idx}`} className="px-3 py-3 font-semibold first:rounded-tl-lg border-b border-green-600 whitespace-nowrap">
+                                                {c.label}
+                                            </th>
+                                        ))}
+                                        <th className="px-3 py-3 font-semibold last:rounded-tr-lg border-b border-green-600 whitespace-nowrap">
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {allUsers.length === 0 && !loading ? (
+                                        <tr>
+                                            <td colSpan={columns.length + 1} className="py-8 text-center text-gray-400">
+                                                No se encontraron registros.
+                                            </td>
+                                        </tr>
                                     ) : (
-                                        history.map((log) => (
-                                            <TableRow key={log.asistencia_id} className="border-white/5 hover:bg-white/[0.02]">
-                                                <TableCell className="text-center font-mono text-sm text-neutral-400">{new Date(log.fecha).toLocaleDateString()}</TableCell>
-                                                <TableCell className="text-center">
-                                                    <Badge className={`bg-neutral-900 border-white/5 text-[9px] uppercase font-black px-2 ${log.turno === 'M' ? 'text-amber-500' : 'text-indigo-400'}`}>
-                                                        {log.turno === 'M' ? 'Mañana' : 'Tarde'}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-center font-bold text-emerald-400">{log.hora_entrada?.substring(0, 5) || '—'}</TableCell>
-                                                <TableCell className="text-center font-bold text-rose-400">{log.hora_salida?.substring(0, 5) || '—'}</TableCell>
-                                            </TableRow>
+                                        allUsers.map((user, i) => (
+                                            <tr key={user.estu_id || user.docente_id || i} className="border-b border-gray-100 hover:bg-gray-50 text-center">
+                                                {columns.map((c, idx) => (
+                                                    <td key={`cell-${idx}`} className="px-3 py-2">
+                                                        {c.render(user, i)}
+                                                    </td>
+                                                ))}
+                                                <td className="px-3 py-2">
+                                                    <div className="flex items-center justify-center gap-1">
+                                                        <Button 
+                                                            onClick={() => openHistory(user)}
+                                                            size="sm"
+                                                            className="h-9 px-3 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors gap-2"
+                                                        >
+                                                            <Eye className="h-4 w-4" /> Ver
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         ))
                                     )}
-                                </TableBody>
-                            </Table>
+                                    {loading && (
+                                        <tr>
+                                            <td colSpan={columns.length + 1} className="py-4 text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                                    <span className="text-xs text-gray-400">Cargando más...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </DialogContent>
-            </Dialog>
-        </AppLayout>
+
+                    {/* Vista Mobile (Cards) */}
+                    <div className="md:hidden">
+                        <div 
+                            ref={scrollContainerRef}
+                            onScroll={handleScroll}
+                            className="flex flex-col gap-3 p-4 max-h-[600px] overflow-y-auto"
+                        >
+                            {allUsers.length === 0 && !loading ? (
+                                <div className="py-8 text-center text-gray-400 border border-gray-100 rounded-lg">
+                                    No se encontraron registros.
+                                </div>
+                            ) : (
+                                allUsers.map((user, i) => (
+                                    <div key={user.estu_id || user.docente_id || i} className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                                        {columns.map((c, idx) => (
+                                            <div key={`cell-mob-${idx}`} className="flex items-center justify-between gap-4 text-sm">
+                                                <span className="font-semibold text-gray-400">{c.label}</span>
+                                                <div className="text-right font-medium text-gray-800 break-words max-w-[60%]">
+                                                    {c.render(user, i)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className="mt-2 flex items-center justify-end gap-2 border-t border-gray-50 pt-3">
+                                            <Button 
+                                                onClick={() => openHistory(user)}
+                                                size="sm"
+                                                className="h-9 px-3 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors gap-2"
+                                            >
+                                                <Eye className="h-4 w-4" /> Ver
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                            {loading && (
+                                <div className="py-4 text-center">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                        <span className="text-xs text-gray-400">Cargando más...</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </ResourcePage>
+
+            <HistorialModal
+                open={showModal}
+                onClose={closeModal}
+                user={selectedUser}
+                history={history}
+                loading={historyLoading}
+                selectedMonth={selectedMonth}
+                onMonthChange={setSelectedMonth}
+                tipo={tipo}
+            />
+        </>
     );
 }
