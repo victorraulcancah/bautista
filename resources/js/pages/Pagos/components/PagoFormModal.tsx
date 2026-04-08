@@ -92,25 +92,27 @@ export default function PagoFormModal({
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-            <DialogContent className="max-w-lg sm:max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-lg w-[90vw] sm:w-full max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className="text-base sm:text-lg">
                         {editing ? 'Editar Pago' : 'Registrar Pago'}
                     </DialogTitle>
                     {!editing && mensualidad && (
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs sm:text-sm text-gray-500">
                             Mensualidad: <span className="font-semibold text-green-700">S/ {mensualidad}</span>
                         </p>
                     )}
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                     {!editing && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="space-y-1">
-                                <Label>Año *</Label>
+                                <Label className="text-xs sm:text-sm">Año *</Label>
                                 <Select value={form.pag_anual} onValueChange={(v) => set('pag_anual', v)}>
-                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                                        <SelectValue />
+                                    </SelectTrigger>
                                     <SelectContent>
                                         {[2024, 2025, 2026, 2027].map((y) => (
                                             <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
@@ -121,9 +123,11 @@ export default function PagoFormModal({
                             </div>
 
                             <div className="space-y-1">
-                                <Label>Mes *</Label>
+                                <Label className="text-xs sm:text-sm">Mes *</Label>
                                 <Select value={form.pag_mes} onValueChange={(v) => set('pag_mes', v)}>
-                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                                        <SelectValue />
+                                    </SelectTrigger>
                                     <SelectContent>
                                         {MESES.map((m) => (
                                             <SelectItem key={m} value={m}>{m}</SelectItem>
@@ -146,12 +150,14 @@ export default function PagoFormModal({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1">
-                            <Label>Concepto adicional 1</Label>
+                            <Label className="text-xs sm:text-sm">Concepto adicional 1</Label>
                             <Select
                                 value={form.pag_nombre1 || '__none__'}
                                 onValueChange={(v) => set('pag_nombre1', v === '__none__' ? '' : v)}
                             >
-                                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                                <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                                    <SelectValue placeholder="—" />
+                                </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="__none__">—</SelectItem>
                                     <SelectItem value="UNIFORME">UNIFORME</SelectItem>
@@ -171,12 +177,14 @@ export default function PagoFormModal({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1">
-                            <Label>Concepto adicional 2</Label>
+                            <Label className="text-xs sm:text-sm">Concepto adicional 2</Label>
                             <Select
                                 value={form.pag_nombre2 || '__none__'}
                                 onValueChange={(v) => set('pag_nombre2', v === '__none__' ? '' : v)}
                             >
-                                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                                <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                                    <SelectValue placeholder="—" />
+                                </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="__none__">—</SelectItem>
                                     <SelectItem value="UNIFORME">UNIFORME</SelectItem>
@@ -196,9 +204,11 @@ export default function PagoFormModal({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1">
-                            <Label>Notificado</Label>
+                            <Label className="text-xs sm:text-sm">Notificado</Label>
                             <Select value={form.pag_notifica} onValueChange={(v) => set('pag_notifica', v)}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                                    <SelectValue />
+                                </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="NO">NO</SelectItem>
                                     <SelectItem value="SI">SI</SelectItem>
@@ -214,12 +224,19 @@ export default function PagoFormModal({
                         />
                     </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+                    <DialogFooter className="gap-2 flex-col-reverse sm:flex-row pt-2">
+                        <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={onClose}
+                            className="w-full sm:w-auto text-xs sm:text-sm h-8 sm:h-9"
+                        >
+                            Cancelar
+                        </Button>
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="bg-[#00a65a] hover:bg-[#008d4c] text-white"
+                            className="bg-[#00a65a] hover:bg-[#008d4c] text-white w-full sm:w-auto text-xs sm:text-sm h-8 sm:h-9"
                         >
                             {processing ? 'Guardando...' : 'Guardar'}
                         </Button>

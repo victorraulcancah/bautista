@@ -69,26 +69,26 @@ return;
 
     return (
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
-            <DialogContent className="max-w-xl">
+            <DialogContent className="max-w-xl w-[90vw] sm:w-full max-h-[85vh] flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Comprobantes de pago</DialogTitle>
+                    <DialogTitle className="text-base sm:text-lg">Comprobantes de pago</DialogTitle>
                 </DialogHeader>
 
-                {loading && <p className="text-sm text-muted-foreground py-4 text-center">Cargando...</p>}
+                {loading && <p className="text-xs sm:text-sm text-muted-foreground py-4 text-center">Cargando...</p>}
 
                 {!loading && vouchers.length === 0 && (
-                    <p className="text-sm text-muted-foreground py-4 text-center">
+                    <p className="text-xs sm:text-sm text-muted-foreground py-4 text-center">
                         No hay comprobantes subidos para este pago.
                     </p>
                 )}
 
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                <div className="space-y-3 sm:space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                     {vouchers.map(v => (
-                        <div key={v.id} className="border rounded-lg p-4 space-y-3">
-                            <div className="flex items-center justify-between">
+                        <div key={v.id} className="border rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                     {ESTADO_ICON[v.estado]}
-                                    <Badge variant={ESTADO_BADGE[v.estado].variant}>
+                                    <Badge variant={ESTADO_BADGE[v.estado].variant} className="text-xs">
                                         {ESTADO_BADGE[v.estado].label}
                                     </Badge>
                                 </div>
@@ -108,7 +108,7 @@ return;
                             </p>
 
                             {v.comentario && (
-                                <p className="text-sm bg-muted rounded p-2">{v.comentario}</p>
+                                <p className="text-xs sm:text-sm bg-muted rounded p-2">{v.comentario}</p>
                             )}
 
                             {v.estado === 'pendiente' && (
@@ -120,16 +120,17 @@ return;
                                             value={comentario}
                                             onChange={e => setComentario(e.target.value)}
                                             placeholder="Observación al validar o rechazar..."
+                                            className="text-xs sm:text-sm"
                                         />
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col sm:flex-row gap-2">
                                         <Button
                                             size="sm"
-                                            className="bg-green-600 hover:bg-green-700 text-white"
+                                            className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto text-xs sm:text-sm h-8 sm:h-9"
                                             disabled={procesando === v.id}
                                             onClick={() => validar(v.id, 'validado')}
                                         >
-                                            <CheckCircle className="h-4 w-4 mr-1" />
+                                            <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
                                             Validar
                                         </Button>
                                         <Button
@@ -137,8 +138,9 @@ return;
                                             variant="destructive"
                                             disabled={procesando === v.id}
                                             onClick={() => validar(v.id, 'rechazado')}
+                                            className="w-full sm:w-auto text-xs sm:text-sm h-8 sm:h-9"
                                         >
-                                            <XCircle className="h-4 w-4 mr-1" />
+                                            <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
                                             Rechazar
                                         </Button>
                                     </div>
