@@ -250,18 +250,18 @@ export default function HistorialModal({
                     {/* Vista Desktop - Tabla */}
                     <div className="hidden md:block bg-white rounded-2xl border border-neutral-200 overflow-hidden">
                         <Table>
-                            <TableHeader className="bg-neutral-50/50">
-                                <TableRow className="border-neutral-100 hover:bg-transparent">
-                                    <TableHead className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 text-center">
+                            <TableHeader className="bg-[#00a65a]">
+                                <TableRow className="border-green-600 hover:bg-transparent">
+                                    <TableHead className="text-[10px] font-bold uppercase tracking-widest text-white text-center">
                                         Fecha
                                     </TableHead>
-                                    <TableHead className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 text-center">
+                                    <TableHead className="text-[10px] font-bold uppercase tracking-widest text-white text-center">
                                         Turno
                                     </TableHead>
-                                    <TableHead className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 text-center">
+                                    <TableHead className="text-[10px] font-bold uppercase tracking-widest text-white text-center">
                                         Entrada
                                     </TableHead>
-                                    <TableHead className="text-[10px] font-bold uppercase tracking-widest text-rose-600 text-center">
+                                    <TableHead className="text-[10px] font-bold uppercase tracking-widest text-white text-center">
                                         Salida
                                     </TableHead>
                                 </TableRow>
