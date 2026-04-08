@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { CalendarDays, QrCode, Eye, GraduationCap, UserCheck } from 'lucide-react';
+import { CalendarDays, QrCode, Eye, GraduationCap, UserCheck, FileSpreadsheet } from 'lucide-react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import { Button } from '@/components/ui/button';
 import type { BreadcrumbItem } from '@/types';
 import HistorialModal from './components/HistorialModal';
+import ExportModal from './components/ExportModal';
 import { useAsistencia } from './hooks/useAsistencia';
 import { useHistorialAsistencia } from './hooks/useHistorialAsistencia';
 import type { Usuario } from './hooks/useAsistencia';
@@ -15,6 +17,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function AsistenciaIndex() {
+    const [showExportModal, setShowExportModal] = useState(false);
+    
     const {
         tipo,
         search,
@@ -31,10 +35,6 @@ export default function AsistenciaIndex() {
     const {
         showModal,
         selectedUser,
-        history,
-        historyLoading,
-        selectedMonth,
-        setSelectedMonth,
         openHistory,
         closeModal,
     } = useHistorialAsistencia(tipo);
@@ -103,12 +103,24 @@ export default function AsistenciaIndex() {
                         </button>
                     </div>
 
-                    <Link href="/asistencia/scanner">
-                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all gap-2 w-full sm:w-auto">
-                            <QrCode className="h-5 w-5" />
-                            Escáner QR
+                    <div className="flex gap-2">
+                        <Button 
+                            onClick={() => setShowExportModal(true)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-600/20 transition-all gap-2"
+                        >
+                            <FileSpreadsheet className="h-5 w-5" />
+                            <span className="hidden sm:inline">Exportar Excel</span>
+                            <span className="sm:hidden">Excel</span>
                         </Button>
-                    </Link>
+                        
+                        <Link href="/asistencia/scanner">
+                            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all gap-2">
+                                <QrCode className="h-5 w-5" />
+                                <span className="hidden sm:inline">Escáner QR</span>
+                                <span className="sm:hidden">QR</span>
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Tabla con scroll infinito */}
@@ -228,10 +240,12 @@ export default function AsistenciaIndex() {
                 open={showModal}
                 onClose={closeModal}
                 user={selectedUser}
-                history={history}
-                loading={historyLoading}
-                selectedMonth={selectedMonth}
-                onMonthChange={setSelectedMonth}
+                tipo={tipo}
+            />
+
+            <ExportModal
+                open={showExportModal}
+                onClose={() => setShowExportModal(false)}
                 tipo={tipo}
             />
         </>
