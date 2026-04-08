@@ -13,18 +13,20 @@ type Props = {
     subtitle:      string;
     iconColor:     string;
     icon:          LucideIcon;
-    search:        string;
-    onSearch:      (v: string) => void;
+    search?:       string;
+    onSearch?:     (v: string) => void;
     flashSuccess?: string | null;
     btnLabel?:     string;
     onNew?:        () => void;
     extraButtons?: React.ReactNode;
+    hideSearch?:   boolean;
+    hideButton?:   boolean;
     children:      React.ReactNode;
 };
 
 export default function ResourcePage({
     breadcrumbs, pageTitle, subtitle, icon, iconColor,
-    search, onSearch, flashSuccess, btnLabel, onNew, extraButtons, children,
+    search = '', onSearch, flashSuccess, btnLabel, onNew, extraButtons, hideSearch, hideButton, children,
 }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -38,27 +40,34 @@ export default function ResourcePage({
                 )}
 
                 <SectionCard title={`Listado de ${pageTitle}`}>
-                    <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex w-full sm:w-auto gap-2">
-                            <Input
-                                value={search}
-                                onChange={(e) => onSearch(e.target.value)}
-                                placeholder="Buscar..."
-                                className="flex-1 sm:w-64"
-                            />
-                            <Button variant="outline" size="icon" className="shrink-0">
-                                <Search className="size-4" />
-                            </Button>
+                    {(!hideSearch || !hideButton) && (
+                        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex w-full sm:w-auto gap-2">
+                                {!hideSearch && onSearch && (
+                                    <>
+                                        <Input
+                                            value={search}
+                                            onChange={(e) => onSearch(e.target.value)}
+                                            placeholder="Buscar..."
+                                            className="flex-1 sm:w-64"
+                                        />
+                                        <Button variant="outline" size="icon" className="shrink-0">
+                                            <Search className="size-4" />
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                            <div className="flex gap-2 flex-wrap">
+                                {extraButtons}
+                                {!hideButton && btnLabel && onNew && (
+                                    <Button onClick={onNew} className="bg-[#00a65a] flex-1 sm:flex-none hover:bg-[#008d4c] text-white gap-2">
+                                        <Plus className="size-4" />
+                                        {btnLabel}
+                                    </Button>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex gap-2 w-full sm:w-auto">
-                            {extraButtons}
-                            {btnLabel && onNew && (
-                                <Button onClick={onNew} className="bg-[#00a65a] flex-1 sm:flex-none hover:bg-[#008d4c] text-white gap-2">
-                                    <Plus className="size-4" /> {btnLabel}
-                                </Button>
-                            )}
-                        </div>
-                    </div>
+                    )}
                     {children}
                 </SectionCard>
             </div>

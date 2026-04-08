@@ -1,7 +1,7 @@
 import { Inbox, Send, Mail } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import MessageRow from './MessageRow';
 import type { Mensaje } from '../hooks/useMensajes';
+import MessageRow from '@/pages/MensajesPrivados/components/MessageRow';
 
 type Props = {
     recibidos: Mensaje[];
