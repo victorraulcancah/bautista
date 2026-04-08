@@ -17,19 +17,23 @@ export default function MessagesList({
     return (
         <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
             <Tabs defaultValue="recibidos" className="w-full">
-                <div className="px-6 py-4 border-b border-neutral-100 bg-neutral-50">
-                    <TabsList className="bg-white p-1 rounded-xl h-11 border border-neutral-200">
+                <div className="px-4 sm:px-6 py-4 border-b border-neutral-100 bg-neutral-50">
+                    <TabsList className="bg-white p-1 rounded-xl h-11 border border-neutral-200 w-full sm:w-auto">
                         <TabsTrigger
                             value="recibidos"
-                            className="rounded-lg px-6 h-full data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all"
+                            className="rounded-lg px-4 sm:px-6 h-full data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all flex-1 sm:flex-none"
                         >
-                            <Inbox className="w-4 h-4 mr-2" /> Recibidos
+                            <Inbox className="w-4 h-4 mr-2" /> 
+                            <span className="hidden sm:inline">Recibidos</span>
+                            <span className="sm:hidden">Inbox</span>
                         </TabsTrigger>
                         <TabsTrigger
                             value="enviados"
-                            className="rounded-lg px-6 h-full data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all"
+                            className="rounded-lg px-4 sm:px-6 h-full data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all flex-1 sm:flex-none"
                         >
-                            <Send className="w-4 h-4 mr-2" /> Enviados
+                            <Send className="w-4 h-4 mr-2" /> 
+                            <span className="hidden sm:inline">Enviados</span>
+                            <span className="sm:hidden">Sent</span>
                         </TabsTrigger>
                     </TabsList>
                 </div>

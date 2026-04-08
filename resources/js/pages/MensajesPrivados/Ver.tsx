@@ -79,15 +79,15 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
                 </div>
 
                 {/* Mensaje principal */}
-                <div className="bg-white rounded-2xl border border-neutral-200 p-8 mb-6">
+                <div className="bg-white rounded-2xl border border-neutral-200 p-4 sm:p-8 mb-6">
                     {/* Header del mensaje */}
-                    <div className="flex items-start gap-4 mb-6 pb-6 border-b border-neutral-100">
+                    <div className="flex flex-col sm:flex-row items-start gap-4 mb-6 pb-6 border-b border-neutral-100">
                         <div className="w-14 h-14 rounded-xl bg-indigo-600 flex items-center justify-center text-white flex-shrink-0">
                             <User className="w-7 h-7" />
                         </div>
-                        <div className="flex-1">
-                            <div className="flex items-start justify-between mb-2">
-                                <div>
+                        <div className="flex-1 w-full">
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                                <div className="flex-1">
                                     <p className="text-sm font-bold text-neutral-900">
                                         {mensaje.remitente?.perfil?.primer_nombre}{' '}
                                         {mensaje.remitente?.perfil?.apellido_paterno}
@@ -112,7 +112,7 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
 
                     {/* Cuerpo del mensaje */}
                     <div className="prose prose-neutral max-w-none">
-                        <p className="text-neutral-700 leading-relaxed whitespace-pre-wrap">
+                        <p className="text-neutral-700 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">
                             {mensaje.cuerpo}
                         </p>
                     </div>
@@ -132,7 +132,7 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
                 )}
 
                 {/* Formulario de respuesta */}
-                <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+                <div className="bg-white rounded-2xl border border-neutral-200 p-4 sm:p-6">
                     <h3 className="text-sm font-bold text-neutral-900 mb-4">
                         Escribe tu respuesta
                     </h3>
@@ -141,18 +141,21 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
                             placeholder="Escribe tu respuesta aquí..."
                             value={respuesta}
                             onChange={(e) => setRespuesta(e.target.value)}
-                            className="min-h-[120px] rounded-xl border-neutral-200 font-medium resize-none"
+                            className="min-h-[120px] rounded-xl border-neutral-200 font-medium resize-none text-sm"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && e.ctrlKey) {
                                     handleReply();
                                 }
                             }}
                         />
-                        <div className="flex justify-end">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                            <p className="text-xs text-neutral-400 font-medium order-2 sm:order-1">
+                                Presiona Ctrl + Enter para enviar rápidamente
+                            </p>
                             <Button
                                 onClick={handleReply}
                                 disabled={sending || !respuesta.trim()}
-                                className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl"
+                                className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl w-full sm:w-auto order-1 sm:order-2"
                             >
                                 {sending ? (
                                     <>
@@ -167,9 +170,6 @@ export default function MensajeriaVer({ mensajeId }: { mensajeId: number }) {
                                 )}
                             </Button>
                         </div>
-                        <p className="text-xs text-neutral-400 font-medium">
-                            Presiona Ctrl + Enter para enviar rápidamente
-                        </p>
                     </div>
                 </div>
             </ResourcePage>
