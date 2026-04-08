@@ -1,6 +1,8 @@
 import { Head, router } from '@inertiajs/react';
 import { ClipboardList, Eye } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import ResourceTable from '@/components/shared/ResourceTable';
+import type { Column } from '@/components/shared/ResourceTable';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
@@ -48,6 +50,44 @@ return;
     }, [selectedAperturaId]);
 
     const totalAlumnos = niveles.reduce((sum, n) => sum + n.total, 0);
+
+    const columns: Column<NivelCount>[] = [
+        {
+            label: '#',
+            render: (_, idx) => (
+                <span className="flex size-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold">
+                    {idx + 1}
+                </span>
+            ),
+        },
+        {
+            label: 'Nombre',
+            render: (n) => (
+                <span className="font-bold text-neutral-900 uppercase text-sm">
+                    {n.nombre_nivel}
+                </span>
+            ),
+        },
+        {
+            label: 'Cnt. Matri.',
+            render: (n) => (
+                <span className="font-semibold text-blue-600">
+                    {n.total}
+                </span>
+            ),
+        },
+    ];
+
+    // Crear datos mock para la paginación (ResourceTable espera este formato)
+    const mockPaginatedData = {
+        data: niveles,
+        current_page: 1,
+        last_page: 1,
+        per_page: niveles.length,
+        total: niveles.length,
+        from: niveles.length > 0 ? 1 : 0,
+        to: niveles.length,
+    };
 
     return (
         <>
@@ -104,44 +144,41 @@ return;
                                 </span>
                             </div>
 
-                            {/* Vista Cards (móvil y desktop) */}
-                            <div className="flex flex-col divide-y divide-neutral-100">
-                                {loadingNiveles ? (
-                                    <div className="py-16 flex flex-col items-center justify-center gap-3">
-                                        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                                        <p className="text-xs text-neutral-400">Cargando…</p>
+                            {loadingNiveles ? (
+                                <div className="py-16 flex flex-col items-center justify-center gap-3">
+                                    <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                                    <p className="text-xs text-neutral-400">Cargando…</p>
+                                </div>
+                            ) : niveles.length === 0 ? (
+                                <p className="py-16 text-center text-xs text-neutral-400">No hay alumnos matriculados en este periodo.</p>
+                            ) : (
+                                <>
+                                    <ResourceTable
+                                        rows={mockPaginatedData}
+                                        columns={columns}
+                                        getKey={(n) => n.nivel_id?.toString() ?? `sin-nivel-${Math.random()}`}
+                                        extraActions={(n) => (
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#00c0ef] hover:bg-[#00a8d0] text-white rounded-lg gap-2 h-9 px-4"
+                                                onClick={() => {
+                                                    if (n.nivel_id) {
+                                                        router.visit(`/matriculas/gestion/${selectedAperturaId}/nivel/${n.nivel_id}`);
+                                                    }
+                                                }}
+                                                disabled={!n.nivel_id}
+                                            >
+                                                <Eye className="h-4 w-4" /> Registra
+                                            </Button>
+                                        )}
+                                        onPageChange={() => {}}
+                                    />
+                                    <div className="flex items-center justify-between px-4 py-3 bg-neutral-50 border-t-2 border-neutral-200">
+                                        <span className="text-xs font-bold text-neutral-500 uppercase tracking-wide">Total</span>
+                                        <span className="font-bold text-neutral-900 text-base">{totalAlumnos} alumnos</span>
                                     </div>
-                                ) : niveles.length === 0 ? (
-                                    <p className="py-16 text-center text-xs text-neutral-400">No hay alumnos matriculados en este periodo.</p>
-                                ) : (
-                                    <>
-                                        {niveles.map((n, idx) => (
-                                            <div key={n.nivel_id} className="flex items-center justify-between gap-3 px-4 py-4 hover:bg-neutral-50 transition-colors">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold">
-                                                        {idx + 1}
-                                                    </span>
-                                                    <div>
-                                                        <p className="font-bold text-neutral-900 uppercase text-sm leading-tight">{n.nombre_nivel}</p>
-                                                        <p className="text-xs text-neutral-500 mt-1">{n.total} alumnos</p>
-                                                    </div>
-                                                </div>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#00c0ef] hover:bg-[#00a8d0] text-white rounded-lg gap-2 shrink-0 h-9 px-4"
-                                                    onClick={() => router.visit(`/matriculas/gestion/${selectedAperturaId}/nivel/${n.nivel_id}`)}
-                                                >
-                                                    <Eye className="h-4 w-4" /> Ver
-                                                </Button>
-                                            </div>
-                                        ))}
-                                        <div className="flex items-center justify-between px-4 py-3 bg-neutral-50 border-t-2 border-neutral-200">
-                                            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wide">Total</span>
-                                            <span className="font-bold text-neutral-900 text-base">{totalAlumnos} alumnos</span>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
