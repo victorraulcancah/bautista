@@ -18,12 +18,13 @@ type Props = {
     flashSuccess?: string | null;
     btnLabel?:     string;
     onNew?:        () => void;
+    extraButtons?: React.ReactNode;
     children:      React.ReactNode;
 };
 
 export default function ResourcePage({
     breadcrumbs, pageTitle, subtitle, icon, iconColor,
-    search, onSearch, flashSuccess, btnLabel, onNew, children,
+    search, onSearch, flashSuccess, btnLabel, onNew, extraButtons, children,
 }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -49,11 +50,14 @@ export default function ResourcePage({
                                 <Search className="size-4" />
                             </Button>
                         </div>
-                        {btnLabel && onNew && (
-                            <Button onClick={onNew} className="bg-[#00a65a] w-full sm:w-auto hover:bg-[#008d4c] text-white gap-2">
-                                <Plus className="size-4" /> {btnLabel}
-                            </Button>
-                        )}
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            {extraButtons}
+                            {btnLabel && onNew && (
+                                <Button onClick={onNew} className="bg-[#00a65a] flex-1 sm:flex-none hover:bg-[#008d4c] text-white gap-2">
+                                    <Plus className="size-4" /> {btnLabel}
+                                </Button>
+                            )}
+                        </div>
                     </div>
                     {children}
                 </SectionCard>

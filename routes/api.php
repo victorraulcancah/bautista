@@ -206,6 +206,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Biblioteca de Medios
     Route::get('medios', [MediosApiController::class, 'index']);
+    Route::get('medios/{id}/breadcrumb', [MediosApiController::class, 'breadcrumb']);
+    Route::post('medios/carpeta', [MediosApiController::class, 'createFolder']);
+    Route::put('medios/carpeta/{id}', [MediosApiController::class, 'updateFolder']);
     Route::post('medios/upload', [MediosApiController::class, 'store']);
     Route::delete('medios/{id}', [MediosApiController::class, 'destroy']);
 
