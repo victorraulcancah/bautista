@@ -8,7 +8,6 @@ use App\Services\ActividadUsuarioService;
 use App\Services\Interfaces\UsuarioServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\Rule;
 
 class UsuarioApiController extends Controller
@@ -18,13 +17,23 @@ class UsuarioApiController extends Controller
         private readonly ActividadUsuarioService $auditoria,
     ) {}
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
-        return UsuarioResource::collection($this->service->listar(
+        $paginated = $this->service->listar(
             instiId: $request->user()->insti_id,
             search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
-        ));
+        );
+
+        return response()->json([
+            'data'         => UsuarioResource::collection($paginated->items()),
+            'current_page' => $paginated->currentPage(),
+            'last_page'    => $paginated->lastPage(),
+            'per_page'     => $paginated->perPage(),
+            'total'        => $paginated->total(),
+            'from'         => $paginated->firstItem(),
+            'to'           => $paginated->lastItem(),
+        ]);
     }
 
     public function show(int $id): UsuarioResource

@@ -33,8 +33,8 @@ export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDele
     return (
         <div>
             {/* View Desktop */}
-            <div className="hidden md:block overflow-x-auto">
-                <div className="overflow-y-auto max-h-[600px] rounded-lg border border-gray-100">
+            <div className="hidden md:block">
+                <div className="overflow-x-auto overflow-y-auto max-h-[600px] rounded-lg border border-gray-100">
                     <table className="w-full text-sm border-separate border-spacing-0">
                     <thead className="sticky top-0 z-20">
                         <tr className="bg-[#00a65a] text-white text-center">
