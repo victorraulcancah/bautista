@@ -31,9 +31,14 @@ export function UserInfo({
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-bold text-white capitalize">
-                    {user.roles?.[0]?.name
-                        ? (ROLES_ES[user.roles[0].name] ?? user.roles[0].name.replace('_', ' '))
-                        : 'Usuario'}
+                    {(() => {
+                        const rolName = typeof user.rol === 'string'
+                            ? user.rol
+                            : user.rol?.name;
+                        return rolName
+                            ? (ROLES_ES[rolName] ?? rolName.replace('_', ' '))
+                            : 'Usuario';
+                    })()}
                 </span>
                 <span className="truncate text-xs text-sidebar-foreground opacity-70">
                     {user.nombre_completo || user.name}

@@ -8,6 +8,7 @@ export type User = {
     created_at: string;
     updated_at: string;
     nombre_completo?: string;
+    rol?: string | { id: number; name: string } | null;
     roles?: Array<{ id: number; name: string }>;
     [key: string]: unknown;
 };

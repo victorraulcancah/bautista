@@ -11,18 +11,9 @@ class AuthenticateWithToken
 {
     public function handle(Request $request, Closure $next)
     {
-        // Si ya hay sesión activa, continuar
-        if (Auth::check()) {
-            return $next($request);
-        }
-
-        // Intentar autenticar con token Bearer en headers
-        $token = $request->bearerToken();
-
-        // Si no hay Bearer token, intentar obtenerlo de la cookie
-        if (!$token) {
-            $token = $request->cookie('auth_token');
-        }
+        // El token (cookie o Bearer) siempre tiene prioridad sobre la sesión,
+        // así un nuevo login vía API reemplaza cualquier sesión anterior.
+        $token = $request->bearerToken() ?? $request->cookie('auth_token');
 
         if ($token) {
             $personalAccessToken = PersonalAccessToken::findToken($token);
@@ -31,6 +22,11 @@ class AuthenticateWithToken
                 Auth::login($personalAccessToken->tokenable);
                 return $next($request);
             }
+        }
+
+        // Sin token válido, caer en la sesión PHP estándar (Fortify web login)
+        if (Auth::check()) {
+            return $next($request);
         }
 
         // Sin autenticación válida → redirigir al login
