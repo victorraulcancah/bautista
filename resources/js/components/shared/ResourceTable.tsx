@@ -1,4 +1,5 @@
 import { Pencil, Trash2 } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 
 export type Column<T> = {
@@ -24,17 +25,40 @@ type Props<T> = {
     onEdit?:        (row: T) => void;
     onDelete?:      (row: T) => void;
     extraActions?:  (row: T) => React.ReactNode;
-    onPageChange:   (page: number) => void;
+    onPageChange?:  (page: number) => void;
+    onLoadMore?:    () => void;
+    hasMore?:       boolean;
+    loading?:       boolean;
 };
 
-export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDelete, extraActions, onPageChange }: Props<T>) {
+export default function ResourceTable<T>({ 
+    rows, columns, getKey, onEdit, onDelete, extraActions, onLoadMore, hasMore, loading 
+}: Props<T>) {
     const showActions = !!(onEdit || onDelete || extraActions);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (!scrollRef.current || !onLoadMore || !hasMore || loading) return;
+
+            const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+            if (scrollHeight - scrollTop <= clientHeight + 100) {
+                onLoadMore();
+            }
+        };
+
+        const scrollElement = scrollRef.current;
+        if (scrollElement) {
+            scrollElement.addEventListener('scroll', handleScroll);
+            return () => scrollElement.removeEventListener('scroll', handleScroll);
+        }
+    }, [onLoadMore, hasMore, loading]);
 
     return (
         <div>
             {/* View Desktop */}
             <div className="hidden md:block">
-                <div className="overflow-x-auto overflow-y-auto max-h-[600px] rounded-lg border border-gray-100">
+                <div ref={scrollRef} className="overflow-x-auto overflow-y-auto max-h-[600px] rounded-lg border border-gray-100">
                     <table className="w-full text-sm border-separate border-spacing-0">
                     <thead className="sticky top-0 z-20">
                         <tr className="bg-[#00a65a] text-white text-center">
@@ -77,8 +101,18 @@ export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDele
                                 )}
                             </tr>
                         ))}
+                        {loading && (
+                            <tr>
+                                <td colSpan={columns.length + 1 + (showActions ? 1 : 0)} className="py-4 text-center text-sm text-gray-400">
+                                    Cargando más...
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
+                </div>
+                <div className="mt-3 text-center text-sm text-gray-500">
+                    Mostrando {rows.data.length} de {rows.total} registros
                 </div>
             </div>
 
@@ -115,22 +149,14 @@ export default function ResourceTable<T>({ rows, columns, getKey, onEdit, onDele
                 ))}
             </div>
 
-            {rows.last_page > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-100 px-4 py-3 text-sm text-gray-500">
-                    <span className="text-center">Mostrando {rows.from}–{rows.to} de {rows.total} registros</span>
-                    <div className="flex flex-wrap justify-center gap-1">
-                        {Array.from({ length: rows.last_page }, (_, i) => i + 1).map((p) => (
-                            <button
-                                key={p}
-                                onClick={() => onPageChange(p)}
-                                className={`size-8 rounded text-xs font-medium transition-colors ${p === rows.current_page ? 'bg-[#00a65a] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-                            >
-                                {p}
-                            </button>
-                        ))}
-                    </div>
+            {loading && (
+                <div className="md:hidden py-4 text-center text-sm text-gray-400">
+                    Cargando más...
                 </div>
             )}
+            <div className="md:hidden mt-3 text-center text-sm text-gray-500">
+                Mostrando {rows.data.length} de {rows.total} registros
+            </div>
         </div>
     );
 }

@@ -47,10 +47,12 @@ export default function UsuariosPage() {
                         columns={usuariosColumns}
                         getKey={(u) => u.id}
                         onEdit={openEdit}
-                        onPageChange={res.setPage}
+                        onLoadMore={res.loadMore}
+                        hasMore={res.hasMore}
+                        loading={res.loading}
                     />
                 )}
-                {res.loading && <p className="py-6 text-center text-sm text-gray-400">Cargando...</p>}
+                {res.loading && !res.rows && <p className="py-6 text-center text-sm text-gray-400">Cargando...</p>}
             </ResourcePage>
 
             <UsuarioFormModal
