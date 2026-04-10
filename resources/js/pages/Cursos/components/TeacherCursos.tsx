@@ -57,7 +57,7 @@ export default function TeacherCursos() {
             {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {cursos.map((c: any) => (
-                        <div key={c.id} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-2xl shadow-gray-200/50 flex flex-col hover:shadow-indigo-100 transition-all group border-b-8 border-b-indigo-500 text-left">
+                        <div key={c.docen_curso_id} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-2xl shadow-gray-200/50 flex flex-col hover:shadow-indigo-100 transition-all group border-b-8 border-b-indigo-500 text-left">
                             <div className="flex justify-between items-start mb-6">
                                 <div className="bg-indigo-50 p-4 rounded-3xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                                     <Book className="w-8 h-8" />
@@ -67,10 +67,10 @@ export default function TeacherCursos() {
                             <div className="flex-1 space-y-4 text-left">
                                 <div className="text-left">
                                     <span className="px-3 py-1 bg-gray-100 rounded-full text-[10px] font-black text-gray-500 uppercase tracking-widest border border-gray-200">
-                                        {c.seccion?.grado?.nivel_educativo?.nombre || 'General'}
+                                        {c.seccion?.grado?.nivel?.nombre_nivel || 'General'}
                                     </span>
                                     <h4 className="text-2xl font-black text-gray-900 mt-3 line-clamp-2">{c.curso?.nombre}</h4>
-                                    <p className="text-indigo-600 font-bold text-sm">{c.seccion?.grado?.nombre} - {c.seccion?.nombre}</p>
+                                    <p className="text-indigo-600 font-bold text-sm">{c.seccion?.grado?.nombre_grado} - {c.seccion?.nombre}</p>
                                 </div>
                             </div>
 
@@ -101,12 +101,12 @@ export default function TeacherCursos() {
                         </thead>
                         <tbody className="divide-y divide-gray-50 text-sm">
                             {cursos.map((c: any) => (
-                                <tr key={c.id} className="hover:bg-indigo-50/30 transition-colors group">
+                                <tr key={c.docen_curso_id} className="hover:bg-indigo-50/30 transition-colors group">
                                     <td className="px-8 py-6">
                                         <p className="font-black text-gray-800">{c.curso?.nombre}</p>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <p className="font-bold text-indigo-600">{c.seccion?.grado?.nombre} {c.seccion?.nombre}</p>
+                                        <p className="font-bold text-indigo-600">{c.seccion?.grado?.nombre_grado} {c.seccion?.nombre}</p>
                                     </td>
                                     <td className="px-8 py-6 text-right">
                                         <Link href={`/docente/cursos/${c.docen_curso_id}/contenido`} className="text-indigo-600 font-bold hover:underline">

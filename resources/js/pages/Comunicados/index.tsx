@@ -9,6 +9,7 @@ import BandejaEntrada from './components/BandejaEntrada';
 import Conversacion from './components/Conversacion';
 import CrearGrupoModal from './components/CrearGrupoModal';
 import EnviarMensajeModal from './components/EnviarMensajeModal';
+import { usePermission } from '@/hooks/usePermission';
 
 type Mensaje = {
     id:          number;
@@ -30,6 +31,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function MensajesPage() {
     const { auth } = usePage<{ auth: { user: { id: number } } }>().props;
+    const { can } = usePermission();
 
     const [mensajes, setMensajes]           = useState<Paginated<Mensaje> | null>(null);
     const [loading, setLoading]             = useState(false);
@@ -98,23 +100,25 @@ export default function MensajesPage() {
                             )}
                         </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                        <Button
-                            onClick={() => setModalGrupo(true)}
-                            variant="outline"
-                            className="gap-2"
-                        >
-                            <Users className="size-4" />
-                            Nuevo Grupo
-                        </Button>
-                        <Button
-                            onClick={() => setModalEnviar(true)}
-                            className="gap-2 bg-[#00a65a] hover:bg-[#008d4c] text-white"
-                        >
-                            <Plus className="size-4" />
-                            Nueva Notificación
-                        </Button>
-                    </div>
+                    {can('comunicados.crear') && (
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                onClick={() => setModalGrupo(true)}
+                                variant="outline"
+                                className="gap-2"
+                            >
+                                <Users className="size-4" />
+                                Nuevo Grupo
+                            </Button>
+                            <Button
+                                onClick={() => setModalEnviar(true)}
+                                className="gap-2 bg-[#00a65a] hover:bg-[#008d4c] text-white"
+                            >
+                                <Plus className="size-4" />
+                                Nueva Notificación
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Layout 2 columnas */}

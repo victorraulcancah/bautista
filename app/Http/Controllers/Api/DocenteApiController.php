@@ -72,7 +72,7 @@ class DocenteApiController extends Controller
             ->count();
 
         // Pending activities to grade (mock logic or based on counts)
-        $actividadesPendientes = ActividadCurso::whereIn('id_curso', $misCursos->pluck('id_curso'))
+        $actividadesPendientes = ActividadCurso::whereIn('id_curso', $misCursos->pluck('curso_id'))
             ->where('fecha_cierre', '<', now())
             ->where('es_calificado', '1')
             ->count();
@@ -96,10 +96,31 @@ class DocenteApiController extends Controller
         $docenteId = $docente->docente_id;
 
         $cursos = DocenteCurso::where('docente_id', $docenteId)
-            ->with(['curso', 'seccion.grado.nivelEducativo', 'apertura'])
+            ->with(['curso', 'seccion.grado.nivel', 'apertura'])
             ->get();
 
         return response()->json($cursos);
+    }
+
+    /**
+     * Get the full content (units/classes) for a specific assignment.
+     */
+    public function cursoContenido(Request $request, int $id)
+    {
+        // $id is the docen_curso_id
+        $dc = DocenteCurso::where('docen_curso_id', $id)->firstOrFail();
+
+        $unidades = \App\Models\Unidad::where('curso_id', $dc->curso_id)
+            ->with([
+                'clases' => function ($q) {
+                    $q->orderBy('orden')
+                      ->with(['archivos', 'actividades.tipoActividad']);
+                }
+            ])
+            ->orderBy('orden')
+            ->get();
+
+        return response()->json($unidades);
     }
 
     /**
@@ -208,8 +229,8 @@ class DocenteApiController extends Controller
     public function alumnosSeccion(Request $request, int $docenteCursoId)
     {
         $docenteCurso = DocenteCurso::findOrFail($docenteCursoId);
-        $alumnos = \App\Models\Matricula::where('seccion', $docenteCurso->seccion_id)
-            ->where('id_apertura_mtr', $docenteCurso->id_apertura)
+        $alumnos = \App\Models\Matricula::where('seccion_id', $docenteCurso->seccion_id)
+            ->where('apertura_id', $docenteCurso->apertura_id)
             ->with('estudiante.perfil')
             ->get();
 

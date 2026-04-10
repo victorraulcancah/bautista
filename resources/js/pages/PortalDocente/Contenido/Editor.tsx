@@ -24,7 +24,7 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
     }, [docenteCursoId]);
 
     const loadContent = () => {
-        api.get(`/alumno/curso/${docenteCursoId}`) // Reusing the same data structure
+        api.get(`/docente/curso/${docenteCursoId}/contenido`)
             .then(res => setUnidades(res.data))
             .finally(() => setLoading(false));
     };

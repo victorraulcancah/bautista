@@ -198,7 +198,7 @@ return (
                 {/* Preguntas */}
                 <div className="space-y-6">
                     {cuestionario.preguntas?.map((p: any, pIndex: number) => (
-                        <div key={p.pregunta_id || p._frontId} className="bg-white rounded-[2rem] border border-gray-200 shadow-xl shadow-gray-200/50 flex flex-col transition-all duration-300 focus-within:ring-4 ring-indigo-500/20 group">
+                        <div key={p.pregunta_id || p._frontId || `p-${pIndex}`} className="bg-white rounded-[2rem] border border-gray-200 shadow-xl shadow-gray-200/50 flex flex-col transition-all duration-300 focus-within:ring-4 ring-indigo-500/20 group">
                             {/* Pregunta Cabecera */}
                             <div className="p-6 md:p-8 space-y-6">
                                 <div className="flex items-start md:items-center justify-between gap-4 flex-col md:flex-row">
@@ -225,7 +225,7 @@ return (
                                 {/* Opciones */}
                                 <div className="space-y-4 pt-4">
                                     {p.alternativas.map((alt: any, aIndex: number) => (
-                                        <div key={alt.alternativa_id || alt._frontId} className="flex items-center space-x-4 pl-4 group/alt">
+                                        <div key={alt.alternativa_id || alt._frontId || `a-${pIndex}-${aIndex}`} className="flex items-center space-x-4 pl-4 group/alt">
                                             {/* Custom Radio Button for Correct Answer */}
                                             <button
                                                 onClick={() => setRespuestaCorrecta(pIndex, aIndex)}

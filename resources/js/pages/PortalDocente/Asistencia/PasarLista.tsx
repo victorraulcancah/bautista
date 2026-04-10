@@ -25,7 +25,7 @@ export default function PasarLista({ docenteCursoId }: { docenteCursoId: number 
         // Load students and classes for this assignment
         Promise.all([
             api.get(`/docente/curso/${docenteCursoId}/alumnos`),
-            api.get(`/alumno/curso/${docenteCursoId}`) // Reuse course detail to get classes
+            api.get(`/docente/curso/${docenteCursoId}/contenido`) // Use teacher-specific content endpoint
         ]).then(([alRes, clRes]) => {
             setAlumnos(alRes.data);
             // Flatten classes from units
