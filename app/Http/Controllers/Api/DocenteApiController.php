@@ -13,6 +13,9 @@ use App\Services\Interfaces\DocenteServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Models\Anuncio;
+use App\Models\AsistenciaAlumno;
+use App\Models\NotaActividad;
 use Illuminate\Support\Facades\DB;
 
 class DocenteApiController extends Controller
@@ -280,5 +283,85 @@ class DocenteApiController extends Controller
         }
 
         return response()->json(['message' => 'Asistencia guardada con éxito.']);
+    }
+
+    /**
+     * Get announcements for a course.
+     */
+    public function getAnuncios(int $docenteCursoId)
+    {
+        $anuncios = Anuncio::where('docente_curso_id', $docenteCursoId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return response()->json($anuncios);
+    }
+
+    /**
+     * Create an announcement.
+     */
+    public function storeAnuncio(Request $request)
+    {
+        $validated = $request->validate([
+            'docente_curso_id' => 'required|exists:docente_cursos,docen_curso_id',
+            'titulo' => 'required|string|max:255',
+            'contenido' => 'required|string',
+        ]);
+
+        $anuncio = Anuncio::create($validated);
+        return response()->json($anuncio, 201);
+    }
+
+    /**
+     * List students for a section with performance metrics.
+     */
+    public function alumnosConMetricas(Request $request, int $docenteCursoId)
+    {
+        $docenteCurso = DocenteCurso::findOrFail($docenteCursoId);
+        $alumnos = \App\Models\Matricula::where('seccion_id', $docenteCurso->seccion_id)
+            ->where('apertura_id', $docenteCurso->apertura_id)
+            ->where('estado', '1')
+            ->with(['estudiante.perfil'])
+            ->get();
+
+        $cursoId = $docenteCurso->curso_id;
+
+        $data = $alumnos->map(function ($m) use ($cursoId, $docenteCursoId) {
+            $estuId = $m->estu_id;
+
+            // 1. Promedio de Notas (de actividades calificadas en este curso)
+            $notas = NotaActividad::where('estu_id', $estuId)
+                ->whereHas('actividad.clase.unidad', function($q) use ($docenteCursoId) {
+                    $q->where('docente_curso_id', $docenteCursoId);
+                })
+                ->pluck('nota')
+                ->map(fn($n) => is_numeric($n) ? floatval($n) : 0);
+            
+            $promedioNotas = $notas->count() > 0 ? round($notas->avg(), 2) : 0;
+
+            // 2. Promedio de Asistencia (% de Presente sobre el total)
+            $asistencias = AsistenciaAlumno::where('id_estudiante', $estuId)
+                ->whereHas('session.clase.unidad', function($q) use ($docenteCursoId) {
+                    $q->where('docente_curso_id', $docenteCursoId);
+                })
+                ->get();
+
+            $totalSesiones = $asistencias->count();
+            $presentes = $asistencias->where('estado', 'P')->count();
+            $porcentajeAsistencia = $totalSesiones > 0 ? round(($presentes / $totalSesiones) * 100, 2) : 100;
+
+            return [
+                'estu_id' => $estuId,
+                'perfil' => [
+                    'primer_nombre' => $m->estudiante?->perfil?->primer_nombre,
+                    'apellido_paterno' => $m->estudiante?->perfil?->apellido_paterno,
+                    'doc_numero' => $m->estudiante?->perfil?->doc_numero,
+                ],
+                'promedio_notas' => $promedioNotas,
+                'asistencia_porcentaje' => $porcentajeAsistencia,
+                'total_asistencias' => $totalSesiones,
+            ];
+        });
+
+        return response()->json($data);
     }
 }

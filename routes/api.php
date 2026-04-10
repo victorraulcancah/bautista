@@ -189,7 +189,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('docente/unidad', [DocenteApiController::class, 'crearUnidad']);
         Route::post('docente/clase', [DocenteApiController::class, 'crearClase']);
         Route::post('docente/actividad', [DocenteApiController::class, 'crearActividad']);
-        Route::get('docente/curso/{id}/alumnos', [DocenteApiController::class, 'alumnosSeccion']);
+        Route::get('docente/curso/{id}/alumnos', [DocenteApiController::class, 'alumnosConMetricas']);
+        Route::get('docente/curso/{id}/anuncios', [DocenteApiController::class, 'getAnuncios']);
+        Route::post('docente/anuncios', [DocenteApiController::class, 'storeAnuncio']);
         Route::post('docente/asistencia/iniciar', [DocenteApiController::class, 'iniciarAsistencia']);
         Route::post('docente/asistencia/{id}/marcar', [DocenteApiController::class, 'marcarAsistencia']);
     });

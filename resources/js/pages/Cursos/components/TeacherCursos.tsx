@@ -39,39 +39,33 @@ export default function TeacherCursos() {
     }
 
     return (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             
-            {/* Hero Section / Welcome Banner */}
-            <div className="relative overflow-hidden rounded-[3rem] bg-gray-900 p-8 md:p-12 text-white shadow-2xl shadow-indigo-200 dark:shadow-none">
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-                    <div className="space-y-4 max-w-2xl">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
-                            <Sparkles size={16} className="text-yellow-400" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Portal del Docente</span>
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
-                            Gestiona tus cursos y <br /> <span className="text-indigo-400">potencia el aprendizaje</span>
-                        </h1>
-                        <p className="text-gray-400 font-bold text-sm md:text-base leading-relaxed">
-                            Bienvenido a tu panel central. Aquí podrás gestionar unidades, sesiones, asistencia y calificaciones de tus {cursos.length} cursos asignados.
-                        </p>
+            {/* Elegant Welcome Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-4">
+                <div className="space-y-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800">
+                        <Sparkles size={12} className="text-indigo-600" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-indigo-600">Portal del Docente</span>
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-6 rounded-[2rem] bg-white/5 border border-white/5 backdrop-blur-sm">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">Total Horas</p>
-                            <p className="text-2xl font-black">24h</p>
-                        </div>
-                        <div className="p-6 rounded-[2rem] bg-white/5 border border-white/5 backdrop-blur-sm">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">Secciones</p>
-                            <p className="text-2xl font-black">{cursos.length}</p>
-                        </div>
+                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900 dark:text-white">
+                        Buenos días, <span className="text-indigo-600">Docente</span>
+                    </h1>
+                    <p className="text-gray-500 font-bold text-xs md:text-sm max-w-lg">
+                        Gestiona tus <span className="text-gray-900 dark:text-gray-200">{cursos.length} cursos</span> activos y supervisa el progreso de tus alumnos desde un solo lugar.
+                    </p>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    <div className="px-6 py-4 rounded-3xl bg-white border-2 border-gray-50 shadow-sm dark:bg-gray-800 dark:border-gray-800">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Horas</p>
+                        <p className="text-xl font-black text-indigo-600">24h <span className="text-[10px] text-gray-300">/ sem</span></p>
+                    </div>
+                    <div className="px-6 py-4 rounded-3xl bg-white border-2 border-gray-50 shadow-sm dark:bg-gray-800 dark:border-gray-800">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Secciones</p>
+                        <p className="text-xl font-black text-indigo-600">{cursos.length}</p>
                     </div>
                 </div>
-
-                {/* Decoración Abstracta */}
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/20 rounded-full blur-[100px]" />
-                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px]" />
             </div>
 
             {/* Barra de Herramientas Premium */}
