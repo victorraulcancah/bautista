@@ -8,7 +8,7 @@ type Props = {
     icon: LucideIcon;
     color: string;   // text-cyan-500, text-purple-600, etc. — used for icon & accent
     iconBg: string;  // bg-cyan-500, bg-purple-600, etc. — icon background
-    href: string;
+    href?: string;
 };
 
 export default function StatCard({ title, value, icon: Icon, color, iconBg, href }: Props) {
@@ -25,16 +25,18 @@ export default function StatCard({ title, value, icon: Icon, color, iconBg, href
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="border-t border-gray-100 px-5 py-2 dark:border-gray-700">
-                <Link
-                    href={href}
-                    className={`flex items-center gap-1 text-xs font-medium transition-colors ${color} opacity-70 hover:opacity-100`}
-                >
-                    Más información
-                    <ArrowRight className="size-3" />
-                </Link>
-            </div>
+            {/* Footer - Solo si hay href */}
+            {href && (
+                <div className="border-t border-gray-100 px-5 py-2 dark:border-gray-700">
+                    <Link
+                        href={href}
+                        className={`flex items-center gap-1 text-xs font-medium transition-colors ${color} opacity-70 hover:opacity-100`}
+                    >
+                        Más información
+                        <ArrowRight className="size-3" />
+                    </Link>
+                </div>
+            )}
         </div>
     );
 }

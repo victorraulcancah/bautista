@@ -32,8 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth.token' => AuthenticateWithToken::class,
             'check.role' => \App\Http\Middleware\CheckRole::class,
-            // Nota: el alias 'role' de Spatie no se usa porque usa Auth::guard(null)->user()
-            // que falla en rutas API con sanctum. Usar 'check.role' en su lugar.
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role'       => \Spatie\Permission\Middleware\RoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

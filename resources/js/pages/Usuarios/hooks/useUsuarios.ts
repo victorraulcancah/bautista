@@ -74,16 +74,7 @@ export function nombreCompleto(u: Usuario): string {
     return u.name ?? u.username;
 }
 
-export const ROLES = [
-    { value: 'administrador',  label: 'Administrador' },
-    { value: 'docente',        label: 'Docente' },
-    { value: 'estudiante',     label: 'Estudiante' },
-    { value: 'padre_familia',  label: 'Padre de Familia' },
-    { value: 'madre_familia',  label: 'Madre de Familia' },
-    { value: 'apoderado',      label: 'Apoderado' },
-    { value: 'psicologo',      label: 'Psicólogo' },
-];
-
 export function rolLabel(rol: string | null): string {
-    return ROLES.find(r => r.value === rol)?.label ?? rol ?? '—';
+    if (!rol) return '—';
+    return rol.replace('_', ' ').toUpperCase();
 }

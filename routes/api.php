@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\ExamenResolucionApiController;
 use App\Http\Controllers\Api\AlumnoApiController;
 use App\Http\Controllers\Api\MatriculaPadresController;
 use App\Http\Controllers\Api\ReniecApiController;
+use App\Http\Controllers\Api\AccessControlApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -235,6 +236,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('usuarios/{id}/historial',      [UsuarioApiController::class, 'historial']);
     Route::get('usuarios/{id}/actividad',      [UsuarioApiController::class, 'actividad']);
     Route::patch('usuarios/{id}/credenciales', [UsuarioApiController::class, 'resetCredenciales']);
+
+    // Roles y Permisos (Control de Acceso)
+    Route::get('seguridad/roles',              [AccessControlApiController::class, 'indexRoles']);
+    Route::post('seguridad/roles',             [AccessControlApiController::class, 'storeRole']);
+    Route::put('seguridad/roles/{id}',         [AccessControlApiController::class, 'updateRole']);
+    Route::delete('seguridad/roles/{id}',      [AccessControlApiController::class, 'destroyRole']);
+    Route::get('seguridad/permisos',           [AccessControlApiController::class, 'indexPermissions']);
 
     // Matrícula — Aperturas
     Route::prefix('matriculas')->group(function () {

@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import type { Unidad, UnidadFormData, ClaseFormData } from '../hooks/useCursoContenido';
 import ClaseFormModal from './ClaseFormModal';
 import ClaseItem from './ClaseItem';
+import { usePermission } from '@/hooks/usePermission';
 
 type Props = {
     unidad:   Unidad;
@@ -17,6 +18,9 @@ export default function UnidadItem({ unidad, onEdit, onDelete, onReload }: Props
     const [expanded, setExpanded]       = useState(true);
     const [claseModal, setClaseModal]   = useState(false);
     const [apiErrors, setApiErrors]     = useState<Record<string, string[]>>({});
+    const { can } = usePermission();
+
+    const isEditor = can(['cursos.manage', 'cursos.edit']);
 
     const handleCreateClase = async (data: ClaseFormData) => {
         setApiErrors({});
@@ -59,18 +63,20 @@ return;
                             ({unidad.clases.length} clase{unidad.clases.length !== 1 ? 's' : ''})
                         </span>
                     </button>
-                    <div className="flex items-center gap-1">
-                        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-green-600 hover:text-green-800"
-                            onClick={() => setClaseModal(true)}>
-                            <Plus className="mr-1 h-3 w-3" /> Clase
-                        </Button>
-                        <Button size="icon" variant="ghost" className="size-7" onClick={() => onEdit(unidad)}>
-                            <Pencil className="h-3.5 w-3.5 text-blue-500" />
-                        </Button>
-                        <Button size="icon" variant="ghost" className="size-7" onClick={() => onDelete(unidad.unidad_id)}>
-                            <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                        </Button>
-                    </div>
+                    {isEditor && (
+                        <div className="flex items-center gap-1">
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-green-600 hover:text-green-800"
+                                onClick={() => setClaseModal(true)}>
+                                <Plus className="mr-1 h-3 w-3" /> Clase
+                            </Button>
+                            <Button size="icon" variant="ghost" className="size-7" onClick={() => onEdit(unidad)}>
+                                <Pencil className="h-3.5 w-3.5 text-blue-500" />
+                            </Button>
+                            <Button size="icon" variant="ghost" className="size-7" onClick={() => onDelete(unidad.unidad_id)}>
+                                <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Clases */}

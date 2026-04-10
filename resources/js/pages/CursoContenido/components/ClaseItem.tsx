@@ -1,4 +1,5 @@
-import { ChevronDown, ChevronRight, FileText, Paperclip, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileText, Paperclip, Pencil, Plus, Trash2, Upload, X, Star, ClipboardList } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import api from '@/lib/api';
 import type { Clase, ClaseFormData, ArchivoClase } from '../hooks/useCursoContenido';
 import { formatTamanio } from '../hooks/useCursoContenido';
 import ClaseFormModal from './ClaseFormModal';
+import { usePermission } from '@/hooks/usePermission';
 
 type Props = {
     clase:    Clase;
@@ -19,6 +21,9 @@ export default function ClaseItem({ clase, onUpdate, onDelete, onReload }: Props
     const [editOpen, setEditOpen]   = useState(false);
     const [apiErrors, setApiErrors] = useState<Record<string, string[]>>({});
     const [uploading, setUploading] = useState(false);
+    const { can } = usePermission();
+
+    const isEditor = can(['cursos.manage', 'cursos.edit']);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -72,18 +77,20 @@ return;
                             </span>
                         )}
                     </button>
-                    <div className="hidden group-hover:flex items-center gap-1">
-                        <label className="cursor-pointer" title="Subir archivo">
-                            <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploading} />
-                            <Upload className="h-3.5 w-3.5 text-green-500 hover:text-green-700" />
-                        </label>
-                        <Button size="icon" variant="ghost" className="size-6" onClick={() => setEditOpen(true)}>
-                            <Pencil className="h-3 w-3 text-blue-500" />
-                        </Button>
-                        <Button size="icon" variant="ghost" className="size-6" onClick={() => onDelete(clase.clase_id)}>
-                            <Trash2 className="h-3 w-3 text-red-400" />
-                        </Button>
-                    </div>
+                    {isEditor && (
+                        <div className="hidden group-hover:flex items-center gap-1">
+                            <label className="cursor-pointer" title="Subir archivo">
+                                <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploading} />
+                                <Upload className="h-3.5 w-3.5 text-green-500 hover:text-green-700" />
+                            </label>
+                            <Button size="icon" variant="ghost" className="size-6" onClick={() => setEditOpen(true)}>
+                                <Pencil className="h-3 w-3 text-blue-500" />
+                            </Button>
+                            <Button size="icon" variant="ghost" className="size-6" onClick={() => onDelete(clase.clase_id)}>
+                                <Trash2 className="h-3 w-3 text-red-400" />
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {expanded && (
@@ -101,13 +108,44 @@ return;
                                         {a.nombre}
                                         {a.tamanio && <span className="text-gray-400">({formatTamanio(a.tamanio)})</span>}
                                     </a>
-                                    <Button size="icon" variant="ghost" className="size-5 shrink-0"
-                                        onClick={() => handleDeleteArchivo(a.archivo_id)}>
-                                        <X className="h-3 w-3 text-red-400" />
-                                    </Button>
+                                    {isEditor && (
+                                        <Button size="icon" variant="ghost" className="size-5 shrink-0"
+                                            onClick={() => handleDeleteArchivo(a.archivo_id)}>
+                                            <X className="h-3 w-3 text-red-400" />
+                                        </Button>
+                                    )}
                                 </div>
                             ))
                         }
+                        {clase.actividades && clase.actividades.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                                {clase.actividades.map((act: any) => (
+                                    <div key={act.actividad_id} className="group flex items-start gap-3 p-3 bg-white border border-gray-100 rounded-xl hover:bg-amber-50/30 hover:border-amber-200 transition-all border-l-4 border-l-amber-500">
+                                        <div className="p-2 bg-amber-50 text-amber-600 rounded-lg group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                            {act.id_tipo_actividad === 2 || act.id_tipo_actividad === 3 ? <Star className="size-4" /> : <ClipboardList className="size-4" />}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between mb-0.5">
+                                                <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">
+                                                    {act.tipo_actividad?.nombre || 'Actividad'}
+                                                </span>
+                                                <span className="text-[8px] text-red-500 font-bold bg-red-50 px-2 py-0.5 rounded-full uppercase">
+                                                    Vence: {act.fecha_cierre ? new Date(act.fecha_cierre).toLocaleDateString() : '-'}
+                                                </span>
+                                            </div>
+                                            <h5 className="text-xs font-bold text-gray-800 truncate">{act.nombre_actividad}</h5>
+                                            <Link 
+                                                href={act.id_tipo_actividad === 2 || act.id_tipo_actividad === 3 ? `/examenes/${act.actividad_id}/resolver` : `/alumno/clase/${clase.clase_id}`}
+                                                className="mt-2 inline-flex items-center gap-1 text-[9px] font-black text-amber-600 hover:text-amber-800 transition-colors uppercase"
+                                            >
+                                                {act.id_tipo_actividad === 2 || act.id_tipo_actividad === 3 ? 'Comenzar Evaluación' : 'Entregar Tarea'}
+                                                <ChevronRight className="size-2.5" />
+                                            </Link>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                         {uploading && <p className="mt-1 text-xs text-gray-400">Subiendo...</p>}
                     </div>
                 )}

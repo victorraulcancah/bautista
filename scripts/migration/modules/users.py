@@ -222,8 +222,15 @@ def migrate_estudiante_contacto(old, new, dry_run: bool):
         
         id_est_col = "id_estuddiante" if "id_estuddiante" in cols else "id_estudiante"
         
+        # Verificar si existe la columna mensualidad
+        has_mensualidad = "mensualidad" in cols
+        
         log.info(f"Usando columna '{id_est_col}' para estudiante_contacto de origen")
-        c.execute(f"SELECT {id_est_col}, id_contacto, mensualidad FROM estudiante_contacto")
+        if has_mensualidad:
+            c.execute(f"SELECT {id_est_col}, id_contacto, mensualidad FROM estudiante_contacto")
+        else:
+            log.info("Columna 'mensualidad' no encontrada, se omitirá")
+            c.execute(f"SELECT {id_est_col}, id_contacto FROM estudiante_contacto")
         rows = c.fetchall()
 
     log.info(f"{len(rows)} relaciones estudiante-contacto encontradas")
@@ -261,9 +268,9 @@ def migrate_estudiante_contacto(old, new, dry_run: bool):
                 continue
 
             # Priorizar mensualidad de la tabla pivot si está disponible, sino de estudiantes
-            mensualidad = r.get("mensualidad")
+            mensualidad = r.get("mensualidad") if has_mensualidad else None
             if mensualidad is None:
-                mensualidad = valid_estudiantes[estu_id] or 0
+                mensualidad = valid_estudiantes.get(estu_id, 0) or 0
 
             if not dry_run:
                 c.execute(

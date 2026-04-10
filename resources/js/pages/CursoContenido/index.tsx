@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
+import { usePermission } from '@/hooks/usePermission';
 import type { BreadcrumbItem } from '@/types';
 import UnidadFormModal from './components/UnidadFormModal';
 import UnidadItem from './components/UnidadItem';
@@ -14,11 +15,14 @@ type Props = {
 };
 
 export default function CursoContenidoPage({ cursoId }: Props) {
+    const { can } = usePermission();
     const [unidades, setUnidades]     = useState<Unidad[]>([]);
     const [loading, setLoading]       = useState(false);
     const [modalOpen, setModalOpen]   = useState(false);
     const [editing, setEditing]       = useState<Unidad | null>(null);
     const [apiErrors, setApiErrors]   = useState<Record<string, string[]>>({});
+
+    const isEditor = can(['cursos.manage', 'cursos.edit']);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },

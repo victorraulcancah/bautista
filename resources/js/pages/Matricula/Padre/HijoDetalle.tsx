@@ -3,7 +3,7 @@ import { GraduationCap, ClipboardCheck, CreditCard, ChevronLeft, Star, Clock, Al
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
-import SubirVoucherModal from '@/pages/PortalPadre/components/SubirVoucherModal';
+import SubirVoucherModal from './components/SubirVoucherModal';
 
 export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
     const [data, setData] = useState<any>(null);

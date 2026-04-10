@@ -1,18 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
-import { Book, GraduationCap, Users, Search, Filter, MoreVertical, LayoutGrid, List, Settings } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { Book, LayoutGrid, List, Search, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
-import type { BreadcrumbItem } from '@/types';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Panel Docente', href: '/docente/dashboard' },
-    { title: 'Mis Cursos', href: '/docente/mis-cursos' },
-];
-
-export default function DocenteMisCursosPage() {
+export default function TeacherCursos() {
     const [cursos, setCursos] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -24,18 +17,11 @@ export default function DocenteMisCursosPage() {
     }, []);
 
     if (loading) {
-return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="p-10 text-center font-black animate-pulse text-indigo-600">Cargando mis materias...</div>
-        </AppLayout>
-    );
-}
+        return <div className="p-10 text-center font-black animate-pulse text-indigo-600">Cargando mis materias...</div>;
+    }
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-        <div className="min-h-screen bg-[#FDFDFF] p-8 space-y-10">
-            <Head title="Mis Materias Asignadas" />
-
+        <div className="space-y-10">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-2">
                     <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Mis Materias</h1>
@@ -58,7 +44,6 @@ return (
                 </div>
             </div>
 
-            {/* Filters Bar */}
             <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col md:flex-row gap-4 items-center">
                 <div className="relative flex-1 w-full">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -72,32 +57,20 @@ return (
             {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {cursos.map((c: any) => (
-                        <div key={c.id} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-2xl shadow-gray-200/50 flex flex-col hover:shadow-indigo-100 transition-all group border-b-8 border-b-indigo-500">
+                        <div key={c.id} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-2xl shadow-gray-200/50 flex flex-col hover:shadow-indigo-100 transition-all group border-b-8 border-b-indigo-500 text-left">
                             <div className="flex justify-between items-start mb-6">
                                 <div className="bg-indigo-50 p-4 rounded-3xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                                     <Book className="w-8 h-8" />
                                 </div>
-                                <button className="p-2 text-gray-300 hover:text-gray-600 transition-colors">
-                                    <MoreVertical className="w-5 h-5" />
-                                </button>
                             </div>
 
-                            <div className="flex-1 space-y-4">
-                                <div>
+                            <div className="flex-1 space-y-4 text-left">
+                                <div className="text-left">
                                     <span className="px-3 py-1 bg-gray-100 rounded-full text-[10px] font-black text-gray-500 uppercase tracking-widest border border-gray-200">
                                         {c.seccion?.grado?.nivel_educativo?.nombre || 'General'}
                                     </span>
                                     <h4 className="text-2xl font-black text-gray-900 mt-3 line-clamp-2">{c.curso?.nombre}</h4>
                                     <p className="text-indigo-600 font-bold text-sm">{c.seccion?.grado?.nombre} - {c.seccion?.nombre}</p>
-                                </div>
-
-                                <div className="flex items-center space-x-6 pt-4">
-                                    <div className="flex items-center text-gray-400 font-bold text-xs uppercase tracking-tighter">
-                                        <Users className="w-4 h-4 mr-2" /> 28 Alumnos
-                                    </div>
-                                    <div className="flex items-center text-gray-400 font-bold text-xs uppercase tracking-tighter">
-                                        <GraduationCap className="w-4 h-4 mr-2" /> Bimestre 1
-                                    </div>
                                 </div>
                             </div>
 
@@ -123,8 +96,6 @@ return (
                             <tr>
                                 <th className="px-8 py-6">Curso / Materia</th>
                                 <th className="px-8 py-6">Grado y Sección</th>
-                                <th className="px-8 py-6">Nivel</th>
-                                <th className="px-8 py-6">Periodo Lectivo</th>
                                 <th className="px-8 py-6 text-right">Acciones</th>
                             </tr>
                         </thead>
@@ -137,25 +108,10 @@ return (
                                     <td className="px-8 py-6">
                                         <p className="font-bold text-indigo-600">{c.seccion?.grado?.nombre} {c.seccion?.nombre}</p>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <p className="text-xs font-bold text-gray-500">{c.seccion?.grado?.nivel_educativo?.nombre}</p>
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        <p className="text-xs font-bold text-gray-500">{c.apertura?.nombre || '2026'}</p>
-                                    </td>
                                     <td className="px-8 py-6 text-right">
-                                        <div className="flex justify-end space-x-2">
-                                            <Link href={`/docente/cursos/${c.docen_curso_id}/contenido`}>
-                                                <Button size="sm" variant="ghost" className="h-10 w-10 rounded-xl hover:bg-white hover:text-indigo-600 hover:shadow-lg">
-                                                    <Settings className="w-5 h-5" />
-                                                </Button>
-                                            </Link>
-                                            <Link href="/notas">
-                                                <Button size="sm" variant="ghost" className="h-10 w-10 rounded-xl hover:bg-white hover:text-indigo-600 hover:shadow-lg">
-                                                    <GraduationCap className="w-5 h-5" />
-                                                </Button>
-                                            </Link>
-                                        </div>
+                                        <Link href={`/docente/cursos/${c.docen_curso_id}/contenido`} className="text-indigo-600 font-bold hover:underline">
+                                            Gestionar →
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}
@@ -164,6 +120,5 @@ return (
                 </div>
             )}
         </div>
-        </AppLayout>
     );
 }

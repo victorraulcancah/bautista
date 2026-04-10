@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import api from '@/lib/api';
 import FormField from '@/components/shared/FormField';
 import { ReqLabel, OptLabel } from '@/components/shared/FormLabels';
 import FormSection from '@/components/shared/FormSection';
@@ -8,7 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Usuario, UsuarioFormData } from '../hooks/useUsuarios';
-import { defaultForm, ROLES, TIPOS_DOC } from '../hooks/useUsuarios';
+import { defaultForm, TIPOS_DOC } from '../hooks/useUsuarios';
 
 type Props = {
     open:        boolean;
@@ -22,6 +23,13 @@ type Props = {
 export default function UsuarioFormModal({ open, onClose, editing, onSave, apiErrors, clearErrors }: Props) {
     const [form, setForm]             = useState<UsuarioFormData>(defaultForm);
     const [processing, setProcessing] = useState(false);
+    const [roles, setRoles]           = useState<{id: number, name: string}[]>([]);
+
+    useEffect(() => {
+        if (open) {
+            api.get('/seguridad/roles').then(res => setRoles(res.data));
+        }
+    }, [open]);
 
     useEffect(() => {
         if (!open) {
@@ -104,8 +112,8 @@ return;
                             <Select value={form.rol} onValueChange={(v) => set('rol', v)}>
                                 <SelectTrigger><SelectValue placeholder="Seleccionar rol" /></SelectTrigger>
                                 <SelectContent>
-                                    {ROLES.map((r) => (
-                                        <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                                    {roles.map((r) => (
+                                        <SelectItem key={r.id} value={r.name}>{r.name.replace('_', ' ').toUpperCase()}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>

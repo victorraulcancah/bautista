@@ -13,7 +13,7 @@ class CursoContenidoRepository implements CursoContenidoRepositoryInterface
 
     public function getUnidadesByCurso(int $cursoId): Collection
     {
-        return Unidad::with(['clases.archivos'])
+        return Unidad::with(['clases.archivos', 'clases.actividades.tipoActividad'])
             ->where('curso_id', $cursoId)
             ->orderBy('orden')
             ->get();
