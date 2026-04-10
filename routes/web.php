@@ -126,8 +126,8 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/horarios',               fn () => Inertia::render('Horarios/index'))->middleware('permission:dashboard.resumen.academico')->name('horarios.index');
     Route::get('/secciones/{seccionId}/horarios', fn (int $seccionId) => Inertia::render('Secciones/HorariosPage', ['seccionId' => $seccionId]))->middleware('permission:secciones.ver')->name('secciones.horarios');
     Route::get('/notas',                  fn () => Inertia::render('Notas/index'))->middleware('permission:dashboard.resumen.academico')->name('notas.index');
-    Route::get('/usuarios',               fn () => Inertia::render('Usuarios/index'))->middleware('permission:usuarios.gestionar')->name('usuarios.index');
-    Route::get('/roles-permisos',         fn () => Inertia::render('Seguridad/index'))->middleware('permission:roles.gestionar')->name('seguridad.roles');
+    Route::get('/usuarios',               fn () => Inertia::render('Usuarios/index'))->middleware('permission:usuarios.ver')->name('usuarios.index');
+    Route::get('/roles-permisos',         fn () => Inertia::render('Seguridad/index'))->middleware('permission:roles.editar')->name('seguridad.roles');
 
     Route::get('/examenes',               fn () => Inertia::render('Examenes/index'))->middleware('permission:dashboard.resumen.academico')->name('examenes.index');
     Route::get('/examenes/{id}/resolver', function (int $id) {

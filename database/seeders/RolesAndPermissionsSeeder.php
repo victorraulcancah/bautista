@@ -23,58 +23,101 @@ class RolesAndPermissionsSeeder extends Seeder
         DB::table('permissions')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // 1. Definir Permisos (EN ESPAÑOL)
+        // 1. Definir Permisos (CRUD COMPLETO EN ESPAÑOL)
         $permissions = [
             // Dashboard (Widgets Modulares)
-            'dashboard.ver',                    // Acceso base al dashboard
-            'dashboard.periodo.global',         // Cuadros de totales (Admin/Auxiliar)
-            'dashboard.mensajes.recientes',     // Consultas y mensajes pendientes
-            'dashboard.accesos.admin',          // Botones de accesos rápidos
-            'dashboard.cursos.asignados',       // Tabla de cursos asignados (Docente)
-            'dashboard.resumen.academico',      // Resumen de notas/asistencia (Estudiante)
-            'dashboard.resumen.familiar',       // Resumen de hijos (Padre)
+            'dashboard.ver',
+            'dashboard.periodo.global',
+            'dashboard.mensajes.recientes',
+            'dashboard.accesos.admin',
+            'dashboard.cursos.asignados',
+            'dashboard.resumen.academico',
+            'dashboard.resumen.familiar',
             
             // Institución
             'institucion.ver',
-            'institucion.gestionar',
+            'institucion.crear',
+            'institucion.editar',
+            'institucion.borrar',
             
-            // Académico
+            // Niveles Académicos
             'niveles.ver',
-            'niveles.gestionar',
+            'niveles.crear',
+            'niveles.editar',
+            'niveles.borrar',
+
+            // Cursos
             'cursos.ver',
-            'cursos.gestionar',
+            'cursos.crear',
+            'cursos.editar',
+            'cursos.borrar',
+
+            // Secciones
             'secciones.ver',
-            'secciones.gestionar',
+            'secciones.crear',
+            'secciones.editar',
+            'secciones.borrar',
             
-            // Usuarios / Personal
+            // Docentes
             'docentes.ver',
-            'docentes.gestionar',
+            'docentes.crear',
+            'docentes.editar',
+            'docentes.borrar',
+
+            // Estudiantes
             'estudiantes.ver',
-            'estudiantes.gestionar',
+            'estudiantes.crear',
+            'estudiantes.editar',
+            'estudiantes.borrar',
+
+            // Usuarios de Sistema
             'usuarios.ver',
-            'usuarios.gestionar',
+            'usuarios.crear',
+            'usuarios.editar',
+            'usuarios.borrar',
             
-            // Procesos
+            // Matrículas
             'matriculas.ver',
-            'matriculas.gestionar',
+            'matriculas.crear',
+            'matriculas.editar',
+            'matriculas.borrar',
+
+            // Asistencia
             'asistencia.ver',
-            'asistencia.gestionar',
+            'asistencia.crear',
+            'asistencia.editar',
+            'asistencia.borrar',
             'asistencia.escanear',
-            'pagos.ver',
-            'pagos.gestionar',
             
-            // Recursos
+            // Pagos / Tesorería
+            'pagos.ver',
+            'pagos.crear',
+            'pagos.editar',
+            'pagos.borrar',
+            
+            // Biblioteca
             'biblioteca.ver',
-            'biblioteca.gestionar',
+            'biblioteca.crear',
+            'biblioteca.editar',
+            'biblioteca.borrar',
+
+            // Comunicados
             'comunicados.ver',
-            'comunicados.gestionar',
+            'comunicados.crear',
+            'comunicados.editar',
+            'comunicados.borrar',
+
+            // Mensajería
             'mensajeria.ver',
 
-            // Seguridad y Roles
-            'roles.gestionar',
+            // Roles y Seguridad
+            'roles.ver',
+            'roles.crear',
+            'roles.editar',
+            'roles.borrar',
             'seguridad.ver',
 
-            // Permisos de Portal/Acciones específicas (EN ESPAÑOL)
+            // Portales Específicos
             'portal.alumno.qr',
             'portal.alumno.asistencia',
             'portal.docente.alumnos',
@@ -86,14 +129,15 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // 2. Definir Roles y Asignar Permisos
         
-        // Administrador: Todo
+        // Administrador: Todo (Absolutamente todo el CRUD)
         $admin = Role::findOrCreate('administrador', 'web');
         $admin->syncPermissions(Permission::all());
 
+        // Rol Usuario Estándar (Herencia de todos los permisos por ahora según pedido)
         $usuario = Role::findOrCreate('usuario', 'web');
         $usuario->syncPermissions(Permission::all());
 
-        // Docente
+        // Docente (Limitado a su portal y gestión básica)
         $docente = Role::findOrCreate('docente', 'web');
         $docente->syncPermissions([
             'dashboard.ver',
@@ -103,13 +147,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'cursos.ver',
             'estudiantes.ver',
             'asistencia.ver',
-            'asistencia.gestionar',
+            'asistencia.crear',
+            'asistencia.editar',
             'biblioteca.ver',
             'comunicados.ver',
             'mensajeria.ver',
         ]);
 
-        // Estudiante
+        // Estudiante (Solo vista personal)
         $estudiante = Role::findOrCreate('estudiante', 'web');
         $estudiante->syncPermissions([
             'dashboard.ver',
@@ -123,7 +168,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'comunicados.ver',
         ]);
 
-        // Padre de Familia / Apoderado
+        // Padres de Familia / Apoderados
         $padrePermissions = [
             'dashboard.ver',
             'dashboard.resumen.familiar',
@@ -157,6 +202,6 @@ class RolesAndPermissionsSeeder extends Seeder
             }
         }
 
-        $this->command->info('¡Roles y permisos en ESPAÑOL sincronizados correctamente!');
+        $this->command->info('¡Roles y permisos CRUD en ESPAÑOL sincronizados correctamente!');
     }
 }
