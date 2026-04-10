@@ -58,13 +58,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('dashboard/stats', [DashboardApiController::class, 'stats']);
 
     // Instituciones
-    Route::apiResource('instituciones', InstitucionApiController::class);
+    Route::apiResource('instituciones', InstitucionApiController::class)->names('api.instituciones');
 
     // Galería de la institución
-    Route::apiResource('galeria', GaleriaApiController::class)->except(['show']);
+    Route::apiResource('galeria', GaleriaApiController::class)->except(['show'])->names('api.galeria');
 
     // Noticias de la institución
-    Route::apiResource('noticias', NoticiaApiController::class)->except(['show']);
+    Route::apiResource('noticias', NoticiaApiController::class)->except(['show'])->names('api.noticias');
 
     // Mensajería
     Route::get('mensajes',                        [MensajeApiController::class, 'index']);
@@ -85,12 +85,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('usuarios/buscar',                 UsuarioBusquedaApiController::class);
 
     // Estudiantes
-    Route::apiResource('estudiantes', EstudianteApiController::class);
+    Route::apiResource('estudiantes', EstudianteApiController::class)->names('api.estudiantes');
     Route::get('estudiantes/{id}/contactos',  [EstudianteApiController::class, 'contactos']);
     Route::post('estudiantes/{id}/contactos', [EstudianteApiController::class, 'guardarContacto']);
 
     // Docentes
-    Route::apiResource('docentes', DocenteApiController::class);
+    Route::apiResource('docentes', DocenteApiController::class)->names('api.docentes');
     Route::get('docentes/{docenteId}/cursos',             [DocenteCursoApiController::class, 'index']);
     Route::post('docentes/{docenteId}/cursos',            [DocenteCursoApiController::class, 'store']);
     Route::delete('docentes/{docenteId}/cursos/{id}',     [DocenteCursoApiController::class, 'destroy']);
@@ -100,19 +100,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('docentes/horarios/{id}',               [\App\Http\Controllers\Api\DocenteHorarioApiController::class, 'destroy']);
 
     // Niveles Educativos
-    Route::apiResource('niveles', NivelEducativoApiController::class);
+    Route::apiResource('niveles', NivelEducativoApiController::class)->names('api.niveles');
 
     // Grados
-    Route::apiResource('grados', GradoApiController::class);
+    Route::apiResource('grados', GradoApiController::class)->names('api.grados');
 
     // Secciones
-    Route::apiResource('secciones', SeccionApiController::class);
+    Route::apiResource('secciones', SeccionApiController::class)->names('api.secciones');
     Route::get('secciones/{seccionId}/horarios',          [\App\Http\Controllers\Api\SeccionHorarioApiController::class, 'index']);
     Route::post('secciones/{seccionId}/horarios',         [\App\Http\Controllers\Api\SeccionHorarioApiController::class, 'store']);
     Route::delete('secciones/horarios/{id}',              [\App\Http\Controllers\Api\SeccionHorarioApiController::class, 'destroy']);
 
     // Cursos
-    Route::apiResource('cursos', CursoApiController::class);
+    Route::apiResource('cursos', CursoApiController::class)->names('api.cursos');
 
     // Grados - Cursos (asignación)
     Route::get('grados/{gradoId}/cursos', [\App\Http\Controllers\Api\GradoCursoApiController::class, 'index']);
@@ -151,7 +151,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Actividades (Exámenes Virtuales)
     Route::get('actividades/tipos',     [ActividadApiController::class, 'tipos']);
-    Route::apiResource('actividades',   ActividadApiController::class);
+    Route::apiResource('actividades',   ActividadApiController::class)->names('api.actividades');
     Route::get('actividades/{id}/cuestionario', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'show']);
     Route::put('actividades/{id}/cuestionario', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'sync']);
     Route::get('actividades/{id}/notas', [CalificacionApiController::class, 'indexByActivity']);
@@ -234,7 +234,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Usuarios
-    Route::apiResource('usuarios', UsuarioApiController::class)->only(['index', 'show', 'store', 'update']);
+    Route::apiResource('usuarios', UsuarioApiController::class)->only(['index', 'show', 'store', 'update'])->names('api.usuarios');
     Route::patch('usuarios/{id}/estado',       [UsuarioApiController::class, 'toggleEstado']);
     Route::get('usuarios/{id}/historial',      [UsuarioApiController::class, 'historial']);
     Route::get('usuarios/{id}/actividad',      [UsuarioApiController::class, 'actividad']);
@@ -264,7 +264,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Horarios de Asistencia
-    Route::apiResource('horarios-asistencia', \App\Http\Controllers\Api\HorarioAsistenciaApiController::class);
+    Route::apiResource('horarios-asistencia', \App\Http\Controllers\Api\HorarioAsistenciaApiController::class)->names('api.horarios-asistencia');
 
     // Perfil del usuario autenticado
     Route::patch('me/perfil',   [\App\Http\Controllers\Api\PerfilApiController::class, 'updateDatos']);

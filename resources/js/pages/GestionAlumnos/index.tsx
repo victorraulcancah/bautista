@@ -14,7 +14,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function EstudiantesPage() {
-    const res = useResource<Estudiante>('/estudiantes');
+    const res = useResource<Estudiante>('/api/estudiantes');
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Estudiante | null>(null);
 

@@ -1,12 +1,19 @@
-import { Link } from '@inertiajs/react';
-import { Book, GraduationCap, User } from 'lucide-react';
+import { Search, Filter, Grid, List as ListIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import PageHeader from '@/components/shared/PageHeader';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
+import CourseCard from './CourseCard';
+
+const COURSE_COLORS = [
+    '#2563eb', '#7c3aed', '#db2777', '#059669', '#d97706', '#0891b2', '#4f46e5'
+];
 
 export default function StudentCursos() {
     const [cursos, setCursos] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     useEffect(() => {
         api.get('/alumno/cursos')
@@ -14,74 +21,94 @@ export default function StudentCursos() {
             .finally(() => setLoading(false));
     }, []);
 
+    const filteredCursos = cursos.filter(c => 
+        c.curso?.nombre?.toLowerCase().includes(search.toLowerCase()) ||
+        c.docente?.perfil?.primer_nombre?.toLowerCase().includes(search.toLowerCase())
+    );
+
     if (loading) {
-        return <div className="p-10 text-center font-black animate-pulse text-primary">Cargando tus cursos...</div>;
+        return (
+            <div className="flex flex-col items-center justify-center p-20 space-y-4">
+                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <p className="font-black text-gray-400 uppercase tracking-widest text-xs">Cargando tus cursos...</p>
+            </div>
+        );
     }
 
     return (
-        <div className="flex flex-col gap-8">
-            <PageHeader 
-                icon={Book}
-                title="Mis Materias"
-                subtitle="Explora tus cursos activos y revisa tu avance por unidad."
-                iconColor="bg-blue-600"
-            />
+        <div className="space-y-8 animate-in fade-in duration-700">
+            {/* Cabecera de Control - Estilo Blackboard (Igual que docente) */}
+            <div className="bg-white dark:bg-gray-900 p-4 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/40 dark:shadow-none flex flex-wrap gap-4 items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Button 
+                        variant={viewMode === 'grid' ? 'default' : 'outline'} 
+                        size="icon" 
+                        onClick={() => setViewMode('grid')}
+                        className="rounded-xl h-11 w-11"
+                    >
+                        <Grid size={18} />
+                    </Button>
+                    <Button 
+                        variant={viewMode === 'list' ? 'default' : 'outline'} 
+                        size="icon" 
+                        onClick={() => setViewMode('list')}
+                        className="rounded-xl h-11 w-11"
+                    >
+                        <ListIcon size={18} />
+                    </Button>
+                </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {cursos.map((c: any) => (
-                    <div key={c.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
-                        <div className="h-2 w-full bg-blue-600" />
-                        
-                        <div className="flex flex-1 flex-col p-6">
-                            <div className="mb-4 flex items-center justify-between">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{c.curso?.nombre}</h3>
-                                <div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/20">
-                                    <Book className="size-5" />
-                                </div>
-                            </div>
+                <div className="relative flex-1 min-w-[300px]">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <Input 
+                        placeholder="Buscar en mis cursos..." 
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="h-12 pl-12 rounded-2xl bg-gray-50 border-none font-bold focus-visible:ring-2 focus-visible:ring-blue-600/20"
+                    />
+                </div>
 
-                            <div className="flex-1 space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex size-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-                                        <User className="size-4 text-gray-500" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Docente</p>
-                                        <p className="text-sm font-bold text-gray-700 dark:text-gray-300">
-                                            {c.docente?.perfil?.primer_nombre} {c.docente?.perfil?.apellido_paterno}
-                                        </p>
-                                    </div>
-                                </div>
+                <div className="flex items-center gap-3">
+                    <select className="h-11 px-4 rounded-xl bg-gray-50 border-none font-bold text-xs text-gray-600 focus:ring-2 focus:ring-blue-600/20 outline-none cursor-pointer">
+                        <option>Mis Cursos 2024</option>
+                        <option>Todos los periodos</option>
+                    </select>
+                    <Button variant="outline" className="h-11 rounded-xl border-gray-100 gap-2 font-bold text-xs uppercase tracking-widest">
+                        <Filter size={16} /> Filtros
+                    </Button>
+                </div>
+            </div>
 
-                                <div className="space-y-1.5">
-                                    <div className="flex justify-between text-xs font-bold text-gray-500">
-                                        <span>Progreso</span>
-                                        <span className="text-blue-600">65%</span>
-                                    </div>
-                                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
-                                        <div className="h-full bg-blue-600 w-[65%]" />
-                                    </div>
-                                </div>
-                            </div>
+            {/* Contador de resultados */}
+            <div className="flex items-center gap-3 px-2">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{filteredCursos.length} Materias activas</span>
+                <div className="h-px flex-1 bg-gray-50" />
+            </div>
 
-                            <div className="mt-6 flex gap-2">
-                                <Link 
-                                    href={`/alumno/cursos/${c.docen_curso_id}`} 
-                                    className="flex-1 rounded-lg bg-gray-900 px-4 py-2 text-center text-xs font-bold text-white transition-colors hover:bg-black dark:bg-gray-700 dark:hover:bg-gray-600"
-                                >
-                                    Entrar al Curso
-                                </Link>
-                                <Link 
-                                    href="/alumno/notas" 
-                                    className="flex size-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-                                >
-                                    <GraduationCap className="size-4" />
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
+            {/* Grid de Cursos para Alumnos */}
+            <div className={`grid gap-8 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                {filteredCursos.map((c, i) => (
+                    <CourseCard 
+                        key={c.id || c.docen_curso_id}
+                        id={c.docen_curso_id?.toString() || c.id?.toString()}
+                        courseCode={`COD-${c.curso_id}`}
+                        title={c.curso?.nombre}
+                        status="Activo"
+                        color={COURSE_COLORS[i % COURSE_COLORS.length]}
+                        href={`/alumno/cursos/${c.docen_curso_id}`}
+                        role="student"
+                        professor={`${c.docente?.perfil?.primer_nombre} ${c.docente?.perfil?.apellido_paterno}`}
+                        progress={65} // Hardcoded por ahora, luego integrar progreso real
+                        term="2024-I"
+                    />
                 ))}
             </div>
+
+            {filteredCursos.length === 0 && (
+                <div className="p-20 text-center bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-100">
+                    <p className="text-gray-400 font-bold">No tienes cursos que coincidan con la búsqueda.</p>
+                </div>
+            )}
         </div>
     );
 }

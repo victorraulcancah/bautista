@@ -91,7 +91,7 @@ Route::middleware(['auth.token'])->group(function () {
     Route::prefix('docente')->name('docente.')->middleware('permission:dashboard.cursos.asignados')->group(function () {
         Route::get('/dashboard', fn () => redirect()->route('dashboard'))->name('dashboard');
         Route::get('/mis-cursos', fn () => redirect()->route('cursos.index'))->name('mis-cursos.index');
-        Route::get('/mis-alumnos', fn () => Inertia::render('PortalDocente/MisAlumnos'))->middleware('permission:portal.docente.alumnos')->name('mis-alumnos.index');
+        Route::get('/mis-alumnos', [\App\Http\Controllers\DocenteController::class, 'misAlumnos'])->middleware('permission:portal.docente.alumnos')->name('mis-alumnos.index');
         Route::get('/cursos/{id}/contenido', fn (int $id) => Inertia::render('PortalDocente/Contenido/Editor', ['docenteCursoId' => $id]))->name('cursos.contenido');
         Route::get('/cursos/{id}/asistencia', fn (int $id) => Inertia::render('PortalDocente/Asistencia/PasarLista', ['docenteCursoId' => $id]))->name('cursos.asistencia');
         Route::get('/cursos/{id}/cuestionario/{actividadId}', fn (int $id, int $actividadId) => Inertia::render('PortalDocente/Contenido/QuizBuilder', [
