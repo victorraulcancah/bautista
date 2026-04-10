@@ -80,6 +80,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('mensajeria/grados/{id}/alumnos',  [MensajeriaGrupoApiController::class, 'alumnosPorGrado']);
     Route::get('mensajeria/aulas',                [MensajeriaGrupoApiController::class, 'aulas']);
     Route::get('mensajeria/aulas/{id}/alumnos',   [MensajeriaGrupoApiController::class, 'alumnosPorAula']);
+    Route::get('mensajeria/roles-personal',       [MensajeriaGrupoApiController::class, 'rolesPersonal']);
+    Route::get('mensajeria/roles-personal/{id}/usuarios', [MensajeriaGrupoApiController::class, 'trabajadoresPorRol']);
     Route::get('usuarios/buscar',                 UsuarioBusquedaApiController::class);
 
     // Estudiantes

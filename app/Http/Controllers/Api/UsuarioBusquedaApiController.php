@@ -33,11 +33,12 @@ class UsuarioBusquedaApiController extends Controller
             ->get();
 
         return response()->json($usuarios->map(fn ($u) => [
-            'id'     => $u->id,
-            'nombre' => $u->perfil
+            'id'       => $u->id,
+            'nombre'   => $u->perfil
                 ? trim("{$u->perfil->primer_nombre} {$u->perfil->apellido_paterno}")
                 : $u->username,
             'username' => $u->username,
+            'rol'      => $u->rol?->name,
         ]));
     }
 }
