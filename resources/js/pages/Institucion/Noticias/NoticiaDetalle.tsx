@@ -50,12 +50,12 @@ export default function NoticiaDetalle({ noticia, recientes }: Props) {
                             </Button>
                         </div>
 
-                        <h1 className="text-5xl md:text-7xl font-black leading-[1.05] text-neutral-900 tracking-tighter max-w-4xl mx-auto">
+                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-black leading-[1.1] text-neutral-900 tracking-tighter max-w-4xl mx-auto">
                             {noticia.not_titulo}
                         </h1>
 
                         {noticia.not_resumen && (
-                            <p className="text-xl md:text-2xl text-neutral-500 font-medium leading-relaxed max-w-3xl mx-auto italic">
+                            <p className="text-lg md:text-xl text-neutral-500 font-medium leading-relaxed max-w-3xl mx-auto italic">
                                 {noticia.not_resumen}
                             </p>
                         )}

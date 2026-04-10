@@ -58,7 +58,7 @@ export default function NoticiasPortada({ noticias }: Props) {
                             <span className="text-neutral-400 font-medium flex items-center gap-1.5">{featured.not_fecha}</span>
                         </div>
                         <h2 
-                            className="text-4xl md:text-5xl font-black leading-[1.1] text-neutral-900 tracking-tighter group-hover:text-[#00a65a] transition-colors cursor-pointer"
+                            className="text-3xl md:text-4xl lg:text-5xl font-black leading-[1.1] text-neutral-900 tracking-tighter group-hover:text-[#00a65a] transition-colors cursor-pointer"
                             onClick={() => navigateToDetail(featured.not_id)}
                         >
                             {featured.not_titulo}
