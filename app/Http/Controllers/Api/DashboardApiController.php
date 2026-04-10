@@ -153,10 +153,10 @@ class DashboardApiController extends Controller
 
     private function docenteStats($user): JsonResponse
     {
-        $docente = Docente::where('user_id', $user->id)->first();
+        $docente = Docente::where('id_usuario', $user->id)->first();
         if (!$docente) return response()->json(['error' => 'No docente found'], 404);
 
-        $cursosCount = \App\Models\DocenteCurso::where('docen_id', $docente->docen_id)->count();
+        $cursosCount = \App\Models\DocenteCurso::where('docente_id', $docente->docente_id)->count();
         $estudiantesCount = \App\Models\Matricula::whereHas('apertura', function($q) use ($user) {
             $q->where('insti_id', $user->insti_id);
         })->count(); // Simplificado para demo, idealmente filtrar por sus cursos
@@ -167,9 +167,11 @@ class DashboardApiController extends Controller
                 'estudiantes' => $estudiantesCount,
                 'pendientes_calificar' => 0
             ],
-            'cursos' => \App\Models\DocenteCurso::where('docen_id', $docente->docen_id)
+            'cursos' => \App\Models\DocenteCurso::where('docente_id', $docente->docente_id)
                 ->with(['curso', 'seccion.grado'])
-                ->get()
+                ->get(),
+            'notificaciones'      => [],
+            'mensajes_pendientes' => [],
         ]);
     }
 
@@ -185,7 +187,9 @@ class DashboardApiController extends Controller
             ],
             'cursos' => \App\Models\Matricula::where('estu_id', $estudiante?->estu_id ?? 0)
                 ->with(['apertura.nivel']) // Simplificado para demo
-                ->get()
+                ->get(),
+            'notificaciones'      => [],
+            'mensajes_pendientes' => [],
         ]);
     }
 
@@ -193,7 +197,9 @@ class DashboardApiController extends Controller
     {
         $padre = \App\Models\PadreApoderado::where('user_id', $user->id)->first();
         return response()->json([
-            'hijos' => $padre ? $padre->estudiantes()->with('perfil')->get() : []
+            'hijos' => $padre ? $padre->estudiantes()->with('perfil')->get() : [],
+            'notificaciones'      => [],
+            'mensajes_pendientes' => [],
         ]);
     }
 }

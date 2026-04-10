@@ -237,7 +237,7 @@ export default function AccessControlManager() {
             <div className="lg:col-span-8">
                 {selectedRole ? (
                     <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white rounded-3xl overflow-hidden">
-                        <CardHeader className="border-b border-gray-50 bg-white sticky top-0 z-20 px-8 py-8">
+                        <CardHeader className="border-b border-gray-50 bg-white sticky top-0 z-20 px-4 py-6 md:px-8 md:py-8">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-3">
@@ -259,7 +259,7 @@ export default function AccessControlManager() {
                             </div>
                         </CardHeader>
                         
-                        <CardContent className="p-8">
+                        <CardContent className="p-4 md:p-8">
                             <div className="space-y-6">
                                 {Object.values(groupedModules).map((mod) => (
                                     <div 
