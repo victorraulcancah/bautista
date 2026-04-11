@@ -118,7 +118,7 @@ export default function CursoFormModal({ open, onClose, editing, niveles, grados
                                 <div className="space-y-1 sm:col-span-2">
                                     <label className="text-xs sm:text-sm font-medium text-neutral-700 uppercase">Descripción</label>
                                     <textarea
-                                        className="flex min-h-[80px] sm:min-h-[100px] w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all placeholder:text-neutral-300 uppercase"
+                                        className="flex min-h-[80px] sm:min-h-[100px] w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-600/30 outline-none transition-all placeholder:text-neutral-300 uppercase"
                                         value={form.descripcion}
                                         onChange={(e) => set('descripcion', e.target.value.toUpperCase())}
                                         placeholder="Ingrese una descripción breve del curso..."
@@ -141,7 +141,7 @@ export default function CursoFormModal({ open, onClose, editing, niveles, grados
                         <Button 
                             type="submit" 
                             disabled={processing} 
-                            className="w-full sm:w-auto px-6 sm:px-10 bg-[#00a65a] hover:bg-[#008d4c] text-white h-9 text-xs sm:text-sm"
+                            className="w-full sm:w-auto px-6 sm:px-10 bg-emerald-600 hover:bg-emerald-700 text-white h-9 text-xs sm:text-sm font-bold shadow-lg shadow-emerald-100"
                         >
                             <Save className="size-3.5 sm:size-4 mr-2" />
                             {processing ? 'Guardando...' : 'Guardar Curso'}

@@ -55,7 +55,7 @@ export default function MensajeriaTab({ docenteCursoId }: { docenteCursoId: numb
 
     if (loading) return (
         <div className="p-20 text-center animate-pulse">
-            <Loader2 className="mx-auto size-8 text-indigo-400 animate-spin mb-4" />
+            <Loader2 className="mx-auto size-8 text-emerald-400 animate-spin mb-4" />
             <p className="font-black text-[10px] uppercase tracking-widest text-gray-400">Cargando Mensajería...</p>
         </div>
     );
@@ -76,14 +76,14 @@ export default function MensajeriaTab({ docenteCursoId }: { docenteCursoId: numb
                         <div 
                             key={s.estu_id}
                             onClick={() => setSelectedStudent(s)}
-                            className={`p-4 rounded-2xl cursor-pointer transition-all flex items-center gap-3 ${selectedStudent?.estu_id === s.estu_id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'hover:bg-gray-50'}`}
+                            className={`p-4 rounded-2xl cursor-pointer transition-all flex items-center gap-3 ${selectedStudent?.estu_id === s.estu_id ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100' : 'hover:bg-gray-50'}`}
                         >
-                            <div className={`size-10 rounded-xl flex items-center justify-center font-black text-xs ${selectedStudent?.estu_id === s.estu_id ? 'bg-white/20' : 'bg-indigo-50 text-indigo-600'}`}>
+                            <div className={`size-10 rounded-xl flex items-center justify-center font-black text-xs ${selectedStudent?.estu_id === s.estu_id ? 'bg-white/20' : 'bg-emerald-50 text-emerald-600'}`}>
                                 {s.perfil?.primer_nombre?.[0]}{s.perfil?.apellido_paterno?.[0]}
                             </div>
                             <div>
                                 <p className="font-bold text-sm line-clamp-1">{s.perfil?.primer_nombre} {s.perfil?.apellido_paterno}</p>
-                                <p className={`text-[9px] font-black uppercase tracking-widest ${selectedStudent?.estu_id === s.estu_id ? 'text-indigo-200' : 'text-gray-400'}`}>Estudiante</p>
+                                <p className={`text-[9px] font-black uppercase tracking-widest ${selectedStudent?.estu_id === s.estu_id ? 'text-emerald-200' : 'text-gray-400'}`}>Estudiante</p>
                             </div>
                         </div>
                     ))}
@@ -94,21 +94,21 @@ export default function MensajeriaTab({ docenteCursoId }: { docenteCursoId: numb
             <div className="lg:col-span-2 space-y-6">
                 {selectedStudent ? (
                     <Card className="rounded-[2.5rem] border-none shadow-sm h-[600px] flex flex-col overflow-hidden bg-white">
-                        <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-indigo-50/10">
+                        <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-emerald-50/10">
                             <div className="flex items-center gap-4">
-                                <div className="size-12 rounded-2xl bg-indigo-600 flex items-center justify-center font-black text-white">
+                                <div className="size-12 rounded-2xl bg-emerald-600 flex items-center justify-center font-black text-white">
                                     {selectedStudent.perfil?.primer_nombre?.[0]}
                                 </div>
                                 <div>
                                     <h3 className="font-black text-gray-900 leading-none">{selectedStudent.perfil?.primer_nombre} {selectedStudent.perfil?.apellido_paterno}</h3>
-                                    <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-1">Chat Directo</p>
+                                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">Chat Directo</p>
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex-1 p-8 overflow-y-auto space-y-6 bg-[#fcfdfe]">
                             <div className="flex flex-col items-center justify-center h-full opacity-20 grayscale">
-                                <Mail size={64} className="mb-4 text-indigo-200" />
+                                <Mail size={64} className="mb-4 text-emerald-200" />
                                 <p className="font-black text-xs uppercase tracking-widest">Inicia una conversación</p>
                             </div>
                         </div>
@@ -116,7 +116,7 @@ export default function MensajeriaTab({ docenteCursoId }: { docenteCursoId: numb
                         <div className="p-8 border-t border-gray-100 bg-white">
                             <div className="flex gap-3">
                                 <textarea 
-                                    className="flex-1 bg-gray-50 border-none rounded-2xl p-4 text-sm font-bold text-gray-700 focus:ring-4 focus:ring-indigo-100 transition-all resize-none h-14"
+                                    className="flex-1 bg-gray-50 border-none rounded-2xl p-4 text-sm font-bold text-gray-700 focus:ring-4 focus:ring-emerald-100 transition-all resize-none h-14"
                                     placeholder={`Escribe un mensaje a ${selectedStudent.perfil?.primer_nombre}...`}
                                     value={messageText}
                                     onChange={e => setMessageText(e.target.value)}
@@ -124,7 +124,7 @@ export default function MensajeriaTab({ docenteCursoId }: { docenteCursoId: numb
                                 <Button 
                                     onClick={handleSend}
                                     disabled={sending || !messageText.trim()}
-                                    className="size-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-100 shrink-0"
+                                    className="size-14 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-100 shrink-0"
                                 >
                                     {sending ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
                                 </Button>
@@ -133,7 +133,7 @@ export default function MensajeriaTab({ docenteCursoId }: { docenteCursoId: numb
                     </Card>
                 ) : (
                     <Card className="rounded-[2.5rem] border-none shadow-sm h-[600px] flex flex-col items-center justify-center text-center p-12 bg-white">
-                        <div className="size-20 rounded-[2rem] bg-indigo-50 flex items-center justify-center text-indigo-600 mb-6">
+                        <div className="size-20 rounded-[2rem] bg-emerald-50 flex items-center justify-center text-emerald-600 mb-6">
                             <Mail size={32} />
                         </div>
                         <h3 className="text-xl font-black text-gray-900 mb-2">Buzón de Mensajes</h3>

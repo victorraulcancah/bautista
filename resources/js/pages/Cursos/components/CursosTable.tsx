@@ -65,7 +65,7 @@ export default function CursosTable({
                             className="pl-9 w-full sm:w-56 h-9 text-sm"
                         />
                     </div>
-                    <Button onClick={onCreate} className="bg-[#00a65a] hover:bg-[#008d4c] text-white gap-2 h-9 text-sm">
+                    <Button onClick={onCreate} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 h-9 text-sm shadow-lg shadow-emerald-100 font-bold">
                         <Plus className="h-4 w-4" />
                         <span className="hidden sm:inline">Agregar Curso</span>
                         <span className="sm:hidden">Agregar</span>
@@ -103,7 +103,7 @@ export default function CursosTable({
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="flex-1 h-8 text-xs text-blue-500"
+                                            className="flex-1 h-8 text-xs text-emerald-600 border-emerald-100 hover:bg-emerald-50"
                                             onClick={() => onEdit(c)}
                                         >
                                             <Pencil className="h-3.5 w-3.5 mr-1" />
@@ -130,8 +130,8 @@ export default function CursosTable({
                         {/* Vista desktop: Tabla */}
                         <div className="hidden sm:block overflow-x-auto overflow-y-auto max-h-[60vh]">
                             <table className="w-full text-sm">
-                                <thead className="sticky top-0 z-10">
-                                    <tr className="bg-[#00a65a]">
+                                <thead className="sticky top-0 z-10 border-b border-emerald-700">
+                                    <tr className="bg-emerald-600">
                                         <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">#</th>
                                         <th className="px-4 py-3 text-left text-white text-xs font-semibold uppercase">Curso</th>
                                         <th className="px-4 py-3 text-left text-white text-xs font-semibold uppercase">Descripción</th>
@@ -155,7 +155,7 @@ export default function CursosTable({
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
-                                                        className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700"
+                                                        className="h-8 w-8 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
                                                         title="Editar curso"
                                                         onClick={() => onEdit(c)}
                                                     >

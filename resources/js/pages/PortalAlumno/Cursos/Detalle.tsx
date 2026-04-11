@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
-import CourseHero from '../../Cursos/components/CourseHero';
+import PageHeader from '@/components/shared/PageHeader';
 import CourseTabs from '../../Cursos/components/CourseTabs';
 
 export default function CursoDetalleAlumno({ cursoId }: { cursoId: number }) {
@@ -56,15 +56,14 @@ export default function CursoDetalleAlumno({ cursoId }: { cursoId: number }) {
             <Head title={`Curso: ${courseData?.curso?.nombre}`} />
             
             <div className="p-6 md:p-10 space-y-10 animate-in fade-in duration-500 max-w-[1600px] mx-auto font-sans">
-                {/* Banner Hero */}
-                <CourseHero 
-                    title={courseData?.curso?.nombre || 'Curso'}
-                    courseCode={`COD-${courseData?.curso_id}`}
-                    color="#2563eb"
-                    role="student"
-                    term="Ciclo 2024-I"
-                    professor={`${courseData?.docente?.perfil?.primer_nombre} ${courseData?.docente?.perfil?.apellido_paterno}`}
-                />
+                <div className="pb-0">
+                    <PageHeader 
+                        icon={BookOpen}
+                        title={courseData?.curso?.nombre || 'Curso'}
+                        subtitle={`Código: COD-${courseData?.curso_id} • ${courseData?.docente?.perfil?.primer_nombre} ${courseData?.docente?.perfil?.apellido_paterno}`}
+                        iconColor="bg-blue-600"
+                    />
+                </div>
 
                 {/* Navigation Tabs */}
                 <CourseTabs 

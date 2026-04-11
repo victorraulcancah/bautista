@@ -66,12 +66,12 @@ export default function CourseCard({
             {/* Cuerpo del Contenido */}
             <div className="flex flex-1 flex-col p-8 -mt-8 relative z-10 bg-white rounded-t-[2.5rem] dark:bg-gray-900">
                 <div className="flex flex-col space-y-1">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 dark:text-emerald-400">
                         <BookOpen size={12} />
                         <span>{courseCode} • {term}</span>
                     </div>
                     <Link href={href}>
-                        <h3 className="text-2xl font-black leading-tight text-gray-900 transition-colors line-clamp-2 hover:text-indigo-600 dark:text-white dark:hover:text-indigo-400">
+                        <h3 className="text-2xl font-black leading-tight text-gray-900 transition-colors line-clamp-2 hover:text-emerald-600 dark:text-white dark:hover:text-emerald-400">
                             {title}
                         </h3>
                     </Link>
@@ -80,11 +80,11 @@ export default function CourseCard({
                 {/* Información del Docente / Entorno */}
                 <div className="mt-8 mb-8 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="flex size-14 items-center justify-center rounded-[1.25rem] bg-indigo-50 border-2 border-white shadow-lg overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+                        <div className="flex size-14 items-center justify-center rounded-[1.25rem] bg-emerald-50 border-2 border-white shadow-lg overflow-hidden dark:bg-gray-800 dark:border-gray-700">
                             {professorPic ? (
                                 <img src={professorPic} alt={professor} className="size-full object-cover" />
                             ) : (
-                                <User size={24} className="text-indigo-400" />
+                                <User size={24} className="text-emerald-400" />
                             )}
                         </div>
                         <div>
@@ -106,11 +106,11 @@ export default function CourseCard({
                     <div className="space-y-3 mb-8 bg-gray-50 p-5 rounded-[1.5rem] dark:bg-gray-800/50">
                         <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest leading-none">
                             <span className="text-gray-400">Progreso de avance</span>
-                            <span className="text-indigo-600 dark:text-indigo-400">{progress}%</span>
+                            <span className="text-emerald-600 dark:text-emerald-400">{progress}%</span>
                         </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-indigo-100 dark:bg-gray-800">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-100 dark:bg-gray-800">
                             <div 
-                                className="h-full bg-indigo-600 transition-all duration-1000 shadow-[0_0_10px_rgba(79,70,229,0.3)]" 
+                                className="h-full bg-emerald-600 transition-all duration-1000 shadow-[0_0_10px_rgba(79,70,229,0.3)]" 
                                 style={{ width: `${progress}%` }} 
                             />
                         </div>
@@ -125,7 +125,7 @@ export default function CourseCard({
                         </Button>
                     </Link>
                     <Link href={role === 'teacher' ? `${href}/asistencia` : '/alumno/notas'}>
-                        <Button variant="outline" className="size-14 rounded-[1.25rem] p-0 border-gray-100 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm hover:shadow-indigo-100 active:scale-95 dark:border-gray-800 dark:hover:shadow-none">
+                        <Button variant="outline" className="size-14 rounded-[1.25rem] p-0 border-gray-100 hover:border-emerald-600 hover:text-emerald-600 transition-all shadow-sm hover:shadow-emerald-100 active:scale-95 dark:border-gray-800 dark:hover:shadow-none">
                             {role === 'teacher' ? <Calendar size={22} /> : <GraduationCap size={22} />}
                         </Button>
                     </Link>

@@ -1,38 +1,47 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Save, FileText, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, FileText, AlertCircle, ClipboardList, CheckCircle2, GraduationCap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
+import PageHeader from '@/components/shared/PageHeader';
 
 interface Props {
     actividadId: string;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Panel Docente', href: '/docente/dashboard' },
-    { title: 'Mis Cursos', href: '/docente/mis-cursos' },
-    { title: 'Calificar Tareas', href: '#' },
-];
-
 export default function CalificarTareasPage({ actividadId }: Props) {
     const [alumnos, setAlumnos] = useState<any[]>([]);
+    const [actividad, setActividad] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [notas, setNotas] = useState<Record<string, string>>({});
+    const [savingId, setSavingId] = useState<string | null>(null);
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Panel Docente', href: '/docente/dashboard' },
+        { title: 'Mis Cursos', href: '/docente/mis-cursos' },
+        { title: 'Calificar Tareas', href: '#' },
+    ];
 
     useEffect(() => {
-        cargarAlumnos();
+        cargarDatos();
     }, [actividadId]);
 
-    const cargarAlumnos = () => {
+    const cargarDatos = () => {
         setLoading(true);
-        api.get(`/docente/actividades/${actividadId}/alumnos`)
-            .then((res) => {
-                setAlumnos(res.data);
+        Promise.all([
+            api.get(`/docente/actividades/${actividadId}/alumnos`),
+            api.get(`/docente/actividades/${actividadId}`)
+        ])
+            .then(([resAlumnos, resActividad]) => {
+                setAlumnos(resAlumnos.data);
+                setActividad(resActividad.data);
                 const notasIniciales: Record<string, string> = {};
-                res.data.forEach((alumno: any) => {
+                resAlumnos.data.forEach((alumno: any) => {
                     notasIniciales[alumno.id] = alumno.nota || '';
                 });
                 setNotas(notasIniciales);
@@ -47,23 +56,28 @@ export default function CalificarTareasPage({ actividadId }: Props) {
             return;
         }
 
+        setSavingId(estudianteId);
         api.post(`/docente/actividades/${actividadId}/calificar`, {
             estudiante_id: estudianteId,
             nota: parseFloat(nota),
         })
             .then(() => {
-                alert('Nota guardada correctamente');
+                // Success feedback can be improved later
             })
             .catch(() => {
                 alert('No se pudo guardar la nota');
-            });
+            })
+            .finally(() => setSavingId(null));
     };
 
-    if (loading) {
+    if (loading && !actividad) {
         return (
             <AppLayout breadcrumbs={breadcrumbs}>
-                <div className="p-10 text-center font-black animate-pulse text-indigo-600">
-                    Cargando alumnos...
+                <div className="flex h-[80vh] items-center justify-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="size-16 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin" />
+                        <p className="font-black text-xs uppercase tracking-widest text-gray-400 animate-pulse">Cargando Nómina...</p>
+                    </div>
                 </div>
             </AppLayout>
         );
@@ -73,106 +87,119 @@ export default function CalificarTareasPage({ actividadId }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Calificar Tareas" />
 
-            <div className="min-h-screen bg-[#FDFDFF] p-8 space-y-8">
+            <div className="min-h-screen bg-[#F8FAFC] p-8 space-y-8 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-4xl font-black text-gray-900 tracking-tighter">
-                            Calificar Tareas
-                        </h1>
-                        <p className="text-gray-500 font-medium italic mt-2">
-                            Lista de alumnos matriculados
-                        </p>
-                    </div>
+                    <PageHeader 
+                        icon={ClipboardList} 
+                        title="Calificar Entregas" 
+                        subtitle={actividad?.nombre || "Tarea"}
+                        iconColor="bg-emerald-600"
+                    />
                     <Link href={`/docente/actividades/${actividadId}`}>
-                        <Button variant="outline" className="rounded-2xl">
+                        <Button variant="ghost" className="rounded-2xl font-bold bg-white shadow-sm border-none hover:bg-gray-50 uppercase text-[10px] tracking-widest h-11 px-6">
                             <ArrowLeft className="w-4 h-4 mr-2" /> Volver
                         </Button>
                     </Link>
                 </div>
 
-                <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl overflow-hidden">
-                    <table className="w-full text-left">
-                        <thead className="bg-[#00a65a] text-white">
-                            <tr>
-                                <th className="px-6 py-4 font-black uppercase tracking-wider text-center">#</th>
-                                <th className="px-6 py-4 font-black uppercase tracking-wider text-center">Nombres</th>
-                                <th className="px-6 py-4 font-black uppercase tracking-wider text-center">Apellidos</th>
-                                <th className="px-6 py-4 font-black uppercase tracking-wider text-center">Archivo</th>
-                                <th className="px-6 py-4 font-black uppercase tracking-wider text-center">Nota</th>
-                                <th className="px-6 py-4 font-black uppercase tracking-wider text-center">Guardar</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {alumnos.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400 italic">
-                                        No hay alumnos matriculados
-                                    </td>
+                <Card className="rounded-[2.5rem] border-none shadow-sm bg-white overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50/50 border-b border-gray-100">
+                                    <th className="px-8 py-6 font-black uppercase tracking-widest text-[10px] text-gray-400">#</th>
+                                    <th className="px-8 py-6 font-black uppercase tracking-widest text-[10px] text-gray-400">Estudiante</th>
+                                    <th className="px-8 py-6 font-black uppercase tracking-widest text-[10px] text-gray-400 text-center">Archivos Adjuntos</th>
+                                    <th className="px-8 py-6 font-black uppercase tracking-widest text-[10px] text-gray-400 text-center">Nota</th>
+                                    <th className="px-8 py-6 font-black uppercase tracking-widest text-[10px] text-gray-400 text-center">Acciones</th>
                                 </tr>
-                            ) : (
-                                alumnos.map((alumno, index) => (
-                                    <tr key={alumno.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 text-center font-bold text-gray-900">
-                                            {index + 1}
-                                        </td>
-                                        <td className="px-6 py-4 text-center text-gray-700">
-                                            {alumno.primer_nombre} {alumno.segundo_nombre}
-                                        </td>
-                                        <td className="px-6 py-4 text-center text-gray-700">
-                                            {alumno.apellido_paterno} {alumno.apellido_materno}
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            {alumno.archivos && alumno.archivos.length > 0 ? (
-                                                <div className="space-y-1">
-                                                    {alumno.archivos.map((archivo: any) => (
-                                                        <a
-                                                            key={archivo.id}
-                                                            href={archivo.url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="flex items-center justify-center text-indigo-600 hover:text-indigo-700 font-medium text-sm"
-                                                        >
-                                                            <FileText className="w-4 h-4 mr-1" />
-                                                            {archivo.nombre}
-                                                        </a>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
-                                                    <AlertCircle className="w-3 h-3 mr-1" />
-                                                    Sin archivo
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <Input
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                max="20"
-                                                value={notas[alumno.id] || ''}
-                                                onChange={(e) =>
-                                                    setNotas({ ...notas, [alumno.id]: e.target.value })
-                                                }
-                                                className="w-24 mx-auto text-center rounded-xl"
-                                                placeholder="0.00"
-                                            />
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <Button
-                                                onClick={() => guardarNota(alumno.id)}
-                                                size="sm"
-                                                className="rounded-xl bg-indigo-600 hover:bg-indigo-700"
-                                            >
-                                                <Save className="w-4 h-4" />
-                                            </Button>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {alumnos.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-8 py-20 text-center">
+                                            <div className="flex flex-col items-center gap-4 opacity-40">
+                                                <GraduationCap size={48} className="text-gray-300" />
+                                                <p className="font-black uppercase tracking-widest text-sm text-gray-400">No hay alumnos matriculados</p>
+                                            </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ) : (
+                                    alumnos.map((alumno, index) => (
+                                        <tr key={alumno.id} className="hover:bg-gray-50/50 transition-colors group">
+                                            <td className="px-8 py-6 font-black text-gray-300 group-hover:text-emerald-600 transition-colors">
+                                                {index + 1}
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="size-10 rounded-[1rem] bg-emerald-50 flex items-center justify-center font-black text-emerald-600 text-[10px] shadow-sm uppercase">
+                                                        {alumno.primer_nombre?.[0]}{alumno.apellido_paterno?.[0]}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-black text-gray-900 leading-none group-hover:text-emerald-600 transition-colors uppercase text-xs">
+                                                            {alumno.primer_nombre} {alumno.segundo_nombre}
+                                                        </div>
+                                                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-tight mt-1">
+                                                            {alumno.apellido_paterno} {alumno.apellido_materno}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6 text-center">
+                                                {alumno.archivos && alumno.archivos.length > 0 ? (
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        {alumno.archivos.map((archivo: any) => (
+                                                            <a
+                                                                key={archivo.id}
+                                                                href={archivo.url || `/storage/${archivo.path}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-[11px] hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                                                            >
+                                                                <FileText size={12} />
+                                                                {archivo.nombre}
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <Badge className="rounded-xl bg-rose-50 text-rose-600 border-none shadow-none font-black uppercase text-[9px] px-3 h-7">
+                                                        <AlertCircle size={10} className="mr-1.5" /> Sin Entregas
+                                                    </Badge>
+                                                )}
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center justify-center">
+                                                    <Input
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0"
+                                                        max="20"
+                                                        value={notas[alumno.id] || ''}
+                                                        onChange={(e) =>
+                                                            setNotas({ ...notas, [alumno.id]: e.target.value })
+                                                        }
+                                                        className="w-24 h-12 text-center rounded-xl border-none bg-gray-100 font-black text-emerald-600 focus:ring-4 focus:ring-emerald-100 transition-all text-lg"
+                                                        placeholder="0.0"
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6 text-center">
+                                                <Button
+                                                    onClick={() => guardarNota(alumno.id)}
+                                                    disabled={savingId === alumno.id}
+                                                    className={`rounded-xl h-12 px-6 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-100 font-black uppercase text-[10px] tracking-widest gap-2 transition-all active:scale-95 ${savingId === alumno.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                >
+                                                    <Save size={14} className={savingId === alumno.id ? 'animate-spin' : ''} />
+                                                    {savingId === alumno.id ? 'Guardando...' : 'Guardar Nota'}
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
             </div>
         </AppLayout>
     );

@@ -1,4 +1,5 @@
-import { Search, Filter, Grid, List as ListIcon } from 'lucide-react';
+import { Search, Filter, Grid, List as ListIcon, BookOpen, ChevronRight } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -29,7 +30,7 @@ export default function StudentCursos() {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center p-20 space-y-4">
-                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
                 <p className="font-black text-gray-400 uppercase tracking-widest text-xs">Cargando tus cursos...</p>
             </div>
         );
@@ -64,12 +65,12 @@ export default function StudentCursos() {
                         placeholder="Buscar en mis cursos..." 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="h-12 pl-12 rounded-2xl bg-gray-50 border-none font-bold focus-visible:ring-2 focus-visible:ring-blue-600/20"
+                        className="h-12 pl-12 rounded-2xl bg-gray-50 border-none font-bold focus-visible:ring-2 focus-visible:ring-emerald-600/20"
                     />
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <select className="h-11 px-4 rounded-xl bg-gray-50 border-none font-bold text-xs text-gray-600 focus:ring-2 focus:ring-blue-600/20 outline-none cursor-pointer">
+                    <select className="h-11 px-4 rounded-xl bg-gray-50 border-none font-bold text-xs text-gray-600 focus:ring-2 focus:ring-emerald-600/20 outline-none cursor-pointer">
                         <option>Mis Cursos 2024</option>
                         <option>Todos los periodos</option>
                     </select>
@@ -85,22 +86,62 @@ export default function StudentCursos() {
                 <div className="h-px flex-1 bg-gray-50" />
             </div>
 
-            {/* Grid de Cursos para Alumnos */}
-            <div className={`grid gap-8 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+            {/* Grid/List de Cursos para Alumnos */}
+            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8' : 'grid-cols-1'}`}>
                 {filteredCursos.map((c, i) => (
-                    <CourseCard 
-                        key={c.id || c.docen_curso_id}
-                        id={c.docen_curso_id?.toString() || c.id?.toString()}
-                        courseCode={`COD-${c.curso_id}`}
-                        title={c.curso?.nombre}
-                        status="Activo"
-                        color={COURSE_COLORS[i % COURSE_COLORS.length]}
-                        href={`/alumno/cursos/${c.docen_curso_id}`}
-                        role="student"
-                        professor={`${c.docente?.perfil?.primer_nombre} ${c.docente?.perfil?.apellido_paterno}`}
-                        progress={65} // Hardcoded por ahora, luego integrar progreso real
-                        term="2024-I"
-                    />
+                    viewMode === 'grid' ? (
+                        <CourseCard 
+                            key={c.id || c.docen_curso_id}
+                            id={c.docen_curso_id?.toString() || c.id?.toString()}
+                            courseCode={`COD-${c.curso_id}`}
+                            title={c.curso?.nombre}
+                            status="Activo"
+                            color={COURSE_COLORS[i % COURSE_COLORS.length]}
+                            href={`/alumno/cursos/${c.docen_curso_id}`}
+                            role="student"
+                            professor={`${c.docente?.perfil?.primer_nombre} ${c.docente?.perfil?.apellido_paterno}`}
+                            progress={65} // Hardcoded por ahora, luego integrar progreso real
+                            term="2024-I"
+                        />
+                    ) : (
+                        <Link 
+                            key={c.id || c.docen_curso_id}
+                            href={`/alumno/cursos/${c.docen_curso_id}`}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-white rounded-[2rem] border border-gray-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-100/50 transition-all gap-4 group"
+                        >
+                            <div className="flex items-center gap-5">
+                                <div className="size-14 rounded-2xl flex items-center justify-center font-black text-white text-xs shadow-md" style={{ backgroundColor: COURSE_COLORS[i % COURSE_COLORS.length] }}>
+                                    {c.curso?.nombre?.substring(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-1">
+                                        <BookOpen size={12} />
+                                        <span>COD-{c.curso_id} • 2024-I</span>
+                                    </div>
+                                    <h3 className="text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors">
+                                        {c.curso?.nombre}
+                                    </h3>
+                                    <p className="text-xs font-bold text-gray-500 mt-1">
+                                        Prof: {c.docente?.perfil?.primer_nombre} {c.docente?.perfil?.apellido_paterno}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-6 self-start sm:self-auto w-full sm:w-auto">
+                                <div className="hidden sm:block flex-1 min-w-[100px]">
+                                    <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest leading-none mb-1.5">
+                                        <span className="text-gray-400">Progreso</span>
+                                        <span className="text-blue-600">65%</span>
+                                    </div>
+                                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
+                                        <div className="h-full bg-blue-600" style={{ width: '65%' }} />
+                                    </div>
+                                </div>
+                                <div className="size-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors shrink-0">
+                                    <ChevronRight size={18} />
+                                </div>
+                            </div>
+                        </Link>
+                    )
                 ))}
             </div>
 

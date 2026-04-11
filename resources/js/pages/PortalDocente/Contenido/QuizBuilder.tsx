@@ -111,7 +111,7 @@ export default function QuizBuilder({ docenteCursoId, actividadId }: { docenteCu
     if (loading) {
 return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="p-20 text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest text-2xl mt-10">Cargando constructor...</div>
+            <div className="p-20 text-center font-black animate-pulse text-emerald-600 uppercase tracking-widest text-2xl mt-10">Cargando constructor...</div>
         </AppLayout>
     );
 }
@@ -133,7 +133,7 @@ return (
                     </Link>
                     <div>
                         <h1 className="text-xl font-black text-gray-900 leading-none">Generador de Exámenes</h1>
-                        <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mt-1">
+                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-1">
                             Total: {totalPuntos} Puntos / {cuestionario.preguntas?.length || 0} Preguntas
                         </p>
                     </div>
@@ -143,7 +143,7 @@ return (
                     <Button 
                         onClick={handleSave} 
                         disabled={saving} 
-                        className="rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 h-12 px-8 font-black shadow-lg shadow-indigo-200 uppercase tracking-widest"
+                        className="rounded-[1.5rem] bg-emerald-600 hover:bg-emerald-700 h-12 px-8 font-black shadow-lg shadow-emerald-200 uppercase tracking-widest"
                     >
                         <Save className="w-5 h-5 mr-3" /> {saving ? 'Guardando...' : 'Guardar Examen'}
                     </Button>
@@ -152,9 +152,9 @@ return (
 
             <div className="flex-1 max-w-4xl w-full mx-auto p-6 md:p-10 space-y-8 pb-32">
                 {/* Metadatos Generales */}
-                <div className="bg-white rounded-[2rem] p-8 border border-t-8 border-indigo-600 shadow-xl shadow-gray-200/50 space-y-6">
+                <div className="bg-white rounded-[2rem] p-8 border border-t-8 border-emerald-600 shadow-xl shadow-gray-200/50 space-y-6">
                     <h2 className="text-3xl font-black text-gray-900 tracking-tight flex items-center">
-                        <FileText className="w-8 h-8 mr-4 text-indigo-300" /> Configuración Básica
+                        <FileText className="w-8 h-8 mr-4 text-emerald-300" /> Configuración Básica
                     </h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -165,7 +165,7 @@ return (
                                 value={cuestionario.duracion || ''} 
                                 onChange={(e) => setCuestionario({...cuestionario, duracion: e.target.value})}
                                 placeholder="Ej: 60"
-                                className="h-12 rounded-xl bg-gray-50 border-gray-100 font-bold text-center text-lg focus:border-indigo-500 focus:ring-indigo-500"
+                                className="h-12 rounded-xl bg-gray-50 border-gray-100 font-bold text-center text-lg focus:border-emerald-500 focus:ring-emerald-500"
                             />
                         </div>
 
@@ -174,7 +174,7 @@ return (
                             <select 
                                 value={cuestionario.nota_visible}
                                 onChange={(e) => setCuestionario({...cuestionario, nota_visible: e.target.value})}
-                                className="w-full h-12 rounded-xl bg-gray-50 border-gray-100 font-bold focus:border-indigo-500 focus:ring-indigo-500"
+                                className="w-full h-12 rounded-xl bg-gray-50 border-gray-100 font-bold focus:border-emerald-500 focus:ring-emerald-500"
                             >
                                 <option value="1">Sí, alumno verá la nota al terminar</option>
                                 <option value="0">No, calcular pero ocultar al alumno</option>
@@ -186,7 +186,7 @@ return (
                             <select 
                                 value={cuestionario.mostrar_respuesta}
                                 onChange={(e) => setCuestionario({...cuestionario, mostrar_respuesta: e.target.value})}
-                                className="w-full h-12 rounded-xl bg-gray-50 border-gray-100 font-bold focus:border-indigo-500 focus:ring-indigo-500"
+                                className="w-full h-12 rounded-xl bg-gray-50 border-gray-100 font-bold focus:border-emerald-500 focus:ring-emerald-500"
                             >
                                 <option value="1">Sí, mostrar correctas al finalizar</option>
                                 <option value="0">No, no mostrar respuestas</option>
@@ -198,12 +198,12 @@ return (
                 {/* Preguntas */}
                 <div className="space-y-6">
                     {cuestionario.preguntas?.map((p: any, pIndex: number) => (
-                        <div key={p.pregunta_id || p._frontId || `p-${pIndex}`} className="bg-white rounded-[2rem] border border-gray-200 shadow-xl shadow-gray-200/50 flex flex-col transition-all duration-300 focus-within:ring-4 ring-indigo-500/20 group">
+                        <div key={p.pregunta_id || p._frontId || `p-${pIndex}`} className="bg-white rounded-[2rem] border border-gray-200 shadow-xl shadow-gray-200/50 flex flex-col transition-all duration-300 focus-within:ring-4 ring-emerald-500/20 group">
                             {/* Pregunta Cabecera */}
                             <div className="p-6 md:p-8 space-y-6">
                                 <div className="flex items-start md:items-center justify-between gap-4 flex-col md:flex-row">
                                     <div className="flex-1 w-full">
-                                        <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest px-2 mb-2 block">Cuerpo de la pregunta</label>
+                                        <label className="text-[10px] font-black text-emerald-400 uppercase tracking-widest px-2 mb-2 block">Cuerpo de la pregunta</label>
                                         <Input 
                                             value={p.cabecera}
                                             onChange={(e) => updatePregunta(pIndex, 'cabecera', e.target.value)}
@@ -262,7 +262,7 @@ return (
                                         <Button 
                                             variant="ghost" 
                                             onClick={() => addAlternativa(pIndex)}
-                                            className="text-indigo-600 font-bold hover:bg-indigo-50 rounded-xl px-4"
+                                            className="text-emerald-600 font-bold hover:bg-emerald-50 rounded-xl px-4"
                                         >
                                             <PlusCircle className="w-4 h-4 mr-2" /> Añadir Opción
                                         </Button>
@@ -288,7 +288,7 @@ return (
                 <div className="flex justify-center pt-8 pb-10">
                     <Button 
                         onClick={addPregunta}
-                        className="bg-white border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 h-16 rounded-[2rem] px-10 shadow-xl shadow-indigo-100 font-black text-lg transition-transform hover:scale-105"
+                        className="bg-white border-2 border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 h-16 rounded-[2rem] px-10 shadow-xl shadow-emerald-100 font-black text-lg transition-transform hover:scale-105"
                     >
                         <PlusCircle className="w-6 h-6 mr-3" /> Añadir Nueva Pregunta
                     </Button>

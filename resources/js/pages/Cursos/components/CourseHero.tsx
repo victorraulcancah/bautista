@@ -75,7 +75,7 @@ export default function CourseHero({
                             <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">En Sesión</span>
                         </div>
                         <div className="flex items-center gap-1.5 group/stat">
-                            <BookOpen size={14} className="text-indigo-400 group-hover/stat:scale-110 transition-transform" />
+                            <BookOpen size={14} className="text-emerald-400 group-hover/stat:scale-110 transition-transform" />
                             <span className="text-[10px] font-bold uppercase tracking-widest">Activo</span>
                         </div>
                     </div>
