@@ -19,8 +19,8 @@ class CalificacionApiController extends Controller
         $actividad = ActividadCurso::findOrFail($actividadId);
         
         // Find the section_id from request or default to first findable from DocenteCurso
-        $seccionId = $request->get('seccion_id');
-        $aperturaId = $request->get('apertura_id');
+        $seccionId = $request->input('seccion_id');
+        $aperturaId = $request->input('apertura_id');
 
         if (!$seccionId || !$aperturaId) {
             return response()->json([
@@ -92,5 +92,150 @@ class CalificacionApiController extends Controller
             DB::rollBack();
             return response()->json(['message' => 'Error al guardar calificaciones: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Get a complete grade matrix (Students x Activities) for a course assignment.
+     */
+    public function indexByCourse(int $docenteCursoId)
+    {
+        $dc = \App\Models\DocenteCurso::with('curso')->findOrFail($docenteCursoId);
+        
+        // 1. Get all gradable activities for this course
+        $actividades = ActividadCurso::where('id_curso', $dc->curso_id)
+            ->where('es_calificado', '1')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // 2. Get all students in this section
+        $matriculas = Matricula::where('seccion_id', $dc->seccion_id)
+            ->where('apertura_id', $dc->apertura_id)
+            ->with('estudiante.perfil')
+            ->get();
+
+        // 3. Get all grades for these students/activities
+        $notas = NotaActividad::whereIn('actividad_id', $actividades->pluck('actividad_id'))
+            ->whereIn('estu_id', $matriculas->pluck('estu_id'))
+            ->get();
+
+        // 4. Format Grade Matrix and calculate weighted averages if settings exist
+        $settings = $dc->settings ?? [];
+        $weights = $settings['weights'] ?? null; // e.g. { "1": 40, "2": 60 } where 1 is Tarea, 2 is Examen
+
+        $estudiantes = $matriculas->map(function ($m) use ($actividades, $notas, $weights) {
+            $e = $m->estudiante;
+            $nombre = trim(($e->perfil?->apellido_paterno ?? '') . ' ' . ($e->perfil?->apellido_materno ?? '') . ', ' . ($e->perfil?->primer_nombre ?? ''));
+            
+            $notasAlumno = $actividades->map(function ($act) use ($e, $notas) {
+                $notaObj = $notas->where('estu_id', $e->estu_id)->where('actividad_id', $act->actividad_id)->first();
+                return [
+                    'actividad_id' => $act->actividad_id,
+                    'tipo_id'      => $act->id_tipo_actividad,
+                    'nota'         => $notaObj?->nota ?? '',
+                    'observacion'  => $notaObj?->observacion ?? '',
+                    'entregado'    => !empty($notaObj?->archivo_entrega),
+                    'fecha_entrega'=> $notaObj?->fecha_entrega,
+                ];
+            });
+
+            // Calculate Average
+            $finalAverage = 0;
+            if ($weights && count($weights) > 0) {
+                // Weighted average logic: 
+                // Group by type, get avg per type, then apply global weight
+                $typeAverages = [];
+                foreach ($weights as $tipoId => $weightPercent) {
+                    $notasDeEsteTipo = $notasAlumno->where('tipo_id', (int)$tipoId)->where('nota', '!=', '');
+                    if ($notasDeEsteTipo->count() > 0) {
+                        $typeAverage = $notasDeEsteTipo->avg('nota');
+                        $finalAverage += ($typeAverage * ($weightPercent / 100));
+                    }
+                }
+            } else {
+                // Simple average
+                $validGrades = $notasAlumno->where('nota', '!=', '');
+                $finalAverage = $validGrades->count() > 0 ? $validGrades->avg('nota') : 0;
+            }
+
+            return [
+                'estu_id' => $e->estu_id,
+                'nombre'  => $nombre,
+                'notas'   => $notasAlumno,
+                'promedio'=> round($finalAverage, 2),
+            ];
+        });
+
+        return response()->json([
+            'curso'       => $dc->curso->nombre,
+            'actividades' => $actividades->map(fn($a) => [
+                'id' => $a->actividad_id, 
+                'nombre' => $a->nombre_actividad,
+                'tipo_id' => $a->id_tipo_actividad
+            ]),
+            'estudiantes' => $estudiantes,
+            'settings'    => $settings,
+        ]);
+    }
+
+    /**
+     * Export the grade matrix to Excel.
+     */
+    public function exportExcel(int $docenteCursoId)
+    {
+        $dc = \App\Models\DocenteCurso::with(['curso', 'seccion.grado'])->findOrFail($docenteCursoId);
+        $matrixSync = $this->indexByCourse($docenteCursoId)->getData();
+        
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Registro de Notas');
+
+        // Header Info
+        $sheet->setCellValue('A1', 'CURSO:');
+        $sheet->setCellValue('B1', $dc->curso->nombre);
+        $sheet->setCellValue('A2', 'GRADO:');
+        $sheet->setCellValue('B2', $dc->seccion->grado->nombre_grado . ' - ' . $dc->seccion->nombre);
+        $sheet->getStyle('A1:A2')->getFont()->setBold(true);
+
+        // Table Header
+        $sheet->setCellValue('A4', 'ESTUDIANTE');
+        $col = 'B';
+        foreach ($matrixSync->actividades as $act) {
+            $sheet->setCellValue($col . '4', $act->nombre);
+            $sheet->getStyle($col . '4')->getAlignment()->setTextRotation(90);
+            $col++;
+        }
+        $sheet->setCellValue($col . '4', 'PROMEDIO');
+        $sheet->getStyle('A4:' . $col . '4')->getFont()->setBold(true);
+        $sheet->getStyle('A4:' . $col . '4')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE0E0E0');
+
+        // Data
+        $row = 5;
+        foreach ($matrixSync->estudiantes as $estu) {
+            $sheet->setCellValue('A' . $row, $estu->nombre);
+            $col = 'B';
+            foreach ($estu->notas as $nota) {
+                $sheet->setCellValue($col . $row, $nota->nota ?: '-');
+                $col++;
+            }
+            $sheet->setCellValue($col . $row, $estu->promedio);
+            
+            // Color average if failing (< 11 or similar)
+            if ($estu->promedio < 11) {
+                $sheet->getStyle($col . $row)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
+            }
+            
+            $row++;
+        }
+
+        // Auto size columns
+        $sheet->getColumnDimension('A')->setAutoSize(true);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        
+        $fileName = 'registro_notas_' . str_replace(' ', '_', $dc->curso->nombre) . '.xlsx';
+        $tempFile = tempnam(sys_get_temp_dir(), 'export');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 }

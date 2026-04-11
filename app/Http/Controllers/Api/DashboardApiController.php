@@ -178,15 +178,39 @@ class DashboardApiController extends Controller
     private function estudianteStats($user): JsonResponse
     {
         $estudiante = Estudiante::where('user_id', $user->id)->first();
-        
+        if (!$estudiante) return response()->json(['stats' => ['tareas_pendientes' => 0, 'asistencia_perc' => 0, 'promedio_general' => 0]]);
+
+        // 1. Calcular Asistencia
+        $totalSesiones = \App\Models\AsistenciaEstudiante::where('estu_id', $estudiante->estu_id)->count();
+        $presentes = \App\Models\AsistenciaEstudiante::where('estu_id', $estudiante->estu_id)
+            ->whereIn('estado', ['P', 'T', 'J'])
+            ->count();
+        $asistenciaPerc = $totalSesiones > 0 ? ($presentes / $totalSesiones) * 100 : 0;
+
+        // 2. Calcular Promedio General
+        $notas = \App\Models\Calificacion::where('estu_id', $estudiante->estu_id)->get();
+        $promedioGeneral = $notas->avg('nota') ?? 0;
+
+        // 3. Tareas Pendientes
+        // Buscamos actividades que no tengan calificación y cuya fecha sea reciente o relevante
+        $pendientes = \App\Models\Actividad::whereHas('claseCurso.clase.unidad.curso', function($q) use ($estudiante) {
+            $q->whereHas('matriculas', function($mq) use ($estudiante) {
+                $mq->where('estu_id', $estudiante->estu_id);
+            });
+        })
+        ->whereDoesntHave('calificaciones', function($q) use ($estudiante) {
+            $q->where('estu_id', $estudiante->estu_id);
+        })
+        ->count();
+
         return response()->json([
             'stats' => [
-                'tareas_pendientes' => 5,
-                'asistencia_perc' => 95,
-                'promedio_general' => 17
+                'tareas_pendientes' => $pendientes,
+                'asistencia_perc' => round($asistenciaPerc, 1),
+                'promedio_general' => round($promedioGeneral, 1)
             ],
-            'cursos' => \App\Models\Matricula::where('estu_id', $estudiante?->estu_id ?? 0)
-                ->with(['apertura.nivel']) // Simplificado para demo
+            'cursos' => \App\Models\Matricula::where('estu_id', $estudiante->estu_id)
+                ->with(['apertura.nivel'])
                 ->get(),
             'notificaciones'      => [],
             'mensajes_pendientes' => [],

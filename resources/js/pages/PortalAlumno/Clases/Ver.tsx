@@ -19,12 +19,10 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
     const handleUpload = (actividadId: number) => {
         const input = document.createElement('input');
         input.type = 'file';
+        input.accept = '.pdf,.doc,.docx,.jpg,.png';
         input.onchange = (e: any) => {
             const file = e.target.files[0];
-
-            if (!file) {
-return;
-}
+            if (!file) return;
 
             const formData = new FormData();
             formData.append('archivo', file);
@@ -32,8 +30,13 @@ return;
             setSubmitting(actividadId);
             api.post(`/alumno/actividad/${actividadId}/entregar`, formData)
                 .then(() => {
-                    alert('¡Actividad entregada con éxito!');
-                    // Optionally refresh or show checkmark
+                    // Update local state to show "Entregado"
+                    setClase((prev: any) => ({
+                        ...prev,
+                        actividades: prev.actividades.map((a: any) => 
+                            a.actividad_id === actividadId ? { ...a, entregado: true } : a
+                        )
+                    }));
                 })
                 .catch(err => alert('Error al subir archivo: ' + err.response?.data?.message))
                 .finally(() => setSubmitting(null));
@@ -105,37 +108,71 @@ return <div className="p-10 text-center font-black animate-pulse text-indigo-600
                 <div className="space-y-8">
                     <div className="bg-indigo-900 rounded-[3rem] p-8 text-white shadow-2xl shadow-indigo-200">
                         <h4 className="text-xl font-black mb-6 flex items-center">
-                            <ClipboardList className="w-5 h-5 mr-3 text-indigo-400" /> Actividades Pendientes
+                            <ClipboardList className="w-5 h-5 mr-3 text-indigo-400" /> Tareas y Evaluaciones
                         </h4>
                         <div className="space-y-4">
-                            {clase.actividades.map((act: any) => (
-                                <div key={act.actividad_id} className="bg-white/5 border border-white/10 p-5 rounded-[2rem] space-y-4">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">{act.tipo_actividad?.nombre || 'Tarea'}</span>
-                                            <p className="font-bold text-sm leading-tight">{act.nombre_actividad}</p>
+                            {clase.actividades.map((act: any) => {
+                                const isQuiz = act.tipo_id == 2 || act.tipo_id == 3;
+                                const isCompleted = act.entregado || (isQuiz && act.nota !== null);
+                                
+                                return (
+                                    <div key={act.actividad_id} className={`p-6 rounded-[2rem] border transition-all ${
+                                        isCompleted 
+                                        ? 'bg-emerald-500/10 border-emerald-500/20' 
+                                        : 'bg-white/5 border-white/10'
+                                    }`}>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <span className={`text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-emerald-400' : 'text-indigo-300'}`}>
+                                                    {act.tipo_actividad?.nombre || 'Tarea'}
+                                                </span>
+                                                <p className={`font-bold text-sm leading-tight ${isCompleted ? 'text-white/90' : 'text-white'}`}>
+                                                    {act.nombre_actividad}
+                                                </p>
+                                            </div>
+                                            {isCompleted ? (
+                                                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                                            ) : (
+                                                <AlertCircle className="w-5 h-5 text-orange-400" />
+                                            )}
                                         </div>
-                                        <AlertCircle className="w-4 h-4 text-orange-400" />
-                                    </div>
-                                    
-                                    {act.tipo_id == 1 ? ( // If it's a quiz/exam
-                                        <Link href={`/examenes/${act.actividad_id}/resolver`} className="block">
-                                            <Button className="w-full h-10 rounded-xl bg-white text-indigo-900 hover:bg-indigo-50 font-black text-[10px] uppercase">
-                                                Iniciar Examen
+                                        
+                                        {isQuiz ? (
+                                            isCompleted ? (
+                                                <div className="text-center py-2 px-4 bg-emerald-500/20 rounded-xl text-emerald-400 font-black text-[10px] uppercase">
+                                                    Examen Finalizado - Nota: {act.nota || 'Pendiente'}
+                                                </div>
+                                            ) : (
+                                                <Link href={`/examenes/${act.actividad_id}/resolver`} className="block">
+                                                    <Button className="w-full h-11 rounded-2xl bg-white text-indigo-900 hover:bg-indigo-50 font-black text-[10px] uppercase shadow-xl shadow-indigo-950/20">
+                                                        Iniciar Examen
+                                                    </Button>
+                                                </Link>
+                                            )
+                                        ) : act.entregado ? (
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-center p-3 rounded-xl bg-emerald-500/20 text-emerald-400 font-black text-[10px] uppercase gap-2">
+                                                    ✅ Tarea Enviada
+                                                </div>
+                                                {act.nota && (
+                                                    <div className="text-center text-[10px] font-black text-indigo-200">
+                                                        CALIFICACIÓN: <span className="text-white">{act.nota}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <Button 
+                                                onClick={() => handleUpload(act.actividad_id)}
+                                                disabled={submitting === act.actividad_id}
+                                                className="w-full h-11 rounded-2xl bg-indigo-500 hover:bg-indigo-400 text-white font-black text-[10px] uppercase shadow-lg shadow-indigo-950/50"
+                                            >
+                                                {submitting === act.actividad_id ? 'Procesando...' : 'Subir Tarea'} <Upload className="w-3 h-3 ml-2" />
                                             </Button>
-                                        </Link>
-                                    ) : (
-                                        <Button 
-                                            onClick={() => handleUpload(act.actividad_id)}
-                                            disabled={submitting === act.actividad_id}
-                                            className="w-full h-10 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-black text-[10px] uppercase shadow-lg shadow-indigo-900/50"
-                                        >
-                                            {submitting === act.actividad_id ? 'Subiendo...' : 'Entregar Tarea'} <Upload className="w-3 h-3 ml-2" />
-                                        </Button>
-                                    )}
-                                </div>
-                            ))}
-                            {clase.actividades.length === 0 && <p className="text-xs text-white/50 italic">No hay actividades para esta sesión.</p>}
+                                        )}
+                                    </div>
+                                );
+                            })}
+                            {clase.actividades.length === 0 && <p className="text-xs text-white/50 italic text-center py-4">No hay tareas programadas.</p>}
                         </div>
                     </div>
 

@@ -609,5 +609,669 @@ SOLUCIÓN:
 
 ---
 
+## 🚀 PLAN DE ESTABILIZACIÓN Y MEJORA - FASE 1
+
+Este plan aborda la **Prioridad ALTA** identificada en el análisis, enfocándose en la consistencia de la base de datos, la seguridad mediante middleware y la completitud de las APIs básicas.
+
+### ⚠️ DECISIONES ARQUITECTÓNICAS IMPORTANTES
+
+#### 1. Consolidación de APIs
+**DECISIÓN**: Eliminar rutas duplicadas en `DocenteApiController` a favor de `CursoContenidoApiController`
+
+**RUTAS A ELIMINAR** (DocenteApiController):
+```php
+❌ POST /api/docente/unidad
+❌ POST /api/docente/clase
+❌ POST /api/docente/actividad
+```
+
+**RUTAS ESTÁNDAR** (CursoContenidoApiController):
+```php
+✅ POST /api/contenido/unidades
+✅ POST /api/contenido/clases
+✅ POST /api/actividades (ActividadApiController)
+```
+
+**IMPACTO**: Requerirá actualización en el frontend (Editor.tsx)
+
+#### 2. Relación Unidad-Curso
+**DECISIÓN CONFIRMADA**: Las Unidades y Clases pertenecen al **Curso** (compartido), NO a la asignación individual del docente.
+
+**ESTRUCTURA**:
+```
+Curso (compartido)
+  └─ Unidad (compartida entre todas las secciones)
+      └─ Clase (compartida entre todas las secciones)
+          └─ Actividad (compartida)
+```
+
+**BENEFICIOS**:
+- Múltiples secciones comparten el mismo material
+- Docentes colaboran en el mismo contenido
+- Actualizaciones benefician a todas las secciones
+- Menos duplicación de contenido
+
+**TABLA AFECTADA**:
+```sql
+-- ✅ CORRECTO (actual)
+CREATE TABLE unidades (
+    unidad_id BIGINT PRIMARY KEY,
+    curso_id BIGINT,  -- ✅ Pertenece al curso
+    titulo VARCHAR(200),
+    ...
+);
+
+-- ❌ INCORRECTO (lo que estaba en DocenteApiController)
+-- docente_curso_id NO debe usarse aquí
+```
+
+---
+
+### 📋 CAMBIOS PROPUESTOS
+
+#### 1. Seguridad y Middleware [NUEVO]
+
+##### [NEW] VerifyDocenteCurso.php
+**Ubicación**: `app/Http/Middleware/VerifyDocenteCurso.php`
+
+**Propósito**: Verificar que el docente autenticado tiene permiso sobre el curso solicitado
+
+**Lógica**:
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use App\Models\DocenteCurso;
+use App\Models\Docente;
+
+class VerifyDocenteCurso
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $user = $request->user();
+        
+        // Obtener docente_id del usuario
+        $docente = Docente::where('id_usuario', $user->id)->first();
+        
+        if (!$docente) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+        
+        // Obtener docenteCursoId del request (puede venir de ruta o query)
+        $docenteCursoId = $request->route('docenteCursoId') 
+                       ?? $request->input('docente_curso_id');
+        
+        if (!$docenteCursoId) {
+            return response()->json(['message' => 'docente_curso_id requerido'], 422);
+        }
+        
+        // Verificar que el docente tiene acceso a este curso
+        $tieneAcceso = DocenteCurso::where('docen_curso_id', $docenteCursoId)
+            ->where('docente_id', $docente->docente_id)
+            ->exists();
+        
+        if (!$tieneAcceso) {
+            return response()->json(['message' => 'No tiene acceso a este curso'], 403);
+        }
+        
+        return $next($request);
+    }
+}
+```
+
+##### [NEW] VerifyEstudianteCurso.php
+**Ubicación**: `app/Http/Middleware/VerifyEstudianteCurso.php`
+
+**Propósito**: Verificar que el estudiante está matriculado en el curso/sección
+
+**Lógica**:
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use App\Models\Estudiante;
+use App\Models\Matricula;
+use App\Models\DocenteCurso;
+
+class VerifyEstudianteCurso
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $user = $request->user();
+        
+        // Obtener estudiante_id del usuario
+        $estudiante = Estudiante::where('user_id', $user->id)->first();
+        
+        if (!$estudiante) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+        
+        // Obtener cursoId o docenteCursoId del request
+        $cursoId = $request->route('cursoId') ?? $request->input('curso_id');
+        $docenteCursoId = $request->route('docenteCursoId');
+        
+        if ($docenteCursoId) {
+            // Verificar a través de docente_curso
+            $docenteCurso = DocenteCurso::find($docenteCursoId);
+            if (!$docenteCurso) {
+                return response()->json(['message' => 'Curso no encontrado'], 404);
+            }
+            
+            $estaMatriculado = Matricula::where('estu_id', $estudiante->estu_id)
+                ->where('seccion_id', $docenteCurso->seccion_id)
+                ->where('apertura_id', $docenteCurso->apertura_id)
+                ->where('estado', '1')
+                ->exists();
+        } else if ($cursoId) {
+            // Verificar a través de curso_id
+            $estaMatriculado = Matricula::where('estu_id', $estudiante->estu_id)
+                ->whereHas('seccion.grado', function($q) use ($cursoId) {
+                    // Verificar que la sección tiene el curso
+                    // Esto depende de cómo relacionas curso con sección
+                })
+                ->where('estado', '1')
+                ->exists();
+        } else {
+            return response()->json(['message' => 'curso_id o docente_curso_id requerido'], 422);
+        }
+        
+        if (!$estaMatriculado) {
+            return response()->json(['message' => 'No está matriculado en este curso'], 403);
+        }
+        
+        return $next($request);
+    }
+}
+```
+
+---
+
+#### 2. Refactorización de APIs Backend
+
+##### [MODIFY] routes/api.php
+**Cambios**:
+```php
+// ============================================
+// APLICAR MIDDLEWARES
+// ============================================
+
+// Rutas de Docente (requieren verificación de acceso al curso)
+Route::middleware(['auth.token', 'verify.docente.curso'])->group(function () {
+    Route::get('docente/curso/{docenteCursoId}/contenido', [DocenteApiController::class, 'cursoContenido']);
+    Route::get('docente/curso/{docenteCursoId}/alumnos', [DocenteApiController::class, 'alumnosSeccion']);
+    Route::get('docente/curso/{docenteCursoId}/anuncios', [DocenteApiController::class, 'getAnuncios']);
+    Route::post('docente/curso/{docenteCursoId}/anuncio', [DocenteApiController::class, 'storeAnuncio']);
+    Route::put('docente/anuncio/{anuncioId}', [DocenteApiController::class, 'updateAnuncio']);
+    Route::delete('docente/anuncio/{anuncioId}', [DocenteApiController::class, 'destroyAnuncio']);
+    Route::get('docente/curso/{docenteCursoId}/calificaciones', [DocenteApiController::class, 'tablaCalificaciones']);
+    Route::get('docente/curso/{docenteCursoId}/entregas-pendientes', [DocenteApiController::class, 'entregasPendientes']);
+});
+
+// ❌ ELIMINAR estas rutas duplicadas:
+// Route::post('docente/unidad', [DocenteApiController::class, 'crearUnidad']);
+// Route::post('docente/clase', [DocenteApiController::class, 'crearClase']);
+// Route::post('docente/actividad', [DocenteApiController::class, 'crearActividad']);
+
+// ✅ USAR estas rutas estándar:
+Route::middleware(['auth.token'])->group(function () {
+    // Contenido del curso (compartido)
+    Route::prefix('contenido')->group(function () {
+        Route::get('cursos/{cursoId}', [CursoContenidoApiController::class, 'show']);
+        Route::post('unidades', [CursoContenidoApiController::class, 'storeUnidad']);
+        Route::put('unidades/{id}', [CursoContenidoApiController::class, 'updateUnidad']);
+        Route::delete('unidades/{id}', [CursoContenidoApiController::class, 'destroyUnidad']);
+        Route::post('unidades/{cursoId}/reordenar', [CursoContenidoApiController::class, 'reordenarUnidades']);
+        
+        Route::post('clases', [CursoContenidoApiController::class, 'storeClase']);
+        Route::put('clases/{id}', [CursoContenidoApiController::class, 'updateClase']);
+        Route::delete('clases/{id}', [CursoContenidoApiController::class, 'destroyClase']);
+        Route::post('clases/{unidadId}/reordenar', [CursoContenidoApiController::class, 'reordenarClases']);
+        
+        Route::post('clases/{claseId}/archivo', [CursoContenidoApiController::class, 'subirArchivo']);
+        Route::delete('archivos/{archivoId}', [CursoContenidoApiController::class, 'eliminarArchivo']);
+    });
+    
+    // Actividades
+    Route::apiResource('actividades', ActividadApiController::class);
+});
+
+// Rutas de Alumno (requieren verificación de matrícula)
+Route::middleware(['auth.token', 'verify.estudiante.curso'])->group(function () {
+    Route::get('alumno/curso/{cursoId}/contenido', [AlumnoApiController::class, 'contenido']);
+    Route::get('alumno/curso/{cursoId}/anuncios', [AlumnoApiController::class, 'anuncios']);
+    Route::get('alumno/curso/{cursoId}/calificaciones', [AlumnoApiController::class, 'calificaciones']);
+    Route::get('alumno/curso/{cursoId}/actividades-pendientes', [AlumnoApiController::class, 'actividadesPendientes']);
+});
+```
+
+##### [MODIFY] DocenteApiController.php
+**Cambios**:
+```php
+// ❌ ELIMINAR estos métodos (ahora en CursoContenidoApiController):
+// - crearUnidad()
+// - crearClase()
+// - crearActividad()
+
+// ✅ AGREGAR estos métodos faltantes:
+
+/**
+ * Update an announcement.
+ */
+public function updateAnuncio(Request $request, int $anuncioId)
+{
+    $validated = $request->validate([
+        'titulo' => 'required|string|max:255',
+        'contenido' => 'required|string',
+    ]);
+
+    $anuncio = Anuncio::findOrFail($anuncioId);
+    $anuncio->update($validated);
+    
+    return response()->json($anuncio);
+}
+
+/**
+ * Delete an announcement.
+ */
+public function destroyAnuncio(int $anuncioId)
+{
+    $anuncio = Anuncio::findOrFail($anuncioId);
+    $anuncio->delete();
+    
+    return response()->json(null, 204);
+}
+
+/**
+ * Get full grade table for a course.
+ */
+public function tablaCalificaciones(int $docenteCursoId)
+{
+    $docenteCurso = DocenteCurso::findOrFail($docenteCursoId);
+    
+    // Obtener estudiantes de la sección
+    $estudiantes = Matricula::where('seccion_id', $docenteCurso->seccion_id)
+        ->where('apertura_id', $docenteCurso->apertura_id)
+        ->where('estado', '1')
+        ->with('estudiante.perfil')
+        ->get();
+    
+    // Obtener actividades del curso
+    $actividades = ActividadCurso::whereHas('clase.unidad', function($q) use ($docenteCurso) {
+        $q->where('curso_id', $docenteCurso->curso_id);
+    })
+    ->where('es_calificado', '1')
+    ->with('clase.unidad')
+    ->get();
+    
+    // Obtener calificaciones
+    $calificaciones = [];
+    foreach ($estudiantes as $estudiante) {
+        $calificaciones[$estudiante->estu_id] = [];
+        foreach ($actividades as $actividad) {
+            $nota = NotaActividad::where('estu_id', $estudiante->estu_id)
+                ->where('actividad_id', $actividad->actividad_id)
+                ->first();
+            
+            $calificaciones[$estudiante->estu_id][$actividad->actividad_id] = [
+                'nota' => $nota?->nota,
+                'fecha' => $nota?->fecha_calificacion,
+                'observacion' => $nota?->observacion,
+            ];
+        }
+    }
+    
+    return response()->json([
+        'estudiantes' => $estudiantes,
+        'actividades' => $actividades,
+        'calificaciones' => $calificaciones,
+    ]);
+}
+
+/**
+ * Get pending submissions to grade.
+ */
+public function entregasPendientes(int $docenteCursoId)
+{
+    $docenteCurso = DocenteCurso::findOrFail($docenteCursoId);
+    
+    $entregas = ActividadUsuario::whereHas('actividad.clase.unidad', function($q) use ($docenteCurso) {
+        $q->where('curso_id', $docenteCurso->curso_id);
+    })
+    ->where('estado', 'entregado')
+    ->whereDoesntHave('calificacion')
+    ->with(['actividad', 'estudiante.perfil'])
+    ->get();
+    
+    return response()->json($entregas);
+}
+```
+
+##### [MODIFY] CursoContenidoService.php
+**Cambios**:
+```php
+// Asegurar que todos los métodos usan curso_id correctamente
+
+public function crearUnidad(array $data)
+{
+    // ✅ CORRECTO: Usar curso_id
+    return Unidad::create([
+        'curso_id' => $data['curso_id'],  // ✅ NO docente_curso_id
+        'titulo' => $data['titulo'],
+        'descripcion' => $data['descripcion'] ?? null,
+        'orden' => Unidad::where('curso_id', $data['curso_id'])->count() + 1,
+        'estado' => '1',
+    ]);
+}
+
+public function reordenarUnidades(int $cursoId, array $orden)
+{
+    foreach ($orden as $index => $unidadId) {
+        Unidad::where('unidad_id', $unidadId)
+            ->where('curso_id', $cursoId)  // ✅ Verificar que pertenece al curso
+            ->update(['orden' => $index + 1]);
+    }
+}
+```
+
+---
+
+#### 3. Portal Alumno - Completitud
+
+##### [MODIFY] AlumnoApiController.php
+**Cambios**:
+```php
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Estudiante;
+use App\Models\DocenteCurso;
+use App\Models\Unidad;
+use App\Models\Anuncio;
+use App\Models\NotaActividad;
+use App\Models\ActividadCurso;
+use App\Models\ActividadUsuario;
+use Illuminate\Http\Request;
+
+class AlumnoApiController extends Controller
+{
+    /**
+     * Get course content for student.
+     */
+    public function contenido(Request $request, int $cursoId)
+    {
+        $unidades = Unidad::where('curso_id', $cursoId)
+            ->with([
+                'clases' => function ($q) {
+                    $q->orderBy('orden')
+                      ->with(['archivos', 'actividades.tipoActividad']);
+                }
+            ])
+            ->orderBy('orden')
+            ->get();
+
+        return response()->json($unidades);
+    }
+
+    /**
+     * Get announcements for student.
+     */
+    public function anuncios(Request $request, int $cursoId)
+    {
+        $estudiante = Estudiante::where('user_id', $request->user()->id)->firstOrFail();
+        
+        // Obtener anuncios de todas las secciones del curso donde está matriculado
+        $anuncios = Anuncio::whereHas('docenteCurso', function($q) use ($cursoId, $estudiante) {
+            $q->where('curso_id', $cursoId)
+              ->whereHas('seccion.matriculas', function($q2) use ($estudiante) {
+                  $q2->where('estu_id', $estudiante->estu_id)
+                     ->where('estado', '1');
+              });
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        return response()->json($anuncios);
+    }
+
+    /**
+     * Get student's grades for a course.
+     */
+    public function calificaciones(Request $request, int $cursoId)
+    {
+        $estudiante = Estudiante::where('user_id', $request->user()->id)->firstOrFail();
+        
+        // Obtener actividades del curso
+        $actividades = ActividadCurso::whereHas('clase.unidad', function($q) use ($cursoId) {
+            $q->where('curso_id', $cursoId);
+        })
+        ->where('es_calificado', '1')
+        ->with('clase.unidad')
+        ->get();
+        
+        // Obtener calificaciones del estudiante
+        $calificaciones = [];
+        $sumaNotas = 0;
+        $cantidadNotas = 0;
+        
+        foreach ($actividades as $actividad) {
+            $nota = NotaActividad::where('estu_id', $estudiante->estu_id)
+                ->where('actividad_id', $actividad->actividad_id)
+                ->first();
+            
+            $calificaciones[] = [
+                'actividad' => $actividad->nombre_actividad,
+                'unidad' => $actividad->clase->unidad->titulo,
+                'nota' => $nota?->nota,
+                'fecha' => $nota?->fecha_calificacion,
+                'observacion' => $nota?->observacion,
+                'puntos_maximos' => $actividad->puntos_maximos,
+            ];
+            
+            if ($nota && is_numeric($nota->nota)) {
+                $sumaNotas += floatval($nota->nota);
+                $cantidadNotas++;
+            }
+        }
+        
+        $promedio = $cantidadNotas > 0 ? round($sumaNotas / $cantidadNotas, 2) : 0;
+        
+        return response()->json([
+            'actividades' => $calificaciones,
+            'promedio' => $promedio,
+        ]);
+    }
+
+    /**
+     * Get pending activities for student.
+     */
+    public function actividadesPendientes(Request $request, int $cursoId)
+    {
+        $estudiante = Estudiante::where('user_id', $request->user()->id)->firstOrFail();
+        
+        $actividades = ActividadCurso::whereHas('clase.unidad', function($q) use ($cursoId) {
+            $q->where('curso_id', $cursoId);
+        })
+        ->where('estado', '1')
+        ->where(function($q) {
+            $q->whereNull('fecha_cierre')
+              ->orWhere('fecha_cierre', '>=', now());
+        })
+        ->whereDoesntHave('entregas', function($q) use ($estudiante) {
+            $q->where('estu_id', $estudiante->estu_id);
+        })
+        ->with(['clase.unidad', 'tipoActividad'])
+        ->get();
+        
+        return response()->json($actividades);
+    }
+}
+```
+
+---
+
+#### 4. Frontend - Ajustes de Integración
+
+##### [MODIFY] Editor.tsx
+**Cambios en las llamadas API**:
+```typescript
+// ❌ ANTES (rutas duplicadas):
+// api.post('/docente/unidad', { docente_curso_id, titulo })
+// api.post('/docente/clase', { unidad_id, titulo })
+// api.post('/docente/actividad', { id_clase_curso, nombre_actividad, tipo_id })
+
+// ✅ DESPUÉS (rutas consolidadas):
+const addUnidad = () => {
+    if (!nuevaUnidad) return;
+    api.post('/contenido/unidades', { 
+        curso_id: courseData.curso_id,  // ✅ Usar curso_id
+        titulo: nuevaUnidad 
+    })
+    .then(() => {
+        setNuevaUnidad('');
+        setShowUnidadForm(false);
+        loadContent();
+    });
+};
+
+const addClase = (unidadId: number) => {
+    const titulo = prompt('Título de la nueva sesión:');
+    if (!titulo) return;
+    api.post('/contenido/clases', { 
+        unidad_id: unidadId, 
+        titulo 
+    })
+    .then(() => loadContent());
+};
+
+const addActividad = (claseId: number, tipoId: number) => {
+    const nombre = prompt(tipoId === 3 ? 'Nombre del Cuestionario/Examen:' : 'Nombre de la actividad/tarea:');
+    if (!nombre) return;
+    api.post('/actividades', { 
+        id_clase_curso: claseId, 
+        nombre_actividad: nombre, 
+        id_tipo_actividad: tipoId 
+    })
+    .then(() => loadContent());
+};
+```
+
+---
+
+### ❓ PREGUNTAS ABIERTAS
+
+#### 1. Contenido Compartido vs Exclusivo
+**PREGUNTA**: ¿Desea que el material del curso (unidades/clases) sea estrictamente compartido entre todas las secciones de un mismo curso, o debe haber una opción para que un docente cree contenido exclusivo para su sección?
+
+**OPCIÓN A (Actual)**: Contenido compartido por Curso
+- ✅ Menos duplicación
+- ✅ Colaboración entre docentes
+- ✅ Actualizaciones centralizadas
+- ❌ Menos flexibilidad individual
+
+**OPCIÓN B**: Contenido por Sección
+- ✅ Flexibilidad total por docente
+- ✅ Personalización por sección
+- ❌ Duplicación de contenido
+- ❌ Difícil mantener consistencia
+
+**RECOMENDACIÓN**: Mantener OPCIÓN A (compartido) con posibilidad de agregar "Contenido Adicional" por sección en el futuro.
+
+---
+
+### ✅ PLAN DE VERIFICACIÓN
+
+#### Tests Automatizados
+```bash
+# 1. Verificar limpieza de rutas
+php artisan route:list | grep docente
+
+# 2. Verificar middlewares registrados
+php artisan route:list --columns=uri,name,middleware | grep verify
+
+# 3. Ejecutar tests unitarios (cuando se creen)
+php artisan test --filter=DocenteCursoTest
+php artisan test --filter=EstudianteCursoTest
+```
+
+#### Tests Manuales (Postman/Insomnia)
+
+**Test 1: Middleware VerifyDocenteCurso**
+```
+1. Login como Docente A (tiene acceso a Curso 1)
+2. GET /api/docente/curso/1/contenido
+   ✅ Debe retornar 200 OK
+
+3. GET /api/docente/curso/999/contenido (Curso que no tiene asignado)
+   ✅ Debe retornar 403 Forbidden
+```
+
+**Test 2: Middleware VerifyEstudianteCurso**
+```
+1. Login como Estudiante A (matriculado en Curso 1)
+2. GET /api/alumno/curso/1/contenido
+   ✅ Debe retornar 200 OK
+
+3. GET /api/alumno/curso/999/contenido (Curso donde no está matriculado)
+   ✅ Debe retornar 403 Forbidden
+```
+
+**Test 3: Rutas Consolidadas**
+```
+1. POST /api/contenido/unidades
+   Body: { "curso_id": 1, "titulo": "Unidad Test" }
+   ✅ Debe crear unidad correctamente
+
+2. POST /api/docente/unidad (ruta antigua)
+   ✅ Debe retornar 404 Not Found (ruta eliminada)
+```
+
+---
+
+### 📊 CHECKLIST DE IMPLEMENTACIÓN
+
+#### Backend
+- [ ] Crear `VerifyDocenteCurso.php` middleware
+- [ ] Crear `VerifyEstudianteCurso.php` middleware
+- [ ] Registrar middlewares en `Kernel.php`
+- [ ] Actualizar `routes/api.php` (aplicar middlewares, eliminar duplicados)
+- [ ] Eliminar métodos duplicados en `DocenteApiController.php`
+- [ ] Agregar métodos faltantes en `DocenteApiController.php`
+- [ ] Actualizar `CursoContenidoService.php` (verificar uso de curso_id)
+- [ ] Crear/actualizar `AlumnoApiController.php`
+- [ ] Ejecutar tests de verificación
+
+#### Frontend
+- [ ] Actualizar `Editor.tsx` (cambiar llamadas API)
+- [ ] Probar creación de unidades
+- [ ] Probar creación de clases
+- [ ] Probar creación de actividades
+- [ ] Verificar que no hay errores 404
+
+#### Documentación
+- [x] Actualizar `ESTADO_ACTUAL_SISTEMA_LMS.md`
+- [ ] Crear guía de migración para desarrolladores
+- [ ] Documentar nuevas rutas API
+
+---
+
+### 🎯 PRÓXIMOS PASOS DESPUÉS DE FASE 1
+
+Una vez completada la Fase 1, continuar con:
+
+1. **Fase 2**: Implementar Tabs completos (Anuncios, Calificaciones)
+2. **Fase 3**: Portal Alumno completo
+3. **Fase 4**: Funcionalidades avanzadas (notificaciones, exportaciones)
+
+---
+
 **Última actualización**: 2026-04-10  
-**Próxima revisión**: Después de completar Prioridad ALTA
+**Próxima revisión**: Después de completar Fase 1  
+**Estado**: 🟡 En Planificación

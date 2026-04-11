@@ -12,7 +12,11 @@ class DocenteCurso extends Model
 
     protected $fillable = [
         'docente_id', 'apertura_id', 'curso_id',
-        'nivel_id', 'grado_id', 'seccion_id', 'estado',
+        'nivel_id', 'grado_id', 'seccion_id', 'estado', 'settings',
+    ];
+
+    protected $casts = [
+        'settings' => 'array',
     ];
 
     public function docente(): BelongsTo

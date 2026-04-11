@@ -11,9 +11,10 @@ class StoreActividadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_curso'          => 'required|integer',
-            'id_tipo_activada'  => 'required|integer',
-            'nombre_activid'    => 'required|string|max:200',
+            'id_clase_curso'    => 'required|exists:clases,clase_id',
+            'id_tipo_actividad' => 'required|exists:tipo_actividad,tipo_id',
+            'nombre_actividad'  => 'required|string|max:200',
+            'id_curso'          => 'nullable|exists:cursos,curso_id',
             'descripcion_corta' => 'nullable|string',
             'descripcion_larga' => 'nullable|string',
             'fecha_inicio'      => 'nullable|date',

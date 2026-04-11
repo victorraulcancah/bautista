@@ -74,17 +74,23 @@ class DocenteApiController extends Controller
             ->where('estado', '1')
             ->count();
 
-        // Pending activities to grade (mock logic or based on counts)
-        $actividadesPendientes = ActividadCurso::whereIn('id_curso', $misCursos->pluck('curso_id'))
-            ->where('fecha_cierre', '<', now())
-            ->where('es_calificado', '1')
+        // Contar entregas reales que no tienen nota asignada
+        $pendientesCalificar = NotaActividad::whereIn('actividad_id', function($query) use ($misCursos) {
+                $query->select('actividad_id')
+                    ->from('actividad_curso')
+                    ->whereIn('id_curso', $misCursos->pluck('curso_id'));
+            })
+            ->whereNotNull('archivo_entrega')
+            ->where(function($q) {
+                $q->whereNull('nota')->orWhere('nota', '');
+            })
             ->count();
 
         return response()->json([
             'resumen' => [
                 'cursos' => $misCursos->count(),
                 'estudiantes' => $totalEstudiantes,
-                'pendientes_calificar' => $actividadesPendientes,
+                'pendientes_calificar' => $pendientesCalificar,
             ],
             'cursos' => $misCursos,
         ]);
@@ -108,10 +114,10 @@ class DocenteApiController extends Controller
     /**
      * Get the full content (units/classes) for a specific assignment.
      */
-    public function cursoContenido(Request $request, int $id)
+    public function cursoContenido(int $id)
     {
-        // $id is the docen_curso_id
-        $dc = DocenteCurso::where('docen_curso_id', $id)->firstOrFail();
+        // $id es el docen_curso_id
+        $dc = DocenteCurso::findOrFail($id);
 
         $unidades = \App\Models\Unidad::where('curso_id', $dc->curso_id)
             ->with([
@@ -127,69 +133,55 @@ class DocenteApiController extends Controller
     }
 
     /**
-     * Create a new academic unit.
+     * Get announcements for a course.
      */
-    public function crearUnidad(Request $request)
+    public function getAnuncios(int $docenteCursoId)
+    {
+        $anuncios = Anuncio::where('docente_curso_id', $docenteCursoId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return response()->json($anuncios);
+    }
+
+    /**
+     * Create an announcement.
+     */
+    public function storeAnuncio(Request $request)
     {
         $validated = $request->validate([
             'docente_curso_id' => 'required|exists:docente_cursos,docen_curso_id',
             'titulo' => 'required|string|max:255',
+            'contenido' => 'required|string',
         ]);
 
-        $unidad = \App\Models\Unidad::create([
-            'docente_curso_id' => $validated['docente_curso_id'],
-            'titulo' => $validated['titulo'],
-            'orden' => \App\Models\Unidad::where('docente_curso_id', $validated['docente_curso_id'])->count() + 1,
-            'estado' => '1',
-        ]);
-
-        return response()->json($unidad);
+        $anuncio = Anuncio::create($validated);
+        return response()->json($anuncio, 201);
     }
 
     /**
-     * Create a new class within a unit.
+     * Update an announcement.
      */
-    public function crearClase(Request $request)
+    public function updateAnuncio(Request $request, int $id)
     {
+        $anuncio = Anuncio::findOrFail($id);
+        
         $validated = $request->validate([
-            'unidad_id' => 'required|exists:unidades,unidad_id',
             'titulo' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
+            'contenido' => 'required|string',
         ]);
 
-        $clase = \App\Models\Clase::create([
-            'unidad_id' => $validated['unidad_id'],
-            'titulo' => $validated['titulo'],
-            'descripcion' => $validated['descripcion'],
-            'orden' => \App\Models\Clase::where('unidad_id', $validated['unidad_id'])->count() + 1,
-            'estado' => '1',
-        ]);
-
-        return response()->json($clase);
+        $anuncio->update($validated);
+        return response()->json($anuncio);
     }
 
     /**
-     * Create a new activity for a class.
+     * Delete an announcement.
      */
-    public function crearActividad(Request $request)
+    public function destroyAnuncio(int $id)
     {
-        $validated = $request->validate([
-            'id_clase_curso' => 'required|exists:clases,clase_id',
-            'nombre_actividad' => 'required|string|max:255',
-            'tipo_id' => 'required|integer', // e.g., 1 for exam, 2 for task
-            'fecha_cierre' => 'nullable|date',
-        ]);
-
-        $actividad = \App\Models\ActividadCurso::create([
-            'id_clase_curso' => $validated['id_clase_curso'],
-            'nombre_actividad' => $validated['nombre_actividad'],
-            'tipo_id' => $validated['tipo_id'],
-            'fecha_cierre' => $validated['fecha_cierre'],
-            'estado' => '1',
-            'es_calificado' => '1',
-        ]);
-
-        return response()->json($actividad);
+        $anuncio = Anuncio::findOrFail($id);
+        $anuncio->delete();
+        return response()->json(null, 204);
     }
 
     /**
@@ -285,31 +277,7 @@ class DocenteApiController extends Controller
         return response()->json(['message' => 'Asistencia guardada con éxito.']);
     }
 
-    /**
-     * Get announcements for a course.
-     */
-    public function getAnuncios(int $docenteCursoId)
-    {
-        $anuncios = Anuncio::where('docente_curso_id', $docenteCursoId)
-            ->orderBy('created_at', 'desc')
-            ->get();
-        return response()->json($anuncios);
-    }
 
-    /**
-     * Create an announcement.
-     */
-    public function storeAnuncio(Request $request)
-    {
-        $validated = $request->validate([
-            'docente_curso_id' => 'required|exists:docente_cursos,docen_curso_id',
-            'titulo' => 'required|string|max:255',
-            'contenido' => 'required|string',
-        ]);
-
-        $anuncio = Anuncio::create($validated);
-        return response()->json($anuncio, 201);
-    }
 
     /**
      * List students for a section with performance metrics.
@@ -330,8 +298,8 @@ class DocenteApiController extends Controller
 
             // 1. Promedio de Notas (de actividades calificadas en este curso)
             $notas = NotaActividad::where('estu_id', $estuId)
-                ->whereHas('actividad.clase.unidad', function($q) use ($docenteCursoId) {
-                    $q->where('docente_curso_id', $docenteCursoId);
+                ->whereHas('actividad', function($q) use ($cursoId) {
+                    $q->where('id_curso', $cursoId);
                 })
                 ->pluck('nota')
                 ->map(fn($n) => is_numeric($n) ? floatval($n) : 0);
@@ -340,8 +308,8 @@ class DocenteApiController extends Controller
 
             // 2. Promedio de Asistencia (% de Presente sobre el total)
             $asistencias = AsistenciaAlumno::where('id_estudiante', $estuId)
-                ->whereHas('session.clase.unidad', function($q) use ($docenteCursoId) {
-                    $q->where('docente_curso_id', $docenteCursoId);
+                ->whereHas('session.clase.unidad', function($q) use ($cursoId) {
+                    $q->where('curso_id', $cursoId);
                 })
                 ->get();
 
@@ -363,5 +331,69 @@ class DocenteApiController extends Controller
         });
 
         return response()->json($data);
+    }
+    /**
+     * Update course settings (weights, preferences).
+     */
+    public function updateSettings(Request $request, int $docenteCursoId)
+    {
+        $dc = DocenteCurso::findOrFail($docenteCursoId);
+        
+        $validated = $request->validate([
+            'settings' => 'required|array',
+        ]);
+
+        $dc->update([
+            'settings' => $validated['settings']
+        ]);
+
+        return response()->json([
+            'message' => 'Configuración actualizada correctamente.',
+            'settings' => $dc->settings
+        ]);
+    }
+
+    /**
+     * Returns a matrix of students and their attendance history.
+     */
+    public function asistenciaMatrix(int $docenteCursoId)
+    {
+        $dc = DocenteCurso::findOrFail($docenteCursoId);
+        
+        // 1. Get students in this specific section/period
+        $alumnos = \App\Models\Matricula::where('seccion_id', $dc->seccion_id)
+            ->where('apertura_id', $dc->apertura_id)
+            ->where('estado', '1')
+            ->with('estudiante.perfil')
+            ->get();
+
+        // 2. Get all classes for this course
+        $clasesIds = \App\Models\Clase::whereHas('unidad', function($q) use ($dc) {
+            $q->where('curso_id', $dc->curso_id);
+        })->pluck('clase_id');
+
+        // 3. Get all attendance sessions for these classes
+        $sesiones = \App\Models\AsistenciaActividad::whereIn('id_clase_curso', $clasesIds)
+            ->orderBy('fecha', 'asc')
+            ->get();
+
+        // 4. Get all records for these students and these sessions
+        $registros = \App\Models\AsistenciaAlumno::whereIn('id_estudiante', $alumnos->pluck('estu_id'))
+            ->whereIn('id_asistencia_clase', $sesiones->pluck('id'))
+            ->get();
+
+        return response()->json([
+            'estudiantes' => $alumnos->map(fn($m) => [
+                'estu_id' => $m->estu_id,
+                'nombre' => $m->estudiante?->perfil?->primer_nombre . ' ' . $m->estudiante?->perfil?->apellido_paterno,
+                'dni' => $m->estudiante?->perfil?->doc_numero,
+                'registros' => $registros->where('id_estudiante', $m->estu_id)->values()
+            ]),
+            'sesiones' => $sesiones->map(fn($s) => [
+                'id' => $s->id,
+                'fecha' => $s->fecha,
+                'clase_id' => $s->id_clase_curso
+            ])
+        ]);
     }
 }

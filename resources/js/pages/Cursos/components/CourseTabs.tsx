@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { BookOpen, Bell, FileText, BarChart2, MessageSquare, Users, Settings } from 'lucide-react';
+import { BookOpen, Bell, FileText, BarChart2, MessageSquare, Users, Settings, Clock } from 'lucide-react';
 
 interface Tab {
     id: string;
@@ -16,16 +16,17 @@ interface CourseTabsProps {
 
 export default function CourseTabs({ activeTab, onChange, role }: CourseTabsProps) {
     const commonTabs: Tab[] = [
-        { id: 'content', label: 'Contenido', icon: BookOpen },
-        { id: 'announcements', label: 'Anuncios', icon: Bell },
-        { id: 'grades', label: 'Calificaciones', icon: BarChart2 },
-        { id: 'messages', label: 'Mensajes', icon: MessageSquare },
+        { id: 'contenido', label: 'Contenido', icon: BookOpen },
+        { id: 'anuncios', label: 'Anuncios', icon: Bell },
+        { id: 'calificaciones', label: 'Calificaciones', icon: BarChart2 },
+        { id: 'asistencia', label: 'Asistencia', icon: Clock },
+        { id: 'mensajes', label: 'Mensajes', icon: MessageSquare },
     ];
 
     const teacherTabs: Tab[] = [
         ...commonTabs,
-        { id: 'roster', label: 'Alumnos', icon: Users },
-        { id: 'settings', label: 'Ajustes', icon: Settings },
+        { id: 'alumnos', label: 'Alumnos', icon: Users },
+        { id: 'configuracion', label: 'Ajustes', icon: Settings },
     ];
 
     const studentTabs: Tab[] = [

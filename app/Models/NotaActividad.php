@@ -10,7 +10,7 @@ class NotaActividad extends Model
     protected $table = 'nota_actividad_estudiante';
 
     protected $fillable = [
-        'estu_id', 'actividad_id', 'nota', 'observacion', 'fecha_calificacion',
+        'estu_id', 'actividad_id', 'nota', 'observacion', 'archivo_entrega', 'fecha_entrega', 'fecha_calificacion',
     ];
 
     public function estudiante(): BelongsTo

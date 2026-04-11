@@ -161,13 +161,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('examenes/{id}/finalizar', [ExamenResolucionApiController::class, 'finalizar']);
 
     // Portal Alumno — solo rol estudiante
-    Route::middleware('check.role:estudiante')->group(function () {
-        Route::get('alumno/dashboard', [AlumnoApiController::class, 'dashboard']);
-        Route::get('alumno/cursos', [AlumnoApiController::class, 'cursos']);
+    Route::middleware(['check.role:estudiante', 'verify.estudiante.curso'])->group(function () {
+        Route::get('alumno/dashboard', [AlumnoApiController::class, 'dashboard'])->withoutMiddleware('verify.estudiante.curso');
+        Route::get('alumno/cursos', [AlumnoApiController::class, 'cursos'])->withoutMiddleware('verify.estudiante.curso');
         Route::get('alumno/curso/{id}', [AlumnoApiController::class, 'cursoDetalle']);
-        Route::get('alumno/asistencia', [AlumnoApiController::class, 'asistencia']);
+        Route::get('alumno/curso/{id}/asistencia', [AlumnoApiController::class, 'cursoAsistencia']);
+        Route::get('alumno/asistencia', [AlumnoApiController::class, 'asistencia'])->withoutMiddleware('verify.estudiante.curso');
         Route::get('alumno/clase/{id}', [AlumnoApiController::class, 'claseDetalle']);
-        Route::get('alumno/profesores', [AlumnoApiController::class, 'profesores']);
+        Route::get('alumno/profesores', [AlumnoApiController::class, 'profesores'])->withoutMiddleware('verify.estudiante.curso');
         Route::post('alumno/actividad/{id}/entregar', [AlumnoApiController::class, 'entregarActividad']);
         Route::post('alumno/dibujo/guardar', [ActividadApiController::class, 'guardarDibujo']);
     });
@@ -181,19 +182,42 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Portal Docente — solo rol docente
-    Route::middleware('check.role:docente')->group(function () {
-        Route::get('docente/dashboard', [DocenteApiController::class, 'dashboard']);
-        Route::get('docente/mis-cursos', [DocenteApiController::class, 'misCursos']);
+    Route::middleware(['check.role:docente', 'verify.docente.curso'])->group(function () {
+        Route::get('docente/dashboard', [DocenteApiController::class, 'dashboard'])->withoutMiddleware('verify.docente.curso');
+        Route::get('docente/mis-cursos', [DocenteApiController::class, 'misCursos'])->withoutMiddleware('verify.docente.curso');
         Route::get('docente/curso/{id}/contenido', [DocenteApiController::class, 'cursoContenido']);
-        Route::get('docente/mis-alumnos', [DocenteApiController::class, 'misAlumnos']);
-        Route::post('docente/unidad', [DocenteApiController::class, 'crearUnidad']);
-        Route::post('docente/clase', [DocenteApiController::class, 'crearClase']);
-        Route::post('docente/actividad', [DocenteApiController::class, 'crearActividad']);
-        Route::get('docente/curso/{id}/alumnos', [DocenteApiController::class, 'alumnosConMetricas']);
+        Route::put('docente/curso/{id}/settings', [DocenteApiController::class, 'updateSettings']);
+        Route::get('docente/mis-alumnos', [DocenteApiController::class, 'misAlumnos'])->withoutMiddleware('verify.docente.curso');
+        
+        // Tab Anuncios
         Route::get('docente/curso/{id}/anuncios', [DocenteApiController::class, 'getAnuncios']);
         Route::post('docente/anuncios', [DocenteApiController::class, 'storeAnuncio']);
+        Route::put('docente/anuncios/{id}', [DocenteApiController::class, 'updateAnuncio']);
+        Route::delete('docente/anuncios/{id}', [DocenteApiController::class, 'destroyAnuncio']);
+
+        // Asistencia
         Route::post('docente/asistencia/iniciar', [DocenteApiController::class, 'iniciarAsistencia']);
         Route::post('docente/asistencia/{id}/marcar', [DocenteApiController::class, 'marcarAsistencia']);
+        Route::get('docente/curso/{id}/asistencia-matrix', [DocenteApiController::class, 'asistenciaMatrix']);
+        
+        // Métricas y Calificaciones
+        Route::get('docente/curso/{id}/alumnos', [DocenteApiController::class, 'alumnosConMetricas']);
+        Route::get('docente/curso/{id}/calificaciones', [\App\Http\Controllers\Api\CalificacionApiController::class, 'indexByCourse']);
+        Route::get('docente/curso/{id}/exportar-excel', [\App\Http\Controllers\Api\CalificacionApiController::class, 'exportExcel']);
+
+        // Gestión de Contenido Académico
+        Route::prefix('contenido')->group(function () {
+            Route::post('unidades', [CursoContenidoApiController::class, 'storeUnidad']);
+            Route::put('unidades/{id}', [CursoContenidoApiController::class, 'updateUnidad']);
+            Route::delete('unidades/{id}', [CursoContenidoApiController::class, 'destroyUnidad']);
+            
+            Route::post('clases', [CursoContenidoApiController::class, 'storeClase']);
+            Route::put('clases/{id}', [CursoContenidoApiController::class, 'updateClase']);
+            Route::delete('clases/{id}', [CursoContenidoApiController::class, 'destroyClase']);
+            
+            Route::post('clases/{clase}/archivos', [CursoContenidoApiController::class, 'subirArchivo']);
+            Route::delete('archivos/{id}', [CursoContenidoApiController::class, 'eliminarArchivo']);
+        });
     });
 
     // Mensajería
