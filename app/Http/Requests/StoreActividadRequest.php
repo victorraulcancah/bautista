@@ -24,6 +24,9 @@ class StoreActividadRequest extends FormRequest
             'ocultar_actividad' => 'nullable|in:0,1',
             'estado'            => 'nullable|in:0,1',
             'es_calificado'     => 'nullable|in:0,1',
+            'peso_porcentaje'   => 'nullable|numeric|min:0|max:100',
+            'puntos_maximos'    => 'nullable|numeric|min:0',
+            'config'            => 'nullable|array',
         ];
     }
 }

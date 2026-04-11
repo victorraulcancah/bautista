@@ -20,6 +20,8 @@ interface ActivityFormData {
     nota_visible: string;
     ocultar_actividad: string;
     estado: string;
+    peso_porcentaje: string;
+    puntos_maximos: string;
 }
 
 export function useActivityForm(cursoId: number, claseId: number) {
@@ -39,7 +41,9 @@ export function useActivityForm(cursoId: number, claseId: number) {
         es_calificado: '1',
         nota_visible: '1',
         ocultar_actividad: '0',
-        estado: '1'
+        estado: '1',
+        peso_porcentaje: '0',
+        puntos_maximos: '20'
     });
 
     useEffect(() => {

@@ -97,14 +97,22 @@ export default function CreateActivityModal({ open, onClose, claseId, cursoId, o
                     {selectedTipo === 'Examen' && (
                         <ExamenConfigForm 
                             config={examenHook.config}
+                            maxPuntosActividad={Number(formData.puntos_maximos) || 20}
                             onUpdateField={examenHook.updateField}
+                            addQuestion={examenHook.addQuestion}
+                            removeQuestion={examenHook.removeQuestion}
+                            updateQuestion={examenHook.updateQuestion}
                         />
                     )}
 
                     {selectedTipo === 'Cuestionario' && (
                         <CuestionarioConfigForm 
                             config={cuestionarioHook.config}
+                            maxPuntosActividad={Number(formData.puntos_maximos) || 20}
                             onUpdateField={cuestionarioHook.updateField}
+                            addQuestion={cuestionarioHook.addQuestion}
+                            removeQuestion={cuestionarioHook.removeQuestion}
+                            updateQuestion={cuestionarioHook.updateQuestion}
                         />
                     )}
                 </form>

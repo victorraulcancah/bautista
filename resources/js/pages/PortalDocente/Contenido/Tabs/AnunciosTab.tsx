@@ -31,7 +31,7 @@ export default function AnunciosTab({ docenteCursoId }: Props) {
 
     const loadAnuncios = () => {
         api.get(`/docente/curso/${docenteCursoId}/anuncios`)
-            .then(res => setAnuncios(res.data))
+            .then(res => setAnuncios(res.data.data || res.data))
             .catch(err => console.error('Error cargando anuncios:', err));
     };
 

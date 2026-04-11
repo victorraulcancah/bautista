@@ -142,6 +142,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DocenteRepositoryInterface::class, DocenteRepository::class);
         $this->app->bind(DocenteServiceInterface::class, DocenteService::class);
         $this->app->bind(DocenteCursoServiceInterface::class, DocenteCursoService::class);
+        $this->app->bind(\App\Services\Interfaces\AnuncioServiceInterface::class, \App\Services\Implements\AnuncioService::class);
+        $this->app->bind(\App\Services\Interfaces\DocenteAlumnoServiceInterface::class, \App\Services\Implements\DocenteAlumnoService::class);
+        $this->app->bind(\App\Services\Interfaces\DocenteAsistenciaServiceInterface::class, \App\Services\Implements\DocenteAsistenciaService::class);
+        $this->app->bind(\App\Services\Interfaces\DocenteExcelExportServiceInterface::class, \App\Services\Implements\DocenteExcelExportService::class);
 
         // Matricula
         $this->app->bind(MatriculaRepositoryInterface::class, MatriculaRepository::class);

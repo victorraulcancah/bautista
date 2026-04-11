@@ -14,6 +14,8 @@ interface ActivityFormData {
     es_calificado: string;
     nota_visible: string;
     ocultar_actividad: string;
+    peso_porcentaje: string;
+    puntos_maximos: string;
 }
 
 interface Props {
@@ -85,20 +87,39 @@ export default function ActivityBaseForm({ formData, onChange }: Props) {
                 </div>
             </div>
 
-            <div className="space-y-2">
-                <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                    <Award size={14} className="text-amber-600" />
-                    Puntos Máximos
-                </Label>
-                <Input 
-                    type="number"
-                    value={formData.nota_actividad}
-                    onChange={(e) => onChange('nota_actividad', e.target.value)}
-                    placeholder="20"
-                    className="h-12 rounded-2xl font-bold"
-                    min="0"
-                    max="100"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                        <Award size={14} className="text-amber-600" />
+                        Puntos Máximos
+                    </Label>
+                    <Input 
+                        type="number"
+                        value={formData.puntos_maximos}
+                        onChange={(e) => onChange('puntos_maximos', e.target.value)}
+                        placeholder="20"
+                        className="h-12 rounded-2xl font-bold"
+                        min="0"
+                    />
+                    <p className="text-[10px] text-gray-400 font-medium px-1">Escala sobre la cual se califica (ej: 20)</p>
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                        <Award size={14} className="text-purple-600" />
+                        Peso de la Actividad (%)
+                    </Label>
+                    <Input 
+                        type="number"
+                        value={formData.peso_porcentaje}
+                        onChange={(e) => onChange('peso_porcentaje', e.target.value)}
+                        placeholder="ej: 40"
+                        className="h-12 rounded-2xl font-bold border-purple-100 focus:ring-purple-200"
+                        min="0"
+                        max="100"
+                    />
+                    <p className="text-[10px] text-gray-400 font-medium px-1">Garantiza que la suma de pesos por unidad sea 100%</p>
+                </div>
             </div>
 
             <div className="space-y-3 p-4 bg-gray-50 rounded-2xl">

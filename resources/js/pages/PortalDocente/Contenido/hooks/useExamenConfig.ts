@@ -1,5 +1,17 @@
 import { useState } from 'react';
 
+export interface Alternative {
+    contenido: string;
+    es_correcta: boolean;
+}
+
+export interface Question {
+    cabecera: string;
+    tipo_respuesta: 'multiple' | 'true_false' | 'likert' | 'open';
+    valor_nota: number;
+    alternativas: Alternative[];
+}
+
 export interface ExamenConfig {
     tiempo_limite: string;
     auto_submit: boolean;
@@ -8,6 +20,7 @@ export interface ExamenConfig {
     password: string;
     passing_score: string;
     show_grade: boolean;
+    questions: Question[];
 }
 
 export function useExamenConfig() {
@@ -18,15 +31,44 @@ export function useExamenConfig() {
         lock_navigation: false,
         password: '',
         passing_score: '11',
-        show_grade: true
+        show_grade: true,
+        questions: []
     });
 
-    const updateField = (field: keyof ExamenConfig, value: string | boolean) => {
+    const updateField = (field: keyof ExamenConfig, value: any) => {
         setConfig(prev => ({ ...prev, [field]: value }));
+    };
+
+    const addQuestion = () => {
+        const newQuestion: Question = {
+            cabecera: '',
+            tipo_respuesta: 'multiple',
+            valor_nota: 1,
+            alternativas: [
+                { contenido: 'Opción 1', es_correcta: true },
+                { contenido: 'Opción 2', es_correcta: false }
+            ]
+        };
+        setConfig(prev => ({ ...prev, questions: [...prev.questions, newQuestion] }));
+    };
+
+    const removeQuestion = (index: number) => {
+        setConfig(prev => ({ ...prev, questions: prev.questions.filter((_, i) => i !== index) }));
+    };
+
+    const updateQuestion = (index: number, updatedQuestion: Question) => {
+        setConfig(prev => {
+            const newQuestions = [...prev.questions];
+            newQuestions[index] = updatedQuestion;
+            return { ...prev, questions: newQuestions };
+        });
     };
 
     return {
         config,
-        updateField
+        updateField,
+        addQuestion,
+        removeQuestion,
+        updateQuestion
     };
 }

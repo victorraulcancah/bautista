@@ -16,15 +16,24 @@ use App\Http\Resources\DocenteCursoResource;
 use App\Http\Resources\DocenteResource;
 use App\Services\Interfaces\DocenteCursoServiceInterface;
 use App\Services\Interfaces\DocenteServiceInterface;
+use App\Services\Interfaces\AnuncioServiceInterface;
+use App\Services\Interfaces\DocenteAlumnoServiceInterface;
+use App\Services\Interfaces\DocenteAsistenciaServiceInterface;
+use App\Services\Interfaces\DocenteExcelExportServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Auth;
 
 class DocenteApiController extends Controller
 {
     public function __construct(
         private readonly DocenteServiceInterface $docenteService,
         private readonly DocenteCursoServiceInterface $docenteCursoService,
+        private readonly AnuncioServiceInterface $anuncioService,
+        private readonly DocenteAlumnoServiceInterface $alumnoService,
+        private readonly DocenteAsistenciaServiceInterface $asistenciaService,
+        private readonly DocenteExcelExportServiceInterface $exportService,
     ) {}
 
     /**
@@ -106,28 +115,37 @@ class DocenteApiController extends Controller
      */
     public function getAnuncios(int $id): AnonymousResourceCollection
     {
-        $anuncios = $this->docenteCursoService->obtenerAnuncios($id);
+        $anuncios = $this->anuncioService->obtenerAnuncios($id);
         return AnuncioResource::collection($anuncios);
     }
 
     /**
      * Create an announcement.
      */
-    public function storeAnuncio(StoreAnuncioRequest $request): JsonResponse
+    public function storeAnuncio(Request $request): JsonResponse
     {
-        $anuncio = $this->docenteCursoService->crearAnuncio($request->validated());
-        return (new AnuncioResource($anuncio))
-            ->response()
-            ->setStatusCode(201);
+        $data = $request->validate([
+            'docente_curso_id' => 'required|integer',
+            'titulo' => 'required|string|max:255',
+            'contenido' => 'required|string',
+        ]);
+
+        $anuncio = $this->anuncioService->crearAnuncio($data);
+        return response()->json($anuncio, 201);
     }
 
     /**
      * Update an announcement.
      */
-    public function updateAnuncio(UpdateAnuncioRequest $request, int $id): AnuncioResource
+    public function updateAnuncio(int $id, Request $request): JsonResponse
     {
-        $anuncio = $this->docenteCursoService->actualizarAnuncio($id, $request->validated());
-        return new AnuncioResource($anuncio);
+        $data = $request->validate([
+            'titulo' => 'string|max:255',
+            'contenido' => 'string',
+        ]);
+
+        $anuncio = $this->anuncioService->actualizarAnuncio($id, $data);
+        return response()->json($anuncio);
     }
 
     /**
@@ -135,16 +153,16 @@ class DocenteApiController extends Controller
      */
     public function destroyAnuncio(int $id): JsonResponse
     {
-        $this->docenteCursoService->eliminarAnuncio($id);
+        $this->anuncioService->eliminarAnuncio($id);
         return response()->json(null, 204);
     }
 
     /**
      * Get all students for the authenticated teacher across all sections.
      */
-    public function misAlumnos(Request $request): JsonResponse
+    public function misAlumnos(): JsonResponse
     {
-        $alumnos = $this->docenteCursoService->obtenerTodosAlumnos($request->user()->id);
+        $alumnos = $this->alumnoService->obtenerTodosAlumnos(Auth::id());
         return response()->json($alumnos);
     }
 
@@ -153,7 +171,7 @@ class DocenteApiController extends Controller
      */
     public function alumnosSeccion(Request $request, int $docenteCursoId): JsonResponse
     {
-        $alumnos = $this->docenteCursoService->obtenerAlumnosSeccion($docenteCursoId);
+        $alumnos = $this->alumnoService->obtenerAlumnosSeccion($docenteCursoId);
         return response()->json($alumnos);
     }
 
@@ -162,7 +180,7 @@ class DocenteApiController extends Controller
      */
     public function alumnosDetallados(int $docenteCursoId): AnonymousResourceCollection
     {
-        $alumnos = $this->docenteCursoService->obtenerAlumnosConMetricas($docenteCursoId);
+        $alumnos = $this->alumnoService->obtenerAlumnosConMetricas($docenteCursoId);
         return AlumnoMetricasResource::collection($alumnos);
     }
 
@@ -174,7 +192,7 @@ class DocenteApiController extends Controller
         $desde = $request->input('desde');
         $hasta = $request->input('hasta');
         
-        $matriz = $this->docenteCursoService->obtenerMatrizAsistencia($docenteCursoId, $desde, $hasta);
+        $matriz = $this->asistenciaService->obtenerMatrizAsistencia($docenteCursoId, $desde, $hasta);
         return response()->json($matriz);
     }
 
@@ -186,7 +204,8 @@ class DocenteApiController extends Controller
         $desde = $request->input('desde');
         $hasta = $request->input('hasta');
         
-        $tempFile = $this->docenteCursoService->exportarAsistencia($docenteCursoId, $desde, $hasta);
+        $matrixData = $this->asistenciaService->obtenerMatrizAsistencia($docenteCursoId, $desde, $hasta);
+        $tempFile = $this->exportService->exportarAsistencia($docenteCursoId, $matrixData);
         
         $fileName = 'asistencia_' . date('Y-m-d') . '.xlsx';
         return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
@@ -197,7 +216,8 @@ class DocenteApiController extends Controller
      */
     public function exportarAlumnos(int $docenteCursoId)
     {
-        $tempFile = $this->docenteCursoService->exportarAlumnos($docenteCursoId);
+        $alumnosData = $this->alumnoService->obtenerAlumnosConMetricas($docenteCursoId);
+        $tempFile = $this->exportService->exportarAlumnos($docenteCursoId, $alumnosData);
         
         $fileName = 'alumnos_' . date('Y-m-d') . '.xlsx';
         return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
@@ -217,7 +237,7 @@ class DocenteApiController extends Controller
      */
     public function iniciarAsistencia(IniciarAsistenciaRequest $request): JsonResponse
     {
-        $session = $this->docenteCursoService->iniciarSesionAsistencia($request->validated());
+        $session = $this->asistenciaService->iniciarSesionAsistencia($request->validated());
         return response()->json($session);
     }
 
@@ -226,7 +246,7 @@ class DocenteApiController extends Controller
      */
     public function marcarAsistencia(MarcarAsistenciaBatchRequest $request, int $sessionId): JsonResponse
     {
-        $this->docenteCursoService->marcarAsistencia($sessionId, $request->validated()['asistencias']);
+        $this->asistenciaService->marcarAsistencia($sessionId, $request->validated()['asistencias']);
         return response()->json(['message' => 'Asistencia guardada con éxito.']);
     }
 

@@ -40,9 +40,7 @@ class CalificacionApiController extends Controller
 
                 return [
                     'estu_id'           => $e->estu_id,
-                    'nombre_completo'   => ($e->perfil?->apellido_paterno ?? '') . ' ' . 
-                                           ($e->perfil?->apellido_materno ?? '') . ', ' . 
-                                           ($e->perfil?->primer_nombre ?? ''),
+                    'nombre_completo'   => $e->perfil?->nombre_ordenado,
                     'nota'              => $nota?->nota ?? '',
                     'observacion'       => $nota?->observacion ?? '',
                 ];
@@ -122,46 +120,41 @@ class CalificacionApiController extends Controller
         $settings = $dc->settings ?? [];
         $weights = $settings['weights'] ?? null; // e.g. { "1": 40, "2": 60 } where 1 is Tarea, 2 is Examen
 
-        $estudiantes = $matriculas->map(function ($m) use ($actividades, $notas, $weights) {
+        $estudiantes = $matriculas->map(function ($m) use ($actividades, $notas) {
             $e = $m->estudiante;
-            $nombre = trim(($e->perfil?->apellido_paterno ?? '') . ' ' . ($e->perfil?->apellido_materno ?? '') . ', ' . ($e->perfil?->primer_nombre ?? ''));
+            $nombre = $e->perfil?->nombre_ordenado;
             
             $notasAlumno = $actividades->map(function ($act) use ($e, $notas) {
                 $notaObj = $notas->where('estu_id', $e->estu_id)->where('actividad_id', $act->actividad_id)->first();
                 return [
-                    'actividad_id' => $act->actividad_id,
-                    'tipo_id'      => $act->id_tipo_actividad,
-                    'nota'         => $notaObj?->nota ?? '',
-                    'observacion'  => $notaObj?->observacion ?? '',
-                    'entregado'    => !empty($notaObj?->archivo_entrega),
-                    'fecha_entrega'=> $notaObj?->fecha_entrega,
+                    'actividad_id'    => $act->actividad_id,
+                    'tipo_id'         => $act->id_tipo_actividad,
+                    'nota'            => $notaObj?->nota ?? '',
+                    'observacion'     => $notaObj?->observacion ?? '',
+                    'entregado'       => !empty($notaObj?->archivo_entrega),
+                    'fecha_entrega'   => $notaObj?->fecha_entrega,
+                    'puntos_maximos'  => $act->puntos_maximos,
+                    'peso_porcentaje' => $act->peso_porcentaje,
                 ];
             });
 
-            // Calculate Average
-            $finalAverage = 0;
-            if ($weights && count($weights) > 0) {
-                // Weighted average logic: 
-                // Group by type, get avg per type, then apply global weight
-                $typeAverages = [];
-                foreach ($weights as $tipoId => $weightPercent) {
-                    $notasDeEsteTipo = $notasAlumno->where('tipo_id', (int)$tipoId)->where('nota', '!=', '');
-                    if ($notasDeEsteTipo->count() > 0) {
-                        $typeAverage = $notasDeEsteTipo->avg('nota');
-                        $finalAverage += ($typeAverage * ($weightPercent / 100));
-                    }
-                }
-            } else {
-                // Simple average
-                $validGrades = $notasAlumno->where('nota', '!=', '');
-                $finalAverage = $validGrades->count() > 0 ? $validGrades->avg('nota') : 0;
+            // Calculate Weighted Average
+            $sumaPonderada = 0;
+            foreach ($notasAlumno as $item) {
+                $puntosObtenidos = is_numeric($item['nota']) ? floatval($item['nota']) : 0;
+                $puntosMaximos = floatval($item['puntos_maximos'] ?: 20);
+                $peso = floatval($item['peso_porcentaje'] ?: 0);
+
+                // Escala 20: (obtenido/máximo) * 20
+                $nota20 = ($puntosMaximos > 0) ? ($puntosObtenidos / $puntosMaximos) * 20 : 0;
+                $sumaPonderada += ($nota20 * ($peso / 100));
             }
 
             return [
                 'estu_id' => $e->estu_id,
                 'nombre'  => $nombre,
                 'notas'   => $notasAlumno,
-                'promedio'=> round($finalAverage, 2),
+                'promedio'=> round($sumaPonderada, 2),
             ];
         });
 

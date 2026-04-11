@@ -100,59 +100,80 @@ class ActividadApiController extends Controller
     /** Obtener entregas de una actividad */
     public function entregas(int $actividadId): JsonResponse
     {
-        $entregas = \DB::table('archivos_actividad as aa')
-            ->join('estudiantes as e', 'aa.estudiante', '=', 'e.estu_id')
-            ->join('perfil as p', 'e.perfil_id', '=', 'p.perfil_id')
-            ->leftJoin('nota_actividad_estudiante as nae', function($join) use ($actividadId) {
-                $join->on('nae.id_estudiante', '=', 'e.estu_id')
-                     ->where('nae.id_actividad', '=', $actividadId);
-            })
-            ->where('aa.id_actividad', $actividadId)
-            ->where('aa.origen', 'e') // e = estudiante
-            ->select(
-                'e.estu_id',
-                'p.primer_nombre as nombre',
-                'p.apellido_paterno',
-                'p.apellido_materno',
-                'aa.created_at as fecha_entrega',
-                'nae.nota',
-                'nae.observacion',
-                \DB::raw('GROUP_CONCAT(aa.archivo_id) as archivo_ids'),
-                \DB::raw('GROUP_CONCAT(aa.nombre_archivo) as archivo_nombres'),
-                \DB::raw('GROUP_CONCAT(aa.archivo) as archivo_paths')
-            )
-            ->groupBy('e.estu_id', 'p.primer_nombre', 'p.apellido_paterno', 'p.apellido_materno', 'aa.created_at', 'nae.nota', 'nae.observacion')
-            ->get()
-            ->map(function($entrega) {
-                $archivoIds = explode(',', $entrega->archivo_ids);
-                $archivoNombres = explode(',', $entrega->archivo_nombres);
-                $archivoPaths = explode(',', $entrega->archivo_paths);
-                
-                $archivos = [];
-                for ($i = 0; $i < count($archivoIds); $i++) {
-                    $archivos[] = [
-                        'archivo_id' => $archivoIds[$i],
-                        'nombre' => $archivoNombres[$i] ?? 'archivo',
-                        'path' => $archivoPaths[$i] ?? '',
-                    ];
-                }
+        $actividad = ActividadCurso::findOrFail($actividadId);
+        $cursoId = $actividad->id_curso;
 
-                return [
-                    'entrega_id' => $entrega->estu_id,
-                    'estudiante' => [
-                        'estu_id' => $entrega->estu_id,
-                        'nombre' => $entrega->nombre,
-                        'apellido_paterno' => $entrega->apellido_paterno,
-                        'apellido_materno' => $entrega->apellido_materno,
-                    ],
-                    'archivos' => $archivos,
-                    'fecha_entrega' => $entrega->fecha_entrega,
-                    'nota' => $entrega->nota,
-                    'observacion' => $entrega->observacion,
-                    'estado' => $entrega->nota ? 'calificado' : 'pendiente',
-                ];
+        // Get all students enrolled in the course
+        $estudiantes = \App\Models\Matricula::whereHas('seccion.docenteCursos', function($q) use ($cursoId) {
+                $q->where('curso_id', $cursoId);
+            })
+            ->with(['estudiante.perfil'])
+            ->get()
+            ->map(function($m) {
+                return $m->estudiante;
             });
 
-        return response()->json($entregas);
+        $data = $estudiantes->map(function($estu) use ($actividadId) {
+            // Check for grade
+            $notaRecord = \App\Models\NotaActividad::where('estu_id', $estu->estu_id)
+                ->where('actividad_id', $actividadId)
+                ->first();
+
+            // Check for files
+            $archivos = \DB::table('archivos_actividad')
+                ->where('id_actividad', $actividadId)
+                ->where('estudiante', $estu->estu_id)
+                ->where('origen', 'e')
+                ->get();
+
+            // Check for exam attempt
+            $intento = \App\Models\ExamenIniciado::where('actividad_id', $actividadId)
+                ->where('estu_id', $estu->estu_id)
+                ->with(['respuestas.pregunta'])
+                ->first();
+
+            $estado = 'pendiente';
+            if ($notaRecord) {
+                $estado = 'calificado';
+            } elseif ($archivos->count() > 0 || ($intento && $intento->estado == '0')) {
+                $estado = 'entregado';
+            }
+
+            return [
+                'entrega_id' => $estu->estu_id,
+                'estudiante' => [
+                    'estu_id' => $estu->estu_id,
+                    'nombre' => $estu->perfil->primer_nombre,
+                    'apellido_paterno' => $estu->perfil->apellido_paterno,
+                    'apellido_materno' => $estu->perfil->apellido_materno,
+                ],
+                'archivos' => $archivos->map(fn($a) => [
+                    'archivo_id' => $a->archiv_actividad_id,
+                    'nombre' => $a->nombre_archivo,
+                    'path' => $a->archivo,
+                ]),
+                'intento' => $intento ? [
+                    'intento_id' => $intento->intento_id,
+                    'fecha_inicio' => $intento->fecha_inicio,
+                    'fecha_fin' => $intento->fecha_fin,
+                    'puntaje_total' => $intento->puntaje_total,
+                    'estado' => $intento->estado,
+                    'respuestas' => $intento->respuestas->map(fn($r) => [
+                        'pregunta' => $r->pregunta->cabecera,
+                        'tipo' => $r->pregunta->tipo_respuesta,
+                        'respuesta_estudiante' => $r->respuesta_texto,
+                        'alternativa_id' => $r->alternativa_id,
+                        'es_correcta' => $r->es_correcta,
+                        'puntaje' => $r->puntaje,
+                    ]),
+                ] : null,
+                'fecha_entrega' => $archivos->first()?->created_at ?? $intento?->fecha_fin ?? $intento?->fecha_inicio,
+                'nota' => $notaRecord?->nota,
+                'observacion' => $notaRecord?->observacion,
+                'estado' => $estado,
+            ];
+        });
+
+        return response()->json($data);
     }
 }

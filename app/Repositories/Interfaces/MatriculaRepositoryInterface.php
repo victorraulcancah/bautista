@@ -25,4 +25,6 @@ interface MatriculaRepositoryInterface
 
     // Helpers
     public function estudiantesNoMatriculados(int $instiId, int $aperturaId): Collection;
+    public function getMatriculasBySecciones(array $seccionIds): Collection;
+    public function getMatriculasBySeccion(int $seccionId, int $aperturaId): Collection;
 }

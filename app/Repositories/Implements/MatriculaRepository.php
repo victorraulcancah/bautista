@@ -112,4 +112,21 @@ class MatriculaRepository implements MatriculaRepositoryInterface
             ->whereNotIn('estu_id', $yaMatriculados)
             ->get();
     }
+
+    public function getMatriculasBySecciones(array $seccionIds): Collection
+    {
+        return Matricula::whereIn('seccion_id', $seccionIds)
+            ->where('estado', '1')
+            ->with(['estudiante.perfil', 'seccion.grado'])
+            ->get();
+    }
+
+    public function getMatriculasBySeccion(int $seccionId, int $aperturaId): Collection
+    {
+        return Matricula::where('seccion_id', $seccionId)
+            ->where('apertura_id', $aperturaId)
+            ->where('estado', '1')
+            ->with('estudiante.perfil')
+            ->get();
+    }
 }
