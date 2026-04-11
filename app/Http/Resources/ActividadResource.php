@@ -25,9 +25,13 @@ class ActividadResource extends JsonResource
             'ocultar_actividad'  => $this->ocultar_actividad,
             'estado'             => $this->estado,
             'es_calificado'      => $this->es_calificado,
-            'tipo'               => $this->whenLoaded('tipo', fn() => [
-                'tipo_id' => $this->tipo->tipo_id,
-                'nombre'  => $this->tipo->nombre,
+            'tipo_actividad'     => $this->whenLoaded('tipoActividad', fn() => [
+                'tipo_id' => $this->tipoActividad->tipo_id,
+                'nombre'  => $this->tipoActividad->nombre,
+            ]),
+            'clase'              => $this->whenLoaded('clase', fn() => [
+                'clase_id' => $this->clase->clase_id,
+                'titulo'   => $this->clase->titulo,
             ]),
             'cuestionario'       => $this->whenLoaded('cuestionario', function () {
                 $cuestionario = $this->cuestionario;

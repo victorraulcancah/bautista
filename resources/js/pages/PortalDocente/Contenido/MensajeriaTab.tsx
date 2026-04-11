@@ -26,8 +26,12 @@ export default function MensajeriaTab({ docenteCursoId }: { docenteCursoId: numb
                 api.get(`/docente/curso/${docenteCursoId}/alumnos`)
             ]);
             // Filtrar mensajes que podrían ser de este curso (difícil sin ID de curso en mensaje, pero podemos filtrar por remitente si es alumno)
-            setMessages(msgRes.data);
-            setStudents(stuRes.data);
+            setMessages(msgRes.data || []);
+            setStudents(stuRes.data.data || []);
+        } catch (error) {
+            console.error('Error loading data:', error);
+            setMessages([]);
+            setStudents([]);
         } finally {
             setLoading(false);
         }

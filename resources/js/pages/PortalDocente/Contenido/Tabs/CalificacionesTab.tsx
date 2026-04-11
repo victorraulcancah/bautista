@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BarChart3, Download, FileText, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { BarChart3, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import api from '@/lib/api';

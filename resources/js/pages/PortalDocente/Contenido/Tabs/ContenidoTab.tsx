@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Plus, BookOpen, Edit3, Trash2, ChevronDown, FileText, MoreVertical } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Plus, BookOpen, Edit3, Trash2, ChevronDown, FileText, Upload, Sparkles, ChevronRight, Download, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 import api from '@/lib/api';
 import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import PromptModal from '@/components/shared/PromptModal';
+import CreateActivityModal from '../components/modals/CreateActivityModal';
+import UploadFileModal from '../components/modals/UploadFileModal';
 
 interface Props {
     unidades: any[];
@@ -25,6 +26,10 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
         defaultValue?: string;
         action: (value: string) => Promise<void> | void;
     }>({ open: false, title: '', action: () => {} });
+    const [uploadingClaseId, setUploadingClaseId] = useState<number | null>(null);
+    const [creatingActivityFor, setCreatingActivityFor] = useState<{ claseId: number; cursoId: number } | null>(null);
+    const [expandedFiles, setExpandedFiles] = useState<Record<number, boolean>>({});
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const toggleSection = (id: number) => {
         setExpanded((s: any) => ({ ...s, [id]: !s[id] }));
@@ -107,6 +112,19 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
         });
     };
 
+    const handleFileUpload = async (claseId: number) => {
+        setUploadingClaseId(claseId);
+    };
+
+    const handleCreateActivity = (claseId: number) => {
+        if (!courseData?.curso_id) return;
+        setCreatingActivityFor({ claseId, cursoId: courseData.curso_id });
+    };
+
+    const toggleFileExpand = (archivoId: number) => {
+        setExpandedFiles(prev => ({ ...prev, [archivoId]: !prev[archivoId] }));
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -171,46 +189,151 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
 
                         {expanded[unidad.unidad_id] && (
                             <div className="px-6 pb-6 bg-white animate-in slide-in-from-top-2 duration-300">
-                                <div className="border-t border-gray-100 pt-4 space-y-2">
+                                <div className="border-t border-gray-100 pt-4 space-y-3">
                                     {unidad.clases?.map((clase: any) => (
-                                        <div key={clase.clase_id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-3xl border border-gray-50 hover:bg-gray-50/50 transition-colors gap-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="size-8 rounded-xl bg-emerald-50 flex items-center justify-center">
-                                                    <FileText size={14} className="text-emerald-600" />
+                                        <div key={clase.clase_id} className="rounded-3xl border border-gray-100 hover:border-emerald-100 transition-all overflow-hidden bg-white">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="size-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+                                                        <FileText size={14} className="text-emerald-600" />
+                                                    </div>
+                                                    <span className="text-sm font-bold text-gray-700">{clase.titulo}</span>
                                                 </div>
-                                                <span className="text-sm font-bold text-gray-700">{clase.titulo}</span>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="sm" 
+                                                        onClick={() => handleFileUpload(clase.clase_id)}
+                                                        className="rounded-xl border-emerald-100 font-bold text-[10px] uppercase h-8 hover:bg-emerald-50 hover:text-emerald-600 gap-1"
+                                                    >
+                                                        <Upload size={12} /> Archivo
+                                                    </Button>
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="sm" 
+                                                        onClick={() => handleCreateActivity(clase.clase_id)}
+                                                        className="rounded-xl border-purple-100 font-bold text-[10px] uppercase h-8 hover:bg-purple-50 hover:text-purple-600 gap-1"
+                                                    >
+                                                        <Sparkles size={12} /> Actividad
+                                                    </Button>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        onClick={() => renameClase(clase.clase_id, clase.titulo)}
+                                                        className="size-8 rounded-full text-gray-400 hover:text-emerald-600"
+                                                    >
+                                                        <Edit3 size={14} />
+                                                    </Button>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        onClick={() => setDeletingId({ id: clase.clase_id, type: 'clase' })}
+                                                        className="size-8 rounded-full text-gray-400 hover:text-red-500"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </Button>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <div className="flex -space-x-1 flex-wrap">
-                                                    {clase.archivos?.map((f: any) => (
-                                                        <div key={f.archivo_id} className="group/file relative flex items-center gap-1 bg-white border border-gray-100 px-2 py-1 rounded-lg text-[9px] font-bold shadow-sm">
-                                                            <a href={`/storage/${f.path}`} target="_blank" className="text-emerald-600 hover:underline">{f.nombre}</a>
-                                                            <button 
-                                                                onClick={() => setDeletingId({ id: f.archivo_id, type: 'archivo' })}
-                                                                className="size-4 rounded-full bg-rose-50 text-rose-500 opacity-0 group-hover/file:opacity-100 transition-opacity"
-                                                            >
-                                                                ✕
-                                                            </button>
+
+                                            {/* Files and Activities */}
+                                            {(clase.archivos?.length > 0 || clase.actividades?.length > 0) && (
+                                                <div className="px-4 pb-4 space-y-3">
+                                                    {/* Files */}
+                                                    {clase.archivos?.length > 0 && (
+                                                        <div className="space-y-2">
+                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Archivos ({clase.archivos.length})</p>
+                                                            <div className="space-y-2">
+                                                                {clase.archivos.map((f: any) => (
+                                                                    <div key={f.archivo_id} className="border border-gray-100 rounded-xl overflow-hidden bg-white hover:border-blue-200 transition-all">
+                                                                        <div 
+                                                                            className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
+                                                                            onClick={() => toggleFileExpand(f.archivo_id)}
+                                                                        >
+                                                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                                                <div className={`transition-transform ${expandedFiles[f.archivo_id] ? 'rotate-90' : ''}`}>
+                                                                                    <ChevronRight size={14} className="text-gray-400" />
+                                                                                </div>
+                                                                                <FileText size={16} className="text-blue-600 flex-shrink-0" />
+                                                                                <div className="flex-1 min-w-0">
+                                                                                    <p className="text-sm font-bold text-gray-900 truncate">{f.titulo || f.nombre}</p>
+                                                                                    <p className="text-[10px] text-gray-400">{(f.tamanio / 1024 / 1024).toFixed(2)} MB</p>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-1">
+                                                                                <Button 
+                                                                                    variant="ghost" 
+                                                                                    size="icon"
+                                                                                    onClick={(e) => { e.stopPropagation(); window.open(`/storage/${f.path}`, '_blank'); }}
+                                                                                    className="size-8 rounded-lg hover:bg-blue-50 hover:text-blue-600"
+                                                                                    title="Ver archivo"
+                                                                                >
+                                                                                    <Eye size={14} />
+                                                                                </Button>
+                                                                                <Button 
+                                                                                    variant="ghost" 
+                                                                                    size="icon"
+                                                                                    onClick={(e) => { e.stopPropagation(); setDeletingId({ id: f.archivo_id, type: 'archivo' }); }}
+                                                                                    className="size-8 rounded-lg hover:bg-red-50 hover:text-red-600"
+                                                                                    title="Eliminar"
+                                                                                >
+                                                                                    <Trash2 size={14} />
+                                                                                </Button>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        {expandedFiles[f.archivo_id] && (
+                                                                            <div className="px-3 pb-3 pt-0 border-t border-gray-100 bg-gray-50 animate-in slide-in-from-top-2 duration-200">
+                                                                                <div className="space-y-2 mt-3">
+                                                                                    {f.descripcion && (
+                                                                                        <div>
+                                                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Descripción</p>
+                                                                                            <p className="text-xs text-gray-600">{f.descripcion}</p>
+                                                                                        </div>
+                                                                                    )}
+                                                                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                                                                        <div>
+                                                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Tipo</p>
+                                                                                            <p className="text-gray-700 font-bold">{f.tipo || 'N/A'}</p>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Tamaño</p>
+                                                                                            <p className="text-gray-700 font-bold">{(f.tamanio / 1024 / 1024).toFixed(2)} MB</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <a 
+                                                                                        href={`/storage/${f.path}`}
+                                                                                        download
+                                                                                        className="flex items-center justify-center gap-2 w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors"
+                                                                                    >
+                                                                                        <Download size={12} />
+                                                                                        Descargar Archivo
+                                                                                    </a>
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
                                                         </div>
-                                                    ))}
+                                                    )}
+
+                                                    {/* Activities */}
+                                                    {clase.actividades?.length > 0 && (
+                                                        <div className="space-y-1">
+                                                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Actividades</p>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {clase.actividades.map((act: any) => (
+                                                                    <div key={act.actividad_id} className="flex items-center gap-2 bg-purple-50 border border-purple-100 px-3 py-2 rounded-xl text-[11px] font-bold">
+                                                                        <Sparkles size={12} className="text-purple-600" />
+                                                                        <span className="text-gray-700">{act.nombre_actividad}</span>
+                                                                        <span className="text-[9px] text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">{act.tipo_actividad?.nombre}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
-                                                    onClick={() => renameClase(clase.clase_id, clase.titulo)}
-                                                    className="size-8 rounded-full text-gray-400 hover:text-emerald-600"
-                                                >
-                                                    <Edit3 size={14} />
-                                                </Button>
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
-                                                    onClick={() => setDeletingId({ id: clase.clase_id, type: 'clase' })}
-                                                    className="size-8 rounded-full text-gray-400 hover:text-red-500"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </Button>
-                                            </div>
+                                            )}
                                         </div>
                                     ))}
                                     {(!unidad.clases || unidad.clases.length === 0) && (
@@ -239,6 +362,36 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
                 message={promptConfig.message}
                 defaultValue={promptConfig.defaultValue}
             />
+
+            <input 
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.avi,.mov,.jpg,.jpeg,.png"
+            />
+
+            <UploadFileModal 
+                open={!!uploadingClaseId}
+                onClose={() => setUploadingClaseId(null)}
+                claseId={uploadingClaseId || 0}
+                onSuccess={() => {
+                    setUploadingClaseId(null);
+                    onRefresh();
+                }}
+            />
+
+            {creatingActivityFor && (
+                <CreateActivityModal 
+                    open={!!creatingActivityFor}
+                    onClose={() => setCreatingActivityFor(null)}
+                    claseId={creatingActivityFor.claseId}
+                    cursoId={creatingActivityFor.cursoId}
+                    onSuccess={() => {
+                        setCreatingActivityFor(null);
+                        onRefresh();
+                    }}
+                />
+            )}
         </div>
     );
 }

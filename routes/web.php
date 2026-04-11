@@ -98,6 +98,9 @@ Route::middleware(['auth.token'])->group(function () {
             'docenteCursoId' => $id, 
             'actividadId' => $actividadId
         ]))->name('cursos.cuestionario');
+        Route::get('/actividad/{actividadId}/entregas', fn (int $actividadId) => Inertia::render('PortalDocente/CalificarActividad', [
+            'actividadId' => $actividadId
+        ]))->name('actividad.entregas');
         Route::get('/alumno/actividad/{id}/dibujo', function ($id) {
             $actividad = \App\Models\ActividadCurso::find($id);
             return inertia('Actividades/Dibujo', ['actividad' => $actividad]);

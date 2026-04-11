@@ -151,6 +151,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Actividades (Exámenes Virtuales)
     Route::get('actividades/tipos',     [ActividadApiController::class, 'tipos']);
+    Route::get('actividades/{id}/entregas', [ActividadApiController::class, 'entregas']);
     Route::apiResource('actividades',   ActividadApiController::class)->names('api.actividades');
     Route::get('actividades/{id}/cuestionario', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'show']);
     Route::put('actividades/{id}/cuestionario', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'sync']);
@@ -199,9 +200,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('docente/asistencia/iniciar', [DocenteApiController::class, 'iniciarAsistencia']);
         Route::post('docente/asistencia/{id}/marcar', [DocenteApiController::class, 'marcarAsistencia']);
         Route::get('docente/curso/{id}/asistencia-matrix', [DocenteApiController::class, 'asistenciaMatrix']);
+        Route::get('docente/curso/{id}/exportar-asistencia', [DocenteApiController::class, 'exportarAsistencia']);
         
         // Métricas y Calificaciones
-        Route::get('docente/curso/{id}/alumnos', [DocenteApiController::class, 'alumnosConMetricas']);
+        Route::get('docente/curso/{id}/alumnos', [DocenteApiController::class, 'alumnosDetallados']);
+        Route::get('docente/curso/{id}/exportar-alumnos', [DocenteApiController::class, 'exportarAlumnos']);
         Route::get('docente/curso/{id}/calificaciones', [\App\Http\Controllers\Api\CalificacionApiController::class, 'indexByCourse']);
         Route::get('docente/curso/{id}/exportar-excel', [\App\Http\Controllers\Api\CalificacionApiController::class, 'exportExcel']);
 

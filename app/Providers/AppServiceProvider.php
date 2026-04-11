@@ -48,6 +48,7 @@ use App\Services\Implements\CursoContenidoService;
 use App\Services\Implements\MatriculaService;
 use App\Services\Implements\CursoService;
 use App\Services\Implements\DocenteService;
+use App\Services\Implements\DocenteCursoService;
 use App\Services\Implements\EstudianteService;
 use App\Services\Implements\GradoService;
 use App\Services\Implements\NivelEducativoService;
@@ -68,6 +69,7 @@ use App\Services\Interfaces\CursoContenidoServiceInterface;
 use App\Services\Interfaces\MatriculaServiceInterface;
 use App\Services\Interfaces\CursoServiceInterface;
 use App\Services\Interfaces\DocenteServiceInterface;
+use App\Services\Interfaces\DocenteCursoServiceInterface;
 use App\Services\Interfaces\EstudianteServiceInterface;
 use App\Services\Interfaces\GradoServiceInterface;
 use App\Services\Interfaces\NivelEducativoServiceInterface;
@@ -139,6 +141,7 @@ class AppServiceProvider extends ServiceProvider
         // Docente
         $this->app->bind(DocenteRepositoryInterface::class, DocenteRepository::class);
         $this->app->bind(DocenteServiceInterface::class, DocenteService::class);
+        $this->app->bind(DocenteCursoServiceInterface::class, DocenteCursoService::class);
 
         // Matricula
         $this->app->bind(MatriculaRepositoryInterface::class, MatriculaRepository::class);

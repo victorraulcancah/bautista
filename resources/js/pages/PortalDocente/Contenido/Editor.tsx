@@ -7,7 +7,8 @@ import {
     Users, 
     Settings, 
     Calendar,
-    Mail
+    Mail,
+    Sparkles
 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
@@ -22,9 +23,11 @@ import CalificacionesTab from './Tabs/CalificacionesTab';
 import AsistenciaTab from './Tabs/AsistenciaTab';
 import AlumnosTab from './Tabs/AlumnosTab';
 import ConfiguracionTab from './Tabs/ConfiguracionTab';
+import ActividadesTab from './Tabs/ActividadesTab';
 
 const TABS = [
     { id: "contenido", label: "Contenido", icon: BookOpen },
+    { id: "actividades", label: "Actividades", icon: Sparkles },
     { id: "anuncios", label: "Anuncios", icon: MessageSquare },
     { id: "mensajeria", label: "Mensajería", icon: Mail },
     { id: "calificaciones", label: "Calificaciones", icon: BarChart3 },
@@ -131,12 +134,24 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
                             onRefresh={loadBasicData}
                         />
                     )}
+                    {activeTab === "actividades" && (
+                        <ActividadesTab 
+                            courseData={courseData}
+                            onRefresh={loadBasicData}
+                        />
+                    )}
                     {activeTab === "anuncios" && <AnunciosTab docenteCursoId={docenteCursoId} />}
                     {activeTab === "mensajeria" && <MensajeriaTab docenteCursoId={docenteCursoId} />}
                     {activeTab === "calificaciones" && <CalificacionesTab docenteCursoId={docenteCursoId} />}
                     {activeTab === "asistencia" && <AsistenciaTab docenteCursoId={docenteCursoId} />}
                     {activeTab === "alumnos" && <AlumnosTab docenteCursoId={docenteCursoId} />}
-                    {activeTab === "configuracion" && <ConfiguracionTab docenteCursoId={docenteCursoId} />}
+                    {activeTab === "configuracion" && (
+                        <ConfiguracionTab 
+                            docenteCursoId={docenteCursoId} 
+                            courseData={courseData}
+                            onRefresh={loadBasicData}
+                        />
+                    )}
                 </main>
             </div>
         </AppLayout>

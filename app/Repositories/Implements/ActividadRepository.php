@@ -10,16 +10,16 @@ class ActividadRepository implements ActividadRepositoryInterface
 {
     public function paginate(int $cursoId, string $search = '', int $perPage = 20): LengthAwarePaginator
     {
-        return ActividadCurso::with(['tipo', 'cuestionario'])
+        return ActividadCurso::with(['tipoActividad', 'clase', 'cuestionario'])
             ->where('id_curso', $cursoId)
-            ->when($search, fn ($q) => $q->where('nombre_activid', 'like', "%{$search}%"))
+            ->when($search, fn ($q) => $q->where('nombre_actividad', 'like', "%{$search}%"))
             ->latest('actividad_id')
             ->paginate($perPage);
     }
 
     public function findById(int $id): ActividadCurso
     {
-        return ActividadCurso::with(['tipo', 'cuestionario.preguntas.alternativas'])->findOrFail($id);
+        return ActividadCurso::with(['tipoActividad', 'clase', 'cuestionario.preguntas.alternativas'])->findOrFail($id);
     }
 
     public function create(array $data): ActividadCurso
@@ -30,7 +30,7 @@ class ActividadRepository implements ActividadRepositoryInterface
     public function update(ActividadCurso $actividad, array $data): ActividadCurso
     {
         $actividad->update($data);
-        return $actividad->fresh(['tipo', 'cuestionario']);
+        return $actividad->fresh(['tipoActividad', 'clase', 'cuestionario']);
     }
 
     public function delete(ActividadCurso $actividad): void

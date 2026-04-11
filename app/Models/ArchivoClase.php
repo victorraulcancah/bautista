@@ -11,7 +11,7 @@ class ArchivoClase extends Model
     protected $primaryKey = 'archivo_id';
 
     protected $fillable = [
-        'clase_id', 'nombre', 'path', 'tipo', 'tamanio',
+        'clase_id', 'nombre', 'titulo', 'descripcion', 'path', 'tipo', 'tamanio', 'visible',
     ];
 
     public function clase(): BelongsTo

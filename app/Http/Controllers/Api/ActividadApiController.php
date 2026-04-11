@@ -96,4 +96,63 @@ class ActividadApiController extends Controller
 
         return response()->json(['message' => 'Dibujo guardado con éxito', 'path' => $path]);
     }
+
+    /** Obtener entregas de una actividad */
+    public function entregas(int $actividadId): JsonResponse
+    {
+        $entregas = \DB::table('archivos_actividad as aa')
+            ->join('estudiantes as e', 'aa.estudiante', '=', 'e.estu_id')
+            ->join('perfil as p', 'e.perfil_id', '=', 'p.perfil_id')
+            ->leftJoin('nota_actividad_estudiante as nae', function($join) use ($actividadId) {
+                $join->on('nae.id_estudiante', '=', 'e.estu_id')
+                     ->where('nae.id_actividad', '=', $actividadId);
+            })
+            ->where('aa.id_actividad', $actividadId)
+            ->where('aa.origen', 'e') // e = estudiante
+            ->select(
+                'e.estu_id',
+                'p.primer_nombre as nombre',
+                'p.apellido_paterno',
+                'p.apellido_materno',
+                'aa.created_at as fecha_entrega',
+                'nae.nota',
+                'nae.observacion',
+                \DB::raw('GROUP_CONCAT(aa.archivo_id) as archivo_ids'),
+                \DB::raw('GROUP_CONCAT(aa.nombre_archivo) as archivo_nombres'),
+                \DB::raw('GROUP_CONCAT(aa.archivo) as archivo_paths')
+            )
+            ->groupBy('e.estu_id', 'p.primer_nombre', 'p.apellido_paterno', 'p.apellido_materno', 'aa.created_at', 'nae.nota', 'nae.observacion')
+            ->get()
+            ->map(function($entrega) {
+                $archivoIds = explode(',', $entrega->archivo_ids);
+                $archivoNombres = explode(',', $entrega->archivo_nombres);
+                $archivoPaths = explode(',', $entrega->archivo_paths);
+                
+                $archivos = [];
+                for ($i = 0; $i < count($archivoIds); $i++) {
+                    $archivos[] = [
+                        'archivo_id' => $archivoIds[$i],
+                        'nombre' => $archivoNombres[$i] ?? 'archivo',
+                        'path' => $archivoPaths[$i] ?? '',
+                    ];
+                }
+
+                return [
+                    'entrega_id' => $entrega->estu_id,
+                    'estudiante' => [
+                        'estu_id' => $entrega->estu_id,
+                        'nombre' => $entrega->nombre,
+                        'apellido_paterno' => $entrega->apellido_paterno,
+                        'apellido_materno' => $entrega->apellido_materno,
+                    ],
+                    'archivos' => $archivos,
+                    'fecha_entrega' => $entrega->fecha_entrega,
+                    'nota' => $entrega->nota,
+                    'observacion' => $entrega->observacion,
+                    'estado' => $entrega->nota ? 'calificado' : 'pendiente',
+                ];
+            });
+
+        return response()->json($entregas);
+    }
 }

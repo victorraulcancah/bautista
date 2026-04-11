@@ -20,9 +20,12 @@ class ClaseResource extends JsonResource
                 $this->archivos->map(fn ($a) => [
                     'archivo_id' => $a->archivo_id,
                     'nombre'     => $a->nombre,
+                    'titulo'     => $a->titulo,
+                    'descripcion' => $a->descripcion,
                     'path'       => $a->path,
                     'tipo'       => $a->tipo,
                     'tamanio'    => $a->tamanio,
+                    'visible'    => $a->visible,
                     'url'        => asset('storage/' . $a->path),
                 ])
             ),
