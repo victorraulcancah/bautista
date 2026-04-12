@@ -15,9 +15,11 @@ const ROLES_ES: Record<string, string> = {
 export function UserInfo({
     user,
     showEmail = false,
+    hideText = false,
 }: {
     user: User;
     showEmail?: boolean;
+    hideText?: boolean;
 }) {
     const getInitials = useInitials();
 
@@ -29,26 +31,28 @@ export function UserInfo({
                     {getInitials(user.nombre_completo || user.name)}
                 </AvatarFallback>
             </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-bold text-white capitalize">
-                    {(() => {
-                        const rolName = typeof user.rol === 'string'
-                            ? user.rol
-                            : user.rol?.name;
-                        return rolName
-                            ? (ROLES_ES[rolName] ?? rolName.replace('_', ' '))
-                            : 'Usuario';
-                    })()}
-                </span>
-                <span className="truncate text-xs text-sidebar-foreground opacity-70">
-                    {user.nombre_completo || user.name}
-                </span>
-                {showEmail && (
-                    <span className="truncate text-xs text-muted-foreground">
-                        {user.email}
+            {!hideText && (
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-bold text-white capitalize">
+                        {(() => {
+                            const rolName = typeof user.rol === 'string'
+                                ? user.rol
+                                : user.rol?.name;
+                            return rolName
+                                ? (ROLES_ES[rolName] ?? rolName.replace('_', ' '))
+                                : 'Usuario';
+                        })()}
                     </span>
-                )}
-            </div>
+                    <span className="truncate text-xs text-sidebar-foreground opacity-70">
+                        {user.nombre_completo || user.name}
+                    </span>
+                    {showEmail && (
+                        <span className="truncate text-xs text-muted-foreground">
+                            {user.email}
+                        </span>
+                    )}
+                </div>
+            )}
         </>
     );
 }

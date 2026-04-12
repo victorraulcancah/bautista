@@ -14,6 +14,7 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 export function NavUser() {
     const { auth } = usePage().props;
@@ -27,11 +28,14 @@ export function NavUser() {
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
-                            className="group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent"
+                            className={cn(
+                                "group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent transition-all duration-200",
+                                state === 'collapsed' && !isMobile && "!justify-center !p-0"
+                            )}
                             data-test="sidebar-menu-button"
                         >
-                            <UserInfo user={auth.user} />
-                            <ChevronsUpDown className="ml-auto size-4" />
+                            <UserInfo user={auth.user} hideText={state === 'collapsed' && !isMobile} />
+                            {(state === 'expanded' || isMobile) && <ChevronsUpDown className="ml-auto size-4" />}
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent

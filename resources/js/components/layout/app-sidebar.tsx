@@ -149,14 +149,16 @@ function NavLinkItem({ item }: { item: Extract<NavItem, { type: 'link' }> }) {
     const btnClass = cn(
         'transition-colors',
         isActive
-            ? 'border-l-2 border-[#00a65a] bg-sidebar-accent text-white pl-[10px]'
+            ? state === 'collapsed' && !isMobile 
+                ? 'bg-sidebar-accent text-white' 
+                : 'border-l-2 border-[#00a65a] bg-sidebar-accent text-white pl-[10px]'
             : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-white',
     );
 
     return (
         <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip={item.title} className={btnClass}>
-                <Link href={item.href}>
+                <Link href={item.href} className={cn(state === 'collapsed' && !isMobile && '!justify-center !p-0')}>
                     <item.icon className="size-4" />
                     {(state === 'expanded' || isMobile) && (
                         <span className="text-xs font-semibold uppercase tracking-tight">{item.title}</span>
@@ -183,8 +185,11 @@ function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
                 tooltip={item.title}
                 className={cn(
                     'cursor-pointer transition-colors',
+                    state === 'collapsed' && !isMobile && '!justify-center !p-0',
                     isGroupActive
-                        ? 'border-l-2 border-[#00a65a] bg-sidebar-accent text-white pl-[10px]'
+                        ? state === 'collapsed' && !isMobile
+                            ? 'bg-sidebar-accent text-white'
+                            : 'border-l-2 border-[#00a65a] bg-sidebar-accent text-white pl-[10px]'
                         : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-white',
                 )}
             >
@@ -221,6 +226,7 @@ function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
 
 export function AppSidebar() {
     const { can } = usePermission();
+    const { state, isMobile } = useSidebar();
 
     const filteredNavigation = useMemo(() => {
         return navigation.map(item => {
@@ -288,9 +294,14 @@ export function AppSidebar() {
         return result;
     }, [filteredNavigation]);
 
+    const isCollapsed = state === 'collapsed' && !isMobile;
+
     return (
         <Sidebar collapsible="icon" variant="sidebar">
-            <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent/50 p-4">
+            <SidebarHeader className={cn(
+                "border-b border-sidebar-border bg-sidebar-accent/50 transition-all duration-200",
+                isCollapsed ? "p-2" : "p-4"
+            )}>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <NavUser />
@@ -304,7 +315,10 @@ export function AppSidebar() {
                         <SidebarGroup key={idx}>
                             {group.section && <SidebarGroupLabel>{group.section}</SidebarGroupLabel>}
                             <SidebarGroupContent>
-                                <SidebarMenu className="px-2 py-2 gap-1">
+                                <SidebarMenu className={cn(
+                                    "gap-1 transition-all duration-200",
+                                    isCollapsed ? "px-0 py-2" : "px-2 py-2"
+                                )}>
                                     {group.items.map((item) => {
                                         if (item.type === 'group') {
                                             return <NavGroupItem key={item.title} item={item} />;
@@ -323,7 +337,10 @@ export function AppSidebar() {
                 </div>
             </SidebarContent>
 
-            <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar-accent/5">
+            <SidebarFooter className={cn(
+                "border-t border-sidebar-border bg-sidebar-accent/5 transition-all duration-200",
+                isCollapsed ? "p-2" : "p-4"
+            )}>
                 <AppLogo variant="sidebar" />
             </SidebarFooter>
         </Sidebar>
