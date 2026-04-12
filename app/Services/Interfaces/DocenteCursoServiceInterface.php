@@ -23,4 +23,9 @@ interface DocenteCursoServiceInterface
      * Update course settings.
      */
     public function actualizarConfiguracion(int $docenteCursoId, array $settings): array;
+
+    /**
+     * Upload course banner.
+     */
+    public function subirBanner(int $docenteCursoId, $file): array;
 }

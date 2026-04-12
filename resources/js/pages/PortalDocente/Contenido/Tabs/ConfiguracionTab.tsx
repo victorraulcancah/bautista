@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+    import { useState, useEffect } from 'react';
 import { Settings, Palette, Image as ImageIcon, Save, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -50,6 +50,9 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
                 banner: courseData.curso.banner || '',
             });
         }
+        if (courseData?.banner_url) {
+            setPreviewBanner(courseData.banner_url);
+        }
     }, [courseData]);
 
     const handleSave = async () => {
@@ -92,7 +95,9 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
             });
 
             setSettings(prev => ({ ...prev, banner: res.data.banner }));
-            setPreviewBanner(URL.createObjectURL(file));
+            setPreviewBanner(res.data.url);
+            onRefresh();
+            alert('Banner subido correctamente');
         } catch (error) {
             console.error('Error uploading banner:', error);
             alert('Error al subir el banner');
@@ -257,7 +262,7 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
                                         ) : previewBanner || settings.banner ? (
                                             <div className="relative w-full h-full rounded-3xl overflow-hidden">
                                                 <img 
-                                                    src={previewBanner || `/storage/${settings.banner}`} 
+                                                    src={previewBanner || (settings.banner ? `/storage/${settings.banner}` : '')} 
                                                     alt="Banner" 
                                                     className="w-full h-full object-cover"
                                                 />
@@ -299,7 +304,7 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
                                     >
                                         {previewBanner || settings.banner ? (
                                             <img 
-                                                src={previewBanner || `/storage/${settings.banner}`} 
+                                                src={previewBanner || (settings.banner ? `/storage/${settings.banner}` : '')} 
                                                 alt="Banner Preview" 
                                                 className="w-full h-full object-cover"
                                             />

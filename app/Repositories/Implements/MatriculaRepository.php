@@ -121,10 +121,10 @@ class MatriculaRepository implements MatriculaRepositoryInterface
             ->get();
     }
 
-    public function getMatriculasBySeccion(int $seccionId, int $aperturaId): Collection
+    public function getMatriculasBySeccion(int $seccionId, ?int $aperturaId = null): Collection
     {
         return Matricula::where('seccion_id', $seccionId)
-            ->where('apertura_id', $aperturaId)
+            ->when($aperturaId, fn($q) => $q->where('apertura_id', $aperturaId))
             ->where('estado', '1')
             ->with('estudiante.perfil')
             ->get();

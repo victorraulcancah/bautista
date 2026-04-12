@@ -12,7 +12,7 @@ class DocenteCurso extends Model
 
     protected $fillable = [
         'docente_id', 'apertura_id', 'curso_id',
-        'nivel_id', 'grado_id', 'seccion_id', 'estado', 'settings',
+        'nivel_id', 'grado_id', 'seccion_id', 'estado', 'settings', 'banner',
     ];
 
     protected $casts = [

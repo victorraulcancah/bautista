@@ -233,6 +233,19 @@ class DocenteApiController extends Controller
     }
 
     /**
+     * Upload course banner.
+     */
+    public function uploadBanner(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'banner' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:5120',
+        ]);
+
+        $result = $this->docenteCursoService->subirBanner($id, $request->file('banner'));
+        return response()->json($result);
+    }
+
+    /**
      * Start an attendance session.
      */
     public function iniciarAsistencia(IniciarAsistenciaRequest $request): JsonResponse

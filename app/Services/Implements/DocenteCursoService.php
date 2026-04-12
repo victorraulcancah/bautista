@@ -101,4 +101,29 @@ class DocenteCursoService implements DocenteCursoServiceInterface
             'settings' => $dc->fresh()->settings
         ];
     }
+
+    public function subirBanner(int $docenteCursoId, $file): array
+    {
+        $dc = DocenteCurso::find($docenteCursoId);
+        
+        if (!$dc) {
+            throw new DocenteCursoNotFoundException();
+        }
+
+        // Delete old banner if exists
+        if ($dc->banner && \Storage::disk('public')->exists($dc->banner)) {
+            \Storage::disk('public')->delete($dc->banner);
+        }
+
+        // Store new banner
+        $path = $file->store('banners/cursos', 'public');
+        
+        $dc->update(['banner' => $path]);
+
+        return [
+            'message' => 'Banner subido correctamente.',
+            'banner' => $path,
+            'url' => \Storage::disk('public')->url($path)
+        ];
+    }
 }

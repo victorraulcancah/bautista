@@ -17,6 +17,8 @@ class DocenteCursoResource extends JsonResource
             'apertura_id' => $this->apertura_id,
             'estado' => $this->estado,
             'settings' => $this->settings,
+            'banner' => $this->banner,
+            'banner_url' => $this->banner ? \Storage::disk('public')->url($this->banner) : null,
             'curso' => new CursoResource($this->whenLoaded('curso')),
             'seccion' => $this->whenLoaded('seccion'),
             'apertura' => $this->whenLoaded('apertura'),

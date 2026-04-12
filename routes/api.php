@@ -188,6 +188,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('docente/mis-cursos', [DocenteApiController::class, 'misCursos'])->withoutMiddleware('verify.docente.curso');
         Route::get('docente/curso/{id}/contenido', [DocenteApiController::class, 'cursoContenido']);
         Route::put('docente/curso/{id}/settings', [DocenteApiController::class, 'updateSettings']);
+        Route::post('docente/curso/{id}/upload-banner', [DocenteApiController::class, 'uploadBanner']);
         Route::get('docente/mis-alumnos', [DocenteApiController::class, 'misAlumnos'])->withoutMiddleware('verify.docente.curso');
         
         // Tab Anuncios
