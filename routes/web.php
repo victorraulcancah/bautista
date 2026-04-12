@@ -23,6 +23,9 @@ Route::middleware(['auth.token'])->group(function () {
     
     Route::get('/mensajes',              fn () => Inertia::render('Comunicados/index'))->middleware('permission:comunicados.ver')->name('mensajes.index');
     
+    Route::get('/credencial',            fn () => Inertia::render('Shared/CredencialDigital'))->name('credencial');
+    Route::get('/mi-fotocheck',          [\App\Http\Controllers\Admin\FotocheckController::class, 'generatePropio'])->name('mi-fotocheck');
+
     Route::get('/estudiantes',  fn () => Inertia::render('GestionAlumnos/index'))->middleware('permission:estudiantes.ver')->name('estudiantes.index');
     Route::get('/estudiantes/{id}/fotocheck', [\App\Http\Controllers\Admin\FotocheckController::class, 'generate'])->middleware('permission:estudiantes.ver')->name('estudiantes.fotocheck');
     Route::get('/matriculas/aperturas/{aperturaId}/niveles/{nivelId}/fotochecks', [\App\Http\Controllers\Admin\FotocheckController::class, 'generateBulk'])->middleware('permission:estudiantes.ver')->name('matriculas.fotochecks.bulk');

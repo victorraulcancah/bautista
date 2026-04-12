@@ -143,7 +143,7 @@
     <div class="header-content">
         <div class="shield">B</div>
         <h1 class="school-name">{{ config('app.name', 'BAUTISTA LA PASCANA') }}</h1>
-        <p class="card-type">Cédula de Identidad Escolar</p>
+        <p class="card-type">Cédula de Identidad Institucional</p>
     </div>
 
     <div class="bg-pattern"></div>
@@ -162,13 +162,13 @@
 
     <!-- Identidad -->
     <div class="identity-area">
-        <div class="badge">ALUMNO(A)</div>
+        <div class="badge">{{ $tipo }}</div>
         <h2 class="last-names">
-            {{ mb_strtoupper($estudiante->perfil->apellido_paterno) }}<br>
-            {{ mb_strtoupper($estudiante->perfil->apellido_materno) }}
+            {{ mb_strtoupper($user->perfil->apellido_paterno) }}<br>
+            {{ mb_strtoupper($user->perfil->apellido_materno) }}
         </h2>
         <p class="first-names">
-            {{ mb_strtoupper($estudiante->perfil->primer_nombre . ' ' . $estudiante->perfil->segundo_nombre) }}
+            {{ mb_strtoupper($user->perfil->primer_nombre . ' ' . $user->perfil->segundo_nombre) }}
         </p>
     </div>
 
@@ -176,11 +176,11 @@
     <div class="bottom-data">
         <div class="data-row">
             <span class="label">ID Sistema</span>
-            <span class="value">EST-{{ str_pad($estudiante->estu_id, 6, '0', STR_PAD_LEFT) }}</span>
+            <span class="value">{{ $idDisplay }}</span>
         </div>
         <div class="data-row">
             <span class="label">Nro Documento</span>
-            <span class="value">{{ $estudiante->perfil->doc_numero ?? '--------' }}</span>
+            <span class="value">{{ $user->perfil->doc_numero ?? '--------' }}</span>
         </div>
     </div>
 

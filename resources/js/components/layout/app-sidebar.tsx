@@ -69,8 +69,8 @@ type NavItem = {
 const navigation: NavItem[] = [
     // ── Menú de Navegación ──────────────────────────────────────────────
     { type: 'section', label: 'MENÚ DE NAVEGACIÓN' },
-    { type: 'link', title: 'QR',               icon: QrCode,          href: '/alumno/qr', permission: 'portal.alumno.qr' },
     { type: 'link', title: 'Inicio',           icon: LayoutDashboard, href: '/dashboard', permission: 'dashboard.ver' },
+    { type: 'link', title: 'Mi Credencial',    icon: QrCode,          href: '/credencial' },
     { type: 'group', title: 'Institución', icon: Building2, children: [
         { title: 'Datos Básicos', href: '/institucion', permission: 'institucion.ver' },
         { title: 'Galería',       href: '/institucion/galeria', permission: 'institucion.ver' },

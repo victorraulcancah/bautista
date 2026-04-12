@@ -81,7 +81,7 @@ class AsistenciaGeneralApiController extends Controller
             return response()->json(['message' => 'Usuario no encontrado.'], 404);
         }
 
-        // Determine if student or teacher
+        // Determine if student or teacher or personal staff
         $tipo = 'E';
         $persona = Estudiante::where('user_id', $user->id)->first();
         
@@ -93,8 +93,10 @@ class AsistenciaGeneralApiController extends Controller
             $id_persona = $persona->estu_id;
         }
 
+        // If still not found, treat as Personal Staff ('P')
         if (!$persona) {
-            return response()->json(['message' => 'No se encontró registro académico para este usuario.'], 404);
+            $tipo = 'P';
+            $id_persona = $user->id;
         }
 
         $fecha = now()->toDateString();
@@ -139,8 +141,11 @@ class AsistenciaGeneralApiController extends Controller
                 $user = null;
                 if ($log->tipo === 'E') {
                     $user = Estudiante::with('perfil')->find($log->id_persona)?->perfil;
-                } else {
+                } elseif ($log->tipo === 'D') {
                     $user = Docente::with('perfil')->find($log->id_persona)?->perfil;
+                } else {
+                    // Tipo P (Personal/Staff)
+                    $user = User::with('perfil')->find($log->id_persona)?->perfil;
                 }
                 $log->usuario_nombre = $user ? "{$user->primer_nombre} {$user->apellido_paterno}" : '—';
                 return $log;

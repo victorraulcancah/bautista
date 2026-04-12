@@ -18,6 +18,7 @@ use App\Repositories\Implements\NivelEducativoRepository;
 use App\Repositories\Implements\SeccionRepository;
 use App\Repositories\Implements\ActividadRepository;
 use App\Repositories\Implements\UsuarioRepository;
+use App\Repositories\Implements\FotocheckRepository;
 use App\Repositories\Interfaces\PagoNotificaRepositoryInterface;
 use App\Repositories\Interfaces\PagoRepositoryInterface;
 use App\Repositories\Interfaces\UsuarioRepositoryInterface;
@@ -34,6 +35,7 @@ use App\Repositories\Interfaces\GradoRepositoryInterface;
 use App\Repositories\Interfaces\NivelEducativoRepositoryInterface;
 use App\Repositories\Interfaces\SeccionRepositoryInterface;
 use App\Repositories\Interfaces\ActividadRepositoryInterface;
+use App\Repositories\Interfaces\FotocheckRepositoryInterface;
 use App\Services\ActividadUsuarioService;
 use App\Services\Implements\PagoNotificaService;
 use App\Services\Implements\PagoService;
@@ -55,6 +57,7 @@ use App\Services\Implements\NivelEducativoService;
 use App\Services\Implements\SeccionService;
 use App\Services\Implements\ActividadService;
 use App\Services\Implements\UsuarioService;
+use App\Services\Implements\FotocheckService;
 use App\Services\Interfaces\PagoNotificaServiceInterface;
 use App\Services\Interfaces\PagoServiceInterface;
 use App\Services\Interfaces\UsuarioServiceInterface;
@@ -75,6 +78,7 @@ use App\Services\Interfaces\GradoServiceInterface;
 use App\Services\Interfaces\NivelEducativoServiceInterface;
 use App\Services\Interfaces\SeccionServiceInterface;
 use App\Services\Interfaces\ActividadServiceInterface;
+use App\Services\Interfaces\FotocheckServiceInterface;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -166,6 +170,10 @@ class AppServiceProvider extends ServiceProvider
         // Usuarios
         $this->app->bind(UsuarioRepositoryInterface::class, UsuarioRepository::class);
         $this->app->bind(UsuarioServiceInterface::class, UsuarioService::class);
+
+        // Fotocheck
+        $this->app->bind(FotocheckRepositoryInterface::class, FotocheckRepository::class);
+        $this->app->bind(FotocheckServiceInterface::class, FotocheckService::class);
     }
 
     /**

@@ -30,6 +30,11 @@ class Asistencia extends Model
         return $this->belongsTo(Docente::class, 'id_persona', 'docente_id');
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_persona', 'id');
+    }
+
     public function institucion(): BelongsTo
     {
         return $this->belongsTo(InstitucionEducativa::class, 'insti_id', 'insti_id');
