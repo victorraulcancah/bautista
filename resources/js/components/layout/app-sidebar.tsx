@@ -20,7 +20,8 @@ import {
     Bell,
     Calendar,
     LogOut,
-    FileText
+    FileText,
+    Shield
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import AppLogo from '@/components/layout/app-logo';
@@ -39,103 +40,104 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
+import { usePermission } from '@/hooks/usePermission';
 
-type NavChild = { title: string; href: string };
+type NavChild = { 
+    title: string; 
+    href: string;
+    permission?: string;
+};
+
 type NavItem = { 
     type: 'section'; 
     label: string; 
-    roles?: string[] 
+    permission?: string;
 } | { 
     type: 'link'; 
     title: string; 
     icon: React.ElementType; 
     href: string; 
-    roles?: string[] 
+    permission?: string;
 } | { 
     type: 'group'; 
     title: string; 
     icon: React.ElementType; 
     children: NavChild[]; 
-    roles?: string[] 
+    permission?: string;
 };
 
 const navigation: NavItem[] = [
     // ── Menú de Navegación ──────────────────────────────────────────────
     { type: 'section', label: 'MENÚ DE NAVEGACIÓN' },
-    { type: 'link', title: 'QR',               icon: QrCode,          href: '/alumno/qr', roles: ['estudiante'] },
-    { type: 'link', title: 'Inicio',           icon: LayoutDashboard, href: '/dashboard' },
-    { type: 'group', title: 'Institución', icon: Building2, roles: ['administrador'], children: [
-        { title: 'Datos Básicos', href: '/institucion' },
-        { title: 'Galería',       href: '/institucion/galeria' },
-        { title: 'Noticias',      href: '/institucion/noticias' },
+    { type: 'link', title: 'QR',               icon: QrCode,          href: '/alumno/qr', permission: 'portal.alumno.qr' },
+    { type: 'link', title: 'Inicio',           icon: LayoutDashboard, href: '/dashboard', permission: 'dashboard.ver' },
+    { type: 'group', title: 'Institución', icon: Building2, children: [
+        { title: 'Datos Básicos', href: '/institucion', permission: 'institucion.ver' },
+        { title: 'Galería',       href: '/institucion/galeria', permission: 'institucion.ver' },
+        { title: 'Noticias',      href: '/institucion/noticias', permission: 'institucion.ver' },
     ]},
-    { type: 'link', title: 'Comunicados',     icon: Newspaper,       href: '/comunicados', roles: ['administrador', 'docente'] },
-    { type: 'link', title: 'Pagos',           icon: CreditCard,      href: '/pagos', roles: ['administrador'] },
+    { type: 'link', title: 'Comunicados',     icon: Newspaper,       href: '/comunicados', permission: 'comunicados.ver' },
+    { type: 'link', title: 'Pagos',           icon: CreditCard,      href: '/pagos', permission: 'pagos.ver' },
 
-    // ── Información Académica ────────────────────────────────────────
-    { type: 'section', label: 'INFORMACION ACADEMICA' },
-    { type: 'group', title: 'Niveles Académicos', icon: BookOpen, roles: ['administrador'], children: [
-        { title: 'Niveles',            href: '/niveles' },
-        { title: 'Grados / Cursos',    href: '/cursos' },
-        { title: 'Grados / Secciones', href: '/secciones' },
+    // ── Información Académica (Admin/Personal) ────────────────────────
+    { type: 'section', label: 'GESTIÓN ACADÉMICA' },
+    { type: 'group', title: 'Niveles Académicos', icon: BookOpen, children: [
+        { title: 'Niveles',            href: '/niveles', permission: 'niveles.ver' },
+        { title: 'Grados / Cursos',    href: '/cursos', permission: 'cursos.ver' },
+        { title: 'Grados / Secciones', href: '/secciones', permission: 'secciones.ver' },
     ]},
-    { type: 'link', title: 'Mis Cursos', icon: BookOpen, href: '/docente/mis-cursos', roles: ['docente'] },
-    { type: 'link', title: 'Mis Alumnos', icon: Users, href: '/docente/mis-alumnos', roles: ['docente'] },
-    { type: 'link', title: 'Gestión de Docentes',  icon: UserCheck, href: '/docentes', roles: ['administrador'] },
-    { type: 'link', title: 'Gestión de Alumnos', icon: GraduationCap, href: '/estudiantes', roles: ['administrador'] },
+    { type: 'link', title: 'Gestión de Docentes',  icon: UserCheck, href: '/docentes', permission: 'docentes.ver' },
+    { type: 'link', title: 'Gestión de Alumnos', icon: GraduationCap, href: '/estudiantes', permission: 'estudiantes.ver' },
 
-    { type: 'group', title: 'INFORMACION ACADEMICA', icon: BookOpen, roles: ['estudiante'], children: [
-        { title: 'CALENDARIO',        href: '/dashboard' },
-        { title: 'HORARIO DE CLASES', href: '/horarios' },
-        { title: 'ROL DE EXAMENTES',  href: '/alumno/notas' },
-    ]},
-    { type: 'link', title: 'Cursos',      icon: BookOpen,      href: '/alumno/cursos', roles: ['estudiante'] },
-    { type: 'link', title: 'Notificaciones', icon: Bell,       href: '/comunicados',   roles: ['estudiante'] },
+    // ── Portal Docente ───────────────────────────────────────────────
+    { type: 'section', label: 'PORTAL DOCENTE' },
+    { type: 'link', title: 'Mis Cursos', icon: BookOpen, href: '/docente/mis-cursos', permission: 'dashboard.cursos.asignados' },
+    { type: 'link', title: 'Mis Alumnos', icon: Users, href: '/docente/mis-alumnos', permission: 'portal.docente.alumnos' },
 
-    // ── Información Académica (Sección 2) ─────────────────────────────
-    { type: 'section', label: 'Información Académica', roles: ['estudiante'] },
-    { type: 'link', title: 'Profesores',  icon: Users,         href: '/alumno/profesores', roles: ['estudiante'] },
-    { type: 'link', title: 'Mi Asistencia', icon: Calendar,    href: '/alumno/asistencia', roles: ['estudiante'] },
-    // ── Mis Medios Alumno ───────────────────────────────────────────
-    { type: 'group', title: 'Mis Medios', icon: Library, roles: ['estudiante'], children: [
-        { title: 'NOTICIAS',             href: '/institucion/noticias' },
-        { title: 'GALERIA',              href: '/biblioteca' },
-        { title: 'ARCHIVOS DEL COLEGIO', href: '#' },
+    // ── Portal Estudiante ─────────────────────────────────────────────
+    { type: 'section', label: 'PORTAL ESTUDIANTE' },
+    { type: 'group', title: 'Mi Académico', icon: BookOpen, children: [
+        { title: 'CALENDARIO',        href: '/dashboard',     permission: 'dashboard.resumen.academico' },
+        { title: 'HORARIO DE CLASES', href: '/horarios',      permission: 'dashboard.resumen.academico' },
+        { title: 'ROL DE EXAMENES',  href: '/alumno/notas',  permission: 'dashboard.resumen.academico' },
     ]},
-
-    // ── Procedimientos Administrativos (Admin/Docente) ───────────────
-    { type: 'section', label: 'PROCEDIMIENTOS ADMINISTRATIVOS', roles: ['administrador', 'docente'] },
-    { type: 'group', title: 'Matrícula', icon: ClipboardList, roles: ['administrador'], children: [
-        { title: 'Aperturas / Cierre', href: '/matriculas' },
-        { title: 'Nuevos Ingresos',    href: '/matriculas/gestion' },
-    ]},
-    { type: 'group', title: 'Asistencia', icon: CalendarDays, roles: ['administrador', 'docente'], children: [
-        { title: 'Gestión / Reportes', href: '/asistencia' },
-        { title: 'Escáner QR',        href: '/asistencia/scanner' },
-    ]},
-
-    // ── Extras Alumno ───────────────────────────────────────────────
-    { type: 'section', label: 'EXTRAS', roles: ['estudiante'] },
-    { type: 'link', title: 'Mis Notas',   icon: ClipboardList, href: '/alumno/notas',    roles: ['estudiante'] },
-    { type: 'link', title: 'Rompecabezas', icon: Gamepad2,     href: '/alumno/puzzles',  roles: ['estudiante'] },
+    { type: 'link', title: 'Mis Cursos',      icon: BookOpen,      href: '/alumno/cursos', permission: 'dashboard.resumen.academico' },
+    { type: 'link', title: 'Mi Asistencia', icon: Calendar,    href: '/alumno/asistencia', permission: 'portal.alumno.asistencia' },
+    { type: 'link', title: 'Mis Notas',   icon: ClipboardList, href: '/alumno/notas',    permission: 'dashboard.resumen.academico' },
+    { type: 'link', title: 'Rompecabezas', icon: Gamepad2,     href: '/alumno/puzzles',  permission: 'dashboard.resumen.academico' },
 
     // ── Módulo Padre ─────────────────────────────────────────────────
-    { type: 'section', label: 'FAMILIA', roles: ['padre_familia', 'madre_familia', 'apoderado'] },
-    { type: 'link', title: 'Mis Hijos', icon: Users, href: '/padre/dashboard', roles: ['padre_familia', 'madre_familia', 'apoderado'] },
+    { type: 'section', label: 'PORTAL FAMILIA' },
+    { type: 'link', title: 'Mis Hijos', icon: Users, href: '/padre/dashboard', permission: 'dashboard.resumen.familiar' },
 
-    // ── Recursos Compartidos (Admin/Docente) ─────────────────────────
-    { type: 'section', label: 'RECURSOS', roles: ['administrador', 'docente'] },
-    { type: 'link', title: 'Biblioteca', icon: Library, href: '/biblioteca', roles: ['administrador', 'docente'] },
-    { type: 'link', title: 'Mensajes Privados', icon: MessageSquare, href: '/mensajeria', roles: ['administrador', 'docente'] },
+    // ── Procedimientos Administrativos ───────────────────────────────
+    { type: 'section', label: 'PROCEDIMIENTOS' },
+    { type: 'group', title: 'Matrícula', icon: ClipboardList, children: [
+        { title: 'Aperturas / Cierre', href: '/matriculas', permission: 'matriculas.ver' },
+        { title: 'Nuevos Ingresos',    href: '/matriculas/gestion', permission: 'matriculas.crear' },
+    ]},
+    { type: 'group', title: 'Asistencia', icon: CalendarDays, children: [
+        { title: 'Gestión / Reportes', href: '/asistencia', permission: 'asistencia.ver' },
+        { title: 'Escáner QR',        href: '/asistencia/scanner', permission: 'asistencia.escanear' },
+    ]},
 
-    // ── Información de Usuarios ──────────────────────────────────────
-    { type: 'section', label: 'INFORMACIÓN DE USUARIOS' },
-    { type: 'group', title: 'Gestión de Usuarios', icon: Settings, roles: ['administrador'], children: [
-        { title: 'Usuarios', href: '/usuarios' },
+    // ── Recursos ─────────────────────────────────────────────────────
+    { type: 'section', label: 'RECURSOS' },
+    { type: 'link', title: 'Biblioteca', icon: Library, href: '/biblioteca', permission: 'biblioteca.ver' },
+    { type: 'link', title: 'Mensajes Privados', icon: MessageSquare, href: '/mensajeria', permission: 'mensajeria.ver' },
+
+    // ── Configuración ──────────────────────────────────────────────── 
+    { type: 'section', label: 'CONFIGURACIÓN' },
+    { type: 'group', title: 'Gestión de Usuarios', icon: Settings, children: [
+        { title: 'Usuarios', href: '/usuarios', permission: 'usuarios.ver' },
         { title: 'Perfil',   href: '/settings/profile' },
     ]},
 
+    // ── Seguridad ────────────────────────────────────────────────────
+    { type: 'section', label: 'SEGURIDAD' },
+    { type: 'group', title: 'Seguridad', icon: Shield, children: [
+        { title: 'Roles y Permisos', href: '/roles-permisos', permission: 'roles.editar' },
+    ]},
 ];
 
 function NavLinkItem({ item }: { item: Extract<NavItem, { type: 'link' }> }) {
@@ -218,44 +220,70 @@ function NavGroupItem({ item }: { item: Extract<NavItem, { type: 'group' }> }) {
 }
 
 export function AppSidebar() {
-    const { auth } = usePage<any>().props;
-    const rolName = typeof auth.user?.rol === 'string' ? auth.user.rol : auth.user?.rol?.name;
-    const userRoles = rolName ? [rolName] : [];
+    const { can } = usePermission();
 
     const filteredNavigation = useMemo(() => {
-        return navigation.filter(item => {
-            if (!item.roles) {
-return true;
-}
+        return navigation.map(item => {
+            // Caso 1: Link simple
+            if (item.type === 'link') {
+                if (item.permission && !can(item.permission)) return null;
+                return item;
+            }
 
-            return item.roles.some(role => userRoles.includes(role));
-        });
-    }, [userRoles]);
+            // Caso 2: Grupo con hijos
+            if (item.type === 'group') {
+                // Filtrar hijos individualmente
+                const visibleChildren = item.children.filter(child => {
+                    if (child.permission) return can(child.permission);
+                    return true;
+                });
+
+                // Si no hay hijos visibles Y el grupo no tiene su propio permiso habilitado -> ocultar grupo
+                const groupPermissionMet = item.permission ? can(item.permission) : false;
+                
+                if (visibleChildren.length === 0 && !groupPermissionMet) return null;
+
+                // Retornar grupo solo con sus hijos visibles
+                return { ...item, children: visibleChildren };
+            }
+
+            // Caso 3: Sección
+            if (item.type === 'section') {
+                if (item.permission && !can(item.permission)) return null;
+                return item;
+            }
+
+            return item;
+        }).filter(Boolean) as NavItem[];
+    }, [can]);
 
     // Grouping logic for SidebarGroup
     const groups = useMemo(() => {
-        const result: { section?: string; items: NavItem[] }[] = [];
-        let currentGroup: { section?: string; items: NavItem[] } | null = null;
+        interface NavSection {
+            section?: string;
+            items: NavItem[];
+        }
+        
+        const result: NavSection[] = [];
+        let currentGroup: NavSection | null = null;
 
-        filteredNavigation.forEach((item) => {
+        for (const item of filteredNavigation) {
             if (item.type === 'section') {
-                if (currentGroup) {
-result.push(currentGroup);
-}
-
+                if (currentGroup && currentGroup.items.length > 0) {
+                    result.push(currentGroup);
+                }
                 currentGroup = { section: item.label, items: [] };
             } else {
                 if (!currentGroup) {
-currentGroup = { items: [] };
-}
-
+                    currentGroup = { items: [] };
+                }
                 currentGroup.items.push(item);
             }
-        });
+        }
 
-        if (currentGroup) {
-result.push(currentGroup);
-}
+        if (currentGroup && currentGroup.items.length > 0) {
+            result.push(currentGroup);
+        }
 
         return result;
     }, [filteredNavigation]);

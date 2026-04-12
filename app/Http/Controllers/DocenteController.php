@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Docente;
+use App\Models\DocenteCurso;
+use App\Models\Matricula;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class DocenteController extends Controller
+{
+    /**
+     * Show all students across all sections the teacher is assigned to.
+     */
+    public function misAlumnos(Request $request): Response
+    {
+        $docente = Docente::where('id_usuario', $request->user()->id)->firstOrFail();
+
+        $seccionIds = DocenteCurso::where('docente_id', $docente->docente_id)
+            ->pluck('seccion_id')
+            ->unique();
+
+        $alumnos = Matricula::whereIn('seccion_id', $seccionIds)
+            ->where('estado', '1')
+            ->with(['estudiante.perfil', 'seccion.grado'])
+            ->get()
+            ->map(fn ($m) => [
+                'estu_id'          => $m->estudiante?->estu_id,
+                'doc_numero'       => $m->estudiante?->perfil?->doc_numero,
+                'primer_nombre'    => $m->estudiante?->perfil?->primer_nombre,
+                'segundo_nombre'   => $m->estudiante?->perfil?->segundo_nombre,
+                'apellido_paterno' => $m->estudiante?->perfil?->apellido_paterno,
+                'apellido_materno' => $m->estudiante?->perfil?->apellido_materno,
+                'fecha_nacimiento' => $m->estudiante?->perfil?->fecha_nacimiento,
+                'telefono'         => $m->estudiante?->perfil?->telefono,
+                'direccion'        => $m->estudiante?->perfil?->direccion,
+                'grado'            => $m->seccion?->grado?->nombre_grado,
+                'seccion'          => $m->seccion?->nombre,
+            ])
+            ->unique('estu_id')
+            ->values();
+
+        return Inertia::render('PortalDocente/MisAlumnos', [
+            'alumnos' => $alumnos,
+        ]);
+    }
+}

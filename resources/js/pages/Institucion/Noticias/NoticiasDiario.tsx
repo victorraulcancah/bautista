@@ -24,46 +24,55 @@ export default function NoticiasDiario({ noticias }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Diario Escolar - Edición Digital" />
 
-            <div className="min-h-screen bg-[#f8f7f2] pb-20">
-                {/* Cabecera del Periódico */}
-                <header className="bg-white border-b-8 border-[#00a65a] py-12 mb-12 shadow-sm">
-                    <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
-                        <div className="w-full flex justify-between items-center mb-8">
-                            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400">
-                                Vol. XXIV • No. 142 • {new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })}
+            <div className="min-h-screen bg-[#fafafa] pb-20">
+                {/* Cabecera Editorial Premium */}
+                <header className="bg-white border-b border-neutral-200 shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] mb-12">
+                    <div className="max-w-7xl mx-auto px-6 pt-10 pb-8 flex flex-col items-center">
+                        {/* Masthead */}
+                        <div className="w-full flex justify-between items-center border-b border-neutral-100 pb-6 mb-8 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">
+                            <div className="flex items-center gap-4">
+                                <span>Volumen XXIV</span>
+                                <span className="text-neutral-200">|</span>
+                                <span>{new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                             </div>
-                            <div className="flex gap-4">
-                                <Button variant="ghost" size="icon" className="rounded-full"><Printer className="w-4 h-4" /></Button>
-                                <Button variant="ghost" size="icon" className="rounded-full"><Share2 className="w-4 h-4" /></Button>
+                            <div className="flex items-center gap-4">
+                                <span className="text-[#00a65a] font-extrabold animate-pulse">En vivo</span>
+                                <span className="text-neutral-200">|</span>
+                                <span>Colegio Bautista</span>
                             </div>
                         </div>
 
-                        <h1 className="text-7xl md:text-9xl font-black text-neutral-900 font-serif tracking-tighter mb-4 first-letter:text-[#00a65a]">
-                            EL&nbsp;BAUTISTA
-                        </h1>
+                        <Link href="/institucion/noticias/portada" className="group">
+                            <h1 className="text-6xl md:text-8xl font-black text-neutral-900 tracking-tighter mb-4 text-center group-hover:text-[#00a65a] transition-colors duration-500">
+                                EL BAUTISTA
+                            </h1>
+                        </Link>
+                        
+                        <p className="text-neutral-500 font-medium tracking-[0.1em] uppercase text-[10px] mb-8">
+                            Cronista de la Excelencia y la Fe
+                        </p>
 
-                        <div className="w-full border-y-2 border-neutral-200 py-3 flex justify-center items-center gap-10">
-                            <span className="text-[11px] font-black uppercase tracking-widest text-[#00a65a]">Crónicas de Hoy</span>
-                            <span className="size-1.5 rounded-full bg-neutral-300" />
-                            <span className="text-[11px] font-black uppercase tracking-widest text-neutral-900 leading-none">Vida Escolar</span>
-                            <span className="size-1.5 rounded-full bg-neutral-300" />
-                            <span className="text-[11px] font-black uppercase tracking-widest text-neutral-900 leading-none">Comunidad</span>
+                        {/* Navigation Section bar */}
+                        <div className="w-full border-y border-neutral-900/10 py-3 flex justify-center items-center gap-12">
+                            {['Vida Escolar', 'Académico', 'Deportes', 'Cultura', 'Comunidad'].map((cat) => (
+                                <span key={cat} className="text-[10px] font-bold uppercase tracking-widest text-neutral-600 hover:text-[#00a65a] cursor-pointer transition-colors">
+                                    {cat}
+                                </span>
+                            ))}
                         </div>
                     </div>
                 </header>
 
                 {/* Contenido de la Portada */}
                 <main className="max-w-7xl mx-auto px-6">
-                    <div className="mb-10 flex justify-between items-center bg-white p-4 rounded-2xl border border-neutral-100 shadow-sm">
+                    <div className="mb-12 flex justify-between items-center bg-white border border-neutral-200 px-6 py-4 shadow-sm">
                         <Link href="/institucion/noticias">
-                            <Button variant="ghost" className="gap-2 text-neutral-500 hover:text-[#00a65a] font-black uppercase tracking-widest text-[10px]">
-                                <ArrowLeft className="w-4 h-4" /> Mesa de Redacción
+                            <Button variant="ghost" className="gap-2 text-neutral-500 hover:text-black font-bold uppercase tracking-widest text-[9px] h-auto p-0 transition-colors">
+                                <ArrowLeft className="w-3.5 h-3.5" /> Mesa de Redacción
                             </Button>
                         </Link>
-                        <div className="flex items-center gap-4 text-xs font-black uppercase tracking-tighter text-neutral-300">
-                            <span className="text-[#00a65a]">Ejemplar Gratuito</span>
-                            <span>|</span>
-                            <span>Colegio Bautista</span>
+                        <div className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">
+                            Digital Edition • <span className="text-[#00a65a]">Premium Content</span>
                         </div>
                     </div>
 

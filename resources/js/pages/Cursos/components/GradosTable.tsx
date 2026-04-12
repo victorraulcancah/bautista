@@ -26,7 +26,7 @@ export default function GradosTable({
         <>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-orange-500 p-2">
+                    <div className="rounded-lg bg-emerald-600 p-2 shadow-lg shadow-emerald-100">
                         <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                     </div>
                     <div>
@@ -77,7 +77,7 @@ export default function GradosTable({
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            className="h-8 w-8 p-0 text-[#00a65a]"
+                                            className="h-8 w-8 p-0 text-emerald-600 border-emerald-100 hover:bg-emerald-50"
                                             onClick={() => onSelectGrado(g)}
                                             title="Ver cursos"
                                         >
@@ -114,8 +114,8 @@ export default function GradosTable({
                         {/* Vista desktop: Tabla */}
                         <div className="hidden sm:block overflow-x-auto overflow-y-auto max-h-[60vh]">
                             <table className="w-full text-sm">
-                                <thead className="sticky top-0 z-10">
-                                    <tr className="bg-[#00a65a]">
+                                <thead className="sticky top-0 z-10 border-b border-emerald-700">
+                                    <tr className="bg-emerald-600">
                                         <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">#</th>
                                         <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Nivel Académico</th>
                                         <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Grado</th>
@@ -135,7 +135,7 @@ export default function GradosTable({
                                                     <Button
                                                         size="sm"
                                                         variant="ghost"
-                                                        className="h-8 w-8 p-0 text-[#00a65a] hover:text-[#008d4c]"
+                                                        className="h-8 w-8 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
                                                         title="Ver cursos"
                                                         onClick={() => onSelectGrado(g)}
                                                     >

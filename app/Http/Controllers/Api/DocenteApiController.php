@@ -3,261 +3,259 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IniciarAsistenciaRequest;
+use App\Http\Requests\MarcarAsistenciaBatchRequest;
+use App\Http\Requests\StoreAnuncioRequest;
 use App\Http\Requests\StoreDocenteRequest;
+use App\Http\Requests\UpdateAnuncioRequest;
+use App\Http\Requests\UpdateCursoSettingsRequest;
 use App\Http\Requests\UpdateDocenteRequest;
+use App\Http\Resources\AlumnoMetricasResource;
+use App\Http\Resources\AnuncioResource;
+use App\Http\Resources\DocenteCursoResource;
 use App\Http\Resources\DocenteResource;
-use App\Models\DocenteCurso;
-use App\Models\Matricula;
-use App\Models\ActividadCurso;
+use App\Services\Interfaces\DocenteCursoServiceInterface;
 use App\Services\Interfaces\DocenteServiceInterface;
+use App\Services\Interfaces\AnuncioServiceInterface;
+use App\Services\Interfaces\DocenteAlumnoServiceInterface;
+use App\Services\Interfaces\DocenteAsistenciaServiceInterface;
+use App\Services\Interfaces\DocenteExcelExportServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class DocenteApiController extends Controller
 {
     public function __construct(
-        private readonly DocenteServiceInterface $service,
+        private readonly DocenteServiceInterface $docenteService,
+        private readonly DocenteCursoServiceInterface $docenteCursoService,
+        private readonly AnuncioServiceInterface $anuncioService,
+        private readonly DocenteAlumnoServiceInterface $alumnoService,
+        private readonly DocenteAsistenciaServiceInterface $asistenciaService,
+        private readonly DocenteExcelExportServiceInterface $exportService,
     ) {}
 
+    /**
+     * List all teachers.
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
-        return DocenteResource::collection($this->service->listar(
+        return DocenteResource::collection($this->docenteService->listar(
             instiId: $request->user()->insti_id,
             search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
         ));
     }
 
+    /**
+     * Show a specific teacher.
+     */
     public function show(int $id): DocenteResource
     {
-        return new DocenteResource($this->service->obtener($id));
+        return new DocenteResource($this->docenteService->obtener($id));
     }
 
+    /**
+     * Create a new teacher.
+     */
     public function store(StoreDocenteRequest $request): JsonResponse
     {
-        return (new DocenteResource($this->service->crear($request->validated())))
+        return (new DocenteResource($this->docenteService->crear($request->validated())))
             ->response()
             ->setStatusCode(201);
     }
 
+    /**
+     * Update a teacher.
+     */
     public function update(UpdateDocenteRequest $request, int $id): DocenteResource
     {
-        return new DocenteResource($this->service->actualizar($id, $request->validated()));
+        return new DocenteResource($this->docenteService->actualizar($id, $request->validated()));
     }
 
+    /**
+     * Delete a teacher.
+     */
     public function destroy(int $id): JsonResponse
     {
-        $this->service->eliminar($id);
+        $this->docenteService->eliminar($id);
         return response()->json(null, 204);
     }
 
     /**
-     * Data for the teacher dashboard.
+     * Get dashboard data for the authenticated teacher.
      */
-    public function dashboard(Request $request)
+    public function dashboard(Request $request): JsonResponse
     {
-        $docente = \App\Models\Docente::where('id_usuario', $request->user()->id)->firstOrFail();
-        $docenteId = $docente->docente_id;
-
-        $misCursos = DocenteCurso::where('docente_id', $docenteId)
-            ->with(['curso', 'seccion.grado'])
-            ->get();
-
-        $seccionesIds = $misCursos->pluck('seccion_id')->unique();
-        
-        $totalEstudiantes = Matricula::whereIn('seccion_id', $seccionesIds)
-            ->where('estado', '1')
-            ->count();
-
-        // Pending activities to grade (mock logic or based on counts)
-        $actividadesPendientes = ActividadCurso::whereIn('id_curso', $misCursos->pluck('id_curso'))
-            ->where('fecha_cierre', '<', now())
-            ->where('es_calificado', '1')
-            ->count();
-
-        return response()->json([
-            'resumen' => [
-                'cursos' => $misCursos->count(),
-                'estudiantes' => $totalEstudiantes,
-                'pendientes_calificar' => $actividadesPendientes,
-            ],
-            'cursos' => $misCursos,
-        ]);
+        $data = $this->docenteCursoService->obtenerDashboard($request->user()->id);
+        return response()->json($data);
     }
 
     /**
-     * Detailed list of assigned courses.
+     * Get all courses assigned to the authenticated teacher.
      */
-    public function misCursos(Request $request)
+    public function misCursos(Request $request): JsonResponse
     {
-        $docente = \App\Models\Docente::where('id_usuario', $request->user()->id)->firstOrFail();
-        $docenteId = $docente->docente_id;
-
-        $cursos = DocenteCurso::where('docente_id', $docenteId)
-            ->with(['curso', 'seccion.grado.nivelEducativo', 'apertura'])
-            ->get();
-
+        $cursos = $this->docenteCursoService->obtenerCursosDocente($request->user()->id);
         return response()->json($cursos);
     }
 
     /**
-     * Create a new academic unit.
+     * Get course content (units/classes) for a specific assignment.
      */
-    public function crearUnidad(Request $request)
+    public function cursoContenido(int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'docente_curso_id' => 'required|exists:docente_cursos,docen_curso_id',
+        $contenido = $this->docenteCursoService->obtenerContenidoCurso($id);
+        return response()->json($contenido);
+    }
+
+    /**
+     * Get announcements for a course.
+     */
+    public function getAnuncios(int $id): AnonymousResourceCollection
+    {
+        $anuncios = $this->anuncioService->obtenerAnuncios($id);
+        return AnuncioResource::collection($anuncios);
+    }
+
+    /**
+     * Create an announcement.
+     */
+    public function storeAnuncio(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'docente_curso_id' => 'required|integer',
             'titulo' => 'required|string|max:255',
+            'contenido' => 'required|string',
         ]);
 
-        $unidad = \App\Models\Unidad::create([
-            'docente_curso_id' => $validated['docente_curso_id'],
-            'titulo' => $validated['titulo'],
-            'orden' => \App\Models\Unidad::where('docente_curso_id', $validated['docente_curso_id'])->count() + 1,
-            'estado' => '1',
-        ]);
-
-        return response()->json($unidad);
+        $anuncio = $this->anuncioService->crearAnuncio($data);
+        return response()->json($anuncio, 201);
     }
 
     /**
-     * Create a new class within a unit.
+     * Update an announcement.
      */
-    public function crearClase(Request $request)
+    public function updateAnuncio(int $id, Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'unidad_id' => 'required|exists:unidades,unidad_id',
-            'titulo' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
+        $data = $request->validate([
+            'titulo' => 'string|max:255',
+            'contenido' => 'string',
         ]);
 
-        $clase = \App\Models\Clase::create([
-            'unidad_id' => $validated['unidad_id'],
-            'titulo' => $validated['titulo'],
-            'descripcion' => $validated['descripcion'],
-            'orden' => \App\Models\Clase::where('unidad_id', $validated['unidad_id'])->count() + 1,
-            'estado' => '1',
-        ]);
-
-        return response()->json($clase);
+        $anuncio = $this->anuncioService->actualizarAnuncio($id, $data);
+        return response()->json($anuncio);
     }
 
     /**
-     * Create a new activity for a class.
+     * Delete an announcement.
      */
-    public function crearActividad(Request $request)
+    public function destroyAnuncio(int $id): JsonResponse
     {
-        $validated = $request->validate([
-            'id_clase_curso' => 'required|exists:clases,clase_id',
-            'nombre_actividad' => 'required|string|max:255',
-            'tipo_id' => 'required|integer', // e.g., 1 for exam, 2 for task
-            'fecha_cierre' => 'nullable|date',
-        ]);
-
-        $actividad = \App\Models\ActividadCurso::create([
-            'id_clase_curso' => $validated['id_clase_curso'],
-            'nombre_actividad' => $validated['nombre_actividad'],
-            'tipo_id' => $validated['tipo_id'],
-            'fecha_cierre' => $validated['fecha_cierre'],
-            'estado' => '1',
-            'es_calificado' => '1',
-        ]);
-
-        return response()->json($actividad);
+        $this->anuncioService->eliminarAnuncio($id);
+        return response()->json(null, 204);
     }
 
     /**
-     * All unique students across all sections the teacher is assigned to.
+     * Get all students for the authenticated teacher across all sections.
      */
-    public function misAlumnos(Request $request)
+    public function misAlumnos(): JsonResponse
     {
-        $docente = \App\Models\Docente::where('id_usuario', $request->user()->id)->firstOrFail();
-
-        $seccionIds = DocenteCurso::where('docente_id', $docente->docente_id)
-            ->pluck('seccion_id')
-            ->unique();
-
-        $alumnos = Matricula::whereIn('seccion_id', $seccionIds)
-            ->where('estado', '1')
-            ->with(['estudiante.perfil', 'seccion.grado'])
-            ->get()
-            ->map(fn ($m) => [
-                'estu_id'          => $m->estudiante?->estu_id,
-                'doc_numero'       => $m->estudiante?->perfil?->doc_numero,
-                'primer_nombre'    => $m->estudiante?->perfil?->primer_nombre,
-                'segundo_nombre'   => $m->estudiante?->perfil?->segundo_nombre,
-                'apellido_paterno' => $m->estudiante?->perfil?->apellido_paterno,
-                'apellido_materno' => $m->estudiante?->perfil?->apellido_materno,
-                'fecha_nacimiento' => $m->estudiante?->perfil?->fecha_nacimiento,
-                'telefono'         => $m->estudiante?->perfil?->telefono,
-                'direccion'        => $m->estudiante?->perfil?->direccion,
-                'grado'            => $m->seccion?->grado?->nombre_grado,
-                'seccion'          => $m->seccion?->nombre,
-            ])
-            ->unique('estu_id')
-            ->values();
-
+        $alumnos = $this->alumnoService->obtenerTodosAlumnos(Auth::id());
         return response()->json($alumnos);
     }
 
     /**
-     * List students for a section to take attendance.
+     * Get students for a specific section.
      */
-    public function alumnosSeccion(Request $request, int $docenteCursoId)
+    public function alumnosSeccion(Request $request, int $docenteCursoId): JsonResponse
     {
-        $docenteCurso = DocenteCurso::findOrFail($docenteCursoId);
-        $alumnos = \App\Models\Matricula::where('seccion', $docenteCurso->seccion_id)
-            ->where('id_apertura_mtr', $docenteCurso->id_apertura)
-            ->with('estudiante.perfil')
-            ->get();
-
+        $alumnos = $this->alumnoService->obtenerAlumnosSeccion($docenteCursoId);
         return response()->json($alumnos);
     }
 
     /**
-     * Start an attendance session for a class.
+     * Get students with detailed metrics for the Alumnos tab.
      */
-    public function iniciarAsistencia(Request $request)
+    public function alumnosDetallados(int $docenteCursoId): AnonymousResourceCollection
     {
-        $validated = $request->validate([
-            'id_clase_curso' => 'required|exists:clases,clase_id',
-            'fecha' => 'required|date',
-        ]);
+        $alumnos = $this->alumnoService->obtenerAlumnosConMetricas($docenteCursoId);
+        return AlumnoMetricasResource::collection($alumnos);
+    }
 
-        $session = \App\Models\AsistenciaActividad::firstOrCreate([
-            'id_clase_curso' => $validated['id_clase_curso'],
-            'fecha' => $validated['fecha'],
-        ]);
+    /**
+     * Get attendance matrix for a course.
+     */
+    public function asistenciaMatrix(Request $request, int $docenteCursoId): JsonResponse
+    {
+        $desde = $request->input('desde');
+        $hasta = $request->input('hasta');
+        
+        $matriz = $this->asistenciaService->obtenerMatrizAsistencia($docenteCursoId, $desde, $hasta);
+        return response()->json($matriz);
+    }
 
+    /**
+     * Export attendance to Excel.
+     */
+    public function exportarAsistencia(Request $request, int $docenteCursoId)
+    {
+        $desde = $request->input('desde');
+        $hasta = $request->input('hasta');
+        
+        $matrixData = $this->asistenciaService->obtenerMatrizAsistencia($docenteCursoId, $desde, $hasta);
+        $tempFile = $this->exportService->exportarAsistencia($docenteCursoId, $matrixData);
+        
+        $fileName = 'asistencia_' . date('Y-m-d') . '.xlsx';
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Export students list to Excel.
+     */
+    public function exportarAlumnos(int $docenteCursoId)
+    {
+        $alumnosData = $this->alumnoService->obtenerAlumnosConMetricas($docenteCursoId);
+        $tempFile = $this->exportService->exportarAlumnos($docenteCursoId, $alumnosData);
+        
+        $fileName = 'alumnos_' . date('Y-m-d') . '.xlsx';
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Update course settings.
+     */
+    public function updateSettings(UpdateCursoSettingsRequest $request, int $id): JsonResponse
+    {
+        $result = $this->docenteCursoService->actualizarConfiguracion($id, $request->validated()['settings']);
+        return response()->json($result);
+    }
+
+    /**
+     * Start an attendance session.
+     */
+    public function iniciarAsistencia(IniciarAsistenciaRequest $request): JsonResponse
+    {
+        $session = $this->asistenciaService->iniciarSesionAsistencia($request->validated());
         return response()->json($session);
     }
 
     /**
-     * Bulk save attendance for students.
+     * Mark attendance for students.
      */
-    public function marcarAsistencia(Request $request, int $sessionId)
+    public function marcarAsistencia(MarcarAsistenciaBatchRequest $request, int $sessionId): JsonResponse
     {
-        $validated = $request->validate([
-            'asistencias' => 'required|array',
-            'asistencias.*.id_estudiante' => 'required|exists:estudiantes,estu_id',
-            'asistencias.*.estado' => 'required|string|max:1', // P, F, J, U
-        ]);
-
-        foreach ($validated['asistencias'] as $asistencia) {
-            \App\Models\AsistenciaAlumno::updateOrCreate(
-                [
-                    'id_asistencia_clase' => $sessionId,
-                    'id_estudiante' => $asistencia['id_estudiante']
-                ],
-                [
-                    'estado' => $asistencia['estado'],
-                    'observacion' => $asistencia['observacion'] ?? null,
-                ]
-            );
-        }
-
+        $this->asistenciaService->marcarAsistencia($sessionId, $request->validated()['asistencias']);
         return response()->json(['message' => 'Asistencia guardada con éxito.']);
+    }
+
+    /**
+     * Get students with performance metrics (legacy method - kept for compatibility).
+     */
+    public function alumnosConMetricas(Request $request, int $docenteCursoId): JsonResponse
+    {
+        $alumnos = $this->docenteCursoService->obtenerAlumnosConMetricas($docenteCursoId);
+        return response()->json($alumnos);
     }
 }

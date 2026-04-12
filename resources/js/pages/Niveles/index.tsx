@@ -99,7 +99,6 @@ export default function NivelesPage() {
  setModalOpen(false); res.clearSuccess(); 
 }}
                 editing={editing}
-                instituciones={instituciones}
                 onSave={editing
                     ? (data) => res.update(editing.nivel_id, data)
                     : (data) => res.create(data)}

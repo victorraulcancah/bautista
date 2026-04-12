@@ -43,4 +43,9 @@ class Perfil extends Model
     {
         return trim("{$this->primer_nombre} {$this->apellido_paterno} {$this->apellido_materno}");
     }
+
+    public function getNombreOrdenadoAttribute(): string
+    {
+        return trim("{$this->apellido_paterno} {$this->apellido_materno}, {$this->primer_nombre}");
+    }
 }

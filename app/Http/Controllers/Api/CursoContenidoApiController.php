@@ -93,6 +93,9 @@ class CursoContenidoApiController extends Controller
     {
         $request->validate([
             'archivo' => ['required', 'file', 'max:20480'], // 20 MB
+            'titulo' => ['nullable', 'string', 'max:255'],
+            'descripcion' => ['nullable', 'string'],
+            'visible' => ['nullable', 'in:0,1'],
         ]);
 
         $file = $request->file('archivo');
@@ -101,17 +104,23 @@ class CursoContenidoApiController extends Controller
         $archivo = ArchivoClase::create([
             'clase_id' => $claseId,
             'nombre'   => $file->getClientOriginalName(),
+            'titulo'   => $request->input('titulo', $file->getClientOriginalName()),
+            'descripcion' => $request->input('descripcion'),
             'path'     => $path,
             'tipo'     => $file->getMimeType(),
             'tamanio'  => $file->getSize(),
+            'visible'  => $request->input('visible', '1'),
         ]);
 
         return response()->json([
             'archivo_id' => $archivo->archivo_id,
             'nombre'     => $archivo->nombre,
+            'titulo'     => $archivo->titulo,
+            'descripcion' => $archivo->descripcion,
             'path'       => $archivo->path,
             'tipo'       => $archivo->tipo,
             'tamanio'    => $archivo->tamanio,
+            'visible'    => $archivo->visible,
             'url'        => asset('storage/' . $archivo->path),
         ], 201);
     }

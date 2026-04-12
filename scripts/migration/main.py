@@ -22,6 +22,7 @@ import modules.docente_cursos as docente_cursos
 import modules.grades as grades
 import modules.academic_extras as academic_extras
 import modules.payments_catalog as payments_catalog
+import modules.horarios as horarios
 
 TABLAS = {
     # ── Core ──────────────────────────────────────────────────────────────────
@@ -86,7 +87,7 @@ def main():
     args = parser.parse_args()
 
     if args.dry_run:
-        print("\n⚠️  MODO DRY-RUN — no se escribirá nada en la base de datos\n")
+        print("\n[!] MODO DRY-RUN - no se escribira nada en la base de datos\n")
 
     print(f"Conectando a {OLD_DB['db']} (origen)...")
     old = connect(OLD_DB)
@@ -165,11 +166,11 @@ def main():
         old.close()
         new.close()
 
-    print("\n" + "═" * 60)
-    print("  Migración completada." if not args.dry_run else "  Simulación completada (no se escribió nada).")
-    print("═" * 60 + "\n")
+    print("\n" + "=" * 60)
+    print("  Migracion completada." if not args.dry_run else "  Simulacion completada (no se escribio nada).")
+    print("=" * 60 + "\n")
     if not args.dry_run:
-        print("  IMPORTANTE: Los usuarios migrados tienen como contraseña")
+        print("  IMPORTANTE: Los usuarios migrados tienen como contrasena")
         print("  su propio DNI/usuario del sistema antiguo.\n")
 
 if __name__ == "__main__":

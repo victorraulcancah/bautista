@@ -25,9 +25,15 @@ class ActividadResource extends JsonResource
             'ocultar_actividad'  => $this->ocultar_actividad,
             'estado'             => $this->estado,
             'es_calificado'      => $this->es_calificado,
-            'tipo'               => $this->whenLoaded('tipo', fn() => [
-                'tipo_id' => $this->tipo->tipo_id,
-                'nombre'  => $this->tipo->nombre,
+            'peso_porcentaje'    => $this->peso_porcentaje,
+            'puntos_maximos'     => $this->puntos_maximos,
+            'tipo_actividad'     => $this->whenLoaded('tipoActividad', fn() => [
+                'tipo_id' => $this->tipoActividad->tipo_id,
+                'nombre'  => $this->tipoActividad->nombre,
+            ]),
+            'clase'              => $this->whenLoaded('clase', fn() => [
+                'clase_id' => $this->clase->clase_id,
+                'titulo'   => $this->clase->titulo,
             ]),
             'cuestionario'       => $this->whenLoaded('cuestionario', function () {
                 $cuestionario = $this->cuestionario;
@@ -38,18 +44,18 @@ class ActividadResource extends JsonResource
                     'nota_visible'      => $cuestionario->nota_visible,
                     'mostrar_respuesta' => $cuestionario->mostrar_respuesta,
                     'estado'            => $cuestionario->estado,
-                    'preguntas'         => $cuestionario->whenLoaded('preguntas') ?? $cuestionario->preguntas?->map(fn($p) => [
+                    'preguntas'         => $cuestionario->relationLoaded('preguntas') ? $cuestionario->preguntas->map(fn($p) => [
                         'pregunta_id'   => $p->pregunta_id,
                         'cabecera'      => $p->cabecera,
                         'cuerpo'        => $p->cuerpo,
                         'tipo_respuesta'=> $p->tipo_respuesta,
                         'valor_nota'    => $p->valor_nota,
-                        'alternativas'  => $p->alternativas->map(fn($a) => [
+                        'alternativas'  => $p->alternativas ? $p->alternativas->map(fn($a) => [
                             'alternativa_id' => $a->alternativa_id,
                             'contenido'      => $a->contenido,
                             'es_correcta'    => $a->estado_res === '1',
-                        ]),
-                    ]),
+                        ]) : [],
+                    ]) : [],
                 ];
             }),
         ];

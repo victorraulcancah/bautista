@@ -1,13 +1,13 @@
-import { Users, X, CheckSquare } from 'lucide-react';
+import { Users, X, CheckSquare, Search, PlusCircle } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import TitleForm from '@/components/TitleForm';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import api from '@/lib/api';
 
-type Estrategia = 'curso' | 'grado' | 'aula';
+type Estrategia = 'curso' | 'grado' | 'aula' | 'personal';
 type OpcionAgrupacion = { id: number; nombre: string; detalle: string | null };
-type Alumno  = { user_id: number; nombre: string };
+type Miembro  = { user_id: number; nombre: string; rol?: string };
 
 type Props = {
     open:    boolean;
@@ -23,16 +23,22 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
     const [tipoAgrupacion, setTipoAgrupacion] = useState<Estrategia>('curso');
     const [opciones, setOpciones] = useState<OpcionAgrupacion[]>([]);
     const [opcionId, setOpcionId] = useState('');
-    const [alumnos, setAlumnos]   = useState<Alumno[]>([]);
-    const [seleccionados, setSel] = useState<Alumno[]>([]);
+    const [miembrosSug, setMiembrosSug] = useState<Miembro[]>([]);
+    const [seleccionados, setSel] = useState<Miembro[]>([]);
     const [saving, setSaving]     = useState(false);
     const [error, setError]       = useState('');
+
+    // Búsqueda manual "A Dedo"
+    const [manualQuery, setManualQuery] = useState('');
+    const [manualResults, setManualResults] = useState<Miembro[]>([]);
+    const [searching, setSearching]     = useState(false);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Cargar opciones al cambiar estrategia o abrir
     useEffect(() => {
         if (!open) {
-            setNombre(''); setOpcionId(''); setAlumnos([]); setSel([]); setError(''); setTipoAgrupacion('curso');
-            setFoto(null); setFotoPreview(null);
+            setNombre(''); setOpcionId(''); setMiembrosSug([]); setSel([]); setError(''); setTipoAgrupacion('curso');
+            setFoto(null); setFotoPreview(null); setManualQuery(''); setManualResults([]);
 
             return;
         }
@@ -42,32 +48,17 @@ export default function CrearGrupoModal({ open, onClose, onSaved }: Props) {
 
         let endpoint = '';
 
-        if (tipoAgrupacion === 'curso') {
-endpoint = '/mensajeria/cursos';
-}
-
-        if (tipoAgrupacion === 'grado') {
-endpoint = '/mensajeria/grados';
-}
-
-        if (tipoAgrupacion === 'aula') {
-endpoint = '/mensajeria/aulas';
-}
+        if (tipoAgrupacion === 'curso')    endpoint = '/mensajeria/cursos';
+        if (tipoAgrupacion === 'grado')    endpoint = '/mensajeria/grados';
+        if (tipoAgrupacion === 'aula')     endpoint = '/mensajeria/aulas';
+        if (tipoAgrupacion === 'personal') endpoint = '/mensajeria/roles-personal';
 
         api.get(endpoint).then(({ data }) => {
             const mapeado = data.map((item: any) => {
-                if (tipoAgrupacion === 'curso') {
-return { id: item.curso_id, nombre: item.nombre, detalle: item.grado ? `— ${item.grado}` : null };
-}
-
-                if (tipoAgrupacion === 'grado') {
-return { id: item.grado_id, nombre: item.nombre, detalle: item.nivel ? `— ${item.nivel}` : null };
-}
-
-                if (tipoAgrupacion === 'aula') {
-return { id: item.seccion_id, nombre: item.nombre, detalle: item.grado ? `— ${item.grado}` : null };
-}
-
+                if (tipoAgrupacion === 'curso') return { id: item.curso_id, nombre: item.nombre, detalle: item.grado ? `— ${item.grado}` : null };
+                if (tipoAgrupacion === 'grado') return { id: item.grado_id, nombre: item.nombre, detalle: item.nivel ? `— ${item.nivel}` : null };
+                if (tipoAgrupacion === 'aula')  return { id: item.seccion_id, nombre: item.nombre, detalle: item.grado ? `— ${item.grado}` : null };
+                if (tipoAgrupacion === 'personal') return { id: item.id, nombre: item.nombre, detalle: 'Rol del Sistema' };
                 return null;
             });
             setOpciones(mapeado);
@@ -75,48 +66,60 @@ return { id: item.seccion_id, nombre: item.nombre, detalle: item.grado ? `— ${
         });
     }, [open, tipoAgrupacion]);
 
-    // Cargar alumnos al seleccionar la opción (curso, grado o aula)
+    // Cargar sugerencias al seleccionar la opción
     useEffect(() => {
-        setAlumnos([]); setSel([]);
+        setMiembrosSug([]); 
 
-        if (!opcionId) {
-return;
-}
+        if (!opcionId) return;
 
         let endpoint = '';
-
-        if (tipoAgrupacion === 'curso') {
-endpoint = `/mensajeria/cursos/${opcionId}/alumnos`;
-}
-
-        if (tipoAgrupacion === 'grado') {
-endpoint = `/mensajeria/grados/${opcionId}/alumnos`;
-}
-
-        if (tipoAgrupacion === 'aula') {
-endpoint = `/mensajeria/aulas/${opcionId}/alumnos`;
-}
+        if (tipoAgrupacion === 'curso')    endpoint = `/mensajeria/cursos/${opcionId}/alumnos`;
+        if (tipoAgrupacion === 'grado')    endpoint = `/mensajeria/grados/${opcionId}/alumnos`;
+        if (tipoAgrupacion === 'aula')     endpoint = `/mensajeria/aulas/${opcionId}/alumnos`;
+        if (tipoAgrupacion === 'personal') endpoint = `/mensajeria/roles-personal/${opcionId}/usuarios`;
 
         api.get(endpoint).then(({ data }) => {
-            setAlumnos(data);
-            setSel(data); // Agrega automáticamente a todos los alumnos obtenidos
+            const dataMapeada = data.map((d: any) => ({
+                user_id: d.user_id,
+                nombre: d.nombre,
+                rol: tipoAgrupacion === 'personal' ? opciones.find(o => o.id === Number(opcionId))?.nombre : 'Estudiante'
+            }));
+            setMiembrosSug(dataMapeada);
+            // Agregamos automáticamente si es curso/grado/aula
+            if (tipoAgrupacion !== 'personal') {
+                setSel(dataMapeada);
+            }
         });
-    }, [opcionId, tipoAgrupacion]);
+    }, [opcionId, tipoAgrupacion, opciones]);
 
-    const seleccionarAlumno = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const buscarManual = (q: string) => {
+        setManualQuery(q);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        if (q.length < 2) { setManualResults([]); return; }
+
+        debounceRef.current = setTimeout(async () => {
+            setSearching(true);
+            try {
+                const { data } = await api.get('/usuarios/buscar', { params: { q } });
+                setManualResults(data.map((u: any) => ({ user_id: u.id, nombre: u.nombre, rol: u.rol })));
+            } finally {
+                setSearching(false);
+            }
+        }, 300);
+    };
+
+    const agregarMiembro = (m: Miembro) => {
+        if (seleccionados.find(s => s.user_id === m.user_id)) return;
+        setSel((prev) => [...prev, m]);
+        setManualQuery('');
+        setManualResults([]);
+    };
+
+    const handleSelectOptionItem = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const uid = Number(e.target.value);
-
-        if (!uid) {
-return;
-}
-
-        const alumno = alumnos.find((a) => a.user_id === uid);
-
-        if (!alumno || seleccionados.find((s) => s.user_id === uid)) {
-return;
-}
-
-        setSel((prev) => [...prev, alumno]);
+        if (!uid) return;
+        const item = miembrosSug.find(m => m.user_id === uid);
+        if (item) agregarMiembro(item);
         e.target.value = '';
     };
 
@@ -133,17 +136,8 @@ return;
     const handleSubmit = async (e: { preventDefault(): void }) => {
         e.preventDefault();
 
-        if (!nombre.trim())        {
- setError('El nombre del grupo es requerido.');
-
- return; 
-}
-
-        if (seleccionados.length < 1) {
- setError('Selecciona al menos un alumno.');
-
- return; 
-}
+        if (!nombre.trim()) { setError('El nombre del grupo es requerido.'); return; }
+        if (seleccionados.length < 1) { setError('Selecciona al menos un miembro.'); return; }
 
         setSaving(true); setError('');
         
@@ -171,122 +165,162 @@ return;
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
             <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-neutral-800">
-                        <Users className="h-5 w-5 text-emerald-600" />
-                        Nuevo Grupo
+                    <DialogTitle className="flex items-center gap-2 text-neutral-800 uppercase italic font-black tracking-tighter text-xl">
+                        <Users className="h-6 w-6 text-indigo-600" />
+                        Configurar Nuevo Grupo
                     </DialogTitle>
-                    <DialogDescription className="sr-only">Crea un grupo de mensajería con alumnos.</DialogDescription>
+                    <DialogDescription className="sr-only">Crea un grupo de mensajería con alumnos o personal.</DialogDescription>
                 </DialogHeader>
 
-                <TitleForm>Datos del Grupo</TitleForm>
+                <TitleForm>1. Datos del Grupo</TitleForm>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Imagen del Grupo */}
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="flex flex-col items-center gap-3 py-2">
                         <div 
-                            className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 overflow-hidden cursor-pointer hover:bg-gray-100 transition-colors relative group"
+                            className="w-24 h-24 rounded-[2rem] border-2 border-dashed border-gray-200 flex items-center justify-center bg-gray-50 overflow-hidden cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition-all relative group shadow-sm"
                             onClick={() => fileInputRef.current?.click()}
                         >
                             {fotoPreview ? (
                                 <img src={fotoPreview} alt="Preview" className="w-full h-full object-cover" />
                             ) : (
-                                <Users className="w-8 h-8 text-gray-300 group-hover:text-gray-400" />
+                                <Users className="w-10 h-10 text-gray-300 group-hover:text-indigo-300" />
                             )}
-                            <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center">
-                                <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">Cambiar<br/>Foto</span>
+                            <div className="absolute inset-0 bg-indigo-600/60 hidden group-hover:flex items-center justify-center">
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">Subir<br/>Logo</span>
                             </div>
                         </div>
                         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFotoChange} />
-                        <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Icono del Grupo (Opcional)</label>
                     </div>
 
                     {/* Nombre del grupo */}
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-neutral-600">Nombre del grupo:</label>
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Nombre del Grupo de Mensajería</label>
                         <input
                             type="text"
                             value={nombre}
                             onChange={(e) => setNombre(e.target.value)}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a65a]"
+                            placeholder="EJ: DOCENTES 5TO GRADO..."
+                            className="w-full rounded-2xl border-2 border-gray-50 bg-gray-50/50 px-4 py-3 text-sm font-bold focus:outline-none focus:border-indigo-500 transition-all"
                         />
                     </div>
 
-                    <TitleForm className="pt-1">Seleccionar Miembros</TitleForm>
+                    <TitleForm>2. Miembros del Grupo</TitleForm>
 
-                    {/* Estrategia de agrupación */}
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-neutral-600">Agrupar por:</label>
-                        <select
-                            value={tipoAgrupacion}
-                            onChange={(e) => setTipoAgrupacion(e.target.value as Estrategia)}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a65a] bg-neutral-50 font-medium"
-                        >
-                            <option value="curso">Por Curso</option>
-                            <option value="grado">Por Grado</option>
-                            <option value="aula">Por Aula / Sección</option>
-                        </select>
+                    {/* Búsqueda Manual "A Dedo" */}
+                    <div className="space-y-2 relative">
+                        <label className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                            <Search className="size-3" /> Agregar individualmente (A Dedo)
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={manualQuery}
+                                onChange={(e) => buscarManual(e.target.value)}
+                                placeholder={searching ? "BUSCANDO..." : "BUSCAR POR NOMBRE O ROL..."}
+                                className="w-full rounded-2xl border-2 border-indigo-50 bg-indigo-50/20 px-4 py-3 text-xs font-bold focus:outline-none focus:border-indigo-500 transition-all"
+                            />
+                            {manualResults.length > 0 && (
+                                <ul className="absolute z-50 top-full mt-2 w-full rounded-2xl border-2 border-gray-100 bg-white shadow-2xl overflow-hidden">
+                                    {manualResults.map((u) => (
+                                        <li
+                                            key={u.user_id}
+                                            className="cursor-pointer px-4 py-3 text-xs font-bold hover:bg-indigo-50 flex items-center justify-between group"
+                                            onClick={() => agregarMiembro(u)}
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="text-gray-900">{u.nombre}</span>
+                                                <span className="text-[9px] text-gray-400 uppercase tracking-tighter">{u.rol || 'USUARIO'}</span>
+                                            </div>
+                                            <PlusCircle className="size-4 text-gray-300 group-hover:text-indigo-600" />
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Entidad seleccionada (Curso, Grado o Aula) */}
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-neutral-600 capitalize">{tipoAgrupacion}:</label>
-                        <select
-                            value={opcionId}
-                            onChange={(e) => setOpcionId(e.target.value)}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a65a]"
-                        >
-                            <option value="">{`Seleccionar ${tipoAgrupacion}`}</option>
-                            {opciones.map((opt) => (
-                                <option key={opt.id} value={opt.id}>
-                                    {opt.nombre} {opt.detalle}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Alumnos */}
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-neutral-600">Alumnos a excluir o agregar manualmente:</label>
-
-                        <select
-                            onChange={seleccionarAlumno}
-                            disabled={alumnos.length === 0}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a65a] disabled:bg-gray-50 disabled:text-gray-400"
-                        >
-                            <option value="">
-                                {opcionId && alumnos.length === 0 ? `Sin alumnos en este ${tipoAgrupacion}` : 'Seleccionar Alumno (uno por uno)'}
-                            </option>
-                            {alumnos
-                                .filter((a) => !seleccionados.find((s) => s.user_id === a.user_id))
-                                .map((a) => (
-                                    <option key={a.user_id} value={a.user_id}>{a.nombre}</option>
+                    {/* Agrupación rápida */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Agrupar Por</label>
+                            <select
+                                value={tipoAgrupacion}
+                                onChange={(e) => setTipoAgrupacion(e.target.value as Estrategia)}
+                                className="w-full rounded-xl border-2 border-gray-50 bg-gray-50 px-3 py-2 text-[10px] font-black uppercase tracking-tighter focus:outline-none focus:border-indigo-500"
+                            >
+                                <option value="curso">Cursos</option>
+                                <option value="grado">Grados</option>
+                                <option value="aula">Aulas</option>
+                                <option value="personal">Personal</option>
+                            </select>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest capitalize">{tipoAgrupacion}</label>
+                            <select
+                                value={opcionId}
+                                onChange={(e) => setOpcionId(e.target.value)}
+                                className="w-full rounded-xl border-2 border-gray-50 bg-gray-50 px-3 py-2 text-[10px] font-black uppercase tracking-tighter focus:outline-none focus:border-indigo-500"
+                            >
+                                <option value="">SELECCIONAR...</option>
+                                {opciones.map((opt) => (
+                                    <option key={opt.id} value={opt.id}>
+                                        {opt.nombre.toUpperCase()}
+                                    </option>
                                 ))}
-                        </select>
+                            </select>
+                        </div>
                     </div>
 
-                    {/* Tags de seleccionados */}
-                    {seleccionados.length > 0 && (
-                        <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 border border-neutral-100 rounded-md">
-                            {seleccionados.map((s) => (
-                                <span
-                                    key={s.user_id}
-                                    className="inline-flex items-center gap-1 rounded-full bg-blue-500 px-3 py-1 text-xs text-white"
-                                >
-                                    {s.nombre}
-                                    <button type="button" onClick={() => quitar(s.user_id)} className="hover:text-blue-200">
-                                        <X className="size-3" />
-                                    </button>
-                                </span>
-                            ))}
+                    {/* Sugerencias de Miembros */}
+                    {miembrosSug.length > 0 && (
+                        <div className="space-y-1">
+                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest italic">Resultados de {tipoAgrupacion} (Click para añadir)</label>
+                            <select
+                                onChange={handleSelectOptionItem}
+                                className="w-full rounded-xl border border-gray-100 bg-white px-3 py-2 text-[10px] font-bold text-indigo-600 focus:outline-none"
+                            >
+                                <option value="">Elegir de la lista...</option>
+                                {miembrosSug
+                                    .filter((a) => !seleccionados.find((s) => s.user_id === a.user_id))
+                                    .map((a) => (
+                                        <option key={a.user_id} value={a.user_id}>{a.nombre} ({a.rol || '---'})</option>
+                                    ))}
+                            </select>
                         </div>
                     )}
 
-                    {error && <p className="text-sm text-red-500">{error}</p>}
+                    {/* Lista de Seleccionados */}
+                    {seleccionados.length > 0 && (
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
+                                <CheckSquare className="size-3" /> Miembros Seleccionados ({seleccionados.length})
+                            </label>
+                            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-3 bg-gray-50/50 rounded-2xl border-2 border-gray-50">
+                                {seleccionados.map((s) => (
+                                    <div
+                                        key={s.user_id}
+                                        className="inline-flex items-center gap-2 rounded-xl bg-white border border-gray-100 px-3 py-1.5 shadow-sm group animate-in zoom-in-95 duration-200"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-bold text-gray-800 leading-none">{s.nombre}</span>
+                                            <span className="text-[8px] text-indigo-400 font-black uppercase tracking-tighter mt-1">{s.rol || 'Miembro'}</span>
+                                        </div>
+                                        <button type="button" onClick={() => quitar(s.user_id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                                            <X className="size-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-                        <Button type="submit" disabled={saving} className="bg-[#00a65a] hover:bg-[#008d4c] text-white">
-                            {saving ? 'Guardando...' : 'Guardar'}
+                    {error && <p className="text-[10px] font-black text-red-500 uppercase p-3 bg-red-50 rounded-xl">{error}</p>}
+
+                    <DialogFooter className="pt-4 border-t border-gray-100">
+                        <Button type="button" variant="ghost" className="font-bold text-xs" onClick={onClose}>Cancelar</Button>
+                        <Button type="submit" disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase text-[10px] tracking-widest px-8 rounded-xl h-12 shadow-lg shadow-indigo-100">
+                            {saving ? 'PROCESANDO...' : 'CREAR GRUPO'}
                         </Button>
                     </DialogFooter>
                 </form>

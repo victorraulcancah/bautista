@@ -82,11 +82,26 @@ class AlumnoApiController extends Controller
             ->where('user_id', $userId)
             ->get();
 
+        // Summary Metrics
+        $asistencias = \App\Models\AsistenciaAlumno::where('id_estudiante', $estudiante->estu_id)->get();
+        $totalSesiones = $asistencias->count();
+        $presentes = $asistencias->where('estado', 'P')->count();
+        $porcentajeAsistencia = $totalSesiones > 0 ? round(($presentes / $totalSesiones) * 100) : 100;
+
+        $todasLasNotas = NotaActividad::where('estu_id', $estudiante->estu_id)
+            ->whereNotNull('nota')
+            ->where('nota', '!=', '')
+            ->pluck('nota')
+            ->map(fn($n) => is_numeric($n) ? floatval($n) : 0);
+        
+        $promedioGeneral = $todasLasNotas->count() > 0 ? round($todasLasNotas->avg(), 1) : 0;
+
         return response()->json([
             'resumen' => [
                 'cursos' => $cursosCount,
                 'pendientes' => count($proximasActividades),
-                'asistencia' => 95,
+                'asistencia' => $porcentajeAsistencia,
+                'promedio' => $promedioGeneral,
             ],
             'actividades' => $proximasActividades,
             'notas' => $ultimasNotas,
@@ -125,8 +140,11 @@ class AlumnoApiController extends Controller
      */
     public function cursoDetalle(Request $request, int $docenteCursoId)
     {
-        $dc = DocenteCurso::find($docenteCursoId);
-        if (!$dc) return response()->json([], 404);
+        $userId = $request->user()->id;
+        $estudiante = Estudiante::where('user_id', $userId)->first();
+        
+        $dc = DocenteCurso::with('curso')->find($docenteCursoId);
+        if (!$dc) return response()->json(['message' => 'Curso no encontrado.'], 404);
 
         $unidades = Unidad::where('curso_id', $dc->curso_id)
             ->with([
@@ -138,7 +156,31 @@ class AlumnoApiController extends Controller
             ->orderBy('orden')
             ->get();
 
-        return response()->json($unidades);
+        // Cruzar con notas del alumno para ver entregas
+        if ($estudiante) {
+            $unidades->each(function($u) use ($estudiante) {
+                $u->clases->each(function($c) use ($estudiante) {
+                    $c->actividades->each(function($act) use ($estudiante) {
+                        $nota = NotaActividad::where('actividad_id', $act->actividad_id)
+                            ->where('estu_id', $estudiante->estu_id)
+                            ->first();
+                        $act->nota = $nota?->nota;
+                        $act->entregado = !empty($nota?->archivo_entrega);
+                        $act->fecha_entrega = $nota?->fecha_entrega;
+                    });
+                });
+            });
+        }
+
+        $anuncios = \App\Models\Anuncio::where('docente_curso_id', $docenteCursoId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'curso'    => $dc->curso,
+            'unidades' => $unidades,
+            'anuncios' => $anuncios,
+        ]);
     }
 
     /**
@@ -246,5 +288,41 @@ class AlumnoApiController extends Controller
             });
 
         return response()->json($profesores);
+    }
+    /**
+     * Get attendance history for a specific course for the student.
+     */
+    public function cursoAsistencia(int $docenteCursoId)
+    {
+        $userId = auth()->id();
+        $estudiante = Estudiante::where('user_id', $userId)->firstOrFail();
+        $dc = DocenteCurso::findOrFail($docenteCursoId);
+
+        // Get all academic sessions (clases) for this course
+        $clasesIds = \App\Models\Clase::whereHas('unidad', function($q) use ($dc) {
+                $q->where('curso_id', $dc->curso_id);
+            })->pluck('clase_id');
+
+        // Find attendance sessions for these classes
+        $sesiones = \App\Models\AsistenciaActividad::whereIn('id_clase_curso', $clasesIds)
+            ->with(['clase'])
+            ->orderBy('fecha', 'desc')
+            ->get();
+
+        $marcas = \App\Models\AsistenciaAlumno::whereIn('id_asistencia_clase', $sesiones->pluck('id'))
+            ->where('id_estudiante', $estudiante->estu_id)
+            ->get();
+
+        $history = $sesiones->map(function($s) use ($marcas) {
+            $marca = $marcas->where('id_asistencia_clase', $s->id)->first();
+            return [
+                'sesion_id' => $s->id,
+                'clase_titulo' => $s->clase?->titulo ?? 'Sesión Sin Título',
+                'fecha' => $s->fecha,
+                'estado' => $marca?->estado ?? '—', // P, F, J, T or null
+            ];
+        });
+
+        return response()->json($history);
     }
 }

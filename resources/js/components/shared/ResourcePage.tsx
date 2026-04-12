@@ -11,8 +11,8 @@ type Props = {
     breadcrumbs:   BreadcrumbItem[];
     pageTitle:     string;
     subtitle:      string;
-    iconColor:     string;
-    icon:          LucideIcon;
+    iconColor?:    string;
+    icon?:         LucideIcon;
     search?:       string;
     onSearch?:     (v: string) => void;
     flashSuccess?: string | null;
@@ -21,17 +21,20 @@ type Props = {
     extraButtons?: React.ReactNode;
     hideSearch?:   boolean;
     hideButton?:   boolean;
+    hideHeader?:   boolean;
     children:      React.ReactNode;
 };
 
 export default function ResourcePage({
     breadcrumbs, pageTitle, subtitle, icon, iconColor,
-    search = '', onSearch, flashSuccess, btnLabel, onNew, extraButtons, hideSearch, hideButton, children,
+    search = '', onSearch, flashSuccess, btnLabel, onNew, extraButtons, hideSearch, hideButton, hideHeader, children,
 }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6">
-                <PageHeader icon={icon} title={pageTitle} subtitle={subtitle} iconColor={iconColor} />
+                {!hideHeader && icon && (
+                    <PageHeader icon={icon} title={pageTitle} subtitle={subtitle} iconColor={iconColor || 'bg-indigo-600'} />
+                )}
 
                 {flashSuccess && (
                     <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">

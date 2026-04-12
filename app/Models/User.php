@@ -11,11 +11,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
 
     protected $fillable = [
         'insti_id',
@@ -50,23 +51,8 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'rol_id');
     }
 
-    public function hasRole(string|array $roles): bool
-    {
-        $roles = is_array($roles) ? $roles : [$roles];
-        return in_array($this->rol?->name, $roles, true);
-    }
-
-    public function hasAnyRole(array $roles): bool
-    {
-        return $this->hasRole($roles);
-    }
-
-    public function assignRole(string $rolName): void
-    {
-        $rol = Role::where('name', $rolName)->firstOrFail();
-        $this->update(['rol_id' => $rol->id]);
-        $this->setRelation('rol', $rol);
-    }
+    // Eliminados métodos manuales hasRole, hasAnyRole y assignRole
+    // Spatie Permission ahora maneja esto a través del trait HasRoles.
 
     public function institucion(): BelongsTo
     {

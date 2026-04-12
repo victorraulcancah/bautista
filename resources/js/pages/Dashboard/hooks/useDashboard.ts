@@ -16,10 +16,10 @@ export type MensajePendiente = {
 };
 
 export type DashboardStats = {
-    instituciones:       number;
-    estudiantes:         number;
-    docentes:            number;
-    cursos:              number;
+    total_instituciones: number;
+    total_estudiantes:   number;
+    total_docentes:      number;
+    total_cursos:        number;
     notificaciones:      NotificationItem[];
     mensajes_pendientes: MensajePendiente[];
 };

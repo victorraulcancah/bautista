@@ -21,13 +21,24 @@ class DashboardApiController extends Controller
         $user    = $request->user();
         $instiId = $user->insti_id;
 
-        // Stats principales
-        $stats = [
-            'instituciones' => InstitucionEducativa::count(),
-            'estudiantes'   => Estudiante::where('insti_id', $instiId)->count(),
-            'docentes'      => Docente::where('id_insti', $instiId)->count(),
-            'cursos'        => Curso::where('id_insti', $instiId)->where('estado', '1')->count(),
-        ];
+        if ($user->hasRole('docente')) {
+            return $this->docenteStats($user);
+        }
+
+        if ($user->hasRole('estudiante')) {
+            return $this->estudianteStats($user);
+        }
+
+        if ($user->hasRole(['padre_familia', 'madre_familia', 'apoderado'])) {
+            return $this->padreStats($user);
+        }
+
+        // Default: Admin Stats
+        return $this->adminStats($user, $instiId);
+    }
+
+    private function adminStats($user, $instiId): JsonResponse
+    {
 
         // Notificaciones Pendientes
         $notifications = [];
@@ -115,10 +126,104 @@ class DashboardApiController extends Controller
                 ];
             });
 
+        // Estadísticas Globales
+        $stats = [
+            'instituciones' => InstitucionEducativa::count(),
+            'docentes'      => Docente::count(),
+            'estudiantes'   => Estudiante::count(),
+            'cursos'        => Curso::count(),
+        ];
+
         return response()->json([
-            ...$stats,
+            'total_instituciones' => $stats['instituciones'],
+            'total_docentes'      => $stats['docentes'],
+            'total_estudiantes'   => $stats['estudiantes'],
+            'total_cursos'        => $stats['cursos'],
             'notificaciones'      => $notifications,
             'mensajes_pendientes' => $mensajesDetalle,
+            'cursos'              => [], // Evitar colisión
+            'stats'               => [   // Valores por defecto para el widget de Estudiante
+                'tareas_pendientes' => 0,
+                'asistencia_perc'   => 0,
+                'promedio_general'  => 0
+            ],
+            'hijos'               => [], // Evitar colisión con widget de Padre
+        ]);
+    }
+
+    private function docenteStats($user): JsonResponse
+    {
+        $docente = Docente::where('id_usuario', $user->id)->first();
+        if (!$docente) return response()->json(['error' => 'No docente found'], 404);
+
+        $cursosCount = \App\Models\DocenteCurso::where('docente_id', $docente->docente_id)->count();
+        $estudiantesCount = \App\Models\Matricula::whereHas('apertura', function($q) use ($user) {
+            $q->where('insti_id', $user->insti_id);
+        })->count(); // Simplificado para demo, idealmente filtrar por sus cursos
+
+        return response()->json([
+            'resumen' => [
+                'cursos' => $cursosCount,
+                'estudiantes' => $estudiantesCount,
+                'pendientes_calificar' => 0
+            ],
+            'cursos' => \App\Models\DocenteCurso::where('docente_id', $docente->docente_id)
+                ->with(['curso', 'seccion.grado'])
+                ->get(),
+            'notificaciones'      => [],
+            'mensajes_pendientes' => [],
+        ]);
+    }
+
+    private function estudianteStats($user): JsonResponse
+    {
+        $estudiante = Estudiante::where('user_id', $user->id)->first();
+        if (!$estudiante) return response()->json(['stats' => ['tareas_pendientes' => 0, 'asistencia_perc' => 0, 'promedio_general' => 0]]);
+
+        // 1. Calcular Asistencia
+        $totalSesiones = \App\Models\AsistenciaEstudiante::where('estu_id', $estudiante->estu_id)->count();
+        $presentes = \App\Models\AsistenciaEstudiante::where('estu_id', $estudiante->estu_id)
+            ->whereIn('estado', ['P', 'T', 'J'])
+            ->count();
+        $asistenciaPerc = $totalSesiones > 0 ? ($presentes / $totalSesiones) * 100 : 0;
+
+        // 2. Calcular Promedio General
+        $notas = \App\Models\Calificacion::where('estu_id', $estudiante->estu_id)->get();
+        $promedioGeneral = $notas->avg('nota') ?? 0;
+
+        // 3. Tareas Pendientes
+        // Buscamos actividades que no tengan calificación y cuya fecha sea reciente o relevante
+        $pendientes = \App\Models\Actividad::whereHas('claseCurso.clase.unidad.curso', function($q) use ($estudiante) {
+            $q->whereHas('matriculas', function($mq) use ($estudiante) {
+                $mq->where('estu_id', $estudiante->estu_id);
+            });
+        })
+        ->whereDoesntHave('calificaciones', function($q) use ($estudiante) {
+            $q->where('estu_id', $estudiante->estu_id);
+        })
+        ->count();
+
+        return response()->json([
+            'stats' => [
+                'tareas_pendientes' => $pendientes,
+                'asistencia_perc' => round($asistenciaPerc, 1),
+                'promedio_general' => round($promedioGeneral, 1)
+            ],
+            'cursos' => \App\Models\Matricula::where('estu_id', $estudiante->estu_id)
+                ->with(['apertura.nivel'])
+                ->get(),
+            'notificaciones'      => [],
+            'mensajes_pendientes' => [],
+        ]);
+    }
+
+    private function padreStats($user): JsonResponse
+    {
+        $padre = \App\Models\PadreApoderado::where('user_id', $user->id)->first();
+        return response()->json([
+            'hijos' => $padre ? $padre->estudiantes()->with('perfil')->get() : [],
+            'notificaciones'      => [],
+            'mensajes_pendientes' => [],
         ]);
     }
 }

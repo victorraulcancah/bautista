@@ -8,6 +8,8 @@ use App\Models\Estudiante;
 use App\Models\Grado;
 use App\Models\Seccion;
 use App\Models\Matricula;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
 use App\Services\Interfaces\MensajeriaGrupoServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -122,6 +124,37 @@ class MensajeriaGrupoApiController extends Controller
             'nombre'  => $e->perfil
                 ? trim("{$e->perfil->primer_nombre} {$e->perfil->apellido_paterno}")
                 : ($e->user?->username ?? '—'),
+        ]));
+    }
+
+    public function rolesPersonal(Request $request): JsonResponse
+    {
+        // Definimos los roles que se consideran "Personal / Trabajadores"
+        $staffRoles = ['administrador', 'docente', 'psicologo', 'usuario', 'vi'];
+        
+        $roles = Role::whereIn('name', $staffRoles)
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($roles->map(fn ($r) => [
+            'id'     => $r->id,
+            'nombre' => ucfirst($r->name),
+        ]));
+    }
+
+    public function trabajadoresPorRol(Request $request, int $rolId): JsonResponse
+    {
+        $usuarios = User::where('insti_id', $request->user()->insti_id)
+            ->where('rol_id', $rolId)
+            ->where('estado', '1')
+            ->with('perfil:perfil_id,user_id,primer_nombre,apellido_paterno')
+            ->get();
+
+        return response()->json($usuarios->map(fn ($u) => [
+            'user_id' => $u->id,
+            'nombre'  => $u->perfil
+                ? trim("{$u->perfil->primer_nombre} {$u->perfil->apellido_paterno}")
+                : $u->username,
         ]));
     }
 

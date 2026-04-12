@@ -3,8 +3,8 @@
 namespace App\Repositories\Implements;
 
 use App\Models\Perfil;
-use App\Models\Role;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 use App\Repositories\Interfaces\UsuarioRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
@@ -41,13 +41,17 @@ class UsuarioRepository implements UsuarioRepositoryInterface
 
         $user = User::create([
             'insti_id' => $data['insti_id'],
-            'rol_id'   => $rolId,
+            'rol_id'   => $rolId, // Mantenemos por compatibilidad legacy
             'username' => $data['username'],
             'name'     => $data['primer_nombre'] . ' ' . $data['apellido_paterno'],
             'email'    => $data['email'] ?? null,
             'password' => Hash::make($data['username']),
             'estado'   => '1',
         ]);
+
+        if (isset($data['rol'])) {
+            $user->assignRole($data['rol']);
+        }
 
         Perfil::create([
             'user_id'          => $user->id,
@@ -92,7 +96,11 @@ class UsuarioRepository implements UsuarioRepositoryInterface
         }
 
         if ($data['rol'] ?? null) {
-            $user->update(['rol_id' => Role::where('name', $data['rol'])->value('id')]);
+            $role = Role::where('name', $data['rol'])->first();
+            if ($role) {
+                $user->update(['rol_id' => $role->id]);
+                $user->syncRoles($role->name);
+            }
         }
 
         return $user->load(['perfil', 'rol']);

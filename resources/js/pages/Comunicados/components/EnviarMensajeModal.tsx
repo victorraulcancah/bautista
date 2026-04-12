@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import api from '@/lib/api';
 
 
-type Usuario = { id: number; nombre: string; username: string };
+type Usuario = { id: number; nombre: string; username: string; rol?: string };
 type Grupo   = { id: number; nombre: string };
 
 type Props = {
@@ -160,7 +160,14 @@ clearTimeout(debounceRef.current);
                                         onClick={() => seleccionar(u)}
                                     >
                                         <span className="font-medium">{u.nombre}</span>
-                                        <span className="ml-2 text-xs text-gray-400">@{u.username}</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">@{u.username}</span>
+                                            {u.rol && (
+                                                <span className="text-[9px] bg-indigo-50 text-indigo-500 px-1.5 py-0.5 rounded font-black uppercase">
+                                                    {u.rol}
+                                                </span>
+                                            )}
+                                        </div>
                                     </li>
                                 ))}
                             </ul>

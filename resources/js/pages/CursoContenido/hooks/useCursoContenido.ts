@@ -15,6 +15,7 @@ export type Clase = {
     orden:       number;
     estado:      '1' | '0';
     archivos:    ArchivoClase[];
+    actividades?: any[];
 };
 
 export type Unidad = {

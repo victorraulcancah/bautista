@@ -15,16 +15,19 @@ class HandleInertiaRequests extends Middleware
         return parent::version($request);
     }
 
+    private mixed $resolvedUser = null;
+
     public function share(Request $request): array
     {
+        $user = $this->resolveUser($request);
+
         return [
             ...parent::share($request),
             'name'        => config('app.name'),
-            'auth'        => fn () => [
-                'user' => $this->resolveUser($request),
+            'auth'        => [
+                'user' => $user,
             ],
-            'branding'    => function () use ($request) {
-                $user = $this->resolveUser($request);
+            'branding'    => function () use ($user) {
                 $institucion = $user ? $user->institucion : \App\Models\InstitucionEducativa::first();
                 
                 if (!$institucion) return null;
@@ -38,27 +41,34 @@ class HandleInertiaRequests extends Middleware
         ];
     }
 
-    /**
-     * Intenta resolver el usuario autenticado:
-     * 1) Desde la sesión PHP (Fortify / web auth)
-     * 2) Desde la cookie auth_token (Sanctum Bearer via cookie)
-     */
     private function resolveUser(Request $request): mixed
     {
-        // 1. Sesión estándar
-        if ($request->user()) {
-            return $request->user()->load('perfil', 'rol');
+        if ($this->resolvedUser !== null) {
+            return $this->resolvedUser;
         }
 
+        $userModel = null;
+
+        // 1. Sesión estándar
+        if ($request->user()) {
+            $userModel = $request->user();
+        } 
         // 2. Token desde cookie auth_token
-        $tokenCookie = $request->cookie('auth_token');
-        if ($tokenCookie) {
+        else if ($tokenCookie = $request->cookie('auth_token')) {
             $token = PersonalAccessToken::findToken($tokenCookie);
             if ($token && $token->tokenable) {
-                return $token->tokenable->load('perfil', 'rol');
+                $userModel = $token->tokenable;
             }
         }
 
-        return null;
+        if ($userModel) {
+            $userModel->load('perfil', 'rol');
+            // Usamos nombres únicos para no chocar con relaciones de Eloquent/Spatie
+            $userModel->setAttribute('can_list', $userModel->getAllPermissions()->pluck('name'));
+            $userModel->setAttribute('role_list', $userModel->getRoleNames());
+            $this->resolvedUser = $userModel;
+        }
+
+        return $this->resolvedUser;
     }
 }

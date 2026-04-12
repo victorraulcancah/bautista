@@ -64,7 +64,7 @@ export default function GradoFormModal({ open, onClose, editing, niveles, onSave
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-                        <Button type="submit" disabled={processing} className="bg-[#00a65a] hover:bg-[#008d4c] text-white">
+                        <Button type="submit" disabled={processing} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-100">
                             {processing ? 'Guardando...' : 'Guardar'}
                         </Button>
                     </DialogFooter>

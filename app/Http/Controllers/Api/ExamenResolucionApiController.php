@@ -135,12 +135,14 @@ class ExamenResolucionApiController extends Controller
             $respuestas = PreguntaRespuesta::where('intento_id', $intentoId)->get();
             $puntajeTotal = 0;
 
+            $tieneAbiertas = false;
+
             /** @var \App\Models\PreguntaRespuesta $resp */
             foreach ($respuestas as $resp) {
                 $pregunta = PreguntaCuestionario::find($resp->pregunta_id);
                 if (!$pregunta) continue;
 
-                // Simple auto-grading for multiple choice
+                // Auto-grading for multiple choice / true-false
                 if ($resp->alternativa_id) {
                     $alternativa = AlternativaPregunta::find($resp->alternativa_id);
                     if ($alternativa && $alternativa->estado_res == '1') {
@@ -150,8 +152,12 @@ class ExamenResolucionApiController extends Controller
                         $resp->es_correcta = false;
                         $resp->puntaje = 0;
                     }
+                } else if ($resp->respuesta_texto) {
+                    // Open response - Requires manual grading
+                    $resp->es_correcta = false;
+                    $resp->puntaje = 0;
+                    $tieneAbiertas = true;
                 } else {
-                    // Open ended or unhandled
                     $resp->es_correcta = false;
                     $resp->puntaje = 0;
                 }
@@ -166,11 +172,15 @@ class ExamenResolucionApiController extends Controller
             ]);
 
             // Synchronize with massive grades table
+            $observacion = $tieneAbiertas 
+                ? 'Contiene respuestas abiertas. Calificación automática parcial, requiere revisión docente.' 
+                : 'Calificado automáticamente por examen virtual.';
+
             NotaActividad::updateOrCreate(
                 ['estu_id' => $intento->estu_id, 'actividad_id' => $intento->actividad_id],
                 [
                     'nota' => (string) $puntajeTotal,
-                    'observacion' => 'Calificado automáticamente por examen virtual.',
+                    'observacion' => $observacion,
                 ]
             );
 

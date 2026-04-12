@@ -96,4 +96,84 @@ class ActividadApiController extends Controller
 
         return response()->json(['message' => 'Dibujo guardado con éxito', 'path' => $path]);
     }
+
+    /** Obtener entregas de una actividad */
+    public function entregas(int $actividadId): JsonResponse
+    {
+        $actividad = ActividadCurso::findOrFail($actividadId);
+        $cursoId = $actividad->id_curso;
+
+        // Get all students enrolled in the course
+        $estudiantes = \App\Models\Matricula::whereHas('seccion.docenteCursos', function($q) use ($cursoId) {
+                $q->where('curso_id', $cursoId);
+            })
+            ->with(['estudiante.perfil'])
+            ->get()
+            ->map(function($m) {
+                return $m->estudiante;
+            });
+
+        $data = $estudiantes->map(function($estu) use ($actividadId) {
+            // Check for grade
+            $notaRecord = \App\Models\NotaActividad::where('estu_id', $estu->estu_id)
+                ->where('actividad_id', $actividadId)
+                ->first();
+
+            // Check for files
+            $archivos = \DB::table('archivos_actividad')
+                ->where('id_actividad', $actividadId)
+                ->where('estudiante', $estu->estu_id)
+                ->where('origen', 'e')
+                ->get();
+
+            // Check for exam attempt
+            $intento = \App\Models\ExamenIniciado::where('actividad_id', $actividadId)
+                ->where('estu_id', $estu->estu_id)
+                ->with(['respuestas.pregunta'])
+                ->first();
+
+            $estado = 'pendiente';
+            if ($notaRecord) {
+                $estado = 'calificado';
+            } elseif ($archivos->count() > 0 || ($intento && $intento->estado == '0')) {
+                $estado = 'entregado';
+            }
+
+            return [
+                'entrega_id' => $estu->estu_id,
+                'estudiante' => [
+                    'estu_id' => $estu->estu_id,
+                    'nombre' => $estu->perfil->primer_nombre,
+                    'apellido_paterno' => $estu->perfil->apellido_paterno,
+                    'apellido_materno' => $estu->perfil->apellido_materno,
+                ],
+                'archivos' => $archivos->map(fn($a) => [
+                    'archivo_id' => $a->archiv_actividad_id,
+                    'nombre' => $a->nombre_archivo,
+                    'path' => $a->archivo,
+                ]),
+                'intento' => $intento ? [
+                    'intento_id' => $intento->intento_id,
+                    'fecha_inicio' => $intento->fecha_inicio,
+                    'fecha_fin' => $intento->fecha_fin,
+                    'puntaje_total' => $intento->puntaje_total,
+                    'estado' => $intento->estado,
+                    'respuestas' => $intento->respuestas->map(fn($r) => [
+                        'pregunta' => $r->pregunta->cabecera,
+                        'tipo' => $r->pregunta->tipo_respuesta,
+                        'respuesta_estudiante' => $r->respuesta_texto,
+                        'alternativa_id' => $r->alternativa_id,
+                        'es_correcta' => $r->es_correcta,
+                        'puntaje' => $r->puntaje,
+                    ]),
+                ] : null,
+                'fecha_entrega' => $archivos->first()?->created_at ?? $intento?->fecha_fin ?? $intento?->fecha_inicio,
+                'nota' => $notaRecord?->nota,
+                'observacion' => $notaRecord?->observacion,
+                'estado' => $estado,
+            ];
+        });
+
+        return response()->json($data);
+    }
 }
