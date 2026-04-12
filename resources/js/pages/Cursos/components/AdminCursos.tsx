@@ -75,6 +75,12 @@ export default function AdminCursos() {
         setModalCrearOpen(true);
     };
 
+    const openEditCurso = (c: Curso) => {
+        setEditing(c);
+        setApiErrors({});
+        setModalCrearOpen(true);
+    };
+
     const handleSaveCrearCurso = async (data: CursoFormData) => {
         try {
             if (data.logo instanceof File) {
@@ -193,7 +199,7 @@ export default function AdminCursos() {
                     onSearchChange={setSearchCurso}
                     onBack={handleBack}
                     onCreate={modoNivelDirecto ? openCreateCurso : openAsignarCurso}
-                    onEdit={() => {}}
+                    onEdit={openEditCurso}
                     onDelete={confirmDeleteCurso}
                     title={modoNivelDirecto ? `Cursos ${nivelNombre}` : selectedGrado?.nombre_grado ?? ''}
                     subtitle={modoNivelDirecto ? nivelNombre : selectedGrado?.nivel?.nombre_nivel ?? '—'}

@@ -1,4 +1,5 @@
-import { ArrowLeft, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Curso } from '../hooks/useCursos';
@@ -30,6 +31,16 @@ export default function CursosTable({
     subtitle,
     modoNivelDirecto = false,
 }: Props) {
+    const [imageModal, setImageModal] = useState<{ open: boolean; url: string; nombre: string }>({
+        open: false,
+        url: '',
+        nombre: '',
+    });
+
+    const openImageModal = (url: string, nombre: string) => {
+        setImageModal({ open: true, url, nombre });
+    };
+
     return (
         <>
             <div className="flex flex-col gap-3">
@@ -82,7 +93,19 @@ export default function CursosTable({
                         <div className="block sm:hidden space-y-3 p-4">
                             {cursos.map((c, idx) => (
                                 <div key={c.curso_id} className="border rounded-lg p-3 space-y-2 bg-white shadow-sm">
-                                    <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-start justify-between gap-3">
+                                        {c.logo ? (
+                                            <button
+                                                onClick={() => openImageModal(c.logo!, c.nombre)}
+                                                className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-neutral-200 hover:border-emerald-400 transition-colors"
+                                            >
+                                                <img src={c.logo} alt={c.nombre} className="w-full h-full object-cover" />
+                                            </button>
+                                        ) : (
+                                            <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-neutral-100 flex items-center justify-center border border-neutral-200">
+                                                <ImageIcon className="h-6 w-6 text-neutral-400" />
+                                            </div>
+                                        )}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-xs font-medium text-neutral-400">#{idx + 1}</span>
@@ -134,6 +157,7 @@ export default function CursosTable({
                                     <tr className="bg-emerald-600">
                                         <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">#</th>
                                         <th className="px-4 py-3 text-left text-white text-xs font-semibold uppercase">Curso</th>
+                                        <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Logo</th>
                                         <th className="px-4 py-3 text-left text-white text-xs font-semibold uppercase">Descripción</th>
                                         <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Estado</th>
                                         <th className="px-4 py-3 text-center text-white text-xs font-semibold uppercase">Acciones</th>
@@ -144,6 +168,20 @@ export default function CursosTable({
                                         <tr key={c.curso_id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
                                             <td className="px-4 py-3 text-center text-neutral-400">{idx + 1}</td>
                                             <td className="px-4 py-3 font-medium">{c.nombre}</td>
+                                            <td className="px-4 py-3 text-center">
+                                                {c.logo ? (
+                                                    <button
+                                                        onClick={() => openImageModal(c.logo!, c.nombre)}
+                                                        className="inline-block w-12 h-12 rounded-lg overflow-hidden border border-neutral-200 hover:border-emerald-400 transition-colors"
+                                                    >
+                                                        <img src={c.logo} alt={c.nombre} className="w-full h-full object-cover" />
+                                                    </button>
+                                                ) : (
+                                                    <div className="inline-flex w-12 h-12 rounded-lg bg-neutral-100 items-center justify-center border border-neutral-200">
+                                                        <ImageIcon className="h-5 w-5 text-neutral-400" />
+                                                    </div>
+                                                )}
+                                            </td>
                                             <td className="px-4 py-3 text-neutral-600">{c.descripcion ?? '—'}</td>
                                             <td className="px-4 py-3 text-center">
                                                 <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${c.estado === '1' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
@@ -176,7 +214,7 @@ export default function CursosTable({
                                     ))}
                                     {cursos.length === 0 && (
                                         <tr>
-                                            <td colSpan={5} className="py-16 text-center text-sm text-neutral-400">
+                                            <td colSpan={6} className="py-16 text-center text-sm text-neutral-400">
                                                 {search ? 'Sin resultados para la búsqueda.' : 'No hay cursos para este grado.'}
                                             </td>
                                         </tr>
@@ -187,6 +225,44 @@ export default function CursosTable({
                     </>
                 )}
             </div>
+
+            {/* Modal para ver imagen completa */}
+            {imageModal.open && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+                    onClick={() => setImageModal({ open: false, url: '', nombre: '' })}
+                >
+                    <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden shadow-2xl">
+                        <div className="p-4 border-b bg-neutral-50">
+                            <h3 className="font-semibold text-neutral-900">{imageModal.nombre}</h3>
+                        </div>
+                        <div className="p-4 flex items-center justify-center bg-neutral-100">
+                            <img
+                                src={imageModal.url}
+                                alt={imageModal.nombre}
+                                className="max-w-full max-h-[70vh] object-contain"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        </div>
+                        <div className="p-4 border-t bg-neutral-50 flex justify-end gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setImageModal({ open: false, url: '', nombre: '' })}
+                            >
+                                Cerrar
+                            </Button>
+                            <Button
+                                size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700"
+                                onClick={() => window.open(imageModal.url, '_blank')}
+                            >
+                                Abrir en nueva pestaña
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

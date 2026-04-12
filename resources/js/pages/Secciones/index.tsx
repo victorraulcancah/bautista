@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { CalendarDays, LayoutList } from 'lucide-react';
 import { useState } from 'react';
+import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
 import { Button } from '@/components/ui/button';
@@ -21,17 +22,23 @@ export default function SeccionesPage() {
     const grados = useOptions<GradoOption>('/grados');
     const [modalOpen, setModalOpen]         = useState(false);
     const [editing, setEditing]             = useState<Seccion | null>(null);
+    const [deleteModal, setDeleteModal] = useState<{
+        open: boolean;
+        seccion: Seccion | null;
+        processing: boolean;
+    }>({ open: false, seccion: null, processing: false });
 
-    const openCreate   = () => {
- setEditing(null); setModalOpen(true); 
-};
-    const openEdit     = (s: Seccion) => {
- setEditing(s); setModalOpen(true); 
-};
+    const openCreate   = () => { setEditing(null); setModalOpen(true); };
+    const openEdit     = (s: Seccion) => { setEditing(s); setModalOpen(true); };
     const handleDelete = (s: Seccion) => {
-        if (confirm(`¿Eliminar la sección "${s.nombre}"?`)) {
-            res.remove(s.seccion_id);
-        }
+        setDeleteModal({ open: true, seccion: s, processing: false });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteModal.seccion) return;
+        setDeleteModal(prev => ({ ...prev, processing: true }));
+        await res.remove(deleteModal.seccion.seccion_id);
+        setDeleteModal({ open: false, seccion: null, processing: false });
     };
 
     return (
@@ -75,9 +82,7 @@ export default function SeccionesPage() {
 
             <SeccionFormModal
                 open={modalOpen}
-                onClose={() => {
- setModalOpen(false); res.clearSuccess(); 
-}}
+                onClose={() => { setModalOpen(false); res.clearSuccess(); }}
                 editing={editing}
                 grados={grados}
                 onSave={editing
@@ -85,6 +90,15 @@ export default function SeccionesPage() {
                     : (data) => res.create(data)}
                 apiErrors={res.apiErrors}
                 clearErrors={res.clearErrors}
+            />
+
+            <ConfirmDeleteModal
+                open={deleteModal.open}
+                title="Eliminar Sección"
+                message={`¿Estás seguro de que deseas eliminar la sección "${deleteModal.seccion?.nombre}"? Esta acción no se puede deshacer.`}
+                processing={deleteModal.processing}
+                onClose={() => setDeleteModal({ open: false, seccion: null, processing: false })}
+                onConfirm={confirmDelete}
             />
         </>
     );

@@ -29,7 +29,7 @@ export function useCursoForm({ editing, open, defaults, onSave, onClose, clearEr
             }
             : { ...defaultForm, ...defaults },
         );
-        setPreview(editing?.logo ? (editing.logo.startsWith('http') ? editing.logo : `/storage/${editing.logo}`) : null);
+        setPreview(editing?.logo ?? null);
     }, [editing, open]);
 
     const set = (key: keyof CursoFormData, value: string) =>
