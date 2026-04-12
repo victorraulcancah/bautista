@@ -118,8 +118,10 @@ export default function AccessControlManager() {
             });
             await loadData();
             setShowConfirmModal(false);
-            alert('Permisos actualizados correctamente');
+            // Mostrar mensaje de éxito (puedes usar un toast aquí)
+            console.log('Permisos actualizados correctamente');
         } catch (e) {
+            console.error('Error al guardar permisos:', e);
             alert('Error al guardar permisos');
         } finally {
             setProcessing(false);
@@ -135,6 +137,7 @@ export default function AccessControlManager() {
             setIsCreating(false);
             await loadData();
         } catch (e) {
+            console.error('Error al crear rol:', e);
             alert('Error al crear rol');
         } finally {
             setProcessing(false);
