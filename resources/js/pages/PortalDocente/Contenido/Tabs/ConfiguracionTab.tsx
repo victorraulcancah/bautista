@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import AlertModal from '@/components/shared/AlertModal';
 import api from '@/lib/api';
 
 interface Props {
@@ -35,35 +36,62 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
         nombre: courseData?.curso?.nombre || '',
         descripcion: courseData?.curso?.descripcion || '',
         color: courseData?.curso?.color || '#10b981',
-        banner: courseData?.curso?.banner || '',
+        banner: courseData?.banner || '',
     });
     const [saving, setSaving] = useState(false);
     const [uploadingBanner, setUploadingBanner] = useState(false);
-    const [previewBanner, setPreviewBanner] = useState<string | null>(null);
+    const [previewBanner, setPreviewBanner] = useState<string | null>(courseData?.banner_url || null);
+    
+    // Alert modal state
+    const [alertModal, setAlertModal] = useState<{
+        open: boolean;
+        variant: 'success' | 'error' | 'warning' | 'info';
+        title?: string;
+        message: string;
+    }>({
+        open: false,
+        variant: 'info',
+        message: '',
+    });
+
+    // Debug: log when alertModal changes
+    useEffect(() => {
+        console.log('Alert modal state:', alertModal);
+    }, [alertModal]);
 
     useEffect(() => {
-        if (courseData?.curso) {
+        if (courseData) {
             setSettings({
-                nombre: courseData.curso.nombre || '',
-                descripcion: courseData.curso.descripcion || '',
-                color: courseData.curso.color || '#10b981',
-                banner: courseData.curso.banner || '',
+                nombre: courseData.curso?.nombre || '',
+                descripcion: courseData.curso?.descripcion || '',
+                color: courseData.curso?.color || '#10b981',
+                banner: courseData.banner || '',
             });
-        }
-        if (courseData?.banner_url) {
-            setPreviewBanner(courseData.banner_url);
+            if (courseData.banner_url) {
+                setPreviewBanner(courseData.banner_url);
+            }
         }
     }, [courseData]);
 
     const handleSave = async () => {
         setSaving(true);
         try {
-            await api.put(`/docente/curso/${docenteCursoId}/settings`, settings);
+            await api.put(`/docente/curso/${docenteCursoId}/settings`, {
+                settings: settings
+            });
             onRefresh();
-            alert('Configuración guardada correctamente');
+            setAlertModal({
+                open: true,
+                variant: 'success',
+                message: 'Configuración guardada correctamente',
+            });
         } catch (error) {
             console.error('Error saving settings:', error);
-            alert('Error al guardar la configuración');
+            setAlertModal({
+                open: true,
+                variant: 'error',
+                message: 'Error al guardar la configuración',
+            });
         } finally {
             setSaving(false);
         }
@@ -75,13 +103,23 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
 
         // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
-            alert('El archivo es demasiado grande. Máximo 5MB.');
+            setAlertModal({
+                open: true,
+                variant: 'warning',
+                message: 'El archivo es demasiado grande. Máximo 5MB.',
+            });
+            e.target.value = ''; // Reset input
             return;
         }
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            alert('Solo se permiten archivos de imagen.');
+            setAlertModal({
+                open: true,
+                variant: 'warning',
+                message: 'Solo se permiten archivos de imagen.',
+            });
+            e.target.value = ''; // Reset input
             return;
         }
 
@@ -94,13 +132,27 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
+            console.log('Banner upload response:', res.data);
+
             setSettings(prev => ({ ...prev, banner: res.data.banner }));
             setPreviewBanner(res.data.url);
+            e.target.value = ''; // Reset input
             onRefresh();
-            alert('Banner subido correctamente');
+            
+            // Show success modal
+            setAlertModal({
+                open: true,
+                variant: 'success',
+                message: 'Banner subido correctamente',
+            });
         } catch (error) {
             console.error('Error uploading banner:', error);
-            alert('Error al subir el banner');
+            e.target.value = ''; // Reset input
+            setAlertModal({
+                open: true,
+                variant: 'error',
+                message: 'Error al subir el banner',
+            });
         } finally {
             setUploadingBanner(false);
         }
@@ -343,6 +395,15 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
                     </Card>
                 </div>
             </div>
+
+            {/* Alert Modal */}
+            <AlertModal
+                open={alertModal.open}
+                onClose={() => setAlertModal(prev => ({ ...prev, open: false }))}
+                variant={alertModal.variant}
+                title={alertModal.title}
+                message={alertModal.message}
+            />
         </div>
     );
 }
