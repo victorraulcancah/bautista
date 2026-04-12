@@ -18,10 +18,10 @@ export default function CursosPage() {
             <Head title="Cursos" />
             <div className="p-3 sm:p-6">
                 {/* 1. Vista Administrativa (Gestión de Niveles/Grados) */}
-                {can(['niveles.view', 'cursos.manage']) && <AdminCursos />}
+                {can('cursos.ver') && hasRole(['administrador', 'usuario']) && <AdminCursos />}
 
                 {/* 2. Vista Docente (Mis Materias Asignadas) */}
-                {hasRole('docente') && !can('cursos.manage') && <TeacherCursos />}
+                {hasRole('docente') && <TeacherCursos />}
 
                 {/* 3. Vista Estudiante (Mis Cursos) */}
                 {hasRole('estudiante') && <StudentCursos />}
