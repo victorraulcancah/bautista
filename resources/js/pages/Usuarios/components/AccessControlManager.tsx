@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Save, Plus, Trash2, Key, Eye, PlusCircle, Pencil, ChevronDown, ChevronRight, Lock } from 'lucide-react';
 import api from '@/lib/api';
+import ConfirmModal from '@/components/shared/ConfirmModal';
 
 type Permission = {
     id: number;
@@ -37,6 +38,9 @@ export default function AccessControlManager() {
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
     const [editedPermissions, setEditedPermissions] = useState<string[]>([]);
     const [expandedModules, setExpandedModules] = useState<string[]>([]);
+    
+    // Confirm modal state
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -100,7 +104,11 @@ export default function AccessControlManager() {
         );
     };
 
-    const handleSavePermissions = async () => {
+    const handleSavePermissions = () => {
+        setShowConfirmModal(true);
+    };
+
+    const confirmSavePermissions = async () => {
         if (!selectedRole) return;
         setProcessing(true);
         try {
@@ -109,6 +117,7 @@ export default function AccessControlManager() {
                 permissions: editedPermissions
             });
             await loadData();
+            setShowConfirmModal(false);
             alert('Permisos actualizados correctamente');
         } catch (e) {
             alert('Error al guardar permisos');
@@ -160,7 +169,19 @@ export default function AccessControlManager() {
     if (loading) return <div className="p-10 text-center animate-pulse text-gray-400">Cargando configuración de seguridad...</div>;
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <>
+            <ConfirmModal
+                open={showConfirmModal}
+                onClose={() => setShowConfirmModal(false)}
+                onConfirm={confirmSavePermissions}
+                title="Confirmar cambios de permisos"
+                message={`¿Estás seguro de que deseas actualizar los permisos del rol "${selectedRole?.name.replace('_', ' ')}"? Los cambios se aplicarán de forma inmediata y afectarán a todos los usuarios con este rol.`}
+                processing={processing}
+                confirmText="Aplicar cambios"
+                variant="warning"
+            />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* Sidebar de Roles */}
             <div className="lg:col-span-4 space-y-6">
                 <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white rounded-3xl overflow-hidden">
@@ -358,5 +379,6 @@ export default function AccessControlManager() {
                 )}
             </div>
         </div>
+        </>
     );
 }
