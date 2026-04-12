@@ -24,7 +24,7 @@ class DocenteController extends Controller
 
         $alumnos = Matricula::whereIn('seccion_id', $seccionIds)
             ->where('estado', '1')
-            ->with(['estudiante.perfil', 'seccion.grado'])
+            ->with(['estudiante.perfil', 'seccion.grado.nivel'])
             ->get()
             ->map(fn ($m) => [
                 'estu_id'          => $m->estudiante?->estu_id,
@@ -37,6 +37,7 @@ class DocenteController extends Controller
                 'telefono'         => $m->estudiante?->perfil?->telefono,
                 'direccion'        => $m->estudiante?->perfil?->direccion,
                 'grado'            => $m->seccion?->grado?->nombre_grado,
+                'nivel'            => $m->seccion?->grado?->nivel?->nombre_nivel,
                 'seccion'          => $m->seccion?->nombre,
             ])
             ->unique('estu_id')

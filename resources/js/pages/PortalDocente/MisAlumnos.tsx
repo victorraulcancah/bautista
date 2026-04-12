@@ -26,6 +26,7 @@ type Alumno = {
     direccion: string | null;
     grado: string | null;
     seccion: string | null;
+    nivel: string | null;
     foto?: string;
 };
 
@@ -129,9 +130,14 @@ export default function MisAlumnosPage({ alumnos }: Props) {
                                             {a.primer_nombre} {a.segundo_nombre} <br/> 
                                             <span className="text-gray-400 group-hover:text-emerald-400">{a.apellido_paterno} {a.apellido_materno}</span>
                                         </h3>
-                                        <Badge className="mt-3 rounded-lg bg-emerald-50 text-emerald-700 border-none font-black uppercase text-[9px] tracking-tight px-3 py-1 shadow-none">
-                                            {[a.grado, a.seccion].filter(Boolean).join(' — ')}
-                                        </Badge>
+                                        <div className="flex flex-wrap gap-1.5 mt-3">
+                                            <Badge className="rounded-lg bg-emerald-600 text-white border-none font-black uppercase text-[9px] tracking-tight px-3 py-1 shadow-none">
+                                                {a.nivel || 'N/A'}
+                                            </Badge>
+                                            <Badge className="rounded-lg bg-emerald-50 text-emerald-700 border-none font-black uppercase text-[9px] tracking-tight px-3 py-1 shadow-none">
+                                                {[a.grado, a.seccion].filter(Boolean).join(' — ')}
+                                            </Badge>
+                                        </div>
                                     </div>
 
                                     <div className="space-y-3 pt-2 border-t border-gray-50">
@@ -179,6 +185,9 @@ export default function MisAlumnosPage({ alumnos }: Props) {
                                     {selectedStudent.apellido_paterno} {selectedStudent.apellido_materno}
                                 </h3>
                                 <div className="flex items-center gap-2 mt-2">
+                                    <Badge className="rounded-lg bg-emerald-600 text-white font-black uppercase text-[10px] tracking-widest border-none">
+                                        {selectedStudent.nivel || 'S/N'}
+                                    </Badge>
                                     <Badge className="rounded-lg bg-emerald-100 text-emerald-700 font-black uppercase text-[10px] tracking-widest border-none">
                                         ID {selectedStudent.estu_id}
                                     </Badge>
@@ -210,14 +219,18 @@ export default function MisAlumnosPage({ alumnos }: Props) {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4 text-center">
-                            <div className="flex-1 p-5 rounded-[2rem] bg-emerald-50 border border-emerald-100">
-                                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Grado</p>
-                                <p className="font-black text-emerald-700 text-lg">{selectedStudent.grado || '—'}</p>
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                            <div className="p-4 rounded-[2rem] bg-emerald-50 border border-emerald-100">
+                                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Nivel</p>
+                                <p className="font-black text-emerald-700 text-sm truncate">{selectedStudent.nivel || '—'}</p>
                             </div>
-                            <div className="flex-1 p-5 rounded-[2rem] bg-emerald-50 border border-emerald-100">
+                            <div className="p-4 rounded-[2rem] bg-emerald-50 border border-emerald-100">
+                                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Grado</p>
+                                <p className="font-black text-emerald-700 text-sm truncate">{selectedStudent.grado || '—'}</p>
+                            </div>
+                            <div className="p-4 rounded-[2rem] bg-emerald-50 border border-emerald-100">
                                 <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Sección</p>
-                                <p className="font-black text-emerald-700 text-lg">{selectedStudent.seccion || '—'}</p>
+                                <p className="font-black text-emerald-700 text-sm truncate">{selectedStudent.seccion || '—'}</p>
                             </div>
                         </div>
 
