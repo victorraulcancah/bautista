@@ -13,7 +13,7 @@ export interface Question {
 }
 
 export interface ExamenConfig {
-    tiempo_limite: string;
+    duracion: string;
     auto_submit: boolean;
     randomize_questions: boolean;
     lock_navigation: boolean;
@@ -25,7 +25,7 @@ export interface ExamenConfig {
 
 export function useExamenConfig() {
     const [config, setConfig] = useState<ExamenConfig>({
-        tiempo_limite: '60',
+        duracion: '60',
         auto_submit: true,
         randomize_questions: false,
         lock_navigation: false,

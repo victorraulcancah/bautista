@@ -165,6 +165,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['check.role:estudiante', 'verify.estudiante.curso'])->group(function () {
         Route::get('alumno/dashboard', [AlumnoApiController::class, 'dashboard'])->withoutMiddleware('verify.estudiante.curso');
         Route::get('alumno/cursos', [AlumnoApiController::class, 'cursos'])->withoutMiddleware('verify.estudiante.curso');
+        Route::get('alumno/notas', [AlumnoApiController::class, 'notas'])->withoutMiddleware('verify.estudiante.curso');
         Route::get('alumno/curso/{id}', [AlumnoApiController::class, 'cursoDetalle']);
         Route::get('alumno/curso/{id}/asistencia', [AlumnoApiController::class, 'cursoAsistencia']);
         Route::get('alumno/asistencia', [AlumnoApiController::class, 'asistencia'])->withoutMiddleware('verify.estudiante.curso');

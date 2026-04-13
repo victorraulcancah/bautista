@@ -93,8 +93,8 @@ export default function ExamenConfigForm({
                         </Label>
                         <Input 
                             type="number"
-                            value={config.tiempo_limite}
-                            onChange={(e) => onUpdateField('tiempo_limite', e.target.value)}
+                            value={config.duracion}
+                            onChange={(e) => onUpdateField('duracion', e.target.value)}
                             className="h-11 rounded-2xl font-bold bg-white"
                             min="1"
                         />

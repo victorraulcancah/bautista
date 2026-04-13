@@ -112,6 +112,19 @@ export default function CuestionarioConfigForm({
                             className="h-11 rounded-2xl font-bold bg-white"
                         />
                     </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-gray-500 uppercase px-1 flex items-center gap-2">
+                            Duración (min)
+                        </Label>
+                        <Input 
+                            type="number"
+                            value={config.duracion}
+                            onChange={(e) => onUpdateField('duracion', e.target.value)}
+                            className="h-11 rounded-2xl font-bold bg-white"
+                            min="1"
+                        />
+                    </div>
                 </div>
 
                 <div className="flex flex-wrap gap-3 pt-2">

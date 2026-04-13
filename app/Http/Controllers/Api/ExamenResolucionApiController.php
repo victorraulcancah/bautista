@@ -51,7 +51,7 @@ class ExamenResolucionApiController extends Controller
             }
 
             // Create new session
-            $duracionMinutos = $cuestionario->duracion ?? 60;
+            $duracionMinutos = max(1, (int)($cuestionario->duracion ?? 60));
             $intento = ExamenIniciado::create([
                 'estu_id' => $estuId,
                 'actividad_id' => $request->actividad_id,

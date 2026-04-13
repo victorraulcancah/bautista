@@ -179,6 +179,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'portal.estudiante.cursos',
             'portal.estudiante.notas',
             'portal.estudiante.asistencia',
+            'portal.estudiante.profesores',
             'portal.estudiante.horario',
             'portal.estudiante.puzzles',
             'portal.padre.ver',

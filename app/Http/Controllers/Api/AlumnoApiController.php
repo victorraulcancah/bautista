@@ -220,6 +220,19 @@ class AlumnoApiController extends Controller
 
         $clase->docen_curso_id = $docenCursoId;
 
+        // Cruzar con notas del alumno para ver entregas
+        if ($estudiante) {
+            $clase->actividades->each(function($act) use ($estudiante) {
+                $nota = \App\Models\NotaActividad::where('actividad_id', $act->actividad_id)
+                    ->where('estu_id', $estudiante->estu_id)
+                    ->first();
+                $act->nota = $nota?->nota;
+                // Consideramos entregado si hay archivo, fecha de entrega o si ya tiene nota (ej. exámenes)
+                $act->entregado = $nota && ($nota->archivo_entrega || $nota->fecha_entrega || $nota->nota !== null);
+                $act->fecha_entrega = $nota?->fecha_entrega;
+            });
+        }
+
         return response()->json($clase);
     }
 
@@ -352,5 +365,38 @@ class AlumnoApiController extends Controller
         });
 
         return response()->json($history);
+    }
+
+    /**
+     * Get all grades for the authenticated student.
+     */
+    public function notas(Request $request)
+    {
+        $userId = $request->user()->id;
+        $estudiante = Estudiante::where('user_id', $userId)->first();
+
+        if (!$estudiante) {
+            return response()->json(['message' => 'No se encontró perfil de estudiante.'], 404);
+        }
+
+        $notas = NotaActividad::where('estu_id', $estudiante->estu_id)
+            ->with(['actividad.tipoActividad'])
+            ->get()
+            ->map(function($n) {
+                return [
+                    'id' => $n->id,
+                    'nota' => $n->nota,
+                    'observacion' => $n->observacion,
+                    'created_at' => $n->created_at?->toDateTimeString(),
+                    'actividad' => [
+                        'nombre_actividad' => $n->actividad->nombre_actividad,
+                        'tipo' => [
+                            'nombre' => $n->actividad->tipoActividad?->nombre ?? 'Tarea'
+                        ]
+                    ]
+                ];
+            });
+
+        return response()->json($notas);
     }
 }

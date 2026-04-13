@@ -1,6 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, FileText, Download, Upload, PlayCircle, ClipboardList, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ChevronLeft, FileText, Download, Upload, ClipboardList, CheckCircle2, AlertCircle, Calendar, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import api from '@/lib/api';
@@ -91,9 +93,12 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
                     <div className="bg-white p-8 md:p-12 rounded-[3.5rem] border border-gray-100 shadow-2xl shadow-gray-200/50 space-y-8">
                         <div>
                             <h3 className="text-2xl font-black text-gray-900 mb-4">Descripción de la Sesión</h3>
-                            <p className="text-gray-500 leading-relaxed font-medium">
-                                {clase.descripcion || 'En esta clase exploraremos los conceptos fundamentales de la unidad. Revisa los materiales adjuntos antes de realizar las actividades.'}
-                            </p>
+                            <div 
+                                className="text-gray-500 leading-relaxed font-medium prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{ 
+                                    __html: clase.descripcion || 'En esta clase exploraremos los conceptos fundamentales de la unidad. Revisa los materiales adjuntos antes de realizar las actividades.' 
+                                }}
+                            />
                         </div>
 
                         <div className="space-y-6 pt-4 border-t border-gray-50">
@@ -129,8 +134,11 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
                         </h4>
                         <div className="space-y-4">
                             {clase.actividades.map((act: any) => {
-                                const isQuiz = act.tipo_id == 2 || act.tipo_id == 3;
-                                const isCompleted = act.entregado || (isQuiz && act.nota !== null);
+                                const typeId = act.id_tipo_actividad || act.tipo_id;
+                                const isQuiz = typeId == 2 || typeId == 3;
+                                const isDrawing = typeId == 5;
+                                const isPuzzle = typeId == 6;
+                                const isCompleted = Boolean(act.entregado) || (isQuiz && act.nota !== null && act.nota !== undefined);
                                 
                                 return (
                                     <div key={act.actividad_id} className={`p-6 rounded-[2rem] border transition-all ${
@@ -153,6 +161,27 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
                                                 <AlertCircle className="w-5 h-5 text-orange-400" />
                                             )}
                                         </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                            <div className="flex items-center gap-2 p-3 bg-white/5 rounded-xl border border-white/10">
+                                                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                                                <div className="flex-1">
+                                                    <p className="text-[8px] font-black text-indigo-300 uppercase tracking-widest leading-none mb-1">Apertura</p>
+                                                    <p className="text-[10px] font-bold text-white leading-none">
+                                                        {act.fecha_inicio ? format(new Date(act.fecha_inicio), "d 'de' MMM, h:mm a", { locale: es }).toUpperCase().replace(/\./g, '') : 'No definido'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 p-3 bg-white/5 rounded-xl border border-white/10">
+                                                <Clock className="w-3.5 h-3.5 text-rose-400" />
+                                                <div className="flex-1">
+                                                    <p className="text-[8px] font-black text-rose-300 uppercase tracking-widest leading-none mb-1">Cierre</p>
+                                                    <p className="text-[10px] font-bold text-white leading-none">
+                                                        {act.fecha_cierre ? format(new Date(act.fecha_cierre), "d 'de' MMM, h:mm a", { locale: es }).toUpperCase().replace(/\./g, '') : 'No definido'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
                                         
                                         {isQuiz ? (
                                             isCompleted ? (
@@ -160,12 +189,24 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
                                                     Examen Finalizado - Nota: {act.nota || 'Pendiente'}
                                                 </div>
                                             ) : (
-                                                <Link href={`/examenes/${act.actividad_id}/resolver`} className="block">
+                                                <Link href={`/alumno/examen/${act.actividad_id}/resolver`} className="block">
                                                     <Button className="w-full h-11 rounded-2xl bg-white text-indigo-900 hover:bg-indigo-50 font-black text-[10px] uppercase shadow-xl shadow-indigo-950/20">
                                                         Iniciar Examen
                                                     </Button>
                                                 </Link>
                                             )
+                                        ) : isDrawing ? (
+                                            <Link href={`/alumno/dibujo/${act.actividad_id}`} className="block">
+                                                <Button className="w-full h-11 rounded-2xl bg-white text-indigo-900 hover:bg-indigo-50 font-black text-[10px] uppercase shadow-xl shadow-indigo-950/20">
+                                                    Abrir Lienzo
+                                                </Button>
+                                            </Link>
+                                        ) : isPuzzle ? (
+                                            <Link href={`/alumno/puzzles/${act.actividad_id}`} className="block">
+                                                <Button className="w-full h-11 rounded-2xl bg-white text-indigo-900 hover:bg-indigo-50 font-black text-[10px] uppercase shadow-xl shadow-indigo-950/20">
+                                                    Jugar Rompecabezas
+                                                </Button>
+                                            </Link>
                                         ) : act.entregado ? (
                                             <div className="space-y-3">
                                                 <div className="flex items-center justify-center p-3 rounded-xl bg-emerald-500/20 text-emerald-400 font-black text-[10px] uppercase gap-2">

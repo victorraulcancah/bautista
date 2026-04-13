@@ -94,6 +94,7 @@ const navigation: NavItem[] = [
     { type: 'group', title: 'Portal Estudiante', icon: GraduationCap, children: [
         { title: 'Horarios', href: '/horarios', permission: 'portal.estudiante.horario' },
         { title: 'Mis Cursos', href: '/alumno/cursos', permission: 'portal.estudiante.cursos' },
+        { title: 'Mis Profesores', href: '/alumno/profesores', permission: 'portal.estudiante.profesores' },
         { title: 'Mi Asistencia', href: '/alumno/asistencia', permission: 'portal.estudiante.asistencia' },
         { title: 'Mis Notas',   href: '/alumno/notas', permission: 'portal.estudiante.notas' },
         { title: 'Rompecabezas', href: '/alumno/puzzles', permission: 'portal.estudiante.puzzles' },

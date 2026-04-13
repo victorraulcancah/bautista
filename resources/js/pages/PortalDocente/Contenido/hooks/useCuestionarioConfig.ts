@@ -19,6 +19,7 @@ export interface CuestionarioConfig {
     completion_message: string;
     is_anonymous: boolean;
     show_summary: boolean;
+    duracion: number;
     questions: Question[];
 }
 
@@ -30,6 +31,7 @@ export function useCuestionarioConfig() {
         completion_message: 'Gracias por completar el cuestionario',
         is_anonymous: false,
         show_summary: false,
+        duracion: 60,
         questions: []
     });
 

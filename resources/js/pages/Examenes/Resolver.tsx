@@ -1,8 +1,11 @@
 import { Head } from '@inertiajs/react';
-import { Clock, ChevronLeft, ChevronRight, Send, AlertCircle } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Send, AlertCircle, Award, CheckCircle2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import AppLayout from '@/layouts/app-layout';
+import ConfirmModal from '@/components/shared/ConfirmModal';
+import AlertModal from '@/components/shared/AlertModal';
 import api from '@/lib/api';
 
 type ExamenState = {
@@ -11,11 +14,19 @@ type ExamenState = {
     preguntas: any[];
 };
 
-export default function ResolverExamenPage({ actividadId, estudianteId }: { actividadId: number, estudianteId: number }) {
+export default function ResolverExamenPage({ actividadId, estudianteId, actividadNombre }: { actividadId: number, estudianteId: number, actividadNombre: string }) {
     const [examen, setExamen] = useState<ExamenState | null>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const [submitting, setSubmitting] = useState(false);
+    
+    // Modal states
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [alertConfig, setAlertConfig] = useState<{ open: boolean; title?: string; message: string; variant: 'success' | 'error' | 'warning' | 'info' }>({
+        open: false,
+        message: '',
+        variant: 'info'
+    });
 
     useEffect(() => {
         api.post('/examenes/comenzar', { actividad_id: actividadId, estu_id: estudianteId })
@@ -26,20 +37,22 @@ export default function ResolverExamenPage({ actividadId, estudianteId }: { acti
                 setTimeLeft(Math.max(0, Math.floor((limit - now) / 1000)));
             })
             .catch(err => {
-                alert(err.response?.data?.message || 'Error al cargar el examen');
+                setAlertConfig({
+                    open: true,
+                    variant: 'error',
+                    title: 'Error de carga',
+                    message: err.response?.data?.message || 'Error al cargar el examen'
+                });
             });
     }, [actividadId, estudianteId]);
 
     useEffect(() => {
         if (timeLeft <= 0 && examen) {
             finalizeExam();
-
             return;
         }
-
         if (timeLeft > 0) {
             const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-
             return () => clearInterval(timer);
         }
     }, [timeLeft, examen]);
@@ -48,15 +61,11 @@ export default function ResolverExamenPage({ actividadId, estudianteId }: { acti
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
         const s = seconds % 60;
-
         return `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
     const handleAnswer = async (preguntaId: number, value: { alternativa_id?: number, texto?: string }) => {
-        if (!examen) {
-return;
-}
-
+        if (!examen) return;
         try {
             await api.post(`/examenes/${examen.intento_id}/responder`, {
                 pregunta_id: preguntaId,
@@ -66,9 +75,7 @@ return;
             setExamen({
                 ...examen,
                 preguntas: examen.preguntas.map(p => 
-                    p.pregunta_id === preguntaId 
-                    ? { ...p, respuesta_estudiante: value } 
-                    : p
+                    p.pregunta_id === preguntaId ? { ...p, respuesta_estudiante: value } : p
                 )
             });
         } catch (err) {
@@ -77,191 +84,252 @@ return;
     };
 
     const finalizeExam = async () => {
-        if (!examen || submitting) {
-return;
-}
-
+        if (!examen || submitting) return;
         setSubmitting(true);
-
+        setShowConfirm(false);
         try {
             const { data } = await api.post(`/examenes/${examen.intento_id}/finalizar`);
-            alert(`Examen finalizado. Puntaje obtenido: ${data.puntaje}`);
-            window.location.href = '/dashboard';
+            setAlertConfig({
+                open: true,
+                variant: 'success',
+                title: 'Examen Finalizado',
+                message: `Tu examen ha sido enviado correctamente. Puntaje obtenido: ${data.puntaje}`
+            });
+            // Delay redirection to allow user to see the success message
+            setTimeout(() => {
+                window.location.href = '/alumno/notas';
+            }, 3000);
         } catch (err) {
-            alert('Error al finalizar el examen');
+            setAlertConfig({
+                open: true,
+                variant: 'error',
+                title: 'Error al enviar',
+                message: 'No pudimos procesar el envío de tu examen en este momento.'
+            });
             setSubmitting(false);
         }
     };
 
     if (!examen) {
-return <div className="p-10 text-center font-medium animate-pulse text-purple-600">Cargando examen...</div>;
-}
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-gray-50/50">
+                <div className="text-center font-black animate-pulse text-indigo-600 uppercase tracking-widest text-2xl">
+                    Cargando examen...
+                </div>
+            </div>
+        );
+    }
 
     const currentPregunta = examen.preguntas[currentIndex];
     const answeredCount = examen.preguntas.filter(p => p.respuesta_estudiante.alternativa_id || p.respuesta_estudiante.texto).length;
     const progress = (answeredCount / examen.preguntas.length) * 100;
 
+    const breadcrumbs = [
+        { title: 'Panel Alumno', href: '/dashboard' },
+        { title: actividadNombre || 'Resolviendo Examen', href: '#' },
+    ];
+
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans selection:bg-purple-200">
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Resolviendo Examen" />
             
-            {/* Header */}
-            <header className="bg-white/80 backdrop-blur-md border-b px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-                <div className="flex items-center space-x-4">
-                    <div className={`p-2.5 rounded-xl transition-colors ${timeLeft < 300 ? 'bg-red-100 text-red-600' : 'bg-purple-100 text-purple-600'}`}>
-                        <Clock className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tiempo Restante</p>
-                        <p className={`text-2xl font-black font-mono transition-colors ${timeLeft < 300 ? 'text-red-600 animate-pulse' : 'text-gray-900'}`}>
-                            {formatTime(timeLeft)}
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex-1 max-w-md mx-12 hidden lg:block">
-                    <div className="flex justify-between text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-tight">
-                        <span>Tu Progreso</span>
-                        <span>{Math.round(progress)}% Completado</span>
-                    </div>
-                    <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden border border-gray-200/50">
-                        <div 
-                            className="bg-gradient-to-r from-purple-500 to-indigo-600 h-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(168,85,247,0.4)]" 
-                            style={{ width: `${progress}%` }} 
-                        />
-                    </div>
-                </div>
-
-                <Button 
-                    variant="destructive" 
-                    className="shadow-lg shadow-red-500/20 hover:scale-105 transition-transform"
-                    onClick={() => {
- if(confirm('¿Seguro que deseas finalizar? Tus respuestas se enviarán ahora.')) {
-finalizeExam();
-} 
-}} 
-                    disabled={submitting}
-                >
-                    <Send className="w-4 h-4 mr-2" />
-                    Finalizar
-                </Button>
-            </header>
-
-            {/* Content */}
-            <main className="flex-1 p-4 md:p-10 max-w-5xl mx-auto w-full">
-                <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col min-h-[500px]">
-                    <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-8 text-white">
-                        <div className="flex items-center justify-between mb-4">
-                            <span className="bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-white/20">
-                                Pregunta {currentIndex + 1} de {examen.preguntas.length}
-                            </span>
-                            <span className="text-white/80 text-xs font-bold bg-black/10 px-3 py-1.5 rounded-lg border border-white/10">
-                                Valor: <span className="text-white">{currentPregunta.valor} pts</span>
-                            </span>
+            <div className="max-w-6xl mx-auto space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {/* Header Info */}
+                <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl shadow-gray-200/40 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="flex items-center gap-6">
+                        <div className={`size-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-500 ${
+                            timeLeft < 300 ? 'bg-rose-100 text-rose-600 animate-pulse ring-4 ring-rose-50' : 'bg-emerald-100 text-emerald-600 shadow-lg shadow-emerald-100'
+                        }`}>
+                            <Clock className="w-8 h-8" />
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-black leading-tight drop-shadow-sm">{currentPregunta.cabecera}</h2>
+                        <div>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 leading-none">Tiempo Restante</p>
+                            <p className={`text-4xl font-black font-mono tracking-tighter ${timeLeft < 300 ? 'text-rose-600' : 'text-gray-900'}`}>
+                                {formatTime(timeLeft)}
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="p-8 md:p-12 flex-1 flex flex-col">
-                        <div className="prose prose-lg prose-purple max-w-none mb-12 text-gray-700 leading-relaxed" 
-                             dangerouslySetInnerHTML={{ __html: currentPregunta.cuerpo }} 
-                        />
+                    <div className="flex-1 max-w-sm hidden md:block">
+                        <div className="flex justify-between text-[10px] font-black text-gray-400 mb-3 uppercase tracking-widest leading-none">
+                            <span>Tu Progreso</span>
+                            <span className="text-emerald-500">{Math.round(progress)}% Completado</span>
+                        </div>
+                        <Progress value={progress} className="h-3 bg-emerald-50" />
+                    </div>
 
-                        <div className="flex-1">
-                            {currentPregunta.tipo === 1 ? ( // Multiple Choice
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {currentPregunta.alternativas.map((alt: any) => {
-                                        const isSelected = currentPregunta.respuesta_estudiante.alternativa_id === alt.alternativa_id;
+                    <Button 
+                        onClick={() => setShowConfirm(true)} 
+                        disabled={submitting}
+                        className="h-16 px-10 rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 font-black text-lg transition-all hover:scale-105 active:scale-95"
+                    >
+                        <Send className="w-5 h-5 mr-3" /> Finalizar Examen
+                    </Button>
+                </div>
 
-                                        return (
-                                            <button
-                                                key={alt.alternativa_id}
-                                                onClick={() => handleAnswer(currentPregunta.pregunta_id, { alternativa_id: alt.alternativa_id })}
-                                                className={`group flex items-center text-left p-6 rounded-2xl border-2 transition-all duration-300 ${
-                                                    isSelected 
-                                                    ? 'border-purple-600 bg-purple-50/50 shadow-md ring-4 ring-purple-100' 
-                                                    : 'border-gray-100 bg-white hover:border-purple-200 hover:bg-gray-50/50'
-                                                }`}
-                                            >
-                                                <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition-colors ${
-                                                    isSelected ? 'border-purple-600 bg-purple-600' : 'border-gray-300 group-hover:border-purple-400'
-                                                }`}>
-                                                    {isSelected && <div className="w-2 h-2 rounded-full bg-white shadow-sm" />}
-                                                </div>
-                                                <span className={`font-bold transition-colors ${isSelected ? 'text-purple-900' : 'text-gray-600'}`}>
-                                                    {alt.contenido}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    {/* Main Question Panel */}
+                    <div className="lg:col-span-3 space-y-8">
+                        <div className="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col min-h-[600px] group transition-all duration-500 hover:shadow-indigo-100/40">
+                            {/* Question Header */}
+                            <div className="bg-gradient-to-br from-indigo-900 to-indigo-700 p-10 md:p-14 text-white relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-8 opacity-10">
+                                    <Award className="size-40 rotate-12" />
                                 </div>
-                            ) : ( // Open ended
-                                <div className="space-y-4">
-                                    <Label className="text-sm font-black text-gray-400 uppercase tracking-tighter">Tu respuesta detallada</Label>
-                                    <textarea 
-                                        className="w-full min-h-[250px] text-xl p-6 rounded-2xl border-2 border-gray-100 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none resize-none font-medium text-gray-800 placeholder:text-gray-300"
-                                        placeholder="Comienza a escribir aquí..."
-                                        value={currentPregunta.respuesta_estudiante.texto || ''}
-                                        onChange={(e) => handleAnswer(currentPregunta.pregunta_id, { texto: e.target.value })}
-                                    />
-                                    <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 flex items-start">
-                                        <AlertCircle className="w-5 h-5 text-amber-500 mr-3 flex-shrink-0 mt-0.5" />
-                                        <p className="text-xs text-amber-800 font-bold leading-relaxed">
-                                            Recuerda: Las preguntas abiertas son calificadas manualmente por tu profesor después de finalizar el examen.
-                                        </p>
+                                <div className="relative z-10 space-y-6">
+                                    <div className="flex items-center gap-4">
+                                        <span className="bg-white/10 backdrop-blur-md px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border border-white/20">
+                                            Pregunta {currentIndex + 1} de {examen.preguntas.length}
+                                        </span>
+                                        <span className="bg-emerald-500/20 backdrop-blur-md px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/20 text-emerald-300">
+                                            {currentPregunta.valor} puntos
+                                        </span>
                                     </div>
+                                    <h2 className="text-3xl md:text-4xl font-black leading-tight tracking-tight">
+                                        {currentPregunta.cabecera}
+                                    </h2>
                                 </div>
-                            )}
+                            </div>
+
+                            {/* Question Body */}
+                            <div className="p-10 md:p-14 flex-1 flex flex-col items-stretch space-y-12">
+                                {currentPregunta.cuerpo && (
+                                    <div className="prose prose-xl prose-indigo max-w-none text-gray-700 font-medium leading-relaxed bg-gray-50/50 p-8 rounded-[2rem] border border-gray-100" 
+                                         dangerouslySetInnerHTML={{ __html: currentPregunta.cuerpo }} 
+                                    />
+                                )}
+
+                                <div className="flex-1 w-full">
+                                    {(currentPregunta.alternativas && currentPregunta.alternativas.length > 0) ? ( // Objective (Multiple Choice, True/False, etc.)
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {currentPregunta.alternativas.map((alt: any) => {
+                                                const isSelected = currentPregunta.respuesta_estudiante.alternativa_id === alt.alternativa_id;
+                                                return (
+                                                    <button
+                                                        key={alt.alternativa_id}
+                                                        onClick={() => handleAnswer(currentPregunta.pregunta_id, { alternativa_id: alt.alternativa_id })}
+                                                        className={`group flex items-center text-left p-8 rounded-[2rem] border-4 transition-all duration-300 active:scale-95 ${
+                                                            isSelected 
+                                                            ? 'border-emerald-500 bg-emerald-50/50 shadow-xl shadow-emerald-100 ring-8 ring-emerald-500/5' 
+                                                            : 'border-gray-50 bg-white hover:border-indigo-100 hover:bg-gray-50/50'
+                                                        }`}
+                                                    >
+                                                        <div className={`size-8 rounded-full border-4 mr-6 flex items-center justify-center transition-all ${
+                                                            isSelected ? 'border-emerald-500 bg-emerald-500 shadow-inner' : 'border-gray-200 group-hover:border-indigo-300'
+                                                        }`}>
+                                                            {isSelected && <div className="size-2 rounded-full bg-white animate-in zoom-in" />}
+                                                        </div>
+                                                        <span className={`text-lg font-black transition-colors ${isSelected ? 'text-emerald-900' : 'text-gray-600'}`}>
+                                                            {alt.contenido}
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : ( // Open ended
+                                        <div className="space-y-6">
+                                            <div className="p-6 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex items-start gap-4">
+                                                <AlertCircle className="w-6 h-6 text-indigo-500 flex-shrink-0 mt-1" />
+                                                <p className="text-sm text-indigo-900 font-bold leading-relaxed">
+                                                    Redacta tu respuesta a continuación. Este tipo de preguntas son calificadas manualmente por el docente.
+                                                </p>
+                                            </div>
+                                            <textarea 
+                                                className="w-full min-h-[300px] text-2xl p-10 rounded-[2.5rem] border-4 border-gray-50 bg-gray-50/30 focus:bg-white focus:border-indigo-500 focus:ring-[15px] focus:ring-indigo-500/5 transition-all outline-none resize-none font-black text-gray-800 placeholder:text-gray-200"
+                                                placeholder="Escribe tu respuesta aquí..."
+                                                value={currentPregunta.respuesta_estudiante.texto || ''}
+                                                onChange={(e) => handleAnswer(currentPregunta.pregunta_id, { texto: e.target.value })}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Bottom Navigation */}
+                            <div className="bg-gray-50/80 backdrop-blur-sm border-t p-8 md:px-14 flex items-center justify-between gap-6">
+                                <Button 
+                                    variant="ghost" 
+                                    className="h-14 px-8 rounded-2xl font-black text-gray-500 hover:bg-gray-200"
+                                    disabled={currentIndex === 0} 
+                                    onClick={() => setCurrentIndex(prev => prev - 1)}
+                                >
+                                    <ChevronLeft className="w-6 h-6 mr-2" /> Pregunta Anterior
+                                </Button>
+                                
+                                <Button 
+                                    className={`h-14 px-12 rounded-2xl font-black shadow-lg transition-all active:scale-95 ${
+                                        currentIndex === examen.preguntas.length - 1 
+                                        ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' 
+                                        : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200'
+                                    }`}
+                                    onClick={() => currentIndex === examen.preguntas.length - 1 ? setShowConfirm(true) : setCurrentIndex(prev => prev + 1)}
+                                    disabled={submitting}
+                                >
+                                    {currentIndex === examen.preguntas.length - 1 ? 'Enviar Examen' : 'Siguiente Pregunta'}
+                                    {currentIndex !== examen.preguntas.length - 1 && <ChevronRight className="w-6 h-6 ml-2" />}
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Navigation Bar */}
-                    <div className="bg-gray-50/50 border-t p-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-6">
-                        <Button 
-                            variant="secondary" 
-                            className="w-full sm:w-auto font-bold rounded-xl h-12 px-6"
-                            disabled={currentIndex === 0} 
-                            onClick={() => setCurrentIndex(prev => prev - 1)}
-                        >
-                            <ChevronLeft className="w-4 h-4 mr-2" /> Pregunta Anterior
-                        </Button>
-                        
-                        <div className="flex flex-wrap justify-center gap-1.5 max-w-xs md:max-w-none">
-                            {examen.preguntas.map((_, idx) => {
-                                const isCurrent = currentIndex === idx;
-                                const isAnswered = examen.preguntas[idx].respuesta_estudiante.alternativa_id || examen.preguntas[idx].respuesta_estudiante.texto;
+                    {/* Sidebar: Navigation Pins */}
+                    <div className="space-y-6">
+                        <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-xl shadow-gray-200/30 space-y-6">
+                            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest text-center leading-none">Mapa de Preguntas</h3>
+                            <div className="grid grid-cols-4 gap-3">
+                                {examen.preguntas.map((_, idx) => {
+                                    const isCurrent = currentIndex === idx;
+                                    const isAnswered = examen.preguntas[idx].respuesta_estudiante.alternativa_id || examen.preguntas[idx].respuesta_estudiante.texto;
 
-                                return (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setCurrentIndex(idx)}
-                                        className={`w-10 h-10 rounded-xl text-xs font-black transition-all transform hover:scale-110 ${
-                                            isCurrent ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/40 ring-2 ring-offset-2 ring-purple-600' : 
-                                            isAnswered ? 'bg-green-500 text-white shadow-md shadow-green-500/20' :
-                                            'bg-white text-gray-400 border border-gray-200 hover:border-purple-400 hover:text-purple-600'
-                                        }`}
-                                    >
-                                        {idx + 1}
-                                    </button>
-                                );
-                            })}
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setCurrentIndex(idx)}
+                                            className={`aspect-square rounded-2xl text-sm font-black transition-all transform hover:scale-110 active:scale-90 flex items-center justify-center ${
+                                                isCurrent ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200 ring-4 ring-indigo-100' : 
+                                                isAnswered ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100' :
+                                                'bg-gray-50 text-gray-300 border border-gray-100 hover:border-indigo-300 hover:text-indigo-500'
+                                            }`}
+                                        >
+                                            {idx + 1}
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
 
-                        <Button 
-                            className={`w-full sm:w-auto font-bold rounded-xl h-12 px-8 shadow-lg transition-all ${
-                                currentIndex === examen.preguntas.length - 1 
-                                ? 'bg-green-600 hover:bg-green-700 shadow-green-600/20' 
-                                : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20'
-                            }`}
-                            onClick={() => currentIndex === examen.preguntas.length - 1 ? (confirm('¿Deseas finalizar el examen?') && finalizeExam()) : setCurrentIndex(prev => prev + 1)}
-                            disabled={submitting}
-                        >
-                            {currentIndex === examen.preguntas.length - 1 ? 'Enviar Todo' : 'Siguiente'}
-                            {currentIndex !== examen.preguntas.length - 1 && <ChevronRight className="w-4 h-4 ml-2" />}
-                        </Button>
+                        <div className="bg-emerald-50 rounded-[2rem] p-8 border border-emerald-100 space-y-4">
+                            <div className="flex items-center gap-3 text-emerald-600 mb-2">
+                                <AlertCircle size={20} />
+                                <span className="font-black text-[10px] uppercase tracking-widest">Consejo de Resolución</span>
+                            </div>
+                            <p className="text-xs text-emerald-800 font-bold leading-relaxed">
+                                Tus respuestas se guardan automáticamente cada vez que seleccionas una opción. Puedes navegar entre preguntas en cualquier momento.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </main>
-        </div>
+            </div>
+
+            {/* Modals */}
+            <ConfirmModal 
+                open={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                onConfirm={finalizeExam}
+                title="¿Finalizar Examen?"
+                message="Tus respuestas se enviarán y no podrás realizar más cambios. ¿Estás seguro?"
+                processing={submitting}
+                confirmText="Sí, enviar ahora"
+                variant="warning"
+            />
+
+            <AlertModal 
+                open={alertConfig.open}
+                onClose={() => setAlertConfig(prev => ({ ...prev, open: false }))}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                variant={alertConfig.variant}
+            />
+        </AppLayout>
     );
 }

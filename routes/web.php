@@ -55,6 +55,33 @@ Route::middleware(['auth.token'])->group(function () {
         Route::get('/cursos/{id}', fn (int $id) => Inertia::render('PortalAlumno/Cursos/Detalle', ['cursoId' => $id]))->name('cursos.detalle');
         Route::get('/clase/{id}', fn (int $id) => Inertia::render('PortalAlumno/Clases/Ver', ['claseId' => $id]))->name('clase.ver');
         Route::get('/notas',     fn () => Inertia::render('PortalAlumno/Notas/index'))->name('notas.index');
+        
+        // Activity Resolution Routes
+        Route::get('/examen/{id}/resolver', function (int $id) {
+            $user = auth()->user();
+            $estudiante = \App\Models\Estudiante::where('user_id', $user->id)->firstOrFail();
+            $actividad = \App\Models\ActividadCurso::findOrFail($id);
+            return Inertia::render('Examenes/Resolver', [
+                'actividadId' => $id,
+                'estudianteId' => $estudiante->estu_id,
+                'actividadNombre' => $actividad->nombre_actividad
+            ]);
+        })->name('examen.resolver');
+
+        Route::get('/dibujo/{id}', function (int $id) {
+            $actividad = \App\Models\ActividadCurso::findOrFail($id);
+            return Inertia::render('Actividades/Dibujo', [
+                'actividad' => $actividad
+            ]);
+        })->name('dibujo.resolver');
+
+        Route::get('/puzzles/{id}', function (int $id) {
+            $actividad = \App\Models\ActividadCurso::findOrFail($id);
+            return Inertia::render('Actividades/Puzzles/Ver', [
+                'actividad' => $actividad
+            ]);
+        })->name('puzzles.ver');
+
         Route::get('/puzzles', function () {
             $estuId = auth()->user()->id;
             $puzzles = DB::table('actividad_curso as ac')
