@@ -121,6 +121,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'portal.alumno.qr',
             'portal.alumno.asistencia',
             'portal.docente.alumnos',
+            'perfil.ver_credencial',
+            'configuracion.fotocheck',
+            'asistencia.reportes',
+            'configuracion.horarios',
         ];
 
         foreach ($permissions as $permission) {
@@ -152,6 +156,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'biblioteca.ver',
             'comunicados.ver',
             'mensajeria.ver',
+            'perfil.ver_credencial',
         ]);
 
         // Estudiante (Solo vista personal)
@@ -166,6 +171,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'asistencia.ver',
             'biblioteca.ver',
             'comunicados.ver',
+            'perfil.ver_credencial',
         ]);
 
         // Padres de Familia / Apoderados

@@ -2,8 +2,13 @@
 
 namespace App\Services\Implements;
 
+use App\Models\Asistencia;
+use App\Models\Estudiante;
+use App\Models\Docente;
+use App\Models\User;
 use App\Repositories\Interfaces\AsistenciaRepositoryInterface;
 use App\Services\Interfaces\AsistenciaServiceInterface;
+use Illuminate\Support\Facades\Auth;
 
 class AsistenciaService implements AsistenciaServiceInterface
 {
@@ -71,22 +76,144 @@ class AsistenciaService implements AsistenciaServiceInterface
         return array_values($reporte);
     }
 
-    public function marcar(array $data): array
+    /**
+     * @inheritDoc
+     */
+    public function marcarPorQR(string $qrData, string $tipoMarcado): array
     {
-        $asistencia = $this->repository->marcar($data);
+        $idPersona = null;
+        $tipo = 'P'; // Default to Personal
+        $user = null;
+
+        // Backward Compatibility Check: Old format was "id,tipo" (e.g. "123,1")
+        if (str_contains($qrData, ',')) {
+            $parts = explode(',', $qrData);
+            if (count($parts) === 2) {
+                $rawId = (int)$parts[0];
+                $legacyType = $parts[1]; // 1 for student usually
+
+                if ($legacyType == 1) {
+                    $tipo = 'E';
+                    $persona = Estudiante::with('user.perfil')->find($rawId);
+                    $idPersona = $rawId;
+                    $user = $persona?->user;
+                } else {
+                    $tipo = 'D';
+                    $persona = Docente::with('user.perfil')->where('docente_id', $rawId)->first();
+                    $idPersona = $rawId;
+                    $user = $persona?->user;
+                }
+            }
+        } else {
+            // New unified format: just user_id
+            $userId = (int)$qrData;
+            $user = User::with(['perfil'])->find($userId);
+            
+            if ($user) {
+                $personaEstu = Estudiante::where('user_id', $user->id)->first();
+                if ($personaEstu) {
+                    $tipo = 'E';
+                    $idPersona = $personaEstu->estu_id;
+                } else {
+                    $personaDoc = Docente::where('id_usuario', $user->id)->first();
+                    if ($personaDoc) {
+                        $tipo = 'D';
+                        $idPersona = $personaDoc->docente_id;
+                    } else {
+                        $tipo = 'P';
+                        $idPersona = $user->id;
+                    }
+                }
+            }
+        }
+
+        if (!$idPersona || !$user) {
+            throw new \Exception("Usuario o registro no encontrado para este código.");
+        }
+
+        $fecha = now()->toDateString();
+        $hora = now()->toTimeString();
+        $turno = now()->hour < 13 ? 'M' : 'T';
+
+        $asistencia = $this->repository->marcar([
+            'insti_id'   => $user->insti_id ?? 1,
+            'id_persona' => $idPersona,
+            'tipo'       => $tipo,
+            'fecha'      => $fecha,
+            'turno'      => $turno,
+            $tipoMarcado === 'entrada' ? 'hora_entrada' : 'hora_salida' => $hora,
+            'estado'     => '1',
+        ]);
+
         return [
-            'asistencia_id' => $asistencia->asistencia_id,
-            'estado'        => $asistencia->estado,
-            'fecha'         => $asistencia->fecha->format('Y-m-d'),
-            'turno'         => $asistencia->turno,
-            'hora_entrada'  => $asistencia->hora_entrada,
-            'hora_salida'   => $asistencia->hora_salida,
+            'message' => ($tipoMarcado === 'entrada' ? 'Entrada' : 'Salida') . ' registrada correctamente',
+            'user'    => $user->perfil,
+            'hora'    => $hora,
+            'turno'   => $asistencia->turno_label,
         ];
     }
 
-    public function marcarBatch(int $instiId, array $registros): void
+    /**
+     * @inheritDoc
+     */
+    public function getHistorialConNombres(int $limit = 20): array
     {
-        $this->repository->marcarBatch($instiId, $registros);
+        $logs = $this->repository->getHistorialGlobal($limit);
+
+        return $logs->map(function($log) {
+            $persona = null;
+            if ($log->tipo === 'E') {
+                $persona = Estudiante::with('perfil')->find($log->id_persona);
+            } elseif ($log->tipo === 'D') {
+                $persona = Docente::with('perfil')->find($log->id_persona);
+            } else {
+                $persona = User::with('perfil')->find($log->id_persona);
+            }
+
+            $perfil = $persona && property_exists($persona, 'perfil') ? $persona->perfil : ($persona instanceof User ? $persona->perfil : null);
+            
+            $log->usuario_nombre = $perfil 
+                ? "{$perfil->primer_nombre} {$perfil->apellido_paterno}" 
+                : ($persona instanceof User ? $persona->name : '—');
+                
+            return $log;
+        })->toArray();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function exportarExcelPersona(int $id, string $tipo, array $filters): array
+    {
+        // This will be implemented if we decide to keep Excel logic in Service
+        // For now, let's keep the DTO/Data preparation here.
+        $fechaInicio = $filters['fecha_inicio'] ?? null;
+        $fechaFin = $filters['fecha_fin'] ?? null;
+        $mes = $filters['mes'] ?? date('m');
+        $anio = $filters['anio'] ?? date('Y');
+
+        if ($fechaInicio && $fechaFin) {
+            $logs = $this->repository->getPorPersonaRango($id, $tipo, $fechaInicio, $fechaFin);
+            $label = date('d/m/Y', strtotime($fechaInicio)) . ' - ' . date('d/m/Y', strtotime($fechaFin));
+        } else {
+            $logs = $this->repository->getPorPersonaMes(1, $id, $tipo, (int)$anio, (int)$mes);
+            $label = "Mes {$mes}/{$anio}";
+        }
+
+        $nombre = 'Usuario';
+        if ($tipo === 'E') {
+            $p = Estudiante::with('perfil')->find($id);
+            if ($p) $nombre = "{$p->perfil->primer_nombre} {$p->perfil->apellido_paterno}";
+        } else {
+            $p = Docente::with('perfil')->find($id);
+            if ($p) $nombre = "{$p->perfil->primer_nombre} {$p->perfil->apellido_paterno}";
+        }
+
+        return [
+            'logs' => $logs,
+            'nombre' => $nombre,
+            'label' => $label,
+        ];
     }
 
     public function eliminar(int $id): void

@@ -70,7 +70,7 @@ const navigation: NavItem[] = [
     // ── Menú de Navegación ──────────────────────────────────────────────
     { type: 'section', label: 'MENÚ DE NAVEGACIÓN' },
     { type: 'link', title: 'Inicio',           icon: LayoutDashboard, href: '/dashboard', permission: 'dashboard.ver' },
-    { type: 'link', title: 'Mi Credencial',    icon: QrCode,          href: '/credencial' },
+    { type: 'link', title: 'Mi Credencial',    icon: QrCode,          href: '/credencial', permission: 'perfil.ver_credencial' },
     { type: 'group', title: 'Institución', icon: Building2, children: [
         { title: 'Datos Básicos', href: '/institucion', permission: 'institucion.ver' },
         { title: 'Galería',       href: '/institucion/galeria', permission: 'institucion.ver' },
@@ -137,6 +137,7 @@ const navigation: NavItem[] = [
     { type: 'section', label: 'SEGURIDAD' },
     { type: 'group', title: 'Seguridad', icon: Shield, children: [
         { title: 'Roles y Permisos', href: '/roles-permisos', permission: 'roles.editar' },
+        { title: 'Diseño de Fotochecks', href: '/seguridad/fotocheck', permission: 'configuracion.fotocheck' },
     ]},
 ];
 

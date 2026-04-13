@@ -12,11 +12,14 @@ interface AsistenciaServiceInterface
     /** Reporte mensual de toda la institución. */
     public function reporteMes(int $instiId, string $tipo, int $anio, int $mes): array;
 
-    /** Marcar asistencia individual. */
-    public function marcar(array $data): array;
+    /** Marcar asistencia vía QR (Soporta formato nuevo y antiguo). */
+    public function marcarPorQR(string $qrData, string $tipoMarcado): array;
 
-    /** Marcar asistencia en lote (docente marca su sección). */
-    public function marcarBatch(int $instiId, array $registros): void;
+    /** Obtener historial reciente con nombres de usuarios ya resueltos. */
+    public function getHistorialConNombres(int $limit = 20): array;
+
+    /** Exportar historial a Excel para una persona. */
+    public function exportarExcelPersona(int $id, string $tipo, array $filters): array;
 
     /** Eliminar un registro. */
     public function eliminar(int $id): void;

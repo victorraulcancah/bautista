@@ -21,5 +21,14 @@ interface AsistenciaRepositoryInterface
 
     public function findOrCreate(array $keys, array $values): Asistencia;
 
+    /** Obtener historial reciente de toda la institución (con límites). */
+    public function getHistorialGlobal(int $limit = 20): Collection;
+
+    /** Obtener usuarios (estudiantes o docentes) paginados para el panel de asistencia. */
+    public function getPaginatedUsers(string $tipo, string $search = '', int $perPage = 20);
+
+    /** Obtener historial de una persona específica en un rango de fechas. */
+    public function getPorPersonaRango(int $id, string $tipo, string $fechaInicio, string $fechaFin): Collection;
+
     public function eliminar(int $id): void;
 }

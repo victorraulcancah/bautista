@@ -55,6 +55,14 @@ class AuthApiController extends Controller
 
     public function me(Request $request): UserResource
     {
-        return new UserResource($request->user()->load('perfil', 'institucion'));
+        return new UserResource(
+            $request->user()->load([
+                'perfil', 
+                'rol',
+                'institucion', 
+                'estudiante.matriculas.seccion.grado.nivel',
+                'docente'
+            ])
+        );
     }
 }

@@ -4,6 +4,7 @@ import type { BreadcrumbItem } from '@/types/navigation';
 export type AppLayoutProps = {
     children: ReactNode;
     breadcrumbs?: BreadcrumbItem[];
+    variant?: AppVariant;
 };
 
 export type AppVariant = 'header' | 'sidebar';

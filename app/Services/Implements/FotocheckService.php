@@ -8,6 +8,7 @@ use App\Http\Resources\FotocheckDataResource;
 use App\Exceptions\FotocheckException;
 use App\Models\Estudiante;
 use App\Models\Docente;
+use App\Models\ConfiguracionFotocheck;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -146,10 +147,14 @@ class FotocheckService implements FotocheckServiceInterface
         $resource = new FotocheckDataResource($user, $tipo, $idDisplay);
         $data = $resource->toArray(request());
 
+        // Load Configuration
+        $config = ConfiguracionFotocheck::where('is_active', true)->first() ?? new ConfiguracionFotocheck();
+
         return array_merge($data, [
             'qrSrc'   => $qrSrc,
             'fotoSrc' => $fotoSrc,
-            'periodo' => date('Y'),
+            'periodo' => $config->footer_text ?? date('Y'),
+            'config'  => $config
         ]);
     }
 }

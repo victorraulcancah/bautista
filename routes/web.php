@@ -12,7 +12,7 @@ Route::get('/login', fn () => Inertia::render('auth/login'))->name('login');
 Route::middleware(['auth.token'])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard/index');
-    })->name('dashboard');
+    })->middleware('permission:dashboard.ver')->name('dashboard');
 
     Route::get('/institucion',         fn () => Inertia::render('Institucion/index'))->middleware('permission:institucion.ver')->name('institucion.index');
     Route::get('/institucion/galeria',   fn () => Inertia::render('Institucion/Galeria/index'))->middleware('permission:institucion.ver')->name('institucion.galeria');
@@ -23,8 +23,8 @@ Route::middleware(['auth.token'])->group(function () {
     
     Route::get('/mensajes',              fn () => Inertia::render('Comunicados/index'))->middleware('permission:comunicados.ver')->name('mensajes.index');
     
-    Route::get('/credencial',            fn () => Inertia::render('Shared/CredencialDigital'))->name('credencial');
-    Route::get('/mi-fotocheck',          [\App\Http\Controllers\Admin\FotocheckController::class, 'generatePropio'])->name('mi-fotocheck');
+    Route::get('/credencial',            fn () => Inertia::render('Shared/CredencialDigital'))->middleware('permission:perfil.ver_credencial')->name('credencial');
+    Route::get('/mi-fotocheck',          [\App\Http\Controllers\Admin\FotocheckController::class, 'generatePropio'])->middleware('permission:perfil.ver_credencial')->name('mi-fotocheck');
 
     Route::get('/estudiantes',  fn () => Inertia::render('GestionAlumnos/index'))->middleware('permission:estudiantes.ver')->name('estudiantes.index');
     Route::get('/estudiantes/{id}/fotocheck', [\App\Http\Controllers\Admin\FotocheckController::class, 'generate'])->middleware('permission:estudiantes.ver')->name('estudiantes.fotocheck');
@@ -86,7 +86,6 @@ Route::middleware(['auth.token'])->group(function () {
             ]);
         })->name('puzzles.ver');
 
-        Route::get('/qr',         fn () => Inertia::render('PortalAlumno/QR'))->middleware('permission:portal.alumno.qr')->name('qr');
         Route::get('/profesores', fn () => Inertia::render('PortalAlumno/Profesores'))->name('profesores');
         Route::get('/asistencia', fn () => Inertia::render('PortalAlumno/Asistencia'))->middleware('permission:portal.alumno.asistencia')->name('asistencia');
     });
@@ -133,7 +132,8 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/secciones/{seccionId}/horarios', fn (int $seccionId) => Inertia::render('Secciones/HorariosPage', ['seccionId' => $seccionId]))->middleware('permission:secciones.ver')->name('secciones.horarios');
     Route::get('/notas',                  fn () => Inertia::render('Notas/index'))->middleware('permission:dashboard.resumen.academico')->name('notas.index');
     Route::get('/usuarios',               fn () => Inertia::render('Usuarios/index'))->middleware('permission:usuarios.ver')->name('usuarios.index');
-    Route::get('/roles-permisos',         fn () => Inertia::render('Seguridad/index'))->middleware('permission:roles.editar')->name('seguridad.roles');
+    Route::get('/roles-permisos',         fn () => Inertia::render('Seguridad/index'))->middleware('permission:configuracion.fotocheck')->name('seguridad.roles');
+    Route::get('/seguridad/fotocheck',   fn () => Inertia::render('Seguridad/ConfiguracionFotocheck'))->middleware('permission:configuracion.fotocheck')->name('seguridad.fotocheck');
 
     Route::get('/examenes',               fn () => Inertia::render('Examenes/index'))->middleware('permission:dashboard.resumen.academico')->name('examenes.index');
     Route::get('/examenes/{id}/resolver', function (int $id) {

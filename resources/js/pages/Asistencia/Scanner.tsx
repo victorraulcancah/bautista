@@ -33,7 +33,7 @@ export default function AsistenciaScanner() {
         if (!scannerRef.current) {
             scannerRef.current = new Html5QrcodeScanner(
                 "reader", 
-                { fps: 10, qrbox: { width: 250, height: 250 } }, 
+                { fps: 20, qrbox: { width: 450, height: 350 } }, 
                 /* verbose= */ false
             );
             scannerRef.current.render(onScanSuccess, onScanFailure);
@@ -98,13 +98,13 @@ return;
                         </p>
                     </div>
 
-                    <div className="flex-1 flex flex-col items-center justify-center py-4">
+                    <div className="flex-1 flex flex-col items-center justify-start py-8">
                         
-                        {/* Contenedor del Lector QR */}
-                        <div className="w-full max-w-md space-y-8">
+                        {/* Contenedor del Lector QR - Ajustado a tamaño XL */}
+                        <div className="w-full max-w-2xl space-y-10">
                             
                             {/* Selector de Tipo (Entrada/Salida) */}
-                            <div className="bg-white border border-neutral-200 p-1.5 rounded-2xl shadow-sm flex gap-1.5">
+                            <div className="bg-white border border-neutral-200 p-1.5 rounded-2xl shadow-sm flex gap-1.5 max-w-sm mx-auto">
                                 <button 
                                     type="button"
                                     onClick={() => setTipo('entrada')}
@@ -131,8 +131,8 @@ return;
                                 </button>
                             </div>
 
-                            {/* El Scanner frame */}
-                            <div className="relative group">
+                            {/* El Scanner frame - Tamaño XL */}
+                            <div className="relative group max-w-xl mx-auto w-full">
                                 <div className={`absolute -inset-1 rounded-[2.5rem] blur opacity-25 transition duration-500 group-hover:opacity-40 ${
                                     tipo === 'entrada' ? 'bg-emerald-500' : 'bg-rose-500'
                                 }`} />
@@ -153,7 +153,7 @@ return;
                             </div>
 
                             {/* Feedback de resultado */}
-                            <div className="min-h-[100px]">
+                            <div className="min-h-[100px] max-w-xl mx-auto w-full">
                                 {lastScan && (
                                     <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl flex items-center space-x-4 animate-in slide-in-from-bottom-4 duration-500">
                                         <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/20">
@@ -162,7 +162,7 @@ return;
                                         <div>
                                             <h3 className="text-sm font-black text-emerald-800 tracking-tight uppercase">Registro Exitoso</h3>
                                             <p className="text-emerald-600 font-bold text-[11px] uppercase tracking-wide leading-tight">{lastScan.message}</p>
-                                            <p className="text-neutral-500 text-[10px] font-medium mt-0.5 tracking-wider italic">Turno: {lastScan.turno}</p>
+                                            <p className="text-neutral-500 text-[10px] font-medium mt-0.5 tracking-wider italic">Turno: {lastScan.turno === 'M' ? 'Mañana' : 'Tarde'}</p>
                                         </div>
                                     </div>
                                 )}

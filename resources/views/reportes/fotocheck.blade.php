@@ -17,29 +17,26 @@
             line-height: 1.2;
         }
 
-        /* 1. Header (Deep Emerald Gradient) */
+        /* 1. Header (Dynamic Logo/Name) */
         .header-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 50pt;
-            background: linear-gradient(135deg, #007a41 0%, #00a65a 100%);
-            border-bottom: 1.5pt solid #eab308;
+            background: #ffffff;
             z-index: 10;
         }
         .header-content {
             position: absolute; top: 6pt; left: 0; width: 100%;
             text-align: center; z-index: 11;
         }
-        .shield {
-            width: 14pt; height: 16pt; margin: 0 auto;
-            background: #ffffff;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            line-height: 16pt; font-weight: bold; color: #007a41; font-size: 8pt;
+        .logo-box {
+            height: 18pt; margin: 0 auto 2pt;
         }
+        .logo-box img { height: 100%; }
         .school-name {
-            margin: 2pt 0 0; font-size: 5.5pt; font-weight: 800; color: #ffffff;
-            text-transform: uppercase; letter-spacing: 0.2pt;
+            margin: 0; font-size: 5.5pt; font-weight: 800; color: #1e3a8a;
+            text-transform: uppercase; letter-spacing: 0.1pt;
         }
         .card-type {
-            margin: 0; font-size: 4pt; font-weight: 400; color: #eab308;
+            margin: 0; font-size: 4pt; font-weight: 400; color: #64748b;
             letter-spacing: 1.2pt; text-transform: uppercase;
         }
 
@@ -49,91 +46,74 @@
             transform: translateX(-50%);
             width: 72pt; height: 84pt;
             background: #ffffff;
-            border-radius: 6pt; padding: 2.5pt;
-            box-shadow: 0 3pt 8pt rgba(0,0,0,0.12);
+            border-radius: 2pt; padding: 2.5pt;
+            box-shadow: 0 2pt 5pt rgba(0,0,0,0.1);
             z-index: 20;
         }
         .photo-inner {
-            width: 100%; height: 100%; border-radius: 4pt;
+            width: 100%; height: 100%; border-radius: 1pt;
             overflow: hidden; background: #f8fafc;
         }
         .photo-inner img { width: 100%; height: 100%; object-fit: cover; }
-        .photo-placeholder {
-            width: 100%; height: 100%; text-align: center; line-height: 84pt;
-            font-size: 24pt; color: #cbd5e1; font-weight: bold;
-        }
 
-        /* 3. Identity Section */
+        /* 3. Identity Area (Dynamic Background) */
+        .main-body {
+            position: absolute; top: 50pt; left: 0; width: 100%; height: 168pt;
+            background-color: {{ $config->secondary_color ?? '#7b8780' }};
+            z-index: 1;
+        }
         .identity-area {
             position: absolute; top: 125pt; left: 0; width: 100%;
             text-align: center; z-index: 30;
         }
         .badge {
-            display: inline-block; padding: 1.5pt 10pt;
-            background: #00a65a; color: #ffffff;
-            font-size: 6pt; font-weight: 800; border-radius: 10pt;
-            margin-bottom: 6pt; text-transform: uppercase;
+            display: inline-block; padding: 2pt 15pt;
+            background: {{ $config->primary_color ?? '#2c63f2' }};
+            color: #ffffff;
+            font-size: 6.5pt; font-weight: 800;
+            margin-bottom: 8pt; text-transform: uppercase;
+            letter-spacing: 0.5pt;
         }
-        .last-names {
-            margin: 0; padding: 0 4pt; font-size: 10pt; font-weight: 900;
-            color: #0f172a; line-height: 1.1; text-transform: uppercase;
-            letter-spacing: -0.2pt;
-        }
-        .first-names {
-            margin: 2pt 0 0; font-size: 7.5pt; font-weight: 500;
-            color: #64748b; text-transform: uppercase;
-            letter-spacing: 0.1pt;
+        .full-name {
+            margin: 0; padding: 0 6pt; font-size: 10pt; font-weight: 900;
+            color: {{ $config->text_color ?? '#ffffff' }};
+            line-height: 1; text-transform: uppercase;
         }
 
-        /* 4. Bottom Data (Avoiding Collisions) */
+        /* 4. Bottom Data */
         .bottom-data {
-            position: absolute; bottom: 32pt; left: 10pt;
-            width: 95pt; z-index: 40;
+            position: absolute; bottom: 35pt; right: 8pt;
+            width: 80pt; z-index: 40; text-align: left;
         }
-        .data-row { margin-bottom: 3.5pt; }
+        .data-row { margin-bottom: 2pt; color: {{ $config->text_color ?? '#ffffff' }}; }
         .label {
-            font-size: 5pt; font-weight: 700; color: #94a3b8;
+            font-size: 4.5pt; font-weight: 700; opacity: 0.8;
             text-transform: uppercase; line-height: 1;
         }
         .value {
-            font-size: 7.5pt; font-weight: 700; color: #334155;
-            display: block; line-height: 1.1; margin-top: 0.5pt;
+            font-size: 6pt; font-weight: 800;
+            display: block; line-height: 1; margin-top: 0.5pt;
         }
 
-        /* 5. Fixed QR (Isolated) */
+        /* 5. Fixed QR */
         .qr-anchor {
-            position: absolute; bottom: 32pt; right: 8pt;
+            position: absolute; bottom: 35pt; left: 10pt;
             width: 32pt; height: 32pt;
-            background: #ffffff; border: 0.5pt solid #e2e8f0;
-            padding: 2pt; border-radius: 3pt; z-index: 50;
+            background: #ffffff; padding: 2pt;
+            box-shadow: 0 2pt 4pt rgba(0,0,0,0.1);
+            z-index: 50;
         }
         .qr-anchor img { width: 100%; height: 100%; }
 
-        /* 6. Footer (Clean Bottom) */
+        /* 6. Footer bar */
         .footer-bar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 26pt;
-            background: #f1f5f9; border-top: 0.5pt solid #e2e8f0;
-            text-align: center; z-index: 5;
+            background: {{ $config->primary_color ?? '#2c63f2' }};
+            text-align: center; z-index: 60;
         }
         .footer-text {
             line-height: 26pt; font-size: 6.5pt; font-weight: 800;
-            color: #64748b; letter-spacing: 0.3pt;
-        }
-        .footer-line {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 3pt;
-            background: #00a65a;
-        }
-
-        /* Background Effects */
-        .bg-pattern {
-            position: absolute; top: 50pt; left: 0; width: 100%; height: 160pt;
-            background: radial-gradient(circle at 50% 50%, #00a65a08 0.5pt, transparent 0.5pt);
-            background-size: 8pt 8pt; z-index: 0;
-        }
-        .watermark {
-            position: absolute; top: 155pt; left: 15pt;
-            font-size: 30pt; font-weight: 900; color: #00a65a03;
-            transform: rotate(-15deg); z-index: 1; pointer-events: none;
+            color: #ffffff; letter-spacing: 0.5pt; text-transform: uppercase;
         }
     </style>
 </head>
@@ -141,13 +121,19 @@
 
     <div class="header-top"></div>
     <div class="header-content">
-        <div class="shield">B</div>
-        <h1 class="school-name">{{ config('app.name', 'BAUTISTA LA PASCANA') }}</h1>
-        <p class="card-type">Cédula de Identidad Institucional</p>
+        <div class="logo-box">
+            @if($config->logo_path)
+                <img src="{{ public_path('storage/' . $config->logo_path) }}" alt="Logo" />
+            @else
+                <img src="{{ public_path('images/logo.png') }}" alt="Logo" />
+            @endif
+        </div>
+        <h1 class="school-name">IEP BAUTISTA LA PASCANA</h1>
+        <p class="card-type">Fotocheck</p>
     </div>
 
-    <div class="bg-pattern"></div>
-    <div class="watermark">INSTITUCIONAL</div>
+    <!-- Fondo Principal Dinámico -->
+    <div class="main-body"></div>
 
     <!-- Foto Central -->
     <div class="photo-outer">
@@ -155,45 +141,49 @@
             @if($fotoSrc)
                 <img src="{{ $fotoSrc }}" alt="F" />
             @else
-                <div class="photo-placeholder">?</div>
+                <div style="text-align: center; line-height: 84pt; color: #ccc;">S/F</div>
             @endif
         </div>
     </div>
 
     <!-- Identidad -->
     <div class="identity-area">
-        <div class="badge">{{ $tipo }}</div>
-        <h2 class="last-names">
-            {{ mb_strtoupper($user->perfil->apellido_paterno) }}<br>
-            {{ mb_strtoupper($user->perfil->apellido_materno) }}
+        <h2 class="full-name">
+            {{ mb_strtoupper($user->perfil->nombre_completo) }}
         </h2>
-        <p class="first-names">
-            {{ mb_strtoupper($user->perfil->primer_nombre . ' ' . $user->perfil->segundo_nombre) }}
-        </p>
+        <div style="margin-top: 8pt">
+            <div class="badge">{{ $tipo }}</div>
+        </div>
     </div>
 
-    <!-- Datos Inferiores -->
+    <!-- Datos Inferiores (Derecha) -->
     <div class="bottom-data">
         <div class="data-row">
-            <span class="label">ID Sistema</span>
+            <span class="label">ID:</span>
             <span class="value">{{ $idDisplay }}</span>
         </div>
         <div class="data-row">
-            <span class="label">Nro Documento</span>
+            <span class="label">DNI:</span>
             <span class="value">{{ $user->perfil->doc_numero ?? '--------' }}</span>
+        </div>
+        <div class="data-row">
+            <span class="label">Periodo:</span>
+            <span class="value">{{ date('Y') }}</span>
         </div>
     </div>
 
-    <!-- Código QR (Anclado) -->
+    <!-- Código QR (Izquierda) -->
     <div class="qr-anchor">
         <img src="{{ $qrSrc }}" alt="QR" />
     </div>
 
     <!-- Footer -->
     <div class="footer-bar">
-        <div class="footer-text">VIGENTE PERIODO {{ $periodo }}</div>
-        <div class="footer-line"></div>
+        <div class="footer-text">{{ $config->footer_text ?? 'Periodo Académico '.date('Y') }}</div>
     </div>
+
+</body>
+</html>
 
 </body>
 </html>

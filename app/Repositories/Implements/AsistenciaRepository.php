@@ -3,6 +3,9 @@
 namespace App\Repositories\Implements;
 
 use App\Models\Asistencia;
+use App\Models\Estudiante;
+use App\Models\Docente;
+use App\Models\User;
 use App\Repositories\Interfaces\AsistenciaRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -63,6 +66,39 @@ class AsistenciaRepository implements AsistenciaRepositoryInterface
     public function findOrCreate(array $keys, array $values): Asistencia
     {
         return Asistencia::firstOrCreate($keys, $values);
+    }
+
+    public function getHistorialGlobal(int $limit = 20): Collection
+    {
+        return Asistencia::orderBy('asistencia_id', 'desc')->limit($limit)->get();
+    }
+
+    public function getPaginatedUsers(string $tipo, string $search = '', int $perPage = 20)
+    {
+        if ($tipo === 'E') {
+            $query = Estudiante::with('perfil');
+        } else {
+            $query = Docente::with('perfil');
+        }
+
+        if ($search) {
+            $query->whereHas('perfil', function ($q) use ($search) {
+                $q->where('primer_nombre', 'like', "%{$search}%")
+                  ->orWhere('apellido_paterno', 'like', "%{$search}%")
+                  ->orWhere('doc_numero', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    public function getPorPersonaRango(int $id, string $tipo, string $fechaInicio, string $fechaFin): Collection
+    {
+        return Asistencia::where('id_persona', $id)
+            ->where('tipo', $tipo)
+            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->orderBy('fecha', 'desc')
+            ->get();
     }
 
     public function eliminar(int $id): void
