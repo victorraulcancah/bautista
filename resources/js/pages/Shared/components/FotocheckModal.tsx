@@ -1,18 +1,44 @@
-import { Download, X, Loader2 } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import FotocheckCardPreview from '../../Shared/components/FotocheckCardPreview';
-import type { Matricula } from '../hooks/useMatricula';
+import FotocheckCardPreview from './FotocheckCardPreview';
 import api from '@/lib/api';
+
+// Tipos mínimos necesarios para que funcione en ambos contextos
+interface MinimalEstudiante {
+    estu_id: number;
+    user_id?: number | null;
+    nombre_completo?: string;
+    perfil?: {
+        primer_nombre?: string;
+        apellido_paterno?: string;
+        doc_numero?: string | null;
+        avatar?: string | null;
+        telefono?: string | null;
+    } | null;
+}
+
+interface MinimalMatricula {
+    estu_id: number;
+    estudiante?: MinimalEstudiante | null;
+    seccion?: {
+        nombre: string;
+        grado?: {
+            nombre_grado: string;
+        } | null;
+    } | null;
+}
 
 interface Props {
     open: boolean;
     onClose: () => void;
-    matricula: Matricula | null;
+    // Puede venir de Matricula o directamente de Estudiante
+    matricula?: MinimalMatricula | null;
+    estudiante?: MinimalEstudiante | null;
 }
 
-export default function FotocheckModal({ open, onClose, matricula }: Props) {
+export default function FotocheckModal({ open, onClose, matricula, estudiante }: Props) {
     const [config, setConfig] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -26,9 +52,12 @@ export default function FotocheckModal({ open, onClose, matricula }: Props) {
         }
     }, [open]);
 
-    if (!matricula) return null;
+    const activeEstudiante = estudiante || matricula?.estudiante;
+    const estuId = estudiante?.estu_id || matricula?.estu_id;
 
-    const fotocheckUrl = `/estudiantes/${matricula.estu_id}/fotocheck`;
+    if (!estuId) return null;
+
+    const fotocheckUrl = `/estudiantes/${estuId}/fotocheck`;
 
     const handleDownload = () => {
         window.open(fotocheckUrl, '_blank');
@@ -36,17 +65,17 @@ export default function FotocheckModal({ open, onClose, matricula }: Props) {
 
     // Mapear datos al formato del preview global
     const getPreviewData = () => {
-        const student = matricula.estudiante;
-        const seccion = matricula.seccion;
+        const student = activeEstudiante;
+        const seccion = matricula?.seccion;
         
         return {
-            id: student?.user_id ?? matricula.estu_id,
-            name: (student?.primer_nombre + ' ' + (student?.apellido_paterno ?? '')).trim(),
+            id: student?.user_id || estuId,
+            name: (student?.perfil?.primer_nombre + ' ' + (student?.perfil?.apellido_paterno ?? '')).trim() || student?.nombre_completo || 'SIN NOMBRE',
             rol_name: 'ALUMNO(A)',
-            avatar: student?.perfil?.avatar ?? undefined, // Evitar null para TS
+            avatar: student?.perfil?.avatar ?? undefined,
             details: {
-                student_id: `EST-${matricula.estu_id.toString().padStart(6, '0')}`,
-                dni: student?.doc_numero ?? undefined,
+                student_id: `EST-${estuId.toString().padStart(6, '0')}`,
+                dni: student?.perfil?.doc_numero ?? undefined,
                 grado: seccion?.grado?.nombre_grado ?? undefined,
                 seccion: seccion?.nombre ?? undefined,
                 tel: student?.perfil?.telefono ?? undefined,
@@ -89,7 +118,7 @@ export default function FotocheckModal({ open, onClose, matricula }: Props) {
                             Estudiante Seleccionado
                         </p>
                         <p className="text-sm text-neutral-900 truncate font-black uppercase">
-                            {matricula.estudiante?.nombre_completo}
+                            {activeEstudiante?.nombre_completo || activeEstudiante?.perfil?.primer_nombre || 'Alumno'}
                         </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">

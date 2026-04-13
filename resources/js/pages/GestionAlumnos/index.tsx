@@ -6,6 +6,7 @@ import { useResource } from '@/hooks/useResource';
 import type { BreadcrumbItem } from '@/types';
 import EstudianteFormModal from './components/EstudianteFormModal';
 import EstudiantesTable from './components/EstudiantesTable';
+import FotocheckModal from '../Shared/components/FotocheckModal';
 import type { Estudiante } from './hooks/useEstudiantes';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -17,13 +18,22 @@ export default function EstudiantesPage() {
     const res = useResource<Estudiante>('/estudiantes');
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Estudiante | null>(null);
+    
+    // Fotocheck
+    const [fotoOpen, setFotoOpen] = useState(false);
+    const [selectedEst, setSelectedEst] = useState<Estudiante | null>(null);
 
     const openCreate = () => {
  setEditing(null); setModalOpen(true); 
 };
     const openEdit   = (e: Estudiante) => {
- setEditing(e); setModalOpen(true); 
-};
+        setEditing(e); setModalOpen(true); 
+    };
+
+    const openFotocheck = (e: Estudiante) => {
+        setSelectedEst(e);
+        setFotoOpen(true);
+    };
 
     return (
         <>
@@ -44,6 +54,7 @@ export default function EstudiantesPage() {
                     <EstudiantesTable
                         estudiantes={res.rows}
                         onEdit={openEdit}
+                        onFotocheck={openFotocheck}
                         onDelete={(e) => {
                             if (confirm(`¿Eliminar a ${e.perfil?.primer_nombre ?? e.user?.username}?`)) {
                                 res.remove(e.estu_id);
@@ -66,6 +77,11 @@ export default function EstudiantesPage() {
                     : (data) => res.create(data)}
                 apiErrors={res.apiErrors}
                 clearErrors={res.clearErrors}
+            />
+            <FotocheckModal
+                open={fotoOpen}
+                onClose={() => setFotoOpen(false)}
+                estudiante={selectedEst}
             />
         </>
     );

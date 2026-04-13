@@ -8,6 +8,7 @@ import { nombreCompleto, dniEstudiante } from '../hooks/useEstudiantes';
 type Props = {
     estudiantes:  Paginated<Estudiante>;
     onEdit:       (e: Estudiante) => void;
+    onFotocheck:  (e: Estudiante) => void;
     onDelete:     (e: Estudiante) => void;
     onPageChange: (page: number) => void;
 };
@@ -24,7 +25,7 @@ return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Bloqueado</Ba
     return <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100">Inactivo</Badge>;
 };
 
-export default function EstudiantesTable({ estudiantes, onEdit, onDelete, onPageChange }: Props) {
+export default function EstudiantesTable({ estudiantes, onEdit, onFotocheck, onDelete, onPageChange }: Props) {
     return (
         <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
             {estudiantes.data.length === 0 ? (
@@ -78,21 +79,15 @@ export default function EstudiantesTable({ estudiantes, onEdit, onDelete, onPage
                                         <Pencil className="h-3.5 w-3.5 mr-1" />
                                         Editar
                                     </Button>
-                                    <a
-                                        href={`/estudiantes/${est.estu_id}/fotocheck`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex-1"
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="flex-1 h-8 text-xs text-emerald-600"
+                                        onClick={() => onFotocheck(est)}
                                     >
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="w-full h-8 text-xs text-emerald-600"
-                                        >
-                                            <Printer className="h-3.5 w-3.5 mr-1" />
-                                            Carnet
-                                        </Button>
-                                    </a>
+                                        <Printer className="h-3.5 w-3.5 mr-1" />
+                                        Carnet
+                                    </Button>
                                     <Button
                                         size="sm"
                                         variant="outline"
@@ -154,20 +149,15 @@ export default function EstudiantesTable({ estudiantes, onEdit, onDelete, onPage
                                                 >
                                                     <Pencil className="size-3.5" />
                                                 </Button>
-                                                <a
-                                                    href={`/estudiantes/${est.estu_id}/fotocheck`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="size-7 text-emerald-600 hover:bg-emerald-50"
+                                                    title="Imprimir Fotocheck / Carnet"
+                                                    onClick={() => onFotocheck(est)}
                                                 >
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="size-7 text-emerald-600 hover:bg-emerald-50"
-                                                        title="Imprimir Fotocheck / Carnet"
-                                                    >
-                                                        <Printer className="size-3.5" />
-                                                    </Button>
-                                                </a>
+                                                    <Printer className="size-3.5" />
+                                                </Button>
                                                 <Button
                                                     size="icon"
                                                     variant="ghost"

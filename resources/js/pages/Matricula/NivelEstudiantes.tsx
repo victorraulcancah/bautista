@@ -9,7 +9,7 @@ import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 import EstudianteFormModal from '../GestionAlumnos/components/EstudianteFormModal';
 import type { Estudiante, EstudianteFormData } from '../GestionAlumnos/hooks/useEstudiantes';
-import FotocheckModal from './components/FotocheckModal';
+import FotocheckModal from '../Shared/components/FotocheckModal';
 import HistorialModal from './components/HistorialModal';
 import MatricularModal from './components/MatricularModal';
 import ResetUserModal from './components/ResetUserModal';
