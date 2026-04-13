@@ -55,7 +55,7 @@ return;
         {
             label: '#',
             render: (_, idx) => (
-                <span className="flex size-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold">
+                <span className="text-neutral-500 font-medium text-sm">
                     {idx + 1}
                 </span>
             ),
@@ -151,15 +151,17 @@ return;
                                         extraActions={(n) => (
                                             <Button
                                                 size="sm"
-                                                className="bg-[#00c0ef] hover:bg-[#00a8d0] text-white rounded-lg gap-2 h-9 px-4"
+                                                variant="outline"
+                                                className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-lg h-9 w-9 p-0"
                                                 onClick={() => {
                                                     if (n.nivel_id) {
                                                         router.visit(`/matriculas/gestion/${selectedAperturaId}/nivel/${n.nivel_id}`);
                                                     }
                                                 }}
                                                 disabled={!n.nivel_id}
+                                                title="Ver Registros"
                                             >
-                                                <Eye className="h-4 w-4" /> Registra
+                                                <Eye className="h-4 w-4" />
                                             </Button>
                                         )}
                                         onPageChange={() => {}}
