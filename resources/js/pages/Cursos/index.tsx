@@ -18,7 +18,7 @@ export default function CursosPage() {
             <Head title="Cursos" />
             <div className="p-3 sm:p-6">
                 {/* Vista Administrativa (Gestión de Grados/Cursos) */}
-                {can('cursos.ver') && <AdminCursos />}
+                {can('academico.cursos.ver') && <AdminCursos />}
             </div>
         </AppLayout>
     );

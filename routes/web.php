@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', fn () => redirect()->route('login'))->name('home');
 
@@ -14,42 +15,41 @@ Route::middleware(['auth.token'])->group(function () {
         return Inertia::render('Dashboard/index');
     })->middleware('permission:dashboard.ver')->name('dashboard');
 
-    Route::get('/institucion',         fn () => Inertia::render('Institucion/index'))->middleware('permission:institucion.ver')->name('institucion.index');
-    Route::get('/institucion/galeria',   fn () => Inertia::render('Institucion/Galeria/index'))->middleware('permission:institucion.ver')->name('institucion.galeria');
-    Route::get('/institucion/noticias',  fn () => Inertia::render('Institucion/Noticias/index'))->middleware('permission:institucion.ver')->name('institucion.noticias');
-    Route::get('/institucion/noticias/portada', [\App\Http\Controllers\Admin\NoticiaController::class, 'portada'])->middleware('permission:institucion.ver')->name('institucion.noticias.portada');
-    Route::get('/institucion/noticias/diario/{id}', [\App\Http\Controllers\Admin\NoticiaController::class, 'showDiario'])->middleware('permission:institucion.ver')->name('institucion.noticias.diario');
-    Route::post('/institucion/noticias/{id}/comentarios', [\App\Http\Controllers\Admin\NoticiaController::class, 'storeComentario'])->middleware('permission:institucion.ver')->name('institucion.noticias.comentarios.store');
+    Route::get('/institucion',         fn () => Inertia::render('Institucion/index'))->middleware('permission:institucion.datos.ver')->name('institucion.index');
+    Route::get('/institucion/galeria',   fn () => Inertia::render('Institucion/Galeria/index'))->middleware('permission:institucion.galeria.ver')->name('institucion.galeria');
+    Route::get('/institucion/noticias',  fn () => Inertia::render('Institucion/Noticias/index'))->middleware('permission:institucion.noticias.ver')->name('institucion.noticias');
+    Route::get('/institucion/noticias/portada', [\App\Http\Controllers\Admin\NoticiaController::class, 'portada'])->middleware('permission:institucion.noticias.ver')->name('institucion.noticias.portada');
+    Route::get('/institucion/noticias/diario/{id}', [\App\Http\Controllers\Admin\NoticiaController::class, 'showDiario'])->middleware('permission:institucion.noticias.ver')->name('institucion.noticias.diario');
+    Route::post('/institucion/noticias/{id}/comentarios', [\App\Http\Controllers\Admin\NoticiaController::class, 'storeComentario'])->middleware('permission:institucion.noticias.comentar')->name('institucion.noticias.comentarios.store');
     
-    Route::get('/mensajes',              fn () => Inertia::render('Comunicados/index'))->middleware('permission:comunicados.ver')->name('mensajes.index');
+    Route::get('/mensajes',              fn () => Inertia::render('Comunicados/index'))->middleware('permission:admin.comunicados.ver')->name('mensajes.index');
     
-    Route::get('/credencial',            fn () => Inertia::render('Shared/CredencialDigital'))->middleware('permission:perfil.ver_credencial')->name('credencial');
-    Route::get('/mi-fotocheck',          [\App\Http\Controllers\Admin\FotocheckController::class, 'generatePropio'])->middleware('permission:perfil.ver_credencial')->name('mi-fotocheck');
+    Route::get('/credencial',            fn () => Inertia::render('Shared/CredencialDigital'))->middleware('permission:credencial.ver')->name('credencial');
+    Route::get('/mi-fotocheck',          [\App\Http\Controllers\Admin\FotocheckController::class, 'generatePropio'])->middleware('permission:credencial.ver')->name('mi-fotocheck');
 
-    Route::get('/estudiantes',  fn () => Inertia::render('GestionAlumnos/index'))->middleware('permission:estudiantes.ver')->name('estudiantes.index');
-    Route::get('/estudiantes/{id}/fotocheck', [\App\Http\Controllers\Admin\FotocheckController::class, 'generate'])->middleware('permission:estudiantes.ver')->name('estudiantes.fotocheck');
-    Route::get('/matriculas/aperturas/{aperturaId}/niveles/{nivelId}/fotochecks', [\App\Http\Controllers\Admin\FotocheckController::class, 'generateBulk'])->middleware('permission:estudiantes.ver')->name('matriculas.fotochecks.bulk');
+    Route::get('/estudiantes',  fn () => Inertia::render('GestionAlumnos/index'))->middleware('permission:personal.estudiantes.ver')->name('estudiantes.index');
+    Route::get('/estudiantes/{id}/fotocheck', [\App\Http\Controllers\Admin\FotocheckController::class, 'generate'])->middleware('permission:personal.estudiantes.ver')->name('estudiantes.fotocheck');
+    Route::get('/matriculas/aperturas/{aperturaId}/niveles/{nivelId}/fotochecks', [\App\Http\Controllers\Admin\FotocheckController::class, 'generateBulk'])->middleware('permission:personal.estudiantes.ver')->name('matriculas.fotochecks.bulk');
     
-    Route::get('/docentes',     fn () => Inertia::render('GestionDocentes/index'))->middleware('permission:docentes.ver')->name('docentes.index');
+    Route::get('/docentes',     fn () => Inertia::render('GestionDocentes/index'))->middleware('permission:personal.docentes.ver')->name('docentes.index');
     
-    Route::get('/niveles',      fn () => Inertia::render('Niveles/index'))->middleware('permission:niveles.ver')->name('niveles.index');
-    Route::get('/grados',       fn () => Inertia::render('Grados/index'))->middleware('permission:cursos.ver')->name('grados.index');
-    Route::get('/secciones',    fn () => Inertia::render('Secciones/index'))->middleware('permission:secciones.ver')->name('secciones.index');
-    Route::get('/cursos',       fn () => Inertia::render('Cursos/index'))->middleware('permission:cursos.ver')->name('cursos.index');
+    Route::get('/niveles',      fn () => Inertia::render('Niveles/index'))->middleware('permission:academico.niveles.ver')->name('niveles.index');
+    Route::get('/grados',       fn () => Inertia::render('Grados/index'))->middleware('permission:academico.cursos.ver')->name('grados.index');
+    Route::get('/secciones',    fn () => Inertia::render('Secciones/index'))->middleware('permission:academico.secciones.ver')->name('secciones.index');
+    Route::get('/cursos',       fn () => Inertia::render('Cursos/index'))->middleware('permission:academico.cursos.ver')->name('cursos.index');
     
-    Route::get('/pagos',      fn () => Inertia::render('Pagos/index'))->middleware('permission:pagos.ver')->name('pagos.index');
+    Route::get('/pagos',      fn () => Inertia::render('Pagos/index'))->middleware('permission:admin.pagos.ver')->name('pagos.index');
     
-    Route::get('/matriculas',                                        fn () => Inertia::render('Matricula/index'))->middleware('permission:matriculas.ver')->name('matriculas.index');
-    Route::get('/matriculas/gestion',                               fn () => Inertia::render('Matricula/Gestion'))->middleware('permission:matriculas.ver')->name('matriculas.gestion');
+    Route::get('/matriculas',                                        fn () => Inertia::render('Matricula/index'))->middleware('permission:matriculas.aperturas.ver')->name('matriculas.index');
+    Route::get('/matriculas/gestion',                               fn () => Inertia::render('Matricula/Gestion'))->middleware('permission:matriculas.gestion.ver')->name('matriculas.gestion');
     Route::get('/matriculas/gestion/{aperturaId}/nivel/{nivelId}',  fn (int $aperturaId, int $nivelId) => Inertia::render('Matricula/NivelEstudiantes', [
         'aperturaId' => $aperturaId,
         'nivelId'    => $nivelId,
-    ]))->middleware('permission:matriculas.ver')->name('matriculas.nivel');
+    ]))->middleware('permission:matriculas.gestion.ver')->name('matriculas.nivel');
 
-    Route::get('/cursos/{id}/contenido',  fn (int $id) => Inertia::render('CursoContenido/index', ['cursoId' => $id]))->middleware('permission:cursos.ver')->name('cursos.contenido');
-    Route::get('/cursos/{id}/detalle',    fn (int $id) => redirect()->route('cursos.contenido', ['id' => $id]))->name('cursos.detalle');
+    Route::get('/cursos/{id}/contenido',  fn (int $id) => Inertia::render('CursoContenido/index', ['cursoId' => $id]))->middleware('permission:academico.cursos.ver')->name('cursos.contenido');
 
-    Route::prefix('alumno')->name('alumno.')->middleware('permission:dashboard.resumen.academico')->group(function () {
+    Route::prefix('alumno')->name('alumno.')->middleware('permission:portal.estudiante.ver')->group(function () {
         Route::get('/dashboard', fn () => redirect()->route('dashboard'))->name('dashboard');
         Route::get('/cursos',    fn () => redirect()->route('cursos.index'))->name('cursos.index');
         Route::get('/cursos/{id}', fn (int $id) => Inertia::render('PortalAlumno/Cursos/Detalle', ['cursoId' => $id]))->name('cursos.detalle');
@@ -72,77 +72,36 @@ Route::middleware(['auth.token'])->group(function () {
             ]);
         })->name('puzzles.index');
 
-        Route::get('/puzzles/{id}', function (int $id) {
-            $puzzle = DB::table('actividad_curso as ac')
-                ->join('imagen_rompecabeza as ir', 'ac.actividad_id', '=', 'ir.actividad_id')
-                ->where('ac.actividad_id', $id)
-                ->select('ac.*', 'ir.imagen')
-                ->first();
-            
-            if (!$puzzle) abort(404);
-
-            return Inertia::render('Actividades/Puzzles/Ver', [
-                'puzzle' => $puzzle
-            ]);
-        })->name('puzzles.ver');
-
         Route::get('/profesores', fn () => Inertia::render('PortalAlumno/Profesores'))->name('profesores');
-        Route::get('/asistencia', fn () => Inertia::render('PortalAlumno/Asistencia'))->middleware('permission:portal.alumno.asistencia')->name('asistencia');
+        Route::get('/asistencia', fn () => Inertia::render('PortalAlumno/Asistencia'))->middleware('permission:portal.estudiante.asistencia')->name('asistencia');
     });
 
-    Route::prefix('docente')->name('docente.')->middleware('permission:dashboard.cursos.asignados')->group(function () {
+    Route::prefix('docente')->name('docente.')->middleware('permission:portal.docente.ver')->group(function () {
         Route::get('/dashboard', fn () => redirect()->route('dashboard'))->name('dashboard');
         Route::get('/mis-cursos', fn () => Inertia::render('PortalDocente/MisCursos'))->name('mis-cursos.index');
         Route::get('/mis-alumnos', [\App\Http\Controllers\DocenteController::class, 'misAlumnos'])->middleware('permission:portal.docente.alumnos')->name('mis-alumnos.index');
         Route::get('/cursos/{id}/contenido', fn (int $id) => Inertia::render('PortalDocente/Contenido/Editor', ['docenteCursoId' => $id]))->name('cursos.contenido');
         Route::get('/cursos/{id}/asistencia', fn (int $id) => Inertia::render('PortalDocente/Asistencia/PasarLista', ['docenteCursoId' => $id]))->name('cursos.asistencia');
-        Route::get('/cursos/{id}/cuestionario/{actividadId}', fn (int $id, int $actividadId) => Inertia::render('PortalDocente/Contenido/QuizBuilder', [
-            'docenteCursoId' => $id, 
-            'actividadId' => $actividadId
-        ]))->name('cursos.cuestionario');
-        Route::get('/actividad/{actividadId}/entregas', fn (int $actividadId) => Inertia::render('PortalDocente/CalificarActividad', [
-            'actividadId' => $actividadId
-        ]))->name('actividad.entregas');
-        Route::get('/alumno/actividad/{id}/dibujo', function ($id) {
-            $actividad = \App\Models\ActividadCurso::find($id);
-            return inertia('Actividades/Dibujo', ['actividad' => $actividad]);
-        })->name('alumno.dibujo');
     });
 
-    Route::prefix('padre')->name('padre.')->middleware('permission:dashboard.resumen.familiar')->group(function () {
+    Route::prefix('padre')->name('padre.')->middleware('permission:portal.padre.hijos')->group(function () {
         Route::get('/dashboard', fn () => redirect()->route('dashboard'))->name('dashboard');
         Route::get('/matricula', fn () => inertia('Matricula/Padre/MatriculaWizard'))->name('matricula.wizard');
         Route::get('/hijo/{id}', fn (int $id) => Inertia::render('Matricula/Padre/HijoDetalle', ['hijoId' => $id]))->name('hijo.detalle');
     });
 
-    Route::prefix('mensajeria')->name('mensajeria.')->middleware('permission:mensajeria.ver')->group(function () {
+    Route::prefix('mensajeria')->name('mensajeria.')->middleware('permission:recursos.mensajeria.ver')->group(function () {
         Route::get('/', fn () => Inertia::render('MensajesPrivados/index'))->name('index');
-        Route::get('/ver/{id}', fn (int $id) => Inertia::render('MensajesPrivados/Ver', ['mensajeId' => $id]))->name('ver');
     });
 
-    Route::prefix('comunicados')->name('comunicados.')->middleware('permission:comunicados.ver')->group(function () {
-        Route::get('/', fn () => Inertia::render('Comunicados/index'))->name('index');
-    });
+    Route::get('/biblioteca', fn () => Inertia::render('Medios/index'))->middleware('permission:recursos.biblioteca.ver')->name('medios.index');
+    Route::get('/asistencia', fn () => Inertia::render('Asistencia/index'))->middleware('permission:asistencia.reportes.ver')->name('asistencia.index');
+    Route::get('/asistencia/scanner', fn () => Inertia::render('Asistencia/Scanner'))->middleware('permission:asistencia.scanner.ver')->name('asistencia.scanner');
 
-    Route::get('/biblioteca', fn () => Inertia::render('Medios/index'))->middleware('permission:biblioteca.ver')->name('medios.index');
-    Route::get('/asistencia', fn () => Inertia::render('Asistencia/index'))->middleware('permission:asistencia.ver')->name('asistencia.index');
-    Route::get('/asistencia/scanner', fn () => Inertia::render('Asistencia/Scanner'))->middleware('permission:asistencia.escanear')->name('asistencia.scanner');
-
-    Route::get('/horarios',               fn () => Inertia::render('Horarios/index'))->middleware('permission:dashboard.resumen.academico')->name('horarios.index');
-    Route::get('/secciones/{seccionId}/horarios', fn (int $seccionId) => Inertia::render('Secciones/HorariosPage', ['seccionId' => $seccionId]))->middleware('permission:secciones.ver')->name('secciones.horarios');
-    Route::get('/notas',                  fn () => Inertia::render('Notas/index'))->middleware('permission:dashboard.resumen.academico')->name('notas.index');
-    Route::get('/usuarios',               fn () => Inertia::render('Usuarios/index'))->middleware('permission:usuarios.ver')->name('usuarios.index');
-    Route::get('/roles-permisos',         fn () => Inertia::render('Seguridad/index'))->middleware('permission:configuracion.fotocheck')->name('seguridad.roles');
-    Route::get('/seguridad/fotocheck',   fn () => Inertia::render('Seguridad/ConfiguracionFotocheck'))->middleware('permission:configuracion.fotocheck')->name('seguridad.fotocheck');
-
-    Route::get('/examenes',               fn () => Inertia::render('Examenes/index'))->middleware('permission:dashboard.resumen.academico')->name('examenes.index');
-    Route::get('/examenes/{id}/resolver', function (int $id) {
-        $estuId = \App\Models\Estudiante::where('user_id', auth()->id())->value('estu_id');
-        return Inertia::render('Examenes/Resolver', [
-            'actividadId' => $id,
-            'estudianteId' => $estuId
-        ]);
-    })->middleware('permission:dashboard.resumen.academico')->name('examenes.resolver');
+    Route::get('/horarios',               fn () => Inertia::render('Horarios/index'))->middleware('permission:portal.estudiante.horario')->name('horarios.index');
+    Route::get('/usuarios',               fn () => Inertia::render('Usuarios/index'))->middleware('permission:seguridad.usuarios.ver')->name('usuarios.index');
+    Route::get('/roles-permisos',         fn () => Inertia::render('Seguridad/index'))->middleware('permission:seguridad.roles.ver')->name('seguridad.roles');
+    Route::get('/seguridad/fotocheck',   fn () => Inertia::render('Seguridad/ConfiguracionFotocheck'))->middleware('permission:seguridad.fotochecks.diseno')->name('seguridad.fotocheck');
 });
 
 require __DIR__.'/settings.php';

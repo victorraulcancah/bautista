@@ -9,8 +9,8 @@ type Props = {
     search: string;
     onSearchChange: (value: string) => void;
     onSelectGrado: (grado: Grado) => void;
-    onEditGrado: (grado: Grado) => void;
-    onDeleteGrado: (grado: Grado) => void;
+    onEditGrado?: (grado: Grado) => void;
+    onDeleteGrado?: (grado: Grado) => void;
 };
 
 export default function GradosTable({
@@ -83,24 +83,28 @@ export default function GradosTable({
                                         >
                                             <BookOpen className="h-3.5 w-3.5" />
                                         </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="h-8 w-8 p-0 text-amber-500"
-                                            onClick={() => onEditGrado(g)}
-                                            title="Editar"
-                                        >
-                                            <Pencil className="h-3.5 w-3.5" />
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="h-8 w-8 p-0 text-red-500"
-                                            onClick={() => onDeleteGrado(g)}
-                                            title="Eliminar"
-                                        >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                        </Button>
+                                        {onEditGrado && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="h-8 w-8 p-0 text-amber-500"
+                                                onClick={() => onEditGrado(g)}
+                                                title="Editar"
+                                            >
+                                                <Pencil className="h-3.5 w-3.5" />
+                                            </Button>
+                                        )}
+                                        {onDeleteGrado && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="h-8 w-8 p-0 text-red-500"
+                                                onClick={() => onDeleteGrado(g)}
+                                                title="Eliminar"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -141,24 +145,28 @@ export default function GradosTable({
                                                     >
                                                         <BookOpen className="h-4 w-4" />
                                                     </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        className="h-8 w-8 p-0 text-amber-500 hover:text-amber-700"
-                                                        title="Editar grado"
-                                                        onClick={() => onEditGrado(g)}
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                                                        title="Eliminar grado"
-                                                        onClick={() => onDeleteGrado(g)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    {onEditGrado && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="h-8 w-8 p-0 text-amber-500 hover:text-amber-700"
+                                                            title="Editar grado"
+                                                            onClick={() => onEditGrado(g)}
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                    {onDeleteGrado && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                                            title="Eliminar grado"
+                                                            onClick={() => onDeleteGrado(g)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

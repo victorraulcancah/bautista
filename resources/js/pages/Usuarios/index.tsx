@@ -6,6 +6,7 @@ import ResourceTable from '@/components/shared/ResourceTable';
 import { useResource } from '@/hooks/useResource';
 import type { BreadcrumbItem } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePermission } from '@/hooks/usePermission';
 import UsuarioFormModal from './components/UsuarioFormModal';
 import AccessControlManager from './components/AccessControlManager';
 import type { Usuario } from './hooks/useUsuarios';
@@ -18,6 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function UsuariosPage() {
     const res = useResource<Usuario>('/usuarios');
+    const { can } = usePermission();
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Usuario | null>(null);
 
@@ -46,9 +48,11 @@ export default function UsuariosPage() {
                             <TabsTrigger value="listado" className="rounded-lg font-bold text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm px-6">
                                 <Users className="size-3 mr-2 text-indigo-600" /> USUARIOS
                             </TabsTrigger>
-                            <TabsTrigger value="seguridad" className="rounded-lg font-bold text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm px-6">
-                                <ShieldCheck className="size-3 mr-2 text-indigo-600" /> ROLES Y PERMISOS
-                            </TabsTrigger>
+                            {can('seguridad.roles.ver') && (
+                                <TabsTrigger value="seguridad" className="rounded-lg font-bold text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm px-6">
+                                    <ShieldCheck className="size-3 mr-2 text-indigo-600" /> ROLES Y PERMISOS
+                                </TabsTrigger>
+                            )}
                         </TabsList>
                     </div>
 
@@ -61,16 +65,16 @@ export default function UsuariosPage() {
                             search={res.search}
                             onSearch={res.setSearch}
                             flashSuccess={res.success}
-                            btnLabel="Nuevo Usuario"
-                            onNew={openCreate}
-                            hideHeader={true} // Necesitaré que ResourcePage soporte esto o simplemente lo dejo así
+                            btnLabel={can('seguridad.usuarios.crear') ? "Nuevo Usuario" : undefined}
+                            onNew={can('seguridad.usuarios.crear') ? openCreate : undefined}
+                            hideHeader={true}
                         >
                             {res.rows && (
                                 <ResourceTable
                                     rows={res.rows}
                                     columns={usuariosColumns}
                                     getKey={(u) => u.id}
-                                    onEdit={openEdit}
+                                    onEdit={can('seguridad.usuarios.editar') ? openEdit : undefined}
                                     onLoadMore={res.loadMore}
                                     hasMore={res.hasMore}
                                     loading={res.loading}
@@ -80,9 +84,11 @@ export default function UsuariosPage() {
                         </ResourcePage>
                     </TabsContent>
 
-                    <TabsContent value="seguridad" className="mt-0 border-none shadow-none bg-transparent outline-none">
-                        <AccessControlManager />
-                    </TabsContent>
+                    {can('seguridad.roles.ver') && (
+                        <TabsContent value="seguridad" className="mt-0 border-none shadow-none bg-transparent outline-none">
+                            <AccessControlManager />
+                        </TabsContent>
+                    )}
                 </Tabs>
             </div>
 

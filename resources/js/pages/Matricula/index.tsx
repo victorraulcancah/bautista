@@ -8,7 +8,7 @@ import type { Column } from '@/components/shared/ResourceTable';
 import { Button } from '@/components/ui/button';
 import { useOptions } from '@/hooks/useOptions';
 import { useResource } from '@/hooks/useResource';
-import type { BreadcrumbItem } from '@/types';
+import { usePermission } from '@/hooks/usePermission';
 import AperturaFormModal from './components/AperturaFormModal';
 import MatriculasDrawer from './components/MatriculasDrawer';
 import type { MatriculaApertura, AperturaFormData, SeccionOption } from './hooks/useMatricula';
@@ -21,6 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function MatriculaPage() {
     const res       = useResource<MatriculaApertura>('/matriculas/aperturas');
     const secciones = useOptions<SeccionOption>('/secciones');
+    const { can } = usePermission();
 
     const [modalOpen, setModalOpen]   = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -69,17 +70,19 @@ return;
             render: (a) => (
                 <div className="flex items-center justify-center gap-2">
                     <span className="font-semibold text-blue-600">{a.matriculas_count}</span>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 px-2 text-xs text-blue-600 hover:text-blue-800"
-                        onClick={(e) => {
- e.stopPropagation(); openDetail(a); 
-}}
-                    >
-                        <Users className="mr-1 h-3 w-3" />
-                        Ver
-                    </Button>
+                    {can('matriculas.gestion.ver') && (
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs text-blue-600 hover:text-blue-800"
+                            onClick={(e) => {
+                                e.stopPropagation(); openDetail(a); 
+                            }}
+                        >
+                            <Users className="mr-1 h-3 w-3" />
+                            Ver
+                        </Button>
+                    )}
                 </div>
             ),
         },
@@ -105,16 +108,16 @@ return;
                 search={res.search}
                 onSearch={res.setSearch}
                 flashSuccess={res.success}
-                btnLabel="Nuevo Periodo"
-                onNew={openCreate}
+                btnLabel={can('matriculas.aperturas.crear') ? "Nuevo Periodo" : undefined}
+                onNew={can('matriculas.aperturas.crear') ? openCreate : undefined}
             >
                 {res.rows && (
                     <ResourceTable
                         rows={res.rows}
                         columns={columns}
                         getKey={(a) => a.apertura_id}
-                        onEdit={openEdit}
-                        onDelete={setDeleting}
+                        onEdit={can('matriculas.aperturas.editar') ? openEdit : undefined}
+                        onDelete={can('matriculas.aperturas.eliminar') ? setDeleting : undefined}
                         onPageChange={res.setPage}
                     />
                 )}

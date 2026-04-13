@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import { GraduationCap } from 'lucide-react';
 import { useState } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
+import { usePermission } from '@/hooks/usePermission';
 import { useResource } from '@/hooks/useResource';
 import type { BreadcrumbItem } from '@/types';
 import EstudianteFormModal from './components/EstudianteFormModal';
@@ -16,6 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function EstudiantesPage() {
     const res = useResource<Estudiante>('/estudiantes');
+    const { can } = usePermission();
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Estudiante | null>(null);
     
@@ -47,19 +49,19 @@ export default function EstudiantesPage() {
                 search={res.search}
                 onSearch={res.setSearch}
                 flashSuccess={res.success}
-                btnLabel="Nuevo Estudiante"
-                onNew={openCreate}
+                btnLabel={can('personal.estudiantes.crear') ? "Nuevo Estudiante" : undefined}
+                onNew={can('personal.estudiantes.crear') ? openCreate : undefined}
             >
                 {res.rows && (
                     <EstudiantesTable
                         estudiantes={res.rows}
-                        onEdit={openEdit}
-                        onFotocheck={openFotocheck}
-                        onDelete={(e) => {
+                        onEdit={can('personal.estudiantes.editar') ? openEdit : undefined}
+                        onFotocheck={can('personal.estudiantes.fotocheck') ? openFotocheck : undefined}
+                        onDelete={can('personal.estudiantes.eliminar') ? (e) => {
                             if (confirm(`¿Eliminar a ${e.perfil?.primer_nombre ?? e.user?.username}?`)) {
                                 res.remove(e.estu_id);
                             }
-                        }}
+                        } : undefined}
                         onPageChange={res.setPage}
                     />
                 )}

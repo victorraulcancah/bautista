@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
 import { Button } from '@/components/ui/button';
+import { usePermission } from '@/hooks/usePermission';
 import { useResource } from '@/hooks/useResource';
 import type { BreadcrumbItem } from '@/types';
 import AsignarCursosModal from './components/AsignarCursosModal';
@@ -20,6 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function DocentesPage() {
     const res = useResource<Docente>('/docentes');
+    const { can } = usePermission();
     const [modalOpen, setModalOpen]           = useState(false);
     const [editing, setEditing]               = useState<Docente | null>(null);
     const [asignarDocente, setAsignarDocente] = useState<Docente | null>(null);
@@ -49,37 +51,41 @@ export default function DocentesPage() {
                 search={res.search}
                 onSearch={res.setSearch}
                 flashSuccess={res.success}
-                btnLabel="Nuevo Docente"
-                onNew={openCreate}
+                btnLabel={can('personal.docentes.crear') ? "Nuevo Docente" : undefined}
+                onNew={can('personal.docentes.crear') ? openCreate : undefined}
             >
                 {res.rows && (
                     <ResourceTable
                         rows={res.rows}
                         columns={docentesColumns}
                         getKey={(d) => d.docente_id}
-                        onEdit={openEdit}
-                        onDelete={handleDelete}
+                        onEdit={can('personal.docentes.editar') ? openEdit : undefined}
+                        onDelete={can('personal.docentes.eliminar') ? handleDelete : undefined}
                         onPageChange={res.setPage}
                         extraActions={(d) => (
                             <>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    title="Asignar Cursos"
-                                    className="size-7 text-emerald-600 hover:bg-emerald-50"
-                                    onClick={() => setAsignarDocente(d)}
-                                >
-                                    <BookOpen className="size-3.5" />
-                                </Button>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    title="Horario"
-                                    className="size-7 text-orange-500 hover:bg-orange-50"
-                                    onClick={() => setHorarioDocente(d)}
-                                >
-                                    <Clock className="size-3.5" />
-                                </Button>
+                                {can('personal.docentes.cursos') && (
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        title="Asignar Cursos"
+                                        className="size-7 text-emerald-600 hover:bg-emerald-50"
+                                        onClick={() => setAsignarDocente(d)}
+                                    >
+                                        <BookOpen className="size-3.5" />
+                                    </Button>
+                                )}
+                                {can('academico.horarios.ver') && (
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        title="Horario"
+                                        className="size-7 text-orange-500 hover:bg-orange-50"
+                                        onClick={() => setHorarioDocente(d)}
+                                    >
+                                        <Clock className="size-3.5" />
+                                    </Button>
+                                )}
                             </>
                         )}
                     />

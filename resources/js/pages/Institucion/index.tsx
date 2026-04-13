@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
 import ResourcePage from '@/components/shared/ResourcePage';
 import ResourceTable from '@/components/shared/ResourceTable';
+import { usePermission } from '@/hooks/usePermission';
 import { useResource } from '@/hooks/useResource';
 import type { BreadcrumbItem } from '@/types';
 import InstitucionFormModal from './components/InstitucionFormModal';
@@ -17,6 +18,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function InstitucionPage() {
     const res = useResource<Institucion>('/instituciones');
+    const { can } = usePermission();
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Institucion | null>(null);
     const [deleting, setDeleting]   = useState<Institucion | null>(null);
@@ -49,16 +51,16 @@ return;
                 search={res.search}
                 onSearch={res.setSearch}
                 flashSuccess={res.success}
-                btnLabel="Nueva Institución"
-                onNew={openCreate}
+                btnLabel={can('institucion.datos.crear') ? "Nueva Institución" : undefined}
+                onNew={can('institucion.datos.crear') ? openCreate : undefined}
             >
                 {res.rows && (
                     <ResourceTable
                         rows={res.rows}
                         columns={institucionColumns}
                         getKey={(i) => i.insti_id}
-                        onEdit={openEdit}
-                        onDelete={setDeleting}
+                        onEdit={can('institucion.datos.editar') ? openEdit : undefined}
+                        onDelete={can('institucion.datos.eliminar') ? setDeleting : undefined}
                         onPageChange={res.setPage}
                     />
                 )}

@@ -9,14 +9,16 @@ const cards = [
     { title: 'Cursos',       key: 'total_cursos'        as const, icon: BookOpen,      color: 'text-red-500',    iconBg: 'bg-red-500',    href: '/cursos' },
 ];
 
-export default function StatsCards({ stats }: { stats: DashboardStats }) {
+export default function StatsCards({ stats }: { stats: DashboardStats | null }) {
+    if (!stats) return null;
+    
     return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {cards.map((card) => (
                 <StatCard
                     key={card.key}
                     title={card.title}
-                    value={stats[card.key]}
+                    value={stats[card.key] ?? 0}
                     icon={card.icon}
                     color={card.color}
                     iconBg={card.iconBg}

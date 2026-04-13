@@ -16,9 +16,14 @@ export function NotificationBell() {
     const [open, setOpen] = useState(false);
 
     const fetchNotifications = () => {
-        api.get<DashboardStats>('/dashboard/stats').then(({ data }) => {
-            setNotifications(data.notificaciones || []);
-        });
+        api.get<DashboardStats>('/dashboard/stats')
+            .then(({ data }) => {
+                setNotifications(data.notificaciones || []);
+            })
+            .catch((error) => {
+                console.error('Error fetching notifications:', error);
+                setNotifications([]);
+            });
     };
 
     useEffect(() => {

@@ -25,10 +25,14 @@ export default function Dashboard() {
     useEffect(() => {
         api.get('/dashboard/stats')
             .then(({ data }) => setData(data))
+            .catch((error) => {
+                console.error('Error loading dashboard:', error);
+                setData(null);
+            })
             .finally(() => setLoading(false));
     }, []);
 
-    const roleName = user?.roles?.[0] || 'Usuario';
+    const roleName = user?.roles?.[0]?.name || 'Usuario';
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -48,19 +52,22 @@ export default function Dashboard() {
                 ) : (
                     <div className="flex flex-col gap-8">
                         {/* 1. Estadísticas Globales (Admin/Auxiliar) */}
-                        {can('dashboard.periodo.global') && <StatsCards stats={data} />}
+                        {(can('dashboard.stats.instituciones') || can('dashboard.stats.docentes') || 
+                          can('dashboard.stats.estudiantes') || can('dashboard.stats.cursos')) && (
+                            <StatsCards stats={data} />
+                        )}
 
                         {/* 2. Mensajes y Accesos Rápidos (Modular) */}
-                        {(can('dashboard.mensajes.recientes') || can('dashboard.accesos.admin')) && (
+                        {(can('dashboard.mensajes.pendientes') || can('dashboard.accesos.rapidos')) && (
                             <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-                                {can('dashboard.mensajes.recientes') && (
+                                {can('dashboard.mensajes.pendientes') && (
                                     <div className="lg:col-span-3">
                                         <NotificacionesPendientes 
                                             messages={data?.mensajes_pendientes ?? []}
                                         />
                                     </div>
                                 )}
-                                {can('dashboard.accesos.admin') && (
+                                {can('dashboard.accesos.rapidos') && (
                                     <div className="lg:col-span-1">
                                         <AccesosRapidos />
                                     </div>
@@ -69,7 +76,7 @@ export default function Dashboard() {
                         )}
 
                         {/* 3. Vista Docente (Cursos Asignados) */}
-                        {can('dashboard.cursos.asignados') && data && (
+                        {can('dashboard.docente.resumen') && data && (
                             <div className="flex flex-col gap-8">
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                     <StatCard
@@ -96,17 +103,19 @@ export default function Dashboard() {
                                         iconBg="bg-rose-600"
                                     />
                                 </div>
-                                <DocenteCourses cursos={data.cursos ?? []} />
+                                {can('dashboard.docente.cursos') && (
+                                    <DocenteCourses cursos={data.cursos ?? []} />
+                                )}
                             </div>
                         )}
 
                         {/* 4. Vista Estudiante (Resumen Académico) */}
-                        {can('dashboard.resumen.academico') && data && (
+                        {can('dashboard.estudiante.resumen') && data && (
                             <EstudianteStats stats={data.stats} />
                         )}
 
                         {/* 5. Vista Padre (Resumen de Hijos) */}
-                        {can('dashboard.resumen.familiar') && data && (
+                        {can('dashboard.padre.resumen') && data && (
                             <div className="p-10 text-center bg-gray-50 rounded-2xl border-2 border-dashed">
                                 <h3 className="text-xl font-bold text-gray-800 mb-2">Panel de Familia</h3>
                                 <p className="text-gray-500">Aquí verás el resumen de tus {data.hijos?.length ?? 0} hijos.</p>

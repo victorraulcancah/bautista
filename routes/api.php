@@ -254,7 +254,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('asistencia/export-all', [AsistenciaGeneralApiController::class, 'exportAll']);
         Route::get('asistencia/historial', [AsistenciaGeneralApiController::class, 'historial']);
     });
-    Route::post('asistencia/marcar-qr', [AsistenciaGeneralApiController::class, 'marcarQR'])->middleware('permission:asistencia.escanear');
+    Route::post('asistencia/marcar-qr', [AsistenciaGeneralApiController::class, 'marcarQR'])->middleware('permission:asistencia.scanner.ver');
 
     // Reniec
     Route::get('reniec/dni/{dni}', [ReniecApiController::class, 'searchDni']);
@@ -273,12 +273,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('usuarios/{id}/credenciales', [UsuarioApiController::class, 'resetCredenciales']);
 
     // Roles y Permisos (Control de Acceso) - Privado Admin
-    Route::middleware(['permission:roles.editar'])->group(function () {
-        Route::get('seguridad/roles',              [AccessControlApiController::class, 'indexRoles']);
-        Route::post('seguridad/roles',             [AccessControlApiController::class, 'storeRole']);
-        Route::put('seguridad/roles/{id}',         [AccessControlApiController::class, 'updateRole']);
-        Route::delete('seguridad/roles/{id}',      [AccessControlApiController::class, 'destroyRole']);
-        Route::get('seguridad/permisos',           [AccessControlApiController::class, 'indexPermissions']);
+    Route::prefix('seguridad')->group(function () {
+        Route::get('roles',              [AccessControlApiController::class, 'indexRoles'])->middleware('permission:seguridad.roles.ver');
+        Route::post('roles',             [AccessControlApiController::class, 'storeRole'])->middleware('permission:seguridad.roles.crear');
+        Route::put('roles/{id}',         [AccessControlApiController::class, 'updateRole'])->middleware('permission:seguridad.roles.editar');
+        Route::delete('roles/{id}',      [AccessControlApiController::class, 'destroyRole'])->middleware('permission:seguridad.roles.eliminar');
+        Route::get('permisos',           [AccessControlApiController::class, 'indexPermissions'])->middleware('permission:seguridad.roles.ver');
     });
 
     // Configuración de Fotochecks

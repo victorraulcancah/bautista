@@ -10,10 +10,12 @@ import CursoFormModal from '../components/CursoFormModal';
 import CursosTable from '../components/CursosTable';
 import GradosTable from '../components/GradosTable';
 import type { Curso, CursoFormData, NivelOption } from '../hooks/useCursos';
+import { usePermission } from '@/hooks/usePermission';
 import { useCursosPage } from '../hooks/useCursosPage';
 
 export default function AdminCursos() {
     const niveles = useOptions<NivelOption>('/niveles');
+    const { can } = usePermission();
     const {
         nivelIdFromUrl,
         nivelNombre,
@@ -186,8 +188,8 @@ export default function AdminCursos() {
                     search={searchGrado}
                     onSearchChange={setSearchGrado}
                     onSelectGrado={handleSelectGrado}
-                    onEditGrado={openEditGrado}
-                    onDeleteGrado={confirmDeleteGrado}
+                    onEditGrado={can('academico.cursos.editar') ? openEditGrado : undefined}
+                    onDeleteGrado={can('academico.cursos.eliminar') ? confirmDeleteGrado : undefined}
                 />
             )}
 
@@ -198,9 +200,9 @@ export default function AdminCursos() {
                     search={searchCurso}
                     onSearchChange={setSearchCurso}
                     onBack={handleBack}
-                    onCreate={modoNivelDirecto ? openCreateCurso : openAsignarCurso}
-                    onEdit={openEditCurso}
-                    onDelete={confirmDeleteCurso}
+                    onCreate={can('academico.cursos.crear') ? (modoNivelDirecto ? openCreateCurso : openAsignarCurso) : undefined}
+                    onEdit={can('academico.cursos.editar') ? openEditCurso : undefined}
+                    onDelete={can('academico.cursos.eliminar') ? confirmDeleteCurso : undefined}
                     title={modoNivelDirecto ? `Cursos ${nivelNombre}` : selectedGrado?.nombre_grado ?? ''}
                     subtitle={modoNivelDirecto ? nivelNombre : selectedGrado?.nivel?.nombre_nivel ?? '—'}
                     modoNivelDirecto={modoNivelDirecto}

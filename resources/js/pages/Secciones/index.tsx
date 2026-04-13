@@ -7,6 +7,7 @@ import ResourceTable from '@/components/shared/ResourceTable';
 import { Button } from '@/components/ui/button';
 import { useOptions } from '@/hooks/useOptions';
 import { useResource } from '@/hooks/useResource';
+import { usePermission } from '@/hooks/usePermission';
 import type { BreadcrumbItem } from '@/types';
 import SeccionFormModal from './components/SeccionFormModal';
 import type { Seccion, GradoOption } from './hooks/useSecciones';
@@ -20,6 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function SeccionesPage() {
     const res    = useResource<Seccion>('/secciones');
     const grados = useOptions<GradoOption>('/grados');
+    const { can } = usePermission();
     const [modalOpen, setModalOpen]         = useState(false);
     const [editing, setEditing]             = useState<Seccion | null>(null);
     const [deleteModal, setDeleteModal] = useState<{
@@ -53,27 +55,31 @@ export default function SeccionesPage() {
                 search={res.search}
                 onSearch={res.setSearch}
                 flashSuccess={res.success}
-                btnLabel="Nueva Sección"
-                onNew={openCreate}
+                btnLabel={can('academico.secciones.crear') ? "Nueva Sección" : undefined}
+                onNew={can('academico.secciones.crear') ? openCreate : undefined}
             >
                 {res.rows && (
                     <ResourceTable
                         rows={res.rows}
                         columns={seccionesColumns}
                         getKey={(s) => s.seccion_id}
-                        onEdit={openEdit}
-                        onDelete={handleDelete}
+                        onEdit={can('academico.secciones.editar') ? openEdit : undefined}
+                        onDelete={can('academico.secciones.eliminar') ? handleDelete : undefined}
                         onPageChange={res.setPage}
                         extraActions={(s) => (
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="size-7 text-blue-500 hover:bg-blue-50"
-                                title="Horarios"
-                                onClick={() => window.location.href = `/secciones/${s.seccion_id}/horarios`}
-                            >
-                                <CalendarDays className="size-3.5" />
-                            </Button>
+                            <>
+                                {can('academico.horarios.ver') && (
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="size-7 text-blue-500 hover:bg-blue-50"
+                                        title="Horarios"
+                                        onClick={() => window.location.href = `/secciones/${s.seccion_id}/horarios`}
+                                    >
+                                        <CalendarDays className="size-3.5" />
+                                    </Button>
+                                )}
+                            </>
                         )}
                     />
                 )}

@@ -7,9 +7,9 @@ import { nombreCompleto, dniEstudiante } from '../hooks/useEstudiantes';
 
 type Props = {
     estudiantes:  Paginated<Estudiante>;
-    onEdit:       (e: Estudiante) => void;
-    onFotocheck:  (e: Estudiante) => void;
-    onDelete:     (e: Estudiante) => void;
+    onEdit?:       (e: Estudiante) => void;
+    onFotocheck?:  (e: Estudiante) => void;
+    onDelete?:     (e: Estudiante) => void;
     onPageChange: (page: number) => void;
 };
 
@@ -70,32 +70,38 @@ export default function EstudiantesTable({ estudiantes, onEdit, onFotocheck, onD
                                 </div>
 
                                 <div className="flex gap-1.5 pt-2 border-t">
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="flex-1 h-8 text-xs text-blue-500"
-                                        onClick={() => onEdit(est)}
-                                    >
-                                        <Pencil className="h-3.5 w-3.5 mr-1" />
-                                        Editar
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="flex-1 h-8 text-xs text-emerald-600"
-                                        onClick={() => onFotocheck(est)}
-                                    >
-                                        <Printer className="h-3.5 w-3.5 mr-1" />
-                                        Carnet
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-8 w-8 p-0 text-red-500"
-                                        onClick={() => onDelete(est)}
-                                    >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
+                                    {onEdit && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="flex-1 h-8 text-xs text-blue-500"
+                                            onClick={() => onEdit(est)}
+                                        >
+                                            <Pencil className="h-3.5 w-3.5 mr-1" />
+                                            Editar
+                                        </Button>
+                                    )}
+                                    {onFotocheck && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="flex-1 h-8 text-xs text-emerald-600"
+                                            onClick={() => onFotocheck(est)}
+                                        >
+                                            <Printer className="h-3.5 w-3.5 mr-1" />
+                                            Carnet
+                                        </Button>
+                                    )}
+                                    {onDelete && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-8 w-8 p-0 text-red-500"
+                                            onClick={() => onDelete(est)}
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -141,31 +147,37 @@ export default function EstudiantesTable({ estudiantes, onEdit, onFotocheck, onD
                                         <td className="px-3 py-2">{estadoBadge(est.estado)}</td>
                                         <td className="px-3 py-2">
                                             <div className="flex items-center justify-center gap-1">
-                                                <Button
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="size-7 text-blue-600 hover:bg-blue-50"
-                                                    onClick={() => onEdit(est)}
-                                                >
-                                                    <Pencil className="size-3.5" />
-                                                </Button>
-                                                <Button
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="size-7 text-emerald-600 hover:bg-emerald-50"
-                                                    title="Imprimir Fotocheck / Carnet"
-                                                    onClick={() => onFotocheck(est)}
-                                                >
-                                                    <Printer className="size-3.5" />
-                                                </Button>
-                                                <Button
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="size-7 text-red-500 hover:bg-red-50"
-                                                    onClick={() => onDelete(est)}
-                                                >
-                                                    <Trash2 className="size-3.5" />
-                                                </Button>
+                                                {onEdit && (
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="size-7 text-blue-600 hover:bg-blue-50"
+                                                        onClick={() => onEdit(est)}
+                                                    >
+                                                        <Pencil className="size-3.5" />
+                                                    </Button>
+                                                )}
+                                                {onFotocheck && (
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="size-7 text-emerald-600 hover:bg-emerald-50"
+                                                        title="Imprimir Fotocheck / Carnet"
+                                                        onClick={() => onFotocheck(est)}
+                                                    >
+                                                        <Printer className="size-3.5" />
+                                                    </Button>
+                                                )}
+                                                {onDelete && (
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="size-7 text-red-500 hover:bg-red-50"
+                                                        onClick={() => onDelete(est)}
+                                                    >
+                                                        <Trash2 className="size-3.5" />
+                                                    </Button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

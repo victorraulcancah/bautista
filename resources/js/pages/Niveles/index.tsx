@@ -6,6 +6,7 @@ import ResourceTable from '@/components/shared/ResourceTable';
 import { Button } from '@/components/ui/button';
 import { useOptions } from '@/hooks/useOptions';
 import { useResource } from '@/hooks/useResource';
+import { usePermission } from '@/hooks/usePermission';
 import type { BreadcrumbItem } from '@/types';
 import NivelFormModal from './components/NivelFormModal';
 import type { Nivel } from './hooks/useNiveles';
@@ -23,7 +24,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function NivelesPage() {
     const res = useResource<Nivel>('/niveles');
-    const instituciones = useOptions<Institucion>('/instituciones');
+    const institucionales = useOptions<Institucion>('/instituciones');
+    const { can } = usePermission();
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing]     = useState<Nivel | null>(null);
 
@@ -41,26 +43,30 @@ export default function NivelesPage() {
 
     const extraActions = (n: Nivel) => (
         <>
-            <Link href={`/grados?nivel_id=${n.nivel_id}`}>
-                <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="size-7 text-blue-600 hover:bg-blue-50"
-                    title="Gestionar Grados"
-                >
-                    <GraduationCap className="size-3.5" />
-                </Button>
-            </Link>
-            <Link href={`/cursos?nivel_id=${n.nivel_id}`}>
-                <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="size-7 text-red-600 hover:bg-red-50"
-                    title="Gestionar Cursos"
-                >
-                    <BookOpen className="size-3.5" />
-                </Button>
-            </Link>
+            {can('academico.cursos.ver') && (
+                <>
+                    <Link href={`/grados?nivel_id=${n.nivel_id}`}>
+                        <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="size-7 text-blue-600 hover:bg-blue-50"
+                            title="Gestionar Grados"
+                        >
+                            <GraduationCap className="size-3.5" />
+                        </Button>
+                    </Link>
+                    <Link href={`/cursos?nivel_id=${n.nivel_id}`}>
+                        <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="size-7 text-red-600 hover:bg-red-50"
+                            title="Gestionar Cursos"
+                        >
+                            <BookOpen className="size-3.5" />
+                        </Button>
+                    </Link>
+                </>
+            )}
         </>
     );
 
@@ -76,16 +82,16 @@ export default function NivelesPage() {
                 search={res.search}
                 onSearch={res.setSearch}
                 flashSuccess={res.success}
-                btnLabel="Nuevo Nivel"
-                onNew={openCreate}
+                btnLabel={can('academico.niveles.crear') ? "Nuevo Nivel" : undefined}
+                onNew={can('academico.niveles.crear') ? openCreate : undefined}
             >
                 {res.rows && (
                     <ResourceTable
                         rows={res.rows}
                         columns={nivelesColumns}
                         getKey={(n) => n.nivel_id}
-                        onEdit={openEdit}
-                        onDelete={handleDelete}
+                        onEdit={can('academico.niveles.editar') ? openEdit : undefined}
+                        onDelete={can('academico.niveles.eliminar') ? handleDelete : undefined}
                         extraActions={extraActions}
                         onPageChange={res.setPage}
                     />

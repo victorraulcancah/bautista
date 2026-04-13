@@ -10,9 +10,9 @@ type Props = {
     search: string;
     onSearchChange: (value: string) => void;
     onBack: () => void;
-    onCreate: () => void;
-    onEdit: (curso: Curso) => void;
-    onDelete: (curso: Curso) => void;
+    onCreate?: () => void;
+    onEdit?: (curso: Curso) => void;
+    onDelete?: (curso: Curso) => void;
     title: string;
     subtitle: string;
     modoNivelDirecto?: boolean;
@@ -76,11 +76,13 @@ export default function CursosTable({
                             className="pl-9 w-full sm:w-56 h-9 text-sm"
                         />
                     </div>
-                    <Button onClick={onCreate} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 h-9 text-sm shadow-lg shadow-emerald-100 font-bold">
-                        <Plus className="h-4 w-4" />
-                        <span className="hidden sm:inline">Agregar Curso</span>
-                        <span className="sm:hidden">Agregar</span>
-                    </Button>
+                    {onCreate && (
+                        <Button onClick={onCreate} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 h-9 text-sm shadow-lg shadow-emerald-100 font-bold">
+                            <Plus className="h-4 w-4" />
+                            <span className="hidden sm:inline">Agregar Curso</span>
+                            <span className="sm:hidden">Agregar</span>
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -123,23 +125,27 @@ export default function CursosTable({
                                     </div>
 
                                     <div className="flex gap-1.5 pt-2 border-t">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="flex-1 h-8 text-xs text-emerald-600 border-emerald-100 hover:bg-emerald-50"
-                                            onClick={() => onEdit(c)}
-                                        >
-                                            <Pencil className="h-3.5 w-3.5 mr-1" />
-                                            Editar
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="h-8 w-8 p-0 text-red-500"
-                                            onClick={() => onDelete(c)}
-                                        >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                        </Button>
+                                        {onEdit && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex-1 h-8 text-xs text-emerald-600 border-emerald-100 hover:bg-emerald-50"
+                                                onClick={() => onEdit(c)}
+                                            >
+                                                <Pencil className="h-3.5 w-3.5 mr-1" />
+                                                Editar
+                                            </Button>
+                                        )}
+                                        {onDelete && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="h-8 w-8 p-0 text-red-500"
+                                                onClick={() => onDelete(c)}
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -190,24 +196,28 @@ export default function CursosTable({
                                             </td>
                                             <td className="px-4 py-3 text-center">
                                                 <div className="flex items-center justify-center gap-1">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        className="h-8 w-8 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
-                                                        title="Editar curso"
-                                                        onClick={() => onEdit(c)}
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                                                        title="Eliminar curso"
-                                                        onClick={() => onDelete(c)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    {onEdit && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="h-8 w-8 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
+                                                            title="Editar curso"
+                                                            onClick={() => onEdit(c)}
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                    {onDelete && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                                            title="Eliminar curso"
+                                                            onClick={() => onDelete(c)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { ClipboardList, Eye } from 'lucide-react';
+import { usePermission } from '@/hooks/usePermission';
 import { useCallback, useEffect, useState } from 'react';
 import ResourceTable from '@/components/shared/ResourceTable';
 import type { Column } from '@/components/shared/ResourceTable';
@@ -19,6 +20,7 @@ export default function MatriculaGestion() {
     const [selectedAperturaId, setSelectedAperturaId] = useState<string>('');
     const [niveles, setNiveles] = useState<NivelCount[]>([]);
     const [loadingNiveles, setLoadingNiveles] = useState(false);
+    const { can } = usePermission();
 
     const selectedApertura = aperturas.find(a => a.apertura_id.toString() === selectedAperturaId) ?? null;
 
@@ -149,20 +151,24 @@ return;
                                         columns={columns}
                                         getKey={(n) => n.nivel_id?.toString() ?? `sin-nivel-${Math.random()}`}
                                         extraActions={(n) => (
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-lg h-9 w-9 p-0"
-                                                onClick={() => {
-                                                    if (n.nivel_id) {
-                                                        router.visit(`/matriculas/gestion/${selectedAperturaId}/nivel/${n.nivel_id}`);
-                                                    }
-                                                }}
-                                                disabled={!n.nivel_id}
-                                                title="Ver Registros"
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
+                                            <>
+                                                {can('matriculas.gestion.ver') && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-lg h-9 w-9 p-0"
+                                                        onClick={() => {
+                                                            if (n.nivel_id) {
+                                                                router.visit(`/matriculas/gestion/${selectedAperturaId}/nivel/${n.nivel_id}`);
+                                                            }
+                                                        }}
+                                                        disabled={!n.nivel_id}
+                                                        title="Ver Registros"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </>
                                         )}
                                         onPageChange={() => {}}
                                     />

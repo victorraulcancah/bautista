@@ -4,6 +4,7 @@ import { CalendarDays, QrCode, Eye, GraduationCap, UserCheck, FileSpreadsheet } 
 import ResourcePage from '@/components/shared/ResourcePage';
 import { Button } from '@/components/ui/button';
 import type { BreadcrumbItem } from '@/types';
+import { usePermission } from '@/hooks/usePermission';
 import HistorialModal from './components/HistorialModal';
 import ExportModal from './components/ExportModal';
 import { useAsistencia } from './hooks/useAsistencia';
@@ -18,6 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function AsistenciaIndex() {
     const [showExportModal, setShowExportModal] = useState(false);
+    const { can } = usePermission();
     
     const {
         tipo,
@@ -104,22 +106,26 @@ export default function AsistenciaIndex() {
                     </div>
 
                     <div className="flex gap-2">
-                        <Button 
-                            onClick={() => setShowExportModal(true)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-600/20 transition-all gap-2"
-                        >
-                            <FileSpreadsheet className="h-5 w-5" />
-                            <span className="hidden sm:inline">Exportar Excel</span>
-                            <span className="sm:hidden">Excel</span>
-                        </Button>
-                        
-                        <Link href="/asistencia/scanner">
-                            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all gap-2">
-                                <QrCode className="h-5 w-5" />
-                                <span className="hidden sm:inline">Escáner QR</span>
-                                <span className="sm:hidden">QR</span>
+                        {can('asistencia.reportes.exportar') && (
+                            <Button 
+                                onClick={() => setShowExportModal(true)}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-emerald-600/20 transition-all gap-2"
+                            >
+                                <FileSpreadsheet className="h-5 w-5" />
+                                <span className="hidden sm:inline">Exportar Excel</span>
+                                <span className="sm:hidden">Excel</span>
                             </Button>
-                        </Link>
+                        )}
+                        
+                        {can('asistencia.scanner.ver') && (
+                            <Link href="/asistencia/scanner">
+                                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all gap-2">
+                                    <QrCode className="h-5 w-5" />
+                                    <span className="hidden sm:inline">Escáner QR</span>
+                                    <span className="sm:hidden">QR</span>
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 </div>
 

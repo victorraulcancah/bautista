@@ -23,191 +23,223 @@ class RolesAndPermissionsSeeder extends Seeder
         DB::table('permissions')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // 1. Definir Permisos (CRUD COMPLETO EN ESPAÑOL)
+        // ═══════════════════════════════════════════════════════════════
+        // PERMISOS JERÁRQUICOS Y GRANULARES
+        // ═══════════════════════════════════════════════════════════════
+        
         $permissions = [
-            // Dashboard (Widgets Modulares)
+            // ─────────────────────────────────────────────────────────
+            // 1. DASHBOARD
+            // ─────────────────────────────────────────────────────────
             'dashboard.ver',
-            'dashboard.periodo.global',
-            'dashboard.mensajes.recientes',
-            'dashboard.accesos.admin',
-            'dashboard.cursos.asignados',
-            'dashboard.resumen.academico',
-            'dashboard.resumen.familiar',
+            'dashboard.stats.instituciones',
+            'dashboard.stats.docentes',
+            'dashboard.stats.estudiantes',
+            'dashboard.stats.cursos',
+            'dashboard.mensajes.pendientes',
+            'dashboard.notificaciones',
+            'dashboard.docente.resumen',
+            'dashboard.estudiante.resumen',
+            'dashboard.estudiante.stats',
+            'dashboard.padre.resumen',
             
-            // Institución
+            // ─────────────────────────────────────────────────────────
+            // 2. PERFIL
+            // ─────────────────────────────────────────────────────────
+            'perfil.ver',
+            'perfil.editar',
+            'perfil.foto',
+            'credencial.ver',
+            'credencial.qr',
+            
+            // ─────────────────────────────────────────────────────────
+            // 3. INSTITUCIÓN
+            // ─────────────────────────────────────────────────────────
             'institucion.ver',
-            'institucion.crear',
-            'institucion.editar',
-            'institucion.borrar',
+            'institucion.datos.ver',
+            'institucion.datos.crear',
+            'institucion.datos.editar',
+            'institucion.datos.eliminar',
+            'institucion.galeria.ver',
+            'institucion.galeria.crear',
+            'institucion.galeria.editar',
+            'institucion.galeria.eliminar',
+            'institucion.noticias.ver',
+            'institucion.noticias.crear',
+            'institucion.noticias.editar',
+            'institucion.noticias.eliminar',
+            'institucion.noticias.comentar',
             
-            // Niveles Académicos
-            'niveles.ver',
-            'niveles.crear',
-            'niveles.editar',
-            'niveles.borrar',
+            // ─────────────────────────────────────────────────────────
+            // 4. ACADÉMICO (Niveles, Grados, Secciones, Cursos)
+            // ─────────────────────────────────────────────────────────
+            'academico.ver',
+            'academico.niveles.ver',
+            'academico.niveles.crear',
+            'academico.niveles.editar',
+            'academico.niveles.eliminar',
+            'academico.cursos.ver',
+            'academico.cursos.crear',
+            'academico.cursos.editar',
+            'academico.cursos.eliminar',
+            'academico.secciones.ver',
+            'academico.secciones.crear',
+            'academico.secciones.editar',
+            'academico.secciones.eliminar',
+            'academico.horarios.ver',
+            'academico.horarios.editar',
 
-            // Cursos
-            'cursos.ver',
-            'cursos.crear',
-            'cursos.editar',
-            'cursos.borrar',
-
-            // Secciones
-            'secciones.ver',
-            'secciones.crear',
-            'secciones.editar',
-            'secciones.borrar',
+            // ─────────────────────────────────────────────────────────
+            // 5. PERSONAL (Docentes y Estudiantes)
+            // ─────────────────────────────────────────────────────────
+            'personal.ver',
+            'personal.docentes.ver',
+            'personal.docentes.crear',
+            'personal.docentes.editar',
+            'personal.docentes.eliminar',
+            'personal.docentes.cursos',
+            'personal.estudiantes.ver',
+            'personal.estudiantes.crear',
+            'personal.estudiantes.editar',
+            'personal.estudiantes.eliminar',
+            'personal.estudiantes.contactos',
+            'personal.estudiantes.fotocheck',
             
-            // Docentes
-            'docentes.ver',
-            'docentes.crear',
-            'docentes.editar',
-            'docentes.borrar',
-
-            // Estudiantes
-            'estudiantes.ver',
-            'estudiantes.crear',
-            'estudiantes.editar',
-            'estudiantes.borrar',
-
-            // Usuarios de Sistema
-            'usuarios.ver',
-            'usuarios.crear',
-            'usuarios.editar',
-            'usuarios.borrar',
-            
-            // Matrículas
+            // ─────────────────────────────────────────────────────────
+            // 6. MATRÍCULAS
+            // ─────────────────────────────────────────────────────────
             'matriculas.ver',
-            'matriculas.crear',
-            'matriculas.editar',
-            'matriculas.borrar',
-
-            // Asistencia
+            'matriculas.aperturas.ver',
+            'matriculas.aperturas.crear',
+            'matriculas.aperturas.editar',
+            'matriculas.aperturas.eliminar',
+            'matriculas.gestion.ver',
+            'matriculas.gestion.crear',
+            'matriculas.gestion.editar',
+            'matriculas.gestion.eliminar',
+            
+            // ─────────────────────────────────────────────────────────
+            // 7. ASISTENCIA
+            // ─────────────────────────────────────────────────────────
             'asistencia.ver',
-            'asistencia.crear',
-            'asistencia.editar',
-            'asistencia.borrar',
-            'asistencia.escanear',
+            'asistencia.reportes.ver',
+            'asistencia.reportes.exportar',
+            'asistencia.scanner.ver',
+            'asistencia.marcar.manual',
             
-            // Pagos / Tesorería
-            'pagos.ver',
-            'pagos.crear',
-            'pagos.editar',
-            'pagos.borrar',
+            // ─────────────────────────────────────────────────────────
+            // 8. ADMINISTRATIVO (Pagos, Comunicados)
+            // ─────────────────────────────────────────────────────────
+            'admin.ver',
+            'admin.pagos.ver',
+            'admin.pagos.crear',
+            'admin.pagos.editar',
+            'admin.pagos.eliminar',
+            'admin.pagos.vouchers',
+            'admin.pagos.reportes',
+            'admin.comunicados.ver',
+            'admin.comunicados.crear',
+            'admin.comunicados.editar',
+            'admin.comunicados.eliminar',
             
-            // Biblioteca
-            'biblioteca.ver',
-            'biblioteca.crear',
-            'biblioteca.editar',
-            'biblioteca.borrar',
-
-            // Comunicados
-            'comunicados.ver',
-            'comunicados.crear',
-            'comunicados.editar',
-            'comunicados.borrar',
-
-            // Mensajería
-            'mensajeria.ver',
-
-            // Roles y Seguridad
-            'roles.ver',
-            'roles.crear',
-            'roles.editar',
-            'roles.borrar',
+            // ─────────────────────────────────────────────────────────
+            // 9. RECURSOS (Biblioteca, Mensajería)
+            // ─────────────────────────────────────────────────────────
+            'recursos.ver',
+            'recursos.biblioteca.ver',
+            'recursos.biblioteca.carpetas',
+            'recursos.biblioteca.archivos',
+            'recursos.mensajeria.ver',
+            'recursos.mensajeria.enviar',
+            'recursos.mensajeria.grupos',
+            
+            // ─────────────────────────────────────────────────────────
+            // 10. SEGURIDAD Y CONFIGURACIÓN
+            // ─────────────────────────────────────────────────────────
             'seguridad.ver',
+            'seguridad.usuarios.ver',
+            'seguridad.usuarios.crear',
+            'seguridad.usuarios.editar',
+            'seguridad.usuarios.eliminar',
+            'seguridad.roles.ver',
+            'seguridad.roles.crear',
+            'seguridad.roles.editar',
+            'seguridad.roles.eliminar',
+            'seguridad.fotochecks.diseno',
 
-            // Portales Específicos
-            'portal.alumno.qr',
-            'portal.alumno.asistencia',
+            // ─────────────────────────────────────────────────────────
+            // 11. PORTALES (Específicos para Roles)
+            // ─────────────────────────────────────────────────────────
+            'portal.docente.ver',
+            'portal.docente.cursos',
             'portal.docente.alumnos',
-            'perfil.ver_credencial',
-            'configuracion.fotocheck',
-            'asistencia.reportes',
-            'configuracion.horarios',
+            'portal.docente.calificar',
+            'portal.docente.asistencia',
+            'portal.estudiante.ver',
+            'portal.estudiante.cursos',
+            'portal.estudiante.notas',
+            'portal.estudiante.asistencia',
+            'portal.estudiante.horario',
+            'portal.padre.ver',
+            'portal.padre.hijos',
+            'portal.padre.pagos',
         ];
 
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
 
-        // 2. Definir Roles y Asignar Permisos
+        // ─────────────────────────────────────────────────────────────
+        // ASIGNACIÓN DE ROLES
+        // ─────────────────────────────────────────────────────────────
         
-        // Administrador: Todo (Absolutamente todo el CRUD)
+        // ADMINISTRADOR
         $admin = Role::findOrCreate('administrador', 'web');
         $admin->syncPermissions(Permission::all());
 
-        // Rol Usuario Estándar (Herencia de todos los permisos por ahora según pedido)
+        // USUARIO BASE
         $usuario = Role::findOrCreate('usuario', 'web');
-        $usuario->syncPermissions(Permission::all());
+        $usuario->syncPermissions(['dashboard.ver', 'perfil.ver', 'perfil.editar']);
 
-        // Docente (Limitado a su portal y gestión básica)
+        // DOCENTE
         $docente = Role::findOrCreate('docente', 'web');
         $docente->syncPermissions([
-            'dashboard.ver',
-            'dashboard.cursos.asignados',
-            'dashboard.mensajes.recientes',
-            'portal.docente.alumnos',
-            'cursos.ver',
-            'estudiantes.ver',
-            'asistencia.ver',
-            'asistencia.crear',
-            'asistencia.editar',
-            'biblioteca.ver',
-            'comunicados.ver',
-            'mensajeria.ver',
-            'perfil.ver_credencial',
+            'dashboard.ver', 'dashboard.docente.resumen',
+            'perfil.ver', 'perfil.editar', 'credencial.ver',
+            'institucion.ver', 'institucion.datos.ver', 'institucion.galeria.ver', 'institucion.noticias.ver',
+            'portal.docente.ver', 'portal.docente.cursos', 'portal.docente.alumnos', 'portal.docente.calificar', 'portal.docente.asistencia',
+            'admin.comunicados.ver',
+            'recursos.biblioteca.ver', 'recursos.mensajeria.ver'
         ]);
 
-        // Estudiante (Solo vista personal)
+        // ESTUDIANTE
         $estudiante = Role::findOrCreate('estudiante', 'web');
         $estudiante->syncPermissions([
-            'dashboard.ver',
-            'dashboard.resumen.academico',
-            'dashboard.mensajes.recientes',
-            'portal.alumno.qr',
-            'portal.alumno.asistencia',
-            'cursos.ver',
-            'asistencia.ver',
-            'biblioteca.ver',
-            'comunicados.ver',
-            'perfil.ver_credencial',
+            'dashboard.ver', 'dashboard.estudiante.resumen', 'dashboard.estudiante.stats',
+            'perfil.ver', 'perfil.editar', 'credencial.ver',
+            'portal.estudiante.ver', 'portal.estudiante.cursos', 'portal.estudiante.notas', 'portal.estudiante.asistencia', 'portal.estudiante.horario',
+            'admin.comunicados.ver',
+            'recursos.biblioteca.ver', 'recursos.mensajeria.ver'
         ]);
 
-        // Padres de Familia / Apoderados
-        $padrePermissions = [
-            'dashboard.ver',
-            'dashboard.resumen.familiar',
-            'dashboard.mensajes.recientes',
-            'comunicados.ver'
-        ];
-
-        Role::findOrCreate('padre_familia', 'web')->syncPermissions($padrePermissions);
-        Role::findOrCreate('madre_familia', 'web')->syncPermissions($padrePermissions);
-        Role::findOrCreate('apoderado', 'web')->syncPermissions($padrePermissions);
-
-        // Psicólogo
-        $psicologo = Role::findOrCreate('psicologo', 'web');
-        $psicologo->syncPermissions([
-            'dashboard.ver',
-            'dashboard.periodo.global',
-            'dashboard.mensajes.recientes',
-            'estudiantes.ver',
-            'comunicados.ver',
-            'mensajeria.ver',
+        // PADRE
+        $padre = Role::findOrCreate('padre_familia', 'web');
+        $padre->syncPermissions([
+            'dashboard.ver', 'dashboard.padre.resumen',
+            'perfil.ver', 'perfil.editar',
+            'institucion.ver', 'institucion.datos.ver',
+            'portal.padre.ver', 'portal.padre.hijos', 'portal.padre.pagos',
+            'admin.comunicados.ver'
         ]);
 
-        // 3. Sincronizar Usuarios Existentes
-        $this->command->info('Sincronizando roles de usuarios existentes...');
-        
+        // Sincronizar Usuarios Existentes
+        $this->command->info('Sincronizando roles...');
         $users = User::whereNotNull('rol_id')->get();
         foreach ($users as $user) {
             $rolName = DB::table('roles')->where('id', $user->rol_id)->value('name');
-            if ($rolName) {
-                $user->assignRole($rolName);
-            }
+            if ($rolName) $user->assignRole($rolName);
         }
 
-        $this->command->info('¡Roles y permisos CRUD en ESPAÑOL sincronizados correctamente!');
+        $this->command->info('¡Sistema jerárquico global sincronizado!');
     }
 }
