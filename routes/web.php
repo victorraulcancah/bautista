@@ -36,7 +36,7 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/niveles',      fn () => Inertia::render('Niveles/index'))->middleware('permission:academico.niveles.ver')->name('niveles.index');
     Route::get('/grados',       fn () => Inertia::render('Grados/index'))->middleware('permission:academico.cursos.ver')->name('grados.index');
     Route::get('/secciones',    fn () => Inertia::render('Secciones/index'))->middleware('permission:academico.secciones.ver')->name('secciones.index');
-    Route::get('/cursos',       fn () => Inertia::render('Cursos/index'))->middleware('permission:academico.cursos.ver')->name('cursos.index');
+    Route::get('/cursos',       fn () => Inertia::render('Cursos/index'))->middleware('permission:academico.cursos.ver|portal.estudiante.cursos|portal.docente.cursos')->name('cursos.index');
     
     Route::get('/pagos',      fn () => Inertia::render('Pagos/index'))->middleware('permission:admin.pagos.ver')->name('pagos.index');
     
@@ -47,11 +47,11 @@ Route::middleware(['auth.token'])->group(function () {
         'nivelId'    => $nivelId,
     ]))->middleware('permission:matriculas.gestion.ver')->name('matriculas.nivel');
 
-    Route::get('/cursos/{id}/contenido',  fn (int $id) => Inertia::render('CursoContenido/index', ['cursoId' => $id]))->middleware('permission:academico.cursos.ver')->name('cursos.contenido');
+    Route::get('/cursos/{id}/contenido',  fn (int $id) => Inertia::render('CursoContenido/index', ['cursoId' => $id]))->middleware('permission:academico.cursos.ver|portal.estudiante.cursos|portal.docente.cursos')->name('cursos.contenido');
 
     Route::prefix('alumno')->name('alumno.')->middleware('permission:portal.estudiante.ver')->group(function () {
         Route::get('/dashboard', fn () => redirect()->route('dashboard'))->name('dashboard');
-        Route::get('/cursos',    fn () => redirect()->route('cursos.index'))->name('cursos.index');
+        Route::get('/cursos',    fn () => Inertia::render('Cursos/index'))->name('cursos.index');
         Route::get('/cursos/{id}', fn (int $id) => Inertia::render('PortalAlumno/Cursos/Detalle', ['cursoId' => $id]))->name('cursos.detalle');
         Route::get('/clase/{id}', fn (int $id) => Inertia::render('PortalAlumno/Clases/Ver', ['claseId' => $id]))->name('clase.ver');
         Route::get('/notas',     fn () => Inertia::render('PortalAlumno/Notas/index'))->name('notas.index');
@@ -70,7 +70,7 @@ Route::middleware(['auth.token'])->group(function () {
             return Inertia::render('Actividades/Puzzles/index', [
                 'puzzles' => $puzzles
             ]);
-        })->name('puzzles.index');
+        })->middleware('permission:portal.estudiante.puzzles')->name('puzzles.index');
 
         Route::get('/profesores', fn () => Inertia::render('PortalAlumno/Profesores'))->name('profesores');
         Route::get('/asistencia', fn () => Inertia::render('PortalAlumno/Asistencia'))->middleware('permission:portal.estudiante.asistencia')->name('asistencia');
@@ -82,6 +82,13 @@ Route::middleware(['auth.token'])->group(function () {
         Route::get('/mis-alumnos', [\App\Http\Controllers\DocenteController::class, 'misAlumnos'])->middleware('permission:portal.docente.alumnos')->name('mis-alumnos.index');
         Route::get('/cursos/{id}/contenido', fn (int $id) => Inertia::render('PortalDocente/Contenido/Editor', ['docenteCursoId' => $id]))->name('cursos.contenido');
         Route::get('/cursos/{id}/asistencia', fn (int $id) => Inertia::render('PortalDocente/Asistencia/PasarLista', ['docenteCursoId' => $id]))->name('cursos.asistencia');
+        
+        // Actividades y Calificaciones
+        Route::get('/actividades/{id}', fn (int $id) => Inertia::render('PortalDocente/DetalleActividad', ['actividadId' => $id]))->name('actividades.detalle');
+        Route::get('/actividades/{id}/entregas', fn (int $id) => Inertia::render('PortalDocente/CalificarActividad', ['actividadId' => $id]))->name('actividades.entregas');
+        Route::get('/actividades/{id}/calificar', fn (int $id) => Inertia::render('PortalDocente/CalificarActividad', ['actividadId' => $id]))->name('actividades.calificar');
+        Route::get('/actividades/{id}/calificar-examen', fn (int $id) => Inertia::render('PortalDocente/CalificarExamen', ['actividadId' => $id]))->name('actividades.calificar_examen');
+        Route::get('/actividades/{id}/cuestionario', fn (int $id) => Inertia::render('PortalDocente/Contenido/QuizBuilder', ['actividadId' => $id]))->name('actividades.cuestionario');
     });
 
     Route::prefix('padre')->name('padre.')->middleware('permission:portal.padre.hijos')->group(function () {

@@ -180,6 +180,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'portal.estudiante.notas',
             'portal.estudiante.asistencia',
             'portal.estudiante.horario',
+            'portal.estudiante.puzzles',
             'portal.padre.ver',
             'portal.padre.hijos',
             'portal.padre.pagos',
@@ -217,7 +218,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $estudiante->syncPermissions([
             'dashboard.ver', 'dashboard.estudiante.resumen', 'dashboard.estudiante.stats',
             'perfil.ver', 'perfil.editar', 'credencial.ver',
-            'portal.estudiante.ver', 'portal.estudiante.cursos', 'portal.estudiante.notas', 'portal.estudiante.asistencia', 'portal.estudiante.horario',
+            'portal.estudiante.ver', 'portal.estudiante.cursos', 'portal.estudiante.notas', 'portal.estudiante.asistencia', 'portal.estudiante.horario', 'portal.estudiante.puzzles',
             'admin.comunicados.ver',
             'recursos.biblioteca.ver', 'recursos.mensajeria.ver'
         ]);

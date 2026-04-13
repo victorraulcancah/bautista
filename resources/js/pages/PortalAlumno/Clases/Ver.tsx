@@ -45,8 +45,25 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
     };
 
     if (loading) {
-return <div className="p-10 text-center font-black animate-pulse text-indigo-600">Preparando el aula virtual...</div>;
-}
+        return <div className="p-10 text-center font-black animate-pulse text-indigo-600">Preparando el aula virtual...</div>;
+    }
+
+    if (!clase) {
+        return (
+            <AppSidebarLayout>
+                <div className="p-20 text-center space-y-6">
+                    <div className="size-20 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto text-rose-500">
+                        <AlertCircle size={40} />
+                    </div>
+                    <h2 className="text-2xl font-black text-gray-900">No pudimos cargar esta clase</h2>
+                    <p className="text-gray-500 font-bold">Es posible que no tengas permisos para ver este contenido o la clase ya no exista.</p>
+                    <Link href="/cursos">
+                        <Button className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 font-black px-8 h-12">Volver a mis cursos</Button>
+                    </Link>
+                </div>
+            </AppSidebarLayout>
+        );
+    }
 
     return (
         <AppSidebarLayout>
@@ -55,7 +72,7 @@ return <div className="p-10 text-center font-black animate-pulse text-indigo-600
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center space-x-6">
-                    <Link href={`/alumno/cursos/${clase.unidad?.curso_id}`}>
+                    <Link href={`/alumno/cursos/${clase.docen_curso_id || clase.unidad?.curso_id}`}>
                         <Button variant="ghost" className="h-12 w-12 rounded-2xl bg-white border border-gray-100 shadow-sm hover:bg-gray-50 p-0">
                             <ChevronLeft className="w-6 h-6" />
                         </Button>

@@ -133,4 +133,46 @@ class CursoContenidoApiController extends Controller
 
         return response()->json(null, 204);
     }
+
+    // ── Archivos de Actividad ────────────────────────────────────────────────
+    public function listarArchivosActividad(int $actividadId): JsonResponse
+    {
+        $archivos = \DB::table('archivos_actividad')
+            ->where('id_actividad', $actividadId)
+            ->where('origen', 'd') // Docente
+            ->get()
+            ->map(function($a) {
+                return [
+                    'archivo_id' => $a->archiv_actividad_id,
+                    'nombre' => $a->nombre_archivo,
+                    'url' => asset('storage/' . $a->archivo),
+                    'tipo' => $a->tipo_archivo,
+                    'created_at' => $a->created_at
+                ];
+            });
+
+        return response()->json($archivos);
+    }
+
+    public function subirArchivoActividad(Request $request, int $actividadId): JsonResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:20480'],
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->store("actividades/{$actividadId}", 'public');
+
+        \DB::table('archivos_actividad')->insert([
+            'id_actividad' => $actividadId,
+            'origen' => 'd',
+            'archivo' => $path,
+            'nombre_archivo' => $file->getClientOriginalName(),
+            'tipo_archivo' => $file->getClientOriginalExtension(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Archivo subido con éxito'], 201);
+    }
 }

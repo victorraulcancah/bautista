@@ -93,7 +93,7 @@ export default function ActividadesTab({ courseData, onRefresh }: Props) {
     };
 
     const handleViewSubmissions = (actividadId: number) => {
-        router.visit(`/docente/actividad/${actividadId}/entregas`);
+        router.visit(`/docente/actividades/${actividadId}/entregas`);
     };
 
     const filteredActividades = actividades.filter(act => {

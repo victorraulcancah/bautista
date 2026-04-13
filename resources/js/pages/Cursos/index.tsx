@@ -19,6 +19,12 @@ export default function CursosPage() {
             <div className="p-3 sm:p-6">
                 {/* Vista Administrativa (Gestión de Grados/Cursos) */}
                 {can('academico.cursos.ver') && <AdminCursos />}
+                
+                {/* Vista Alumno (Mis Cursos Inscritos) */}
+                {can('portal.estudiante.cursos') && <StudentCursos />}
+
+                {/* Vista Docente (Cursos Asignados) */}
+                {can('portal.docente.cursos') && <TeacherCursos />}
             </div>
         </AppLayout>
     );

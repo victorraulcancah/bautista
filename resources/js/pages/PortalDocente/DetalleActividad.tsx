@@ -40,7 +40,7 @@ export default function DetalleActividadPage({ actividadId }: Props) {
     };
 
     const handleSaveDescription = async (descripcion: string) => {
-        await api.put(`/docente/actividades/${actividadId}/descripcion`, { descripcion });
+        await api.put(`/docente/actividades/${actividadId}`, { descripcion_larga: descripcion });
         cargarDatos();
     };
 

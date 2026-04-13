@@ -209,6 +209,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('docente/curso/{id}/calificaciones', [\App\Http\Controllers\Api\CalificacionApiController::class, 'indexByCourse']);
         Route::get('docente/curso/{id}/exportar-excel', [\App\Http\Controllers\Api\CalificacionApiController::class, 'exportExcel']);
 
+        // Rutas adicionales para gestión de actividades desde el portal docente
+        Route::get('docente/actividades/{id}', [ActividadApiController::class, 'show']);
+        Route::get('docente/actividades/{id}/entregas', [ActividadApiController::class, 'entregas']);
+        Route::get('docente/actividades/{id}/examenes', [ActividadApiController::class, 'entregas']); // Alias para CalificarExamen.tsx
+        Route::post('docente/actividades/{id}/calificar', [CalificacionApiController::class, 'calificar']);
+        Route::post('docente/actividades/{id}/calificar-examen', [CalificacionApiController::class, 'calificar']); // Alias para CalificarExamen.tsx
+        Route::get('docente/actividades/{id}/archivos', [CursoContenidoApiController::class, 'listarArchivosActividad']);
+        Route::post('docente/actividades/{id}/archivos', [CursoContenidoApiController::class, 'subirArchivoActividad']);
+
         // Gestión de Contenido Académico
         Route::prefix('contenido')->group(function () {
             Route::post('unidades', [CursoContenidoApiController::class, 'storeUnidad']);

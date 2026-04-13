@@ -29,10 +29,15 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
     const [uploadingClaseId, setUploadingClaseId] = useState<number | null>(null);
     const [creatingActivityFor, setCreatingActivityFor] = useState<{ claseId: number; cursoId: number } | null>(null);
     const [expandedFiles, setExpandedFiles] = useState<Record<number, boolean>>({});
+    const [expandedClases, setExpandedClases] = useState<Record<number, boolean>>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const toggleSection = (id: number) => {
         setExpanded((s: any) => ({ ...s, [id]: !s[id] }));
+    };
+
+    const toggleClase = (id: number) => {
+        setExpandedClases(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
     const addUnidad = () => {
@@ -191,11 +196,14 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
                             <div className="px-6 pb-6 bg-white animate-in slide-in-from-top-2 duration-300">
                                 <div className="border-t border-gray-100 pt-4 space-y-3">
                                     {unidad.clases?.map((clase: any) => (
-                                        <div key={clase.clase_id} className="rounded-3xl border border-gray-100 hover:border-emerald-100 transition-all overflow-hidden bg-white">
-                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3">
+                                        <div key={clase.clase_id} className="rounded-3xl border border-gray-100 hover:border-emerald-100 transition-all overflow-hidden bg-white group/clase">
+                                            <div 
+                                                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 cursor-pointer hover:bg-gray-50/50"
+                                                onClick={() => toggleClase(clase.clase_id)}
+                                            >
                                                 <div className="flex items-center gap-3">
-                                                    <div className="size-8 rounded-xl bg-emerald-50 flex items-center justify-center">
-                                                        <FileText size={14} className="text-emerald-600" />
+                                                    <div className={`size-8 rounded-xl flex items-center justify-center transition-all ${expandedClases[clase.clase_id] ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-600'}`}>
+                                                        <FileText size={14} />
                                                     </div>
                                                     <span className="text-sm font-bold text-gray-700">{clase.titulo}</span>
                                                 </div>
@@ -203,7 +211,7 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
                                                     <Button 
                                                         variant="outline" 
                                                         size="sm" 
-                                                        onClick={() => handleFileUpload(clase.clase_id)}
+                                                        onClick={(e) => { e.stopPropagation(); handleFileUpload(clase.clase_id); }}
                                                         className="rounded-xl border-emerald-100 font-bold text-[10px] uppercase h-8 hover:bg-emerald-50 hover:text-emerald-600 gap-1"
                                                     >
                                                         <Upload size={12} /> Archivo
@@ -211,7 +219,7 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
                                                     <Button 
                                                         variant="outline" 
                                                         size="sm" 
-                                                        onClick={() => handleCreateActivity(clase.clase_id)}
+                                                        onClick={(e) => { e.stopPropagation(); handleCreateActivity(clase.clase_id); }}
                                                         className="rounded-xl border-purple-100 font-bold text-[10px] uppercase h-8 hover:bg-purple-50 hover:text-purple-600 gap-1"
                                                     >
                                                         <Sparkles size={12} /> Actividad
@@ -219,7 +227,7 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
                                                     <Button 
                                                         variant="ghost" 
                                                         size="icon" 
-                                                        onClick={() => renameClase(clase.clase_id, clase.titulo)}
+                                                        onClick={(e) => { e.stopPropagation(); renameClase(clase.clase_id, clase.titulo); }}
                                                         className="size-8 rounded-full text-gray-400 hover:text-emerald-600"
                                                     >
                                                         <Edit3 size={14} />
@@ -227,19 +235,22 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
                                                     <Button 
                                                         variant="ghost" 
                                                         size="icon" 
-                                                        onClick={() => setDeletingId({ id: clase.clase_id, type: 'clase' })}
+                                                        onClick={(e) => { e.stopPropagation(); setDeletingId({ id: clase.clase_id, type: 'clase' }); }}
                                                         className="size-8 rounded-full text-gray-400 hover:text-red-500"
                                                     >
                                                         <Trash2 size={14} />
                                                     </Button>
+                                                    <div className={`transition-transform duration-300 ${expandedClases[clase.clase_id] ? 'rotate-180' : ''}`}>
+                                                        <ChevronDown size={14} className="text-gray-400" />
+                                                    </div>
                                                 </div>
                                             </div>
 
                                             {/* Files and Activities */}
-                                            {(clase.archivos?.length > 0 || clase.actividades?.length > 0) && (
-                                                <div className="px-4 pb-4 space-y-3">
+                                            {expandedClases[clase.clase_id] && (
+                                                <div className="px-4 pb-4 space-y-3 border-t border-gray-50 pt-4 animate-in slide-in-from-top-2 duration-300">
                                                     {/* Files */}
-                                                    {clase.archivos?.length > 0 && (
+                                                    {clase.archivos?.length > 0 ? (
                                                         <div className="space-y-2">
                                                             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Archivos ({clase.archivos.length})</p>
                                                             <div className="space-y-2">
@@ -314,6 +325,10 @@ export default function ContenidoTab({ unidades, expanded, setExpanded, docenteC
                                                                     </div>
                                                                 ))}
                                                             </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-4 border-2 border-dashed border-gray-100 rounded-3xl">
+                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sin archivos adjuntos</p>
                                                         </div>
                                                     )}
 

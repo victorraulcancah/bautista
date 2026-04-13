@@ -144,7 +144,20 @@ class AlumnoApiController extends Controller
         $estudiante = Estudiante::where('user_id', $userId)->first();
         
         $dc = DocenteCurso::with('curso')->find($docenteCursoId);
-        if (!$dc) return response()->json(['message' => 'Curso no encontrado.'], 404);
+        
+        // Si no se encuentra por PK, tal vez nos enviaron el curso_id
+        if (!$dc && $estudiante) {
+            $matricula = Matricula::where('estu_id', $estudiante->estu_id)->where('estado', '1')->first();
+            if ($matricula) {
+                $dc = DocenteCurso::with('curso')
+                    ->where('curso_id', $docenteCursoId)
+                    ->where('seccion_id', $matricula->seccion_id)
+                    ->where('apertura_id', $matricula->apertura_id)
+                    ->first();
+            }
+        }
+
+        if (!$dc) return response()->json(['message' => 'Curso no encontrado o no matriculado.'], 404);
 
         $unidades = Unidad::where('curso_id', $dc->curso_id)
             ->with([
@@ -191,6 +204,21 @@ class AlumnoApiController extends Controller
         $clase = Clase::where('clase_id', $claseId)
             ->with(['unidad.curso', 'archivos', 'actividades.tipoActividad'])
             ->firstOrFail();
+
+        // Encontrar el docen_curso_id para este alumno y este curso para facilitar la navegación de regreso
+        $userId = $request->user()->id;
+        $estudiante = Estudiante::where('user_id', $userId)->first();
+        $matricula = $estudiante ? Matricula::where('estu_id', $estudiante->estu_id)->where('estado', '1')->first() : null;
+        
+        $docenCursoId = null;
+        if ($matricula) {
+            $docenCursoId = DocenteCurso::where('curso_id', $clase->unidad->curso_id)
+                ->where('seccion_id', $matricula->seccion_id)
+                ->where('apertura_id', $matricula->apertura_id)
+                ->value('docen_curso_id');
+        }
+
+        $clase->docen_curso_id = $docenCursoId;
 
         return response()->json($clase);
     }

@@ -73,7 +73,19 @@ export default function AccessControlManager() {
 
     const handleSelectRole = (role: Role) => {
         setSelectedRole(role);
-        setEditedPermissions(role.permissions.map(p => p.name));
+        
+        // Poblar editedPermissions con los permisos reales Y todos sus ancestros para la UI
+        const permsSet = new Set<string>();
+        role.permissions.forEach(p => {
+            const parts = p.name.split('.');
+            let current = '';
+            parts.forEach(part => {
+                current = current ? `${current}.${part}` : part;
+                permsSet.add(current);
+            });
+        });
+        
+        setEditedPermissions(Array.from(permsSet));
     };
 
     // --- Lógica de árbol ---

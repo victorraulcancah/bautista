@@ -72,7 +72,7 @@ const navigation: NavItem[] = [
         { title: 'Galería',       href: '/institucion/galeria', permission: 'institucion.galeria.ver' },
         { title: 'Noticias',      href: '/institucion/noticias', permission: 'institucion.noticias.ver' },
     ]},
-    { type: 'link', title: 'Comunicados',     icon: Newspaper,       href: '/comunicados', permission: 'admin.comunicados.ver' },
+    { type: 'link', title: 'Comunicados',     icon: Newspaper,       href: '/mensajes', permission: 'admin.comunicados.ver' },
     { type: 'link', title: 'Pagos',           icon: CreditCard,      href: '/pagos', permission: 'admin.pagos.ver' },
 
     // ── Información Académica ────────────────────────────────────────
@@ -96,7 +96,7 @@ const navigation: NavItem[] = [
         { title: 'Mis Cursos', href: '/alumno/cursos', permission: 'portal.estudiante.cursos' },
         { title: 'Mi Asistencia', href: '/alumno/asistencia', permission: 'portal.estudiante.asistencia' },
         { title: 'Mis Notas',   href: '/alumno/notas', permission: 'portal.estudiante.notas' },
-        { title: 'Rompecabezas', href: '/alumno/puzzles', permission: 'portal.estudiante.ver' },
+        { title: 'Rompecabezas', href: '/alumno/puzzles', permission: 'portal.estudiante.puzzles' },
     ]},
     { type: 'link', title: 'Portal Familia', icon: Users, href: '/padre/dashboard', permission: 'portal.padre.ver' },
 

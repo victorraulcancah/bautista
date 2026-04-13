@@ -41,21 +41,45 @@ class VerifyEstudianteCurso
             return response()->json(['message' => 'No tienes una matrícula activa.'], 403);
         }
 
-        // El ID puede venir como docenteCursoId (ID de asignación) o directamente como cursoId
+        // El ID puede venir como docenteCursoId (ID de asignación), cursoId o claseId
         $id = $request->route('id') 
             ?? $request->route('docenteCursoId') 
             ?? $request->input('docente_curso_id')
             ?? $request->input('docen_curso_id');
 
         if ($id) {
-            // Verificar si el estudiante pertenece a la sección/apertura de ese curso asignado
+            // Caso 1: El ID es una CLASE (ruta alumno/clase/{id})
+            if ($request->is('api/alumno/clase/*')) {
+                $clase = \App\Models\Clase::with('unidad')->find($id);
+                if ($clase && $clase->unidad) {
+                    $hasAccess = DocenteCurso::where('curso_id', $clase->unidad->curso_id)
+                        ->where('seccion_id', $matricula->seccion_id)
+                        ->where('apertura_id', $matricula->apertura_id)
+                        ->exists();
+
+                    if (!$hasAccess) {
+                        return response()->json(['message' => 'No tienes acceso a la clase de este curso.'], 403);
+                    }
+                    return $next($request);
+                }
+            }
+
+            // Caso 2: El ID es un ID de asignación (DocenteCurso)
             $hasAccess = DocenteCurso::where('docen_curso_id', $id)
                 ->where('seccion_id', $matricula->seccion_id)
                 ->where('apertura_id', $matricula->apertura_id)
                 ->exists();
 
             if (!$hasAccess) {
-                return response()->json(['message' => 'No tienes acceso a este curso asignado.'], 403);
+                // Si no es por asignación, quizás enviaron el curso_id directamente
+                $hasAccess = DocenteCurso::where('curso_id', $id)
+                    ->where('seccion_id', $matricula->seccion_id)
+                    ->where('apertura_id', $matricula->apertura_id)
+                    ->exists();
+                
+                if (!$hasAccess) {
+                    return response()->json(['message' => 'No tienes acceso a este recurso.'], 403);
+                }
             }
         }
 

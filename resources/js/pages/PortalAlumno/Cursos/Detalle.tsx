@@ -28,7 +28,12 @@ export default function CursoDetalleAlumno({ cursoId }: { cursoId: number }) {
 
             // Cargar estructura del curso
             const contentRes = await api.get(`/alumno/curso/${cursoId}`);
-            setUnidades(contentRes.data);
+            setUnidades(contentRes.data.unidades || []);
+            
+            // Si no tenemos la info básica del curso aún, la sacamos de aquí
+            if (!courseData && contentRes.data.curso) {
+                setCourseData({ curso: contentRes.data.curso });
+            }
         } catch (error) {
             console.error("Error cargando detalle del curso", error);
         } finally {
@@ -303,8 +308,8 @@ function NotasTab({ cursoId }: { cursoId: number }) {
             </div>
 
             <div className="grid gap-4">
-                {actividades.map((act: any) => (
-                    <Card key={act.id} className="rounded-[2.5rem] border-none shadow-sm p-8 flex items-center justify-between bg-white group hover:shadow-md transition-all">
+                {actividades.map((act: any, idx: number) => (
+                    <Card key={`${act.id || 'act'}-${idx}`} className="rounded-[2.5rem] border-none shadow-sm p-8 flex items-center justify-between bg-white group hover:shadow-md transition-all">
                         <div className="flex items-center gap-4">
                             <div className="size-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
                                 <FileText size={20} />
