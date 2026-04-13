@@ -28,6 +28,11 @@ export type Matricula = {
         genero:           string | null;
         user_id:          number | null;
         estado_user:      string | null;
+        perfil?: {
+            avatar:   string | null;
+            telefono: string | null;
+            direccion: string | null;
+        };
     } | null;
     seccion: {
         seccion_id: number;

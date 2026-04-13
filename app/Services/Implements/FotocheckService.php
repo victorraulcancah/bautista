@@ -143,18 +143,30 @@ class FotocheckService implements FotocheckServiceInterface
             $fotoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($imgPath));
         }
 
+        // Extract student metadata if available
+        $grado = null;
+        $seccion = null;
+        $estudiante = \App\Models\Estudiante::where('user_id', $user->id)->with('matriculas.seccion.grado')->first();
+        if ($estudiante && $estudiante->matriculas->isNotEmpty()) {
+            $lastMatricula = $estudiante->matriculas->first();
+            $grado = $lastMatricula->seccion->grado->nombre_grado ?? null;
+            $seccion = $lastMatricula->seccion->nombre ?? null;
+        }
+
         // Use Resource for standardized labels (manually mapping to array for blade)
         $resource = new FotocheckDataResource($user, $tipo, $idDisplay);
         $data = $resource->toArray(request());
 
         // Load Configuration
-        $config = ConfiguracionFotocheck::where('is_active', true)->first() ?? new ConfiguracionFotocheck();
+        $config = \App\Models\ConfiguracionFotocheck::where('is_active', true)->first() ?? new \App\Models\ConfiguracionFotocheck();
 
         return array_merge($data, [
             'qrSrc'   => $qrSrc,
             'fotoSrc' => $fotoSrc,
             'periodo' => $config->footer_text ?? date('Y'),
-            'config'  => $config
+            'config'  => $config,
+            'grado'   => $grado,
+            'seccion' => $seccion
         ]);
     }
 }

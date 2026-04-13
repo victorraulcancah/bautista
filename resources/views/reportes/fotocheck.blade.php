@@ -2,188 +2,250 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Fotocheck Estudiante</title>
+    <title>Fotocheck Institucional</title>
     <style>
-        /* Modern Vertical ID Card Spec (54x86mm) */
-        @page { margin: 0; padding: 0; }
+        /* Sincronizado con medidas.php (54mm x 85.6mm) */
+        @page {
+            margin: 0;
+            padding: 0;
+            size: 54mm 85.6mm;
+        }
+        
         body {
-            margin: 0; padding: 0;
-            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 54mm;
+            height: 85.6mm;
+            font-family: 'Helvetica', sans-serif;
             background-color: #ffffff;
-            width: 153.07pt; height: 243.78pt;
             position: relative;
             overflow: hidden;
-            color: #1e293b;
-            line-height: 1.2;
         }
 
-        /* 1. Header (Dynamic Logo/Name) */
-        .header-top {
-            position: absolute; top: 0; left: 0; width: 100%; height: 50pt;
-            background: #ffffff;
+        /* 1. Cabecera (18mm) */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 54mm;
+            height: 18mm;
+            background-color: #ffffff;
+            text-align: center;
             z-index: 10;
         }
-        .header-content {
-            position: absolute; top: 6pt; left: 0; width: 100%;
-            text-align: center; z-index: 11;
+
+        .logo-container {
+            width: 30mm;
+            height: 11mm;
+            margin: 2mm auto 1mm;
+            display: block;
         }
-        .logo-box {
-            height: 18pt; margin: 0 auto 2pt;
+
+        .logo-container img {
+            max-width: 100%;
+            max-height: 100%;
         }
-        .logo-box img { height: 100%; }
+
         .school-name {
-            margin: 0; font-size: 5.5pt; font-weight: 800; color: #1e3a8a;
-            text-transform: uppercase; letter-spacing: 0.1pt;
-        }
-        .card-type {
-            margin: 0; font-size: 4pt; font-weight: 400; color: #64748b;
-            letter-spacing: 1.2pt; text-transform: uppercase;
+            font-size: 5pt;
+            font-weight: 900;
+            color: {{ $config->primary_color ?? '#1e3a8a' }};
+            text-transform: uppercase;
+            margin: 0;
+            letter-spacing: 0.2pt;
         }
 
-        /* 2. Photo (High Visual Impact) */
-        .photo-outer {
-            position: absolute; top: 38pt; left: 50%;
-            transform: translateX(-50%);
-            width: 72pt; height: 84pt;
-            background: #ffffff;
-            border-radius: 2pt; padding: 2.5pt;
-            box-shadow: 0 2pt 5pt rgba(0,0,0,0.1);
-            z-index: 20;
-        }
-        .photo-inner {
-            width: 100%; height: 100%; border-radius: 1pt;
-            overflow: hidden; background: #f8fafc;
-        }
-        .photo-inner img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* 3. Identity Area (Dynamic Background) */
-        .main-body {
-            position: absolute; top: 50pt; left: 0; width: 100%; height: 168pt;
+        /* 2. Área Central (Color Secundario) */
+        .main-background {
+            position: absolute;
+            top: 18mm;
+            left: 0;
+            width: 54mm;
+            height: 59mm; /* Hasta antes del footer */
             background-color: {{ $config->secondary_color ?? '#7b8780' }};
             z-index: 1;
         }
-        .identity-area {
-            position: absolute; top: 125pt; left: 0; width: 100%;
-            text-align: center; z-index: 30;
+
+        /* 3. Foto (32mm x 32mm) */
+        .photo-frame {
+            position: absolute;
+            top: 15mm; /* Solapa un poco con la cabecera como en el diseño React */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32mm;
+            height: 32mm;
+            background-color: #ffffff;
+            border: 1mm solid #ffffff;
+            border-radius: 1mm;
+            box-shadow: 0 1mm 2mm rgba(0,0,0,0.2);
+            z-index: 20;
+            overflow: hidden;
         }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 4. Identidad y Datos */
+        .identity-container {
+            position: absolute;
+            top: 48mm;
+            left: 0;
+            width: 54mm;
+            text-align: center;
+            z-index: 30;
+        }
+
         .badge {
-            display: inline-block; padding: 2pt 15pt;
-            background: {{ $config->primary_color ?? '#2c63f2' }};
+            display: inline-block;
+            background-color: {{ $config->primary_color ?? '#2c63f2' }};
             color: #ffffff;
-            font-size: 6.5pt; font-weight: 800;
-            margin-bottom: 8pt; text-transform: uppercase;
-            letter-spacing: 0.5pt;
+            font-size: 6pt;
+            font-weight: 900;
+            padding: 1.5pt 10pt;
+            text-transform: uppercase;
+            margin-bottom: 2mm;
         }
+
         .full-name {
-            margin: 0; padding: 0 6pt; font-size: 10pt; font-weight: 900;
+            font-size: 9pt;
+            font-weight: 900;
             color: {{ $config->text_color ?? '#ffffff' }};
-            line-height: 1; text-transform: uppercase;
+            text-transform: uppercase;
+            margin: 0;
+            padding: 0 2mm;
+            line-height: 1.1;
         }
 
-        /* 4. Bottom Data */
-        .bottom-data {
-            position: absolute; bottom: 35pt; right: 8pt;
-            width: 80pt; z-index: 40; text-align: left;
+        /* 5. Datos Inferiores y QR */
+        .bottom-area {
+            position: absolute;
+            top: 60mm;
+            left: 4mm;
+            width: 46mm;
+            height: 14mm;
+            z-index: 40;
         }
-        .data-row { margin-bottom: 2pt; color: {{ $config->text_color ?? '#ffffff' }}; }
+
+        .qr-code {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 14mm;
+            height: 14mm;
+            background-color: #ffffff;
+            padding: 1mm;
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .metadata {
+            position: absolute;
+            left: 17mm;
+            top: 0;
+            width: 29mm;
+            text-align: left;
+        }
+
+        .data-row {
+            margin-bottom: 1pt;
+        }
+
         .label {
-            font-size: 4.5pt; font-weight: 700; opacity: 0.8;
-            text-transform: uppercase; line-height: 1;
-        }
-        .value {
-            font-size: 6pt; font-weight: 800;
-            display: block; line-height: 1; margin-top: 0.5pt;
+            font-size: 4pt;
+            font-weight: 800;
+            color: {{ $config->text_color ?? '#ffffff' }};
+            opacity: 0.7;
+            text-transform: uppercase;
+            display: block;
         }
 
-        /* 5. Fixed QR */
-        .qr-anchor {
-            position: absolute; bottom: 35pt; left: 10pt;
-            width: 32pt; height: 32pt;
-            background: #ffffff; padding: 2pt;
-            box-shadow: 0 2pt 4pt rgba(0,0,0,0.1);
+        .value {
+            font-size: 5.5pt;
+            font-weight: 900;
+            color: {{ $config->text_color ?? '#ffffff' }};
+            display: block;
+            margin-top: -1pt;
+        }
+
+        /* 6. Footer (8.6mm) */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 54mm;
+            height: 8.6mm;
+            background-color: {{ $config->primary_color ?? '#2c63f2' }};
+            color: #ffffff;
+            text-align: center;
+            line-height: 8.6mm;
             z-index: 50;
         }
-        .qr-anchor img { width: 100%; height: 100%; }
 
-        /* 6. Footer bar */
-        .footer-bar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 26pt;
-            background: {{ $config->primary_color ?? '#2c63f2' }};
-            text-align: center; z-index: 60;
-        }
         .footer-text {
-            line-height: 26pt; font-size: 6.5pt; font-weight: 800;
-            color: #ffffff; letter-spacing: 0.5pt; text-transform: uppercase;
+            font-size: 5.5pt;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-top"></div>
-    <div class="header-content">
-        <div class="logo-box">
+    <div class="header">
+        <div class="logo-container">
             @if($config->logo_path)
-                <img src="{{ public_path('storage/' . $config->logo_path) }}" alt="Logo" />
+                <img src="{{ public_path('storage/' . $config->logo_path) }}" alt="Logo">
             @else
-                <img src="{{ public_path('images/logo.png') }}" alt="Logo" />
+                <img src="{{ public_path('images/logo.png') }}" alt="Logo">
             @endif
         </div>
-        <h1 class="school-name">IEP BAUTISTA LA PASCANA</h1>
-        <p class="card-type">Fotocheck</p>
+        <p class="school-name">IEP BAUTISTA LA PASCANA</p>
     </div>
 
-    <!-- Fondo Principal Dinámico -->
-    <div class="main-body"></div>
+    <div class="main-background"></div>
 
-    <!-- Foto Central -->
-    <div class="photo-outer">
-        <div class="photo-inner">
-            @if($fotoSrc)
-                <img src="{{ $fotoSrc }}" alt="F" />
-            @else
-                <div style="text-align: center; line-height: 84pt; color: #ccc;">S/F</div>
-            @endif
+    <div class="photo-frame">
+        @if($fotoSrc)
+            <img src="{{ $fotoSrc }}" alt="Foto">
+        @else
+            <div style="width: 100%; height: 100%; background: #eee;"></div>
+        @endif
+    </div>
+
+    <div class="identity-container">
+        <div class="badge">{{ $tipo }}</div>
+        <h1 class="full-name">{{ mb_strtoupper($nombre) }}</h1>
+    </div>
+
+    <div class="bottom-area">
+        <div class="qr-code">
+            <img src="{{ $qrSrc }}" alt="QR">
+        </div>
+        <div class="metadata">
+            <div class="data-row">
+                <span class="label">ID Sistema</span>
+                <span class="value">{{ $idDisplay }}</span>
+            </div>
+            <div class="data-row">
+                <span class="label">DNI / Documento</span>
+                <span class="value">{{ $dni ?? '----------' }}</span>
+            </div>
+            <div class="data-row">
+                <span class="label">Grado / Sección</span>
+                <span class="value">{{ $grado ?? 'PERSONAL' }} - {{ $seccion ?? 'S/S' }}</span>
+            </div>
         </div>
     </div>
 
-    <!-- Identidad -->
-    <div class="identity-area">
-        <h2 class="full-name">
-            {{ mb_strtoupper($user->perfil->nombre_completo) }}
-        </h2>
-        <div style="margin-top: 8pt">
-            <div class="badge">{{ $tipo }}</div>
-        </div>
+    <div class="footer">
+        <span class="footer-text">{{ $config->footer_text ?? 'Periodo Académico '.date('Y') }}</span>
     </div>
-
-    <!-- Datos Inferiores (Derecha) -->
-    <div class="bottom-data">
-        <div class="data-row">
-            <span class="label">ID:</span>
-            <span class="value">{{ $idDisplay }}</span>
-        </div>
-        <div class="data-row">
-            <span class="label">DNI:</span>
-            <span class="value">{{ $user->perfil->doc_numero ?? '--------' }}</span>
-        </div>
-        <div class="data-row">
-            <span class="label">Periodo:</span>
-            <span class="value">{{ date('Y') }}</span>
-        </div>
-    </div>
-
-    <!-- Código QR (Izquierda) -->
-    <div class="qr-anchor">
-        <img src="{{ $qrSrc }}" alt="QR" />
-    </div>
-
-    <!-- Footer -->
-    <div class="footer-bar">
-        <div class="footer-text">{{ $config->footer_text ?? 'Periodo Académico '.date('Y') }}</div>
-    </div>
-
-</body>
-</html>
 
 </body>
 </html>

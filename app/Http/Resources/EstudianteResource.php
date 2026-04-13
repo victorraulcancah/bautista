@@ -27,6 +27,7 @@ class EstudianteResource extends JsonResource
                 'segundo_nombre'   => $this->perfil->segundo_nombre,
                 'apellido_paterno' => $this->perfil->apellido_paterno,
                 'apellido_materno' => $this->perfil->apellido_materno,
+                'avatar'           => $this->perfil->foto_perfil ? asset('storage/' . $this->perfil->foto_perfil) : null,
                 'genero'           => $this->perfil->genero,
                 'doc_numero'       => $this->perfil->doc_numero,
                 'fecha_nacimiento' => $this->perfil->fecha_nacimiento,

@@ -139,11 +139,15 @@ export default function CredencialDigital() {
                             <TabsContent value="card" className="w-full flex flex-col items-center gap-8 mt-0 focus-visible:outline-none">
                                 {user && config && (
                                     <>
-                                        <FotocheckCardPreview user={getFotocheckUser()!} config={config} />
+                                        <FotocheckCardPreview 
+                                            user={getFotocheckUser()!} 
+                                            config={config} 
+                                            className="scale-[1.5] sm:scale-[1.7] transform origin-top mb-64"
+                                        />
                                         <Button 
                                             onClick={handleDownloadPDF}
                                             variant="outline"
-                                            className="rounded-2xl h-12 px-12 border-blue-200 text-blue-600 font-black uppercase text-[10px] tracking-widest hover:bg-blue-50 gap-2"
+                                            className="rounded-2xl h-12 px-12 border-blue-200 text-blue-600 font-black uppercase text-[10px] tracking-widest hover:bg-blue-50 gap-2 shadow-sm"
                                         >
                                             <Download className="size-4" /> Descargar Fotocheck Oficial
                                         </Button>
@@ -154,7 +158,7 @@ export default function CredencialDigital() {
                     )}
                 </Tabs>
 
-                <p className="text-sm text-gray-400 flex items-center gap-2 font-medium">
+                <p className="text-sm text-gray-400 flex items-center gap-2 font-medium mt-16">
                     <span className="size-1.5 rounded-full bg-blue-500 animate-pulse" />
                     Identificación Institucional - Bautista La Pascana
                 </p>

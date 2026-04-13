@@ -56,9 +56,8 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
     const [editEstApiErrors, setEditEstApiErrors] = useState<Record<string, string[]>>({});
 
     // Fotocheck modal
-    const [fotoOpen, setFotoOpen]           = useState(false);
-    const [fotoEstId, setFotoEstId]         = useState<number | null>(null);
-    const [fotoEstNombre, setFotoEstNombre] = useState('');
+    const [fotoOpen, setFotoOpen]   = useState(false);
+    const [selectedMatricula, setSelectedMatricula] = useState<Matricula | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard',           href: '/dashboard' },
@@ -185,13 +184,8 @@ return;
     };
 
     const openFotocheck = (m: Matricula) => {
-        if (!m.estu_id) {
-return;
-}
-
-        const nombre = [m.estudiante?.primer_nombre, m.estudiante?.apellido_paterno].filter(Boolean).join(' ');
-        setFotoEstId(m.estu_id);
-        setFotoEstNombre(nombre);
+        if (!m.estu_id) return;
+        setSelectedMatricula(m);
         setFotoOpen(true);
     };
 
@@ -540,8 +534,7 @@ return;
             <FotocheckModal
                 open={fotoOpen}
                 onClose={() => setFotoOpen(false)}
-                estudianteId={fotoEstId}
-                estudianteNombre={fotoEstNombre}
+                matricula={selectedMatricula}
             />
 
             <EstudianteFormModal

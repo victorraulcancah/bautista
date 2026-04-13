@@ -26,15 +26,18 @@ interface User {
 interface Props {
     user: User;
     config: Configuration;
+    className?: string;
 }
 
-export default function FotocheckCardPreview({ user, config }: Props) {
+export default function FotocheckCardPreview({ user, config, className }: Props) {
     const primaryColor = config.primary_color || '#2c63f2';
     const secondaryColor = config.secondary_color || '#7b8780';
     const textColor = config.text_color || '#ffffff';
 
     return (
-        <div className="w-[54mm] h-[85.6mm] bg-white shadow-2xl rounded-sm overflow-hidden flex flex-col font-sans border-[0.6mm] border-black scale-[1.7] transform origin-top mb-44">
+        <div 
+            className={`w-[54mm] h-[85.6mm] bg-white shadow-2xl rounded-sm overflow-hidden flex flex-col font-sans border-[0.6mm] border-black ${className || ''}`}
+        >
             
             {/* Header: Exact 18mm height */}
             <div className="h-[18mm] flex flex-col items-center p-0 bg-white relative z-10 border-b border-gray-100">

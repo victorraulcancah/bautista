@@ -259,7 +259,11 @@ export default function ConfiguracionFotocheck() {
                             <CreditCard className="size-3" /> Previsualización en Vivo
                         </div>
                         <div className="scale-90 xl:scale-100 origin-top">
-                             <FotocheckCardPreview user={previewUser} config={config} />
+                             <FotocheckCardPreview 
+                                user={previewUser} 
+                                config={config} 
+                                className="scale-[1.7] transform origin-top mb-44"
+                             />
                         </div>
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center max-w-xs">
                             Los cambios guardados se aplicarán instantáneamente a todos los carnets digitales y PDF generados.

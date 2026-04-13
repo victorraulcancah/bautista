@@ -15,7 +15,11 @@ class FotocheckRepository implements FotocheckRepositoryInterface
      */
     public function findEstudianteById(int $id): ?Estudiante
     {
-        return Estudiante::with(['perfil', 'user'])->find($id);
+        return Estudiante::with([
+            'perfil', 
+            'user', 
+            'matriculas' => fn($q) => $q->latest()->with('seccion.grado')
+        ])->find($id);
     }
 
     /**
