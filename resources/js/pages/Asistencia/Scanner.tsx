@@ -18,9 +18,16 @@ export default function AsistenciaScanner() {
     const [tipo, setTipo] = useState<'entrada' | 'salida'>('entrada');
     const [error, setError] = useState<string | null>(null);
     const [scanning, setScanning] = useState(false);
+    const [isSecure, setIsSecure] = useState(true);
     const scannerRef = useRef<Html5QrcodeScanner | null>(null);
     const tipoRef = useRef(tipo);
     const scanningRef = useRef(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setIsSecure(window.isSecureContext);
+        }
+    }, []);
 
     useEffect(() => {
         tipoRef.current = tipo;
@@ -30,10 +37,16 @@ export default function AsistenciaScanner() {
     useEffect(() => {
         loadHistorial();
         
-        if (!scannerRef.current) {
+        if (!scannerRef.current && window.isSecureContext) {
             scannerRef.current = new Html5QrcodeScanner(
                 "reader", 
-                { fps: 20, qrbox: { width: 450, height: 350 } }, 
+                { 
+                    fps: 20, 
+                    qrbox: { width: 450, height: 350 },
+                    aspectRatio: 1.0,
+                    showTorchButtonIfSupported: true,
+                    showZoomSliderIfSupported: true,
+                }, 
                 /* verbose= */ false
             );
             scannerRef.current.render(onScanSuccess, onScanFailure);
@@ -138,16 +151,39 @@ return;
                                 }`} />
                                 
                                 <div className="relative aspect-square bg-white rounded-[2rem] border-2 border-neutral-200 p-3 overflow-hidden shadow-xl">
-                                    <div id="reader" className="w-full h-full overflow-hidden rounded-xl border border-neutral-100" />
-                                    
-                                    {/* Overlay al escanear */}
-                                    {scanning && (
-                                        <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300 z-50">
-                                            <div className={`w-12 h-12 border-4 rounded-full animate-spin mb-4 ${
-                                                tipo === 'entrada' ? 'border-emerald-600 border-t-transparent' : 'border-rose-600 border-t-transparent'
-                                            }`} />
-                                            <span className="font-extrabold uppercase tracking-[0.3em] text-[10px] text-neutral-600">Procesando...</span>
+                                    {!isSecure ? (
+                                        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-rose-50 rounded-xl space-y-4">
+                                            <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center">
+                                                <Shield className="w-8 h-8 text-rose-600" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <h3 className="text-rose-900 font-black uppercase text-sm tracking-tight">Conexión Insegura</h3>
+                                                <p className="text-rose-600 text-xs font-medium leading-relaxed">
+                                                    El acceso a la cámara requiere una conexión <span className="font-black">HTTPS</span> por seguridad. 
+                                                    Contacte al administrador para habilitar el certificado SSL.
+                                                </p>
+                                            </div>
+                                            <div className="pt-4 w-full">
+                                                <div className="bg-white/50 border border-thin border-rose-200 p-3 rounded-lg text-left">
+                                                    <p className="text-[10px] text-rose-800 font-bold uppercase mb-1">Causa técnica:</p>
+                                                    <code className="text-[9px] text-rose-600 font-mono break-all">DOMException: Permission denied (Secure Context Required)</code>
+                                                </div>
+                                            </div>
                                         </div>
+                                    ) : (
+                                        <>
+                                            <div id="reader" className="w-full h-full overflow-hidden rounded-xl border border-neutral-100" />
+                                            
+                                            {/* Overlay al escanear */}
+                                            {scanning && (
+                                                <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300 z-50">
+                                                    <div className={`w-12 h-12 border-4 rounded-full animate-spin mb-4 ${
+                                                        tipo === 'entrada' ? 'border-emerald-600 border-t-transparent' : 'border-rose-600 border-t-transparent'
+                                                    }`} />
+                                                    <span className="font-extrabold uppercase tracking-[0.3em] text-[10px] text-neutral-600">Procesando...</span>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>
