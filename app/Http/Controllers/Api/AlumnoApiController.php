@@ -379,24 +379,61 @@ class AlumnoApiController extends Controller
             return response()->json(['message' => 'No se encontró perfil de estudiante.'], 404);
         }
 
-        $notas = NotaActividad::where('estu_id', $estudiante->estu_id)
+        // Obtener matrícula activa
+        $matricula = Matricula::where('estu_id', $estudiante->estu_id)
+            ->where('estado', '1')
+            ->first();
+
+        if (!$matricula) {
+            return response()->json([]);
+        }
+
+        // Obtener cursos del alumno
+        $docenteCursos = DocenteCurso::where('seccion_id', $matricula->seccion_id)
+            ->where('apertura_id', $matricula->apertura_id)
+            ->with(['curso'])
+            ->get();
+
+        // Obtener notas
+        $notasRaw = NotaActividad::where('estu_id', $estudiante->estu_id)
             ->with(['actividad.tipoActividad'])
-            ->get()
-            ->map(function($n) {
-                return [
-                    'id' => $n->id,
-                    'nota' => $n->nota,
-                    'observacion' => $n->observacion,
-                    'created_at' => $n->created_at?->toDateTimeString(),
-                    'actividad' => [
-                        'nombre_actividad' => $n->actividad->nombre_actividad,
-                        'tipo' => [
-                            'nombre' => $n->actividad->tipoActividad?->nombre ?? 'Tarea'
-                        ]
-                    ]
-                ];
+            ->get();
+
+        $resultado = $docenteCursos->map(function ($dc) use ($notasRaw) {
+            $curso = $dc->curso;
+            
+            $notasCurso = $notasRaw->filter(function ($n) use ($curso) {
+                return $n->actividad && $n->actividad->id_curso == $curso->curso_id;
             });
 
-        return response()->json($notas);
+            $agrupadoPorTipo = $notasCurso->groupBy(function ($n) {
+                return $n->actividad->tipoActividad?->nombre ?? 'Actividad';
+            })->map(function ($notas, $tipo) {
+                return [
+                    'tipo' => $tipo,
+                    'items' => $notas->map(function ($n) {
+                        return [
+                            'id' => $n->id,
+                            'nombre' => $n->actividad->nombre_actividad,
+                            'nota' => $n->nota,
+                            'observacion' => $n->observacion,
+                            'fecha' => $n->created_at?->toDateString(),
+                        ];
+                    })->values()
+                ];
+            })->values();
+
+            $soloNotas = $notasCurso->pluck('nota')->filter(fn($v) => is_numeric($v));
+            $promedio = $soloNotas->count() > 0 ? round($soloNotas->avg(), 1) : null;
+
+            return [
+                'curso_id' => $curso->curso_id,
+                'nombre_curso' => $curso->nombre,
+                'promedio' => $promedio,
+                'grupos' => $agrupadoPorTipo
+            ];
+        });
+
+        return response()->json($resultado);
     }
 }
