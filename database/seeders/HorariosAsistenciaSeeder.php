@@ -28,35 +28,20 @@ class HorariosAsistenciaSeeder extends Seeder
         
         if ($niveles->isEmpty()) {
             $this->command->warn('⚠️  No hay niveles educativos en la base de datos.');
-            $this->command->info('💡 Creando horarios generales sin nivel específico...');
+            $this->command->info('💡 Creando niveles educativos por defecto...');
             
-            // Crear horarios generales (sin nivel específico)
-            $horariosGenerales = [
-                [
-                    'insti_id' => $instiId,
-                    'nivel_id' => null,
-                    'tipo_usuario' => 'E',
-                    'turno' => 'M',
-                    'hora_ingreso' => '07:30:00',
-                    'hora_salida' => '13:00:00',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                [
-                    'insti_id' => $instiId,
-                    'nivel_id' => null,
-                    'tipo_usuario' => 'D',
-                    'turno' => 'M',
-                    'hora_ingreso' => '07:00:00',
-                    'hora_salida' => '14:00:00',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
+            // Crear niveles educativos básicos
+            $nivelesData = [
+                ['nombre_nivel' => 'Inicial', 'created_at' => now(), 'updated_at' => now()],
+                ['nombre_nivel' => 'Primaria', 'created_at' => now(), 'updated_at' => now()],
+                ['nombre_nivel' => 'Secundaria', 'created_at' => now(), 'updated_at' => now()],
             ];
             
-            DB::table('horarios_asistencia')->insert($horariosGenerales);
-            $this->command->info('✅ Horarios generales creados');
-            return;
+            DB::table('niveles_educativos')->insert($nivelesData);
+            $this->command->info('✅ Niveles educativos creados: Inicial, Primaria, Secundaria');
+            
+            // Recargar niveles
+            $niveles = DB::table('niveles_educativos')->get();
         }
 
         $this->command->info('📚 Niveles encontrados: ' . $niveles->count());
