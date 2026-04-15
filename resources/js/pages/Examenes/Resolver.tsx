@@ -192,11 +192,23 @@ export default function ResolverExamenPage({ actividadId, estudianteId, activida
                             </div>
 
                             {/* Question Body */}
-                            <div className="p-10 md:p-14 flex-1 flex flex-col items-stretch space-y-12">
+                            <div className="p-10 md:p-14 flex-1 flex flex-col items-stretch gap-8">
                                 {currentPregunta.cuerpo && (
                                     <div className="prose prose-xl prose-indigo max-w-none text-gray-700 font-medium leading-relaxed bg-gray-50/50 p-8 rounded-[2rem] border border-gray-100" 
                                          dangerouslySetInnerHTML={{ __html: currentPregunta.cuerpo }} 
                                     />
+                                )}
+
+                                {currentPregunta.recurso_imagen && (
+                                    <div className="w-full flex justify-center">
+                                        <div className="w-full max-w-lg h-64 rounded-[2rem] overflow-hidden border-2 border-indigo-100 bg-gray-50 shadow-lg shadow-indigo-50">
+                                            <img
+                                                src={currentPregunta.recurso_imagen.startsWith('http') ? currentPregunta.recurso_imagen : `/storage/${currentPregunta.recurso_imagen}`}
+                                                alt="Imagen de apoyo"
+                                                className="w-full h-full object-contain"
+                                            />
+                                        </div>
+                                    </div>
                                 )}
 
                                 <div className="flex-1 w-full">

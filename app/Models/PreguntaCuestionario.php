@@ -11,7 +11,7 @@ class PreguntaCuestionario extends Model
     protected $primaryKey = 'pregunta_id';
 
     protected $fillable = [
-        'id_cuestionario', 'cabecera', 'cuerpo', 'tipo_respuesta', 'valor_nota',
+        'id_cuestionario', 'cabecera', 'cuerpo', 'tipo_respuesta', 'valor_nota', 'recurso_imagen',
     ];
 
     public function cuestionario(): BelongsTo

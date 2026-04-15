@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Save, PlusCircle, Trash2, Eye, Clock, FileText, CheckCircle2, X } from 'lucide-react';
+import { ArrowLeft, Save, PlusCircle, Trash2, Eye, Clock, FileText, CheckCircle2, X, Image as ImageIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,6 +98,25 @@ export default function QuizBuilder({ docenteCursoId, actividadId }: { docenteCu
             estado_res: i === aIndex ? '1' : '0'
         }));
         setCuestionario({ ...cuestionario, preguntas: p });
+    };
+
+    const handleImageUpload = (pIndex: number, file: File) => {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        api.post(`/actividades/${actividadId}/cuestionario/upload-image`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        .then(res => {
+            updatePregunta(pIndex, 'recurso_imagen', res.data.path);
+        })
+        .catch(() => alert('Error al subir la imagen.'));
+    };
+
+    const getImageUrl = (path: string) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        return `/storage/${path}`;
     };
 
     const handleSave = () => {
@@ -220,6 +239,40 @@ return (
                                             className="h-14 font-black text-xl text-center text-emerald-600 bg-emerald-50 border-emerald-100 rounded-2xl"
                                         />
                                     </div>
+                                </div>
+
+                                {/* Recurso de Imagen */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[10px] font-black text-emerald-400 uppercase tracking-widest px-2 block">Imagen de Apoyo (Opcional)</label>
+                                        <div className="relative">
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                onChange={(e) => e.target.files?.[0] && handleImageUpload(pIndex, e.target.files[0])}
+                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                            />
+                                            <Button type="button" variant="outline" size="sm" className="rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50">
+                                                <ImageIcon className="w-4 h-4 mr-2" /> {p.recurso_imagen ? 'Cambiar Imagen' : 'Subir Imagen'}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {p.recurso_imagen && (
+                                        <div className="relative w-full max-w-lg mx-auto h-56 rounded-2xl overflow-hidden border-2 border-emerald-100 bg-gray-50 group/img">
+                                            <img 
+                                                src={getImageUrl(p.recurso_imagen)} 
+                                                alt="Recurso" 
+                                                className="w-full h-full object-contain"
+                                            />
+                                            <button 
+                                                onClick={() => updatePregunta(pIndex, 'recurso_imagen', null)}
+                                                className="absolute top-2 right-2 bg-rose-500 text-white p-2 rounded-full shadow-lg opacity-0 group-hover/img:opacity-100 transition-opacity"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Opciones */}

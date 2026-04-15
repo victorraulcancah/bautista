@@ -1,8 +1,9 @@
 import { ExamenConfig, Question, Alternative } from '../../hooks/useExamenConfig';
-import { Plus, Trash2, CheckCircle2, Circle, Shield, Clock, Lock, Shuffle, Eye, Sparkles, Award } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Circle, Clock, Award, Image as ImageIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import api from '@/lib/api';
 
 interface Props {
     config: ExamenConfig;
@@ -24,6 +25,16 @@ export default function ExamenConfigForm({
     const handleUpdateQuestion = (index: number, field: keyof Question, value: any) => {
         const updated = { ...config.questions[index], [field]: value };
         updateQuestion(index, updated);
+    };
+
+    const handleImageUpload = (qIndex: number, file: File) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        api.post('/actividades/cuestionario/upload-image-temp', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }).then(res => {
+            handleUpdateQuestion(qIndex, 'recurso_imagen', res.data.path);
+        }).catch(() => alert('Error al subir la imagen.'));
     };
 
     const handleUpdateAlternative = (qIndex: number, aIndex: number, field: keyof Alternative, value: any) => {
@@ -179,6 +190,31 @@ export default function ExamenConfigForm({
                                                     placeholder="Escribe el enunciado de la pregunta..."
                                                     className="flex-1 h-12 rounded-2xl font-black text-gray-800 border-none bg-gray-50 focus:ring-4 focus:ring-rose-50 transition-all"
                                                 />
+                                            </div>
+
+                                            {/* Imagen de apoyo */}
+                                            <div className="flex items-center gap-3 px-1">
+                                                <div className="relative">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(e) => e.target.files?.[0] && handleImageUpload(qIndex, e.target.files[0])}
+                                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                                    />
+                                                    <Button type="button" variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-500 hover:bg-rose-50 text-[10px] font-black uppercase tracking-widest gap-2">
+                                                        <ImageIcon size={12} /> {q.recurso_imagen ? 'Cambiar Imagen' : 'Añadir Imagen'}
+                                                    </Button>
+                                                </div>
+                                                {q.recurso_imagen && (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-24 h-14 rounded-xl overflow-hidden border border-rose-100 bg-gray-50">
+                                                            <img src={q.recurso_imagen.startsWith('http') ? q.recurso_imagen : `/storage/${q.recurso_imagen}`} alt="preview" className="w-full h-full object-contain" />
+                                                        </div>
+                                                        <button type="button" onClick={() => handleUpdateQuestion(qIndex, 'recurso_imagen', null)} className="p-1 text-rose-300 hover:text-rose-500">
+                                                            <X size={14} />
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="flex flex-wrap items-center gap-3 px-1">

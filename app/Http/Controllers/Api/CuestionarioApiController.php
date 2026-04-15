@@ -10,6 +10,7 @@ use App\Models\PreguntaCuestionario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CuestionarioApiController extends Controller
 {
@@ -48,9 +49,12 @@ class CuestionarioApiController extends Controller
             'nota_visible' => 'required|in:1,0',
             'mostrar_respuesta' => 'required|in:1,0',
             'preguntas' => 'array',
+            'preguntas.*.pregunta_id' => 'nullable',
             'preguntas.*.cabecera' => 'required|string',
             'preguntas.*.valor_nota' => 'required|numeric|min:0',
+            'preguntas.*.recurso_imagen' => 'nullable|string',
             'preguntas.*.alternativas' => 'required|array|min:2',
+            'preguntas.*.alternativas.*.alternativa_id' => 'nullable',
             'preguntas.*.alternativas.*.contenido' => 'required|string',
             'preguntas.*.alternativas.*.estado_res' => 'required|in:1,0',
         ]);
@@ -81,8 +85,9 @@ class CuestionarioApiController extends Controller
                     $pregunta = PreguntaCuestionario::find($pData['pregunta_id']);
                     if ($pregunta) {
                         $pregunta->update([
-                            'cabecera'   => $pData['cabecera'],
-                            'valor_nota' => $pData['valor_nota'],
+                            'cabecera'       => $pData['cabecera'],
+                            'valor_nota'     => $pData['valor_nota'],
+                            'recurso_imagen' => $pData['recurso_imagen'] ?? null,
                         ]);
                     }
                 } else {
@@ -90,6 +95,7 @@ class CuestionarioApiController extends Controller
                         'id_cuestionario' => $cuestionario->cuestionario_id,
                         'cabecera'       => $pData['cabecera'],
                         'valor_nota'     => $pData['valor_nota'],
+                        'recurso_imagen' => $pData['recurso_imagen'] ?? null,
                         'cuerpo'         => $pData['cuerpo'] ?? '',
                         'tipo_respuesta' => 1, // Múltiple
                     ]);
@@ -130,5 +136,26 @@ class CuestionarioApiController extends Controller
             DB::rollBack();
             return response()->json(['message' => 'Error interno al guardar: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Sube una imagen para una pregunta del cuestionario.
+     */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:5120',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('quizzes/questions', 'public');
+            
+            return response()->json([
+                'path' => $path,
+                'url' => Storage::disk('public')->url($path)
+            ]);
+        }
+
+        return response()->json(['message' => 'No se pudo subir la imagen.'], 400);
     }
 }

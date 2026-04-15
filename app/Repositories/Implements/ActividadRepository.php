@@ -36,8 +36,8 @@ class ActividadRepository implements ActividadRepositoryInterface
                 $cuestionario = \App\Models\Cuestionario::create([
                     'id_actividad'      => $actividad->actividad_id,
                     'duracion'          => $config['duracion'] ?? 0,
-                    'nota_visible'      => $config['show_correct_answer'] ? '1' : '0',
-                    'mostrar_respuesta' => $config['show_correct_answer'] ? '1' : '0',
+                    'nota_visible'      => ($config['show_correct_answer'] ?? $config['show_grade'] ?? false) ? '1' : '0',
+                    'mostrar_respuesta' => ($config['show_correct_answer'] ?? $config['show_grade'] ?? false) ? '1' : '0',
                     'estado'            => '1',
                 ]);
 
@@ -58,6 +58,7 @@ class ActividadRepository implements ActividadRepositoryInterface
                         'cuerpo'         => $qData['cabecera'] ?? '',
                         'tipo_respuesta' => $tipoId,
                         'valor_nota'     => $qData['valor_nota'] ?? 0,
+                        'recurso_imagen' => $qData['recurso_imagen'] ?? null,
                     ]);
 
                     if (isset($qData['alternativas']) && is_array($qData['alternativas'])) {
@@ -69,6 +70,8 @@ class ActividadRepository implements ActividadRepositoryInterface
                         }
                     }
                 }
+
+                $actividad->load('cuestionario.preguntas.alternativas');
             }
 
             return $actividad;

@@ -155,6 +155,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('actividades',   ActividadApiController::class)->names('api.actividades');
     Route::get('actividades/{id}/cuestionario', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'show']);
     Route::put('actividades/{id}/cuestionario', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'sync']);
+    Route::post('actividades/{id}/cuestionario/upload-image', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'uploadImage']);
+    Route::post('actividades/cuestionario/upload-image-temp', [\App\Http\Controllers\Api\CuestionarioApiController::class, 'uploadImage']);
     Route::get('actividades/{id}/notas', [CalificacionApiController::class, 'indexByActivity']);
     Route::post('actividades/{id}/calificar', [CalificacionApiController::class, 'calificar']);
     Route::post('examenes/comenzar', [ExamenResolucionApiController::class, 'comenzar']);

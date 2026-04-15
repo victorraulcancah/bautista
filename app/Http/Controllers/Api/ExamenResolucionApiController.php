@@ -73,12 +73,13 @@ class ExamenResolucionApiController extends Controller
                     ->first();
                 
                 return [
-                    'pregunta_id' => $p->pregunta_id,
-                    'cabecera'    => $p->cabecera,
-                    'cuerpo'      => $p->cuerpo,
-                    'tipo'        => $p->tipo_respuesta,
-                    'valor'       => $p->valor_nota,
-                    'alternativas' => $p->alternativas,
+                    'pregunta_id'    => $p->pregunta_id,
+                    'cabecera'       => $p->cabecera,
+                    'cuerpo'         => $p->cuerpo,
+                    'tipo'           => $p->tipo_respuesta,
+                    'valor'          => $p->valor_nota,
+                    'recurso_imagen' => $p->recurso_imagen,
+                    'alternativas'   => $p->alternativas,
                     'respuesta_estudiante' => [
                         'alternativa_id' => $resp?->alternativa_id,
                         'texto'          => $resp?->respuesta_texto,

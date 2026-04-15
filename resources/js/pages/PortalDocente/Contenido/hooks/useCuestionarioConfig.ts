@@ -9,6 +9,7 @@ export interface Question {
     cabecera: string;
     tipo_respuesta: 'multiple' | 'true_false' | 'likert' | 'open';
     valor_nota: number;
+    recurso_imagen?: string | null;
     alternativas: Alternative[];
 }
 

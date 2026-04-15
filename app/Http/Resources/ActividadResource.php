@@ -45,12 +45,13 @@ class ActividadResource extends JsonResource
                     'mostrar_respuesta' => $cuestionario->mostrar_respuesta,
                     'estado'            => $cuestionario->estado,
                     'preguntas'         => $cuestionario->relationLoaded('preguntas') ? $cuestionario->preguntas->map(fn($p) => [
-                        'pregunta_id'   => $p->pregunta_id,
-                        'cabecera'      => $p->cabecera,
-                        'cuerpo'        => $p->cuerpo,
-                        'tipo_respuesta'=> $p->tipo_respuesta,
-                        'valor_nota'    => $p->valor_nota,
-                        'alternativas'  => $p->alternativas ? $p->alternativas->map(fn($a) => [
+                        'pregunta_id'    => $p->pregunta_id,
+                        'cabecera'       => $p->cabecera,
+                        'cuerpo'         => $p->cuerpo,
+                        'tipo_respuesta' => $p->tipo_respuesta,
+                        'valor_nota'     => $p->valor_nota,
+                        'recurso_imagen' => $p->recurso_imagen,
+                        'alternativas'   => $p->alternativas ? $p->alternativas->map(fn($a) => [
                             'alternativa_id' => $a->alternativa_id,
                             'contenido'      => $a->contenido,
                             'es_correcta'    => $a->estado_res === '1',
