@@ -35,12 +35,6 @@ export default function AlumnoNotasPage() {
         );
     }
 
-    // Calcular promedio general basado en el promedio de cada curso
-    const cursosConNota = cursos.filter(c => c.promedio !== null);
-    const promedioGeneral = (cursosConNota.length > 0) 
-        ? (cursosConNota.reduce((acc, c) => acc + parseFloat(c.promedio), 0) / cursosConNota.length).toFixed(1) 
-        : '---';
-
     // Función para manejar el clic en un curso
     const handleCourseClick = (curso: any) => {
         setSelectedCourse(curso);
@@ -74,19 +68,6 @@ export default function AlumnoNotasPage() {
                             iconColor="bg-amber-500"
                         />
                     </div>
-
-                    {!selectedCourse && (
-                        <div className="w-full lg:w-72">
-                            <StatCard 
-                                title="Promedio General"
-                                value={promedioGeneral}
-                                icon={TrendingUp}
-                                color={promedioGeneral !== '---' && parseFloat(promedioGeneral) >= 11 ? 'text-blue-600' : 'text-red-600'}
-                                iconBg="bg-amber-500"
-                                href="#"
-                            />
-                        </div>
-                    )}
 
                     {selectedCourse && (
                         <div className="flex items-center gap-4 rounded-2xl bg-white border border-gray-100 p-4 shadow-sm">
