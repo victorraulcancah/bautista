@@ -91,6 +91,8 @@ export default function CreateActivityModal({ open, onClose, claseId, cursoId, o
                             onUpdateMaxFileSize={tareaHook.updateMaxFileSize}
                             onUpdateMaxAttempts={tareaHook.updateMaxAttempts}
                             onToggleFormat={tareaHook.toggleFormat}
+                            onAddFile={tareaHook.addFile}
+                            onRemoveFile={tareaHook.removeFile}
                         />
                     )}
 

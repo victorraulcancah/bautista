@@ -17,7 +17,7 @@ class ActividadCurso extends Model
         'fecha_inicio', 'fecha_cierre',
         'nota_visible', 'nota_actividad', 'respuesta_visible',
         'ocultar_actividad', 'estado', 'es_calificado',
-        'peso_porcentaje', 'puntos_maximos',
+        'peso_porcentaje', 'puntos_maximos', 'allowed_formats',
     ];
 
     protected $casts = [

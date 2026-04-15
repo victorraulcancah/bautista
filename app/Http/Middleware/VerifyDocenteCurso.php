@@ -38,9 +38,20 @@ class VerifyDocenteCurso
 
         // Si tenemos un ID de asignación (DocenteCurso)
         if ($id) {
+            // Primero intentar como docen_curso_id directo
             $hasAccess = DocenteCurso::where('docente_id', $docente->docente_id)
                 ->where('docen_curso_id', $id)
                 ->exists();
+
+            // Si no, puede ser un actividadId — resolver el curso_id desde la actividad
+            if (!$hasAccess) {
+                $cursoIdFromActividad = \App\Models\ActividadCurso::where('actividad_id', $id)->value('id_curso');
+                if ($cursoIdFromActividad) {
+                    $hasAccess = DocenteCurso::where('docente_id', $docente->docente_id)
+                        ->where('curso_id', $cursoIdFromActividad)
+                        ->exists();
+                }
+            }
 
             if (!$hasAccess) {
                 return response()->json(['message' => 'No tienes permiso para acceder a este curso.'], 403);

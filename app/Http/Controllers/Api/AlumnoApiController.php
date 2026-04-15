@@ -227,9 +227,24 @@ class AlumnoApiController extends Controller
                     ->where('estu_id', $estudiante->estu_id)
                     ->first();
                 $act->nota = $nota?->nota;
-                // Consideramos entregado si hay archivo, fecha de entrega o si ya tiene nota (ej. exámenes)
                 $act->entregado = $nota && ($nota->archivo_entrega || $nota->fecha_entrega || $nota->nota !== null);
                 $act->fecha_entrega = $nota?->fecha_entrega;
+
+                // Archivos del docente para esta actividad
+                $act->archivos_docente = \DB::table('archivos_actividad')
+                    ->where('id_actividad', $act->actividad_id)
+                    ->where('origen', 'd')
+                    ->get()
+                    ->map(fn($a) => [
+                        'nombre' => $a->nombre_archivo,
+                        'url'    => '/storage/' . $a->archivo,
+                        'tipo'   => $a->tipo_archivo,
+                    ]);
+
+                // Formatos permitidos para entrega
+                $act->allowed_formats = $act->allowed_formats
+                    ? explode(',', $act->allowed_formats)
+                    : ['pdf', 'docx', 'jpg', 'png'];
             });
         }
 
@@ -242,7 +257,7 @@ class AlumnoApiController extends Controller
     public function entregarActividad(Request $request, int $actividadId)
     {
         $request->validate([
-            'archivo' => 'required|file|max:10240',
+            'archivo' => 'required|file|max:3072|mimes:pdf,doc,docx,jpg,jpeg,png,gif,webp,xlsx,xls,zip,rar',
         ]);
 
         $userId = $request->user()->id;

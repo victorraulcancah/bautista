@@ -64,14 +64,28 @@ class VerifyEstudianteCurso
                 }
             }
 
-            // Caso 2: El ID es un ID de asignación (DocenteCurso)
+            // Caso 2: El ID es una ACTIVIDAD (ruta alumno/actividad/{id}/...)
+            if ($request->is('api/alumno/actividad/*')) {
+                $cursoIdFromActividad = \App\Models\ActividadCurso::where('actividad_id', $id)->value('id_curso');
+                if ($cursoIdFromActividad) {
+                    $hasAccess = DocenteCurso::where('curso_id', $cursoIdFromActividad)
+                        ->where('seccion_id', $matricula->seccion_id)
+                        ->where('apertura_id', $matricula->apertura_id)
+                        ->exists();
+                    if (!$hasAccess) {
+                        return response()->json(['message' => 'No tienes acceso a este recurso.'], 403);
+                    }
+                    return $next($request);
+                }
+            }
+
+            // Caso 3: El ID es un ID de asignación (DocenteCurso)
             $hasAccess = DocenteCurso::where('docen_curso_id', $id)
                 ->where('seccion_id', $matricula->seccion_id)
                 ->where('apertura_id', $matricula->apertura_id)
                 ->exists();
 
             if (!$hasAccess) {
-                // Si no es por asignación, quizás enviaron el curso_id directamente
                 $hasAccess = DocenteCurso::where('curso_id', $id)
                     ->where('seccion_id', $matricula->seccion_id)
                     ->where('apertura_id', $matricula->apertura_id)

@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, Send, AlertCircle, BookOpen, Menu, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,6 +32,9 @@ export default function ResolverExamenPage({
     const [timeLeft, setTimeLeft] = useState(0);
     const [submitting, setSubmitting] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    // Local text state for open-ended questions (avoids API call on every keystroke)
+    const [openText, setOpenText] = useState<Record<number, string>>({});
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const [showConfirm, setShowConfirm] = useState(false);
     const [alertConfig, setAlertConfig] = useState<{
@@ -47,6 +50,14 @@ export default function ResolverExamenPage({
                 setExamen(data);
                 const limit = new Date(data.fecha_limite).getTime();
                 setTimeLeft(Math.max(0, Math.floor((limit - Date.now()) / 1000)));
+                // Pre-fill open text state from existing answers
+                const texts: Record<number, string> = {};
+                data.preguntas.forEach((p: any) => {
+                    if (p.respuesta_estudiante?.texto) {
+                        texts[p.pregunta_id] = p.respuesta_estudiante.texto;
+                    }
+                });
+                setOpenText(texts);
             })
             .catch(err => {
                 setAlertConfig({
@@ -90,6 +101,15 @@ export default function ResolverExamenPage({
         } catch (err) {
             console.error('Error saving answer', err);
         }
+    };
+
+    // For open-ended: update local state immediately, debounce the API call 1s
+    const handleOpenText = (preguntaId: number, texto: string) => {
+        setOpenText(prev => ({ ...prev, [preguntaId]: texto }));
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            handleAnswer(preguntaId, { texto });
+        }, 1000);
     };
 
     const finalizeExam = async () => {
@@ -278,8 +298,8 @@ export default function ResolverExamenPage({
                                         <Textarea
                                             rows={6}
                                             placeholder="Escribe tu respuesta aquí..."
-                                            value={currentPregunta.respuesta_estudiante?.texto || ''}
-                                            onChange={e => handleAnswer(currentPregunta.pregunta_id, { texto: e.target.value })}
+                                            value={openText[currentPregunta.pregunta_id] ?? ''}
+                                            onChange={e => handleOpenText(currentPregunta.pregunta_id, e.target.value)}
                                             className="resize-none text-sm font-medium rounded-xl border-gray-200 focus:border-indigo-400 focus:ring-indigo-100"
                                         />
                                     </div>

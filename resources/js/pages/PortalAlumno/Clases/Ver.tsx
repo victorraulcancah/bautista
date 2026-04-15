@@ -18,13 +18,27 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
             .finally(() => setLoading(false));
     }, [claseId]);
 
-    const handleUpload = (actividadId: number) => {
+    const handleUpload = (actividadId: number, allowedFormats?: string[]) => {
+        const formats = allowedFormats && allowedFormats.length > 0 ? allowedFormats : ['pdf', 'doc', 'docx', 'jpg', 'png'];
+        const accept = formats.map(f => {
+            const map: Record<string, string> = {
+                pdf: '.pdf', docx: '.docx', doc: '.doc', jpg: '.jpg,.jpeg',
+                png: '.png', xlsx: '.xlsx', zip: '.zip', gif: '.gif',
+            };
+            return map[f] ?? `.${f}`;
+        }).join(',');
+
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.pdf,.doc,.docx,.jpg,.png';
+        input.accept = accept;
         input.onchange = (e: any) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            if (file.size > 3 * 1024 * 1024) {
+                alert('El archivo supera el límite de 3 MB. Por favor elige un archivo más pequeño.');
+                return;
+            }
 
             const formData = new FormData();
             formData.append('archivo', file);
@@ -183,6 +197,27 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
                                             </div>
                                         </div>
                                         
+                                        {/* Archivos del docente */}
+                                        {act.archivos_docente?.length > 0 && (
+                                            <div className="space-y-2 mb-3">
+                                                <p className="text-[9px] font-black text-indigo-300 uppercase tracking-widest">Material adjunto</p>
+                                                {act.archivos_docente.map((archivo: any, i: number) => {
+                                                    const isImg = ['jpg','jpeg','png','gif','webp'].includes(archivo.tipo?.toLowerCase());
+                                                    return isImg ? (
+                                                        <a key={i} href={archivo.url} target="_blank" className="block rounded-xl overflow-hidden border border-white/10">
+                                                            <img src={archivo.url} alt={archivo.nombre} className="w-full max-h-40 object-contain bg-black/20" />
+                                                        </a>
+                                                    ) : (
+                                                        <a key={i} href={archivo.url} target="_blank"
+                                                            className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all">
+                                                            <Download className="w-4 h-4 text-indigo-300 shrink-0" />
+                                                            <span className="text-[10px] font-bold text-white truncate">{archivo.nombre}</span>
+                                                        </a>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
                                         {isQuiz ? (
                                             isCompleted ? (
                                                 <div className="text-center py-2 px-4 bg-emerald-500/20 rounded-xl text-emerald-400 font-black text-[10px] uppercase">
@@ -220,7 +255,7 @@ export default function ClaseVer({ claseId }: { claseId: number }) {
                                             </div>
                                         ) : (
                                             <Button 
-                                                onClick={() => handleUpload(act.actividad_id)}
+                                                onClick={() => handleUpload(act.actividad_id, act.allowed_formats)}
                                                 disabled={submitting === act.actividad_id}
                                                 className="w-full h-11 rounded-2xl bg-indigo-500 hover:bg-indigo-400 text-white font-black text-[10px] uppercase shadow-lg shadow-indigo-950/50"
                                             >

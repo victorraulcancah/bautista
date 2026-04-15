@@ -27,6 +27,7 @@ class StoreActividadRequest extends FormRequest
             'peso_porcentaje'   => 'nullable|numeric|min:0|max:100',
             'puntos_maximos'    => 'nullable|numeric|min:0',
             'config'            => 'nullable|array',
+            'allowed_formats'   => 'nullable|string',
         ];
     }
 }

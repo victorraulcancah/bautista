@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreActividadRequest;
 use App\Http\Requests\UpdateActividadRequest;
 use App\Http\Resources\ActividadResource;
+use App\Models\ActividadCurso;
 use App\Models\TipoActividad;
 use App\Services\Interfaces\ActividadServiceInterface;
 use Illuminate\Http\JsonResponse;
@@ -103,30 +104,44 @@ class ActividadApiController extends Controller
         $actividad = ActividadCurso::findOrFail($actividadId);
         $cursoId = $actividad->id_curso;
 
-        // Get all students enrolled in the course
-        $estudiantes = \App\Models\Matricula::whereHas('seccion.docenteCursos', function($q) use ($cursoId) {
-                $q->where('curso_id', $cursoId);
-            })
+        // Get seccion_id and apertura_id from DocenteCurso for this course
+        $docenteCurso = \App\Models\DocenteCurso::where('curso_id', $cursoId)->first();
+
+        if (!$docenteCurso) {
+            return response()->json([]);
+        }
+
+        $estudiantes = \App\Models\Matricula::where('seccion_id', $docenteCurso->seccion_id)
+            ->where('apertura_id', $docenteCurso->apertura_id)
             ->with(['estudiante.perfil'])
             ->get()
-            ->map(function($m) {
-                return $m->estudiante;
-            });
+            ->pluck('estudiante')
+            ->filter();
 
         $data = $estudiantes->map(function($estu) use ($actividadId) {
-            // Check for grade
             $notaRecord = \App\Models\NotaActividad::where('estu_id', $estu->estu_id)
                 ->where('actividad_id', $actividadId)
                 ->first();
 
-            // Check for files
-            $archivos = \DB::table('archivos_actividad')
+            $archivosDb = \DB::table('archivos_actividad')
                 ->where('id_actividad', $actividadId)
                 ->where('estudiante', $estu->estu_id)
                 ->where('origen', 'e')
                 ->get();
 
-            // Check for exam attempt
+            // Si no hay en archivos_actividad, buscar en nota_actividad.archivo_entrega
+            if ($archivosDb->isEmpty() && $notaRecord?->archivo_entrega) {
+                $archivosDb = collect([(object)[
+                    'archiv_actividad_id' => 0,
+                    'nombre_archivo'      => basename($notaRecord->archivo_entrega),
+                    'archivo'             => $notaRecord->archivo_entrega,
+                    'tipo_archivo'        => pathinfo($notaRecord->archivo_entrega, PATHINFO_EXTENSION),
+                    'created_at'          => $notaRecord->fecha_entrega,
+                ]]);
+            }
+
+            $archivos = $archivosDb;
+
             $intento = \App\Models\ExamenIniciado::where('actividad_id', $actividadId)
                 ->where('estu_id', $estu->estu_id)
                 ->with(['respuestas.pregunta'])
@@ -142,37 +157,39 @@ class ActividadApiController extends Controller
             return [
                 'entrega_id' => $estu->estu_id,
                 'estudiante' => [
-                    'estu_id' => $estu->estu_id,
-                    'nombre' => $estu->perfil->primer_nombre,
-                    'apellido_paterno' => $estu->perfil->apellido_paterno,
-                    'apellido_materno' => $estu->perfil->apellido_materno,
+                    'estu_id'          => $estu->estu_id,
+                    'nombre'           => $estu->perfil?->primer_nombre ?? '',
+                    'apellido_paterno' => $estu->perfil?->apellido_paterno ?? '',
+                    'apellido_materno' => $estu->perfil?->apellido_materno ?? '',
                 ],
                 'archivos' => $archivos->map(fn($a) => [
-                    'archivo_id' => $a->archiv_actividad_id,
-                    'nombre' => $a->nombre_archivo,
-                    'path' => $a->archivo,
+                    'archivo_id' => $a->archiv_actividad_id ?? 0,
+                    'nombre'     => $a->nombre_archivo,
+                    'path'       => $a->archivo,
+                    'url'        => '/storage/' . $a->archivo,
+                    'tamanio'    => 0,
                 ]),
                 'intento' => $intento ? [
-                    'intento_id' => $intento->intento_id,
-                    'fecha_inicio' => $intento->fecha_inicio,
-                    'fecha_fin' => $intento->fecha_fin,
+                    'intento_id'    => $intento->intento_id,
+                    'fecha_inicio'  => $intento->fecha_inicio,
+                    'fecha_fin'     => $intento->fecha_fin,
                     'puntaje_total' => $intento->puntaje_total,
-                    'estado' => $intento->estado,
-                    'respuestas' => $intento->respuestas->map(fn($r) => [
-                        'pregunta' => $r->pregunta->cabecera,
-                        'tipo' => $r->pregunta->tipo_respuesta,
+                    'estado'        => $intento->estado,
+                    'respuestas'    => $intento->respuestas->map(fn($r) => [
+                        'pregunta'             => $r->pregunta?->cabecera,
+                        'tipo'                 => $r->pregunta?->tipo_respuesta,
                         'respuesta_estudiante' => $r->respuesta_texto,
-                        'alternativa_id' => $r->alternativa_id,
-                        'es_correcta' => $r->es_correcta,
-                        'puntaje' => $r->puntaje,
+                        'alternativa_id'       => $r->alternativa_id,
+                        'es_correcta'          => $r->es_correcta,
+                        'puntaje'              => $r->puntaje,
                     ]),
                 ] : null,
-                'fecha_entrega' => $archivos->first()?->created_at ?? $intento?->fecha_fin ?? $intento?->fecha_inicio,
-                'nota' => $notaRecord?->nota,
-                'observacion' => $notaRecord?->observacion,
-                'estado' => $estado,
+                'fecha_entrega' => $notaRecord?->fecha_entrega ?? $archivos->first()?->created_at ?? $intento?->fecha_fin ?? $intento?->fecha_inicio,
+                'nota'          => $notaRecord?->nota,
+                'observacion'   => $notaRecord?->observacion,
+                'estado'        => $estado,
             ];
-        });
+        })->values();
 
         return response()->json($data);
     }

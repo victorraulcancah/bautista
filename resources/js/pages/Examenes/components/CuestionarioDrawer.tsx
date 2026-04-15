@@ -2,7 +2,7 @@ import { CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import api from '@/lib/api';
-import type { Actividad, Pregunta } from '../index';
+import type { Actividad, Pregunta } from '../types';
 
 type Props = {
     open:      boolean;

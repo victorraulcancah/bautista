@@ -57,38 +57,46 @@ class CalificacionApiController extends Controller
      */
     public function calificar(Request $request, int $actividadId)
     {
-        $request->validate([
-            'notas'             => 'required|array',
-            'notas.*.estu_id'   => 'required|integer',
-            'notas.*.nota'      => 'nullable|string|max:5',
-            'notas.*.obs'       => 'nullable|string',
-        ]);
+        // Support both batch format { notas: [...] } and single format { estu_id, nota, observacion }
+        if ($request->has('notas')) {
+            $request->validate([
+                'notas'             => 'required|array',
+                'notas.*.estu_id'   => 'required|integer',
+                'notas.*.nota'      => 'nullable|string|max:10',
+                'notas.*.obs'       => 'nullable|string',
+            ]);
+            $items = collect($request->notas)->map(fn($i) => [
+                'estu_id' => $i['estu_id'],
+                'nota'    => $i['nota'] ?? null,
+                'obs'     => $i['obs'] ?? null,
+            ]);
+        } else {
+            $request->validate([
+                'nota'       => 'nullable|string|max:10',
+                'observacion'=> 'nullable|string',
+            ]);
+            $estuId = $request->input('estu_id') ?? $request->input('estudiante_id') ?? $request->input('entrega_id');
+            $items = collect([[
+                'estu_id' => $estuId,
+                'nota'    => $request->input('nota'),
+                'obs'     => $request->input('observacion'),
+            ]]);
+        }
 
         DB::beginTransaction();
         try {
-            foreach ($request->notas as $item) {
-                if (empty($item['nota']) && empty($item['obs'])) {
-                    // Optionally delete? No, usually keep or ignore
-                    continue;
-                }
-
+            foreach ($items as $item) {
+                if (empty($item['nota']) && empty($item['obs'])) continue;
                 NotaActividad::updateOrCreate(
-                    [
-                        'estu_id'       => $item['estu_id'],
-                        'actividad_id'  => $actividadId,
-                    ],
-                    [
-                        'nota'          => $item['nota'],
-                        'observacion'   => $item['obs'] ?? null,
-                        'fecha_calificacion' => now(),
-                    ]
+                    ['estu_id' => $item['estu_id'], 'actividad_id' => $actividadId],
+                    ['nota' => $item['nota'], 'observacion' => $item['obs'] ?? null, 'fecha_calificacion' => now()]
                 );
             }
             DB::commit();
             return response()->json(['message' => 'Calificaciones guardadas correctamente.']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Error al guardar calificaciones: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Error al guardar: ' . $e->getMessage()], 500);
         }
     }
 

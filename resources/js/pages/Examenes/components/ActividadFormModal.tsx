@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import api from '@/lib/api';
-import type { TipoActividad } from '../index';
+import type { TipoActividad } from '../types';
 
 // ─── Form shape ─────────────────────────────────────────────────────────────
 export type ActividadFormData = {

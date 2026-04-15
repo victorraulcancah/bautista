@@ -31,6 +31,11 @@ class ActividadRepository implements ActividadRepositoryInterface
             // 1. Create the main activity
             $actividad = ActividadCurso::create($data);
 
+            // 2. Save tarea allowed_formats
+            if ($config && !empty($config['allowed_formats'])) {
+                $actividad->update(['allowed_formats' => implode(',', $config['allowed_formats'])]);
+            }
+
             // 2. If it's a questionnaire or exam, save the questions/alternatives
             if ($config && isset($config['questions'])) {
                 $cuestionario = \App\Models\Cuestionario::create([

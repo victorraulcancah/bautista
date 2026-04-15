@@ -120,7 +120,9 @@ export default function GradeSubmissionView({
                                                 ID: {entrega.estudiante.estu_id}
                                             </Badge>
                                             <span className="text-[10px] text-gray-400 font-black uppercase tracking-tight">
-                                                Entregado: {format(new Date(entrega.fecha_entrega), "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                                                Entregado: {entrega.fecha_entrega
+                                                    ? format(new Date(entrega.fecha_entrega), "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })
+                                                    : 'Pendiente'}
                                             </span>
                                         </div>
                                     </div>
@@ -134,7 +136,7 @@ export default function GradeSubmissionView({
                                             {entrega.archivos.map((archivo) => (
                                                 <a
                                                     key={archivo.archivo_id}
-                                                    href={`/storage/${archivo.path}`}
+                                                    href={archivo.url || `/storage/${archivo.path}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="flex items-center gap-3 px-4 py-2 bg-white border border-gray-100 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 transition-all shadow-sm group/file"

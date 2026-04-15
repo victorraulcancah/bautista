@@ -77,8 +77,24 @@ export function useActivityForm(cursoId: number, claseId: number) {
     const submitActivity = async (config: any) => {
         setLoading(true);
         try {
-            const payload = { ...formData, config };
-            await api.post('/actividades', payload);
+            const attachments: File[] = config?.attachments ?? [];
+            const configWithoutFiles = config ? { ...config, attachments: undefined } : config;
+
+            const payload = { ...formData, config: configWithoutFiles };
+            const res = await api.post('/actividades', payload);
+            const actividadId = res.data?.data?.actividad_id;
+
+            // Upload docente attachments if any
+            if (actividadId && attachments.length > 0) {
+                for (const file of attachments) {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    await api.post(`/docente/actividades/${actividadId}/archivos`, fd, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    });
+                }
+            }
+
             return true;
         } catch (error) {
             console.error('Error creating activity:', error);
