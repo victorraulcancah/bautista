@@ -27,6 +27,7 @@ class ActividadResource extends JsonResource
             'es_calificado'      => $this->es_calificado,
             'peso_porcentaje'    => $this->peso_porcentaje,
             'puntos_maximos'     => $this->puntos_maximos,
+            'allowed_formats'    => $this->allowed_formats,
             'tipo_actividad'     => $this->whenLoaded('tipoActividad', fn() => [
                 'tipo_id' => $this->tipoActividad->tipo_id,
                 'nombre'  => $this->tipoActividad->nombre,

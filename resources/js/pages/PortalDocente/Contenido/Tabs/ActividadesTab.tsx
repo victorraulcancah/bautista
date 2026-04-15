@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import api from '@/lib/api';
 import ConfirmDeleteModal from '@/components/shared/ConfirmDeleteModal';
+import EditActivityModal from '../components/modals/EditActivityModal';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { router } from '@inertiajs/react';
@@ -49,6 +50,7 @@ export default function ActividadesTab({ courseData, onRefresh }: Props) {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterTipo, setFilterTipo] = useState<string>('');
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [editingActividad, setEditingActividad] = useState<Actividad | null>(null);
 
     useEffect(() => {
         if (courseData?.curso_id) {
@@ -274,6 +276,7 @@ export default function ActividadesTab({ courseData, onRefresh }: Props) {
                                             <Button 
                                                 variant="outline" 
                                                 size="icon" 
+                                                onClick={() => setEditingActividad(actividad)}
                                                 className="size-10 rounded-xl hover:bg-blue-50 hover:text-blue-600"
                                                 title="Editar"
                                             >
@@ -303,6 +306,13 @@ export default function ActividadesTab({ courseData, onRefresh }: Props) {
                 onConfirm={handleDelete}
                 title="Eliminar Actividad"
                 message="¿Estás seguro de que deseas eliminar esta actividad? Esta acción no se puede deshacer y se perderán todas las entregas de los estudiantes."
+            />
+
+            <EditActivityModal
+                open={!!editingActividad}
+                onClose={() => setEditingActividad(null)}
+                actividad={editingActividad}
+                onSuccess={() => { loadActividades(); onRefresh(); }}
             />
         </div>
     );
