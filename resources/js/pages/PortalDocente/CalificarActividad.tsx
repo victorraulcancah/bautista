@@ -1,8 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, ClipboardList } from 'lucide-react';
+import { ArrowLeft, ClipboardList, Search } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import api from '@/lib/api';
 import PageHeader from '@/components/shared/PageHeader';
 import GradeSubmissionView from './components/GradeSubmissionView';
@@ -23,6 +24,7 @@ export default function CalificarActividad({
     const [actividad, setActividad] = useState<any>(null);
     const [entregas, setEntregas] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
 
     const effectiveEntregasEndpoint = entregasEndpoint || `/actividades/${actividadId}/entregas`;
     const effectiveSaveEndpoint = saveEndpoint || `/actividades/${actividadId}/calificar`;
@@ -84,6 +86,13 @@ export default function CalificarActividad({
         { title: 'Calificar', href: '#' },
     ];
 
+    const filteredEntregas = entregas.filter(e => {
+        if (!search.trim()) return true;
+        const q = search.toLowerCase();
+        const nombre = `${e.estudiante?.nombre} ${e.estudiante?.apellido_paterno} ${e.estudiante?.apellido_materno}`.toLowerCase();
+        return nombre.includes(q);
+    });
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Calificar - ${actividad?.nombre || 'Cargando...'}`} />
@@ -116,7 +125,7 @@ export default function CalificarActividad({
                                 </div>
                                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Total Entregas</span>
-                                    <span className="font-bold text-gray-900">{entregas.length} Estudiantes</span>
+                                    <span className="font-bold text-gray-900">{filteredEntregas.length} / {entregas.length} Estudiantes</span>
                                 </div>
                                 <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100/50">
                                     <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Tipo</span>
@@ -126,9 +135,20 @@ export default function CalificarActividad({
                         </div>
                     </div>
 
-                    <div className="lg:col-span-3">
+                    <div className="lg:col-span-3 space-y-4">
+                        {/* Buscador */}
+                        <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <Input
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                placeholder="Buscar alumno por nombre..."
+                                className="pl-10 h-11 rounded-2xl border-gray-200 bg-white shadow-sm font-medium text-sm focus:ring-emerald-500 focus:border-emerald-400"
+                            />
+                        </div>
+
                         <GradeSubmissionView 
-                            entregas={entregas} 
+                            entregas={filteredEntregas} 
                             maxNota={parseInt(actividad?.nota_actividad || '20')}
                             onSaveGrade={handleSaveGrade}
                             isLoading={loading}
