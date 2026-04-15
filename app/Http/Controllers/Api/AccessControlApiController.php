@@ -88,4 +88,34 @@ class AccessControlApiController extends Controller
 
         return response()->json(null, 204);
     }
+
+    /**
+     * Restablecer permisos por defecto de un rol del sistema.
+     */
+    public function resetRolePermissions(int $id): JsonResponse
+    {
+        $role = Role::findOrFail($id);
+        
+        // Solo permitir restablecer roles del sistema
+        $systemRoles = ['administrador', 'usuario', 'docente', 'estudiante', 'padre_familia'];
+        
+        if (!in_array($role->name, $systemRoles)) {
+            return response()->json([
+                'message' => 'Solo se pueden restablecer permisos de roles del sistema.'
+            ], 400);
+        }
+
+        // Obtener permisos por defecto del seeder
+        if ($role->name === 'administrador') {
+            $role->syncPermissions(Permission::all());
+        } else {
+            $defaultPermissions = \Database\Seeders\RolesAndPermissionsSeeder::getDefaultPermissions($role->name);
+            $role->syncPermissions($defaultPermissions);
+        }
+
+        return response()->json([
+            'message' => 'Permisos restablecidos correctamente',
+            'role' => $role->load('permissions')
+        ]);
+    }
 }

@@ -10,6 +10,51 @@ use Illuminate\Support\Facades\DB;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
+    /**
+     * Obtener permisos por defecto para un rol específico
+     */
+    public static function getDefaultPermissions(string $roleName): array
+    {
+        $defaults = [
+            'administrador' => [], // Se asignan todos con Permission::all() en el run()
+            
+            'usuario' => [
+                'dashboard.ver',
+                'perfil.ver',
+                'perfil.editar',
+            ],
+            
+            'docente' => [
+                'dashboard.ver', 'dashboard.docente.resumen',
+                'perfil.ver', 'perfil.editar', 'credencial.ver',
+                'institucion.ver', 'institucion.datos.ver', 'institucion.galeria.ver', 'institucion.noticias.ver',
+                'portal.docente.ver', 'portal.docente.cursos', 'portal.docente.alumnos', 'portal.docente.calificar', 'portal.docente.asistencia',
+                'admin.comunicados.ver',
+                'recursos.biblioteca.ver', 'recursos.mensajeria.ver',
+                'horarios.ver', 'horarios.clases.ver',
+            ],
+            
+            'estudiante' => [
+                'dashboard.ver', 'dashboard.estudiante.resumen', 'dashboard.estudiante.stats',
+                'perfil.ver', 'perfil.editar', 'credencial.ver',
+                'portal.estudiante.ver', 'portal.estudiante.cursos', 'portal.estudiante.notas', 'portal.estudiante.asistencia', 'portal.estudiante.puzzles',
+                'admin.comunicados.ver',
+                'recursos.biblioteca.ver', 'recursos.mensajeria.ver',
+                'horarios.ver', 'horarios.clases.ver',
+            ],
+            
+            'padre_familia' => [
+                'dashboard.ver', 'dashboard.padre.resumen',
+                'perfil.ver', 'perfil.editar',
+                'institucion.ver', 'institucion.datos.ver',
+                'portal.padre.ver', 'portal.padre.hijos', 'portal.padre.pagos',
+                'admin.comunicados.ver',
+            ],
+        ];
+
+        return $defaults[$roleName] ?? [];
+    }
+
     public function run(): void
     {
         // Limpiar caché de permisos
@@ -88,6 +133,25 @@ class RolesAndPermissionsSeeder extends Seeder
             'academico.secciones.eliminar',
             'academico.horarios.ver',
             'academico.horarios.editar',
+            
+            // Horarios de Clases (nuevo módulo)
+            'horarios.ver',
+            'horarios.bloques.ver',
+            'horarios.bloques.crear',
+            'horarios.bloques.editar',
+            'horarios.bloques.eliminar',
+            'horarios.clases.ver',
+            'horarios.clases.crear',
+            'horarios.clases.editar',
+            'horarios.clases.eliminar',
+            'horarios.clases.clonar',
+            'horarios.conflictos.ver',
+            
+            // Horarios de Asistencia (configuración administrativa)
+            'horarios.asistencia.ver',
+            'horarios.asistencia.crear',
+            'horarios.asistencia.editar',
+            'horarios.asistencia.eliminar',
 
             // ─────────────────────────────────────────────────────────
             // 5. PERSONAL (Docentes y Estudiantes)
@@ -180,7 +244,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'portal.estudiante.notas',
             'portal.estudiante.asistencia',
             'portal.estudiante.profesores',
-            'portal.estudiante.horario',
             'portal.estudiante.puzzles',
             'portal.padre.ver',
             'portal.padre.hijos',
@@ -201,38 +264,19 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // USUARIO BASE
         $usuario = Role::findOrCreate('usuario', 'web');
-        $usuario->syncPermissions(['dashboard.ver', 'perfil.ver', 'perfil.editar']);
+        $usuario->syncPermissions(self::getDefaultPermissions('usuario'));
 
         // DOCENTE
         $docente = Role::findOrCreate('docente', 'web');
-        $docente->syncPermissions([
-            'dashboard.ver', 'dashboard.docente.resumen',
-            'perfil.ver', 'perfil.editar', 'credencial.ver',
-            'institucion.ver', 'institucion.datos.ver', 'institucion.galeria.ver', 'institucion.noticias.ver',
-            'portal.docente.ver', 'portal.docente.cursos', 'portal.docente.alumnos', 'portal.docente.calificar', 'portal.docente.asistencia',
-            'admin.comunicados.ver',
-            'recursos.biblioteca.ver', 'recursos.mensajeria.ver'
-        ]);
+        $docente->syncPermissions(self::getDefaultPermissions('docente'));
 
         // ESTUDIANTE
         $estudiante = Role::findOrCreate('estudiante', 'web');
-        $estudiante->syncPermissions([
-            'dashboard.ver', 'dashboard.estudiante.resumen', 'dashboard.estudiante.stats',
-            'perfil.ver', 'perfil.editar', 'credencial.ver',
-            'portal.estudiante.ver', 'portal.estudiante.cursos', 'portal.estudiante.notas', 'portal.estudiante.asistencia', 'portal.estudiante.horario', 'portal.estudiante.puzzles',
-            'admin.comunicados.ver',
-            'recursos.biblioteca.ver', 'recursos.mensajeria.ver'
-        ]);
+        $estudiante->syncPermissions(self::getDefaultPermissions('estudiante'));
 
         // PADRE
         $padre = Role::findOrCreate('padre_familia', 'web');
-        $padre->syncPermissions([
-            'dashboard.ver', 'dashboard.padre.resumen',
-            'perfil.ver', 'perfil.editar',
-            'institucion.ver', 'institucion.datos.ver',
-            'portal.padre.ver', 'portal.padre.hijos', 'portal.padre.pagos',
-            'admin.comunicados.ver'
-        ]);
+        $padre->syncPermissions(self::getDefaultPermissions('padre_familia'));
 
         // Sincronizar Usuarios Existentes
         $this->command->info('Sincronizando roles...');

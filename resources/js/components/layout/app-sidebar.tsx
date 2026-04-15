@@ -82,6 +82,10 @@ const navigation: NavItem[] = [
         { title: 'Grados / Cursos',    href: '/cursos', permission: 'academico.cursos.ver' },
         { title: 'Grados / Secciones', href: '/secciones', permission: 'academico.secciones.ver' },
     ]},
+    { type: 'group', title: 'Horarios', icon: Calendar, children: [
+        { title: 'Horario de Clases', href: '/horario-clases', permission: 'horarios.ver' },
+        { title: 'Horarios de Asistencia', href: '/horarios', permission: 'horarios.asistencia.ver' },
+    ]},
     { type: 'link', title: 'Gestión de Docentes',  icon: UserCheck, href: '/docentes', permission: 'personal.docentes.ver' },
     { type: 'link', title: 'Gestión de Alumnos', icon: GraduationCap, href: '/estudiantes', permission: 'personal.estudiantes.ver' },
 
@@ -92,7 +96,6 @@ const navigation: NavItem[] = [
         { title: 'Mis Alumnos', href: '/docente/mis-alumnos', permission: 'portal.docente.alumnos' },
     ]},
     { type: 'group', title: 'Portal Estudiante', icon: GraduationCap, children: [
-        { title: 'Horarios', href: '/horarios', permission: 'portal.estudiante.horario' },
         { title: 'Mis Cursos', href: '/alumno/cursos', permission: 'portal.estudiante.cursos' },
         { title: 'Mis Profesores', href: '/alumno/profesores', permission: 'portal.estudiante.profesores' },
         { title: 'Mi Asistencia', href: '/alumno/asistencia', permission: 'portal.estudiante.asistencia' },

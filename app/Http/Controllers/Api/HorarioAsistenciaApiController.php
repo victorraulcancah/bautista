@@ -2,52 +2,113 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\HorarioNotFoundException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreHorarioAsistenciaRequest;
+use App\Http\Requests\UpdateHorarioAsistenciaRequest;
+use App\Http\Resources\HorarioAsistenciaResource;
 use App\Models\HorarioAsistencia;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class HorarioAsistenciaApiController extends Controller
 {
-    public function index()
+    /**
+     * GET /api/horarios-asistencia
+     * Listar horarios de asistencia con búsqueda y paginación
+     */
+    public function index(Request $request): AnonymousResourceCollection
     {
-        return response()->json(HorarioAsistencia::all());
+        $query = HorarioAsistencia::with(['nivel', 'institucion']);
+
+        // Búsqueda
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('tipo_usuario', 'like', "%{$search}%")
+                  ->orWhere('turno', 'like', "%{$search}%")
+                  ->orWhereHas('nivel', function($q) use ($search) {
+                      $q->where('nombre_nivel', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Paginación
+        $perPage = $request->get('per_page', 15);
+        $horarios = $query->paginate($perPage);
+        
+        return HorarioAsistenciaResource::collection($horarios);
     }
 
-    public function store(Request $request)
+    /**
+     * POST /api/horarios-asistencia
+     * Crear nuevo horario de asistencia
+     */
+    public function store(StoreHorarioAsistenciaRequest $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:100',
-            'hora_entrada' => 'required',
-            'hora_salida' => 'required',
-            'tolerancia_minutos' => 'nullable|integer',
-        ]);
-
+        $validated = $request->validated();
+        $validated['insti_id'] = $request->user()->insti_id;
+        
         $horario = HorarioAsistencia::create($validated);
-        return response()->json($horario, 201);
+        
+        return response()->json([
+            'message' => 'Horario de asistencia creado exitosamente',
+            'horario' => new HorarioAsistenciaResource($horario->load(['nivel', 'institucion']))
+        ], 201);
     }
 
-    public function show($id)
+    /**
+     * GET /api/horarios-asistencia/{id}
+     * Obtener un horario de asistencia específico
+     */
+    public function show(int $id)
     {
-        return response()->json(HorarioAsistencia::findOrFail($id));
+        $horario = HorarioAsistencia::with(['nivel', 'institucion'])->find($id);
+        
+        if (!$horario) {
+            throw new HorarioNotFoundException("Horario de asistencia con ID {$id} no encontrado");
+        }
+        
+        return response()->json(new HorarioAsistenciaResource($horario));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * PUT /api/horarios-asistencia/{id}
+     * Actualizar horario de asistencia
+     */
+    public function update(UpdateHorarioAsistenciaRequest $request, int $id)
     {
-        $horario = HorarioAsistencia::findOrFail($id);
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:100',
-            'hora_entrada' => 'required',
-            'hora_salida' => 'required',
-            'tolerancia_minutos' => 'nullable|integer',
-        ]);
-
+        $horario = HorarioAsistencia::find($id);
+        
+        if (!$horario) {
+            throw new HorarioNotFoundException("Horario de asistencia con ID {$id} no encontrado");
+        }
+        
+        $validated = $request->validated();
         $horario->update($validated);
-        return response()->json($horario);
+        
+        return response()->json([
+            'message' => 'Horario de asistencia actualizado exitosamente',
+            'horario' => new HorarioAsistenciaResource($horario->load(['nivel', 'institucion']))
+        ]);
     }
 
-    public function destroy($id)
+    /**
+     * DELETE /api/horarios-asistencia/{id}
+     * Eliminar horario de asistencia
+     */
+    public function destroy(int $id)
     {
-        HorarioAsistencia::findOrFail($id)->delete();
-        return response()->json(null, 204);
+        $horario = HorarioAsistencia::find($id);
+        
+        if (!$horario) {
+            throw new HorarioNotFoundException("Horario de asistencia con ID {$id} no encontrado");
+        }
+        
+        $horario->delete();
+        
+        return response()->json([
+            'message' => 'Horario de asistencia eliminado exitosamente'
+        ]);
     }
 }

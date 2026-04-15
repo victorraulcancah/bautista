@@ -7,7 +7,7 @@ import {
     Shield, Save, Plus, Trash2, Key, Eye, PlusCircle, 
     Pencil, ChevronDown, ChevronRight, Lock, Layout, 
     FileText, Image as ImageIcon, MessageSquare, ListCheck,
-    Building2, Newspaper, Search
+    Building2, Newspaper, Search, RotateCcw
 } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import api from '@/lib/api';
@@ -48,6 +48,10 @@ export default function AccessControlManager() {
     const [searchQuery, setSearchQuery] = useState('');
     
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showResetModal, setShowResetModal] = useState(false);
+    
+    // Roles del sistema que pueden ser restablecidos
+    const systemRoles = ['administrador', 'usuario', 'docente', 'estudiante', 'padre_familia'];
 
     useEffect(() => {
         loadData();
@@ -196,6 +200,23 @@ export default function AccessControlManager() {
         }
     };
 
+    const handleResetPermissions = () => setShowResetModal(true);
+
+    const confirmResetPermissions = async () => {
+        if (!selectedRole) return;
+        setProcessing(true);
+        try {
+            await api.post(`/seguridad/roles/${selectedRole.id}/restablecer-permisos`);
+            await loadData();
+            setShowResetModal(false);
+        } catch (e: any) {
+            console.error(e);
+            alert(e.response?.data?.message || 'Error al restablecer permisos');
+        } finally {
+            setProcessing(false);
+        }
+    };
+
     const handleCreateRole = async () => {
         if (!newRoleName.trim()) return;
         setProcessing(true);
@@ -319,6 +340,17 @@ export default function AccessControlManager() {
                 confirmText="Sincronizar Permisos"
                 variant="warning"
             />
+
+            <ConfirmModal
+                open={showResetModal}
+                onClose={() => setShowResetModal(false)}
+                onConfirm={confirmResetPermissions}
+                title="Restablecer permisos por defecto"
+                message={`¿Estás seguro de que deseas restablecer los permisos del rol "${selectedRole?.name.replace('_', ' ')}" a su configuración original del sistema? Esta acción sobrescribirá todos los cambios personalizados.`}
+                processing={processing}
+                confirmText="Restablecer Permisos"
+                variant="danger"
+            />
             
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 {/* Sidebar de Roles */}
@@ -407,37 +439,62 @@ export default function AccessControlManager() {
                     {selectedRole ? (
                         <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white rounded-[2.5rem] overflow-hidden">
                             <CardHeader className="border-b border-gray-50 bg-white sticky top-0 z-20 px-4 py-8 md:px-10">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-3">
-                                            <CardTitle className="text-2xl font-black text-gray-900 tracking-tighter uppercase italic">
-                                                Matriz: <span className="text-indigo-600 underline decoration-indigo-200 decoration-8 underline-offset-[-2px]">{selectedRole.name.replace('_', ' ')}</span>
-                                            </CardTitle>
+                                <div className="flex flex-col gap-6">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-3">
+                                                <CardTitle className="text-2xl font-black text-gray-900 tracking-tighter uppercase italic">
+                                                    Matriz: <span className="text-indigo-600 underline decoration-indigo-200 decoration-8 underline-offset-[-2px]">{selectedRole.name.replace('_', ' ')}</span>
+                                                </CardTitle>
+                                            </div>
+                                            <CardDescription className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] font-mono">
+                                                Jerarquía de Accesos Recursiva
+                                            </CardDescription>
                                         </div>
-                                        <CardDescription className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] font-mono">
-                                            Jerarquía de Accesos Recursiva
-                                        </CardDescription>
+                                        <div className="flex items-center gap-3 w-full md:w-auto">
+                                            <div className="relative flex-1 md:w-64">
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                                                <input 
+                                                    className="w-full text-xs font-bold border-2 border-gray-100 rounded-2xl pl-10 pr-4 h-14 outline-none focus:border-indigo-500 transition-all bg-gray-50/50" 
+                                                    placeholder="BUSCAR PERMISO..." 
+                                                    value={searchQuery}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                />
+                                            </div>
+                                            {can('seguridad.roles.editar') && (
+                                                <Button 
+                                                    onClick={handleSavePermissions} 
+                                                    disabled={processing}
+                                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase text-[11px] tracking-[0.15em] px-8 h-14 rounded-2xl shadow-xl shadow-indigo-100 transition-all hover:scale-105 active:scale-95 whitespace-nowrap shrink-0"
+                                                >
+                                                    <Save className="size-4 mr-2" /> {processing ? 'Procesando...' : 'Guardar Cambios'}
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-3 w-full md:w-auto">
-                                        <div className="relative flex-1 md:w-64">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-                                            <input 
-                                                className="w-full text-xs font-bold border-2 border-gray-100 rounded-2xl pl-10 pr-4 h-14 outline-none focus:border-indigo-500 transition-all bg-gray-50/50" 
-                                                placeholder="BUSCAR PERMISO..." 
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                            />
-                                        </div>
-                                        {can('seguridad.roles.editar') && (
-                                            <Button 
-                                                onClick={handleSavePermissions} 
+                                    
+                                    {/* Botón de Restablecer Permisos - Solo para roles del sistema */}
+                                    {can('seguridad.roles.editar') && systemRoles.includes(selectedRole.name) && (
+                                        <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-amber-100 rounded-xl">
+                                                    <RotateCcw className="size-4 text-amber-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[11px] font-black text-amber-900 uppercase tracking-wide">Rol del Sistema</p>
+                                                    <p className="text-[10px] text-amber-700 font-bold">Puedes restaurar los permisos originales si algo salió mal</p>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                onClick={handleResetPermissions}
                                                 disabled={processing}
-                                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase text-[11px] tracking-[0.15em] px-8 h-14 rounded-2xl shadow-xl shadow-indigo-100 transition-all hover:scale-105 active:scale-95 whitespace-nowrap shrink-0"
+                                                variant="outline"
+                                                className="border-amber-200 text-amber-700 hover:bg-amber-100 hover:text-amber-800 font-black uppercase text-[10px] tracking-wider px-6 h-11 rounded-xl whitespace-nowrap shrink-0"
                                             >
-                                                <Save className="size-4 mr-2" /> {processing ? 'Procesando...' : 'Guardar Cambios'}
+                                                <RotateCcw className="size-3.5 mr-2" /> Restablecer
                                             </Button>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
                                 </div>
                             </CardHeader>
                             

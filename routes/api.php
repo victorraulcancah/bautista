@@ -288,6 +288,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('roles',             [AccessControlApiController::class, 'storeRole'])->middleware('permission:seguridad.roles.crear');
         Route::put('roles/{id}',         [AccessControlApiController::class, 'updateRole'])->middleware('permission:seguridad.roles.editar');
         Route::delete('roles/{id}',      [AccessControlApiController::class, 'destroyRole'])->middleware('permission:seguridad.roles.eliminar');
+        Route::post('roles/{id}/restablecer-permisos', [AccessControlApiController::class, 'resetRolePermissions'])->middleware('permission:seguridad.roles.editar');
         Route::get('permisos',           [AccessControlApiController::class, 'indexPermissions'])->middleware('permission:seguridad.roles.ver');
     });
 
@@ -313,6 +314,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Horarios de Asistencia
     Route::apiResource('horarios-asistencia', \App\Http\Controllers\Api\HorarioAsistenciaApiController::class)->names('api.horarios-asistencia');
+
+    // Horarios de Clases (Sistema estructurado)
+    Route::prefix('horario-clases')->group(function () {
+        Route::post('/',                                    [\App\Http\Controllers\Api\HorarioClaseApiController::class, 'store']);
+        Route::put('/{id}',                                 [\App\Http\Controllers\Api\HorarioClaseApiController::class, 'update']);
+        Route::delete('/{id}',                              [\App\Http\Controllers\Api\HorarioClaseApiController::class, 'destroy']);
+        Route::post('/validar-conflictos',                 [\App\Http\Controllers\Api\HorarioClaseApiController::class, 'validarConflictos']);
+    });
+    
+    Route::get('secciones/{seccionId}/horario',             [\App\Http\Controllers\Api\HorarioClaseApiController::class, 'porSeccion']);
+    Route::post('secciones/{seccionId}/clonar-horario',     [\App\Http\Controllers\Api\HorarioClaseApiController::class, 'clonarHorario']);
+    Route::get('docentes/{docenteId}/horario-clases',       [\App\Http\Controllers\Api\HorarioClaseApiController::class, 'porDocente']);
+    Route::get('docentes/{docenteId}/carga-horaria',        [\App\Http\Controllers\Api\HorarioClaseApiController::class, 'cargaHoraria']);
+
+    // Bloques Horarios (Configuración)
+    Route::apiResource('horario-bloques', \App\Http\Controllers\Api\HorarioBloqueApiController::class)->except(['show'])->names('api.horario-bloques');
 
     // Perfil del usuario autenticado
     Route::patch('me/perfil',   [\App\Http\Controllers\Api\PerfilApiController::class, 'updateDatos']);

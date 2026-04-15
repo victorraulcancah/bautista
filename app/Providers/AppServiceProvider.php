@@ -177,6 +177,9 @@ class AppServiceProvider extends ServiceProvider
         // Fotocheck
         $this->app->bind(FotocheckRepositoryInterface::class, FotocheckRepository::class);
         $this->app->bind(FotocheckServiceInterface::class, FotocheckService::class);
+
+        // Horarios
+        $this->app->bind(\App\Services\Interfaces\HorarioServiceInterface::class, \App\Services\Implements\HorarioService::class);
     }
 
     /**

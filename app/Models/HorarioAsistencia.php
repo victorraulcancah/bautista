@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HorarioAsistencia extends Model
 {
+    protected $table = 'horarios_asistencia';
     protected $primaryKey = 'horario_id';
 
     protected $fillable = [
