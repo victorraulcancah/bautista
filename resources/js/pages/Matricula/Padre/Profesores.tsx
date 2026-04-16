@@ -1,20 +1,75 @@
 import { Head } from '@inertiajs/react';
-import { GraduationCap, Mail, Phone, ChevronDown, ChevronUp } from 'lucide-react';
+import { GraduationCap, Mail, Phone, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import api from '@/lib/api';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Portal Familia', href: '/padre/dashboard' },
     { title: 'Profesores', href: '#' },
 ];
+
+// ── Modal de contacto ─────────────────────────────────────────────────────────
+function ContactoModal({ prof, onClose }: { prof: any; onClose: () => void }) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8 space-y-6 animate-in zoom-in-95 duration-200">
+                <button onClick={onClose} className="absolute top-4 right-4 size-8 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <X size={14} className="text-gray-500" />
+                </button>
+
+                {/* Avatar + nombre */}
+                <div className="flex flex-col items-center gap-3 text-center">
+                    <div className="size-16 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-black text-2xl">
+                        {prof.nombre?.charAt(0) ?? 'P'}
+                    </div>
+                    <div>
+                        <p className="font-black text-gray-900 text-lg">{prof.nombre} {prof.apellido}</p>
+                        <p className="text-sm text-indigo-500 font-semibold">{prof.curso}</p>
+                    </div>
+                </div>
+
+                {/* Datos de contacto */}
+                <div className="space-y-3">
+                    {prof.email && prof.email !== '—' && (
+                        <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
+                            <div className="size-9 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                <Mail size={16} className="text-indigo-500" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Correo</p>
+                                <p className="text-sm font-semibold text-gray-800 truncate">{prof.email}</p>
+                            </div>
+                        </div>
+                    )}
+                    {prof.telefono && prof.telefono !== '—' && (
+                        <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
+                            <div className="size-9 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                <Phone size={16} className="text-emerald-500" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Teléfono</p>
+                                <p className="text-sm font-semibold text-gray-800">{prof.telefono}</p>
+                            </div>
+                        </div>
+                    )}
+                    {(!prof.email || prof.email === '—') && (!prof.telefono || prof.telefono === '—') && (
+                        <p className="text-center text-sm text-gray-400 italic py-2">Sin datos de contacto registrados.</p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function ProfesoresPage() {
     const [hijos, setHijos] = useState<any[]>([]);
     const [profsPorHijo, setProfsPorHijo] = useState<Record<number, any[]>>({});
     const [loading, setLoading] = useState(true);
     const [expanded, setExpanded] = useState<number | null>(null);
+    const [profContacto, setProfContacto] = useState<any | null>(null);
 
     useEffect(() => {
         api.get('/padre/hijos').then(async res => {
@@ -25,7 +80,7 @@ export default function ProfesoresPage() {
             const profsMap: Record<number, any[]> = {};
             await Promise.all(hijosData.map(async (h: any) => {
                 try {
-                    const r = await api.get('/alumno/profesores', { params: { estu_id: h.estu_id } });
+                    const r = await api.get(`/padre/hijo/${h.estu_id}/profesores`);
                     profsMap[h.estu_id] = r.data ?? [];
                 } catch { profsMap[h.estu_id] = []; }
             }));
@@ -86,21 +141,17 @@ export default function ProfesoresPage() {
                                                         {prof.nombre?.charAt(0) ?? 'P'}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="font-semibold text-gray-800 text-sm capitalize">{prof.nombre} {prof.apellido}</p>
-                                                        <p className="text-xs text-indigo-500 font-medium">{prof.curso ?? prof.materia ?? ''}</p>
+                                                        <p className="font-semibold text-gray-800 text-sm">{prof.nombre} {prof.apellido}</p>
+                                                        <p className="text-xs text-indigo-500 font-medium">{prof.curso}</p>
                                                     </div>
-                                                    <div className="flex gap-2">
-                                                        {prof.email && (
-                                                            <a href={`mailto:${prof.email}`} className="p-2 rounded-lg bg-gray-50 text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 transition-colors">
-                                                                <Mail className="size-3.5" />
-                                                            </a>
-                                                        )}
-                                                        {prof.telefono && (
-                                                            <a href={`tel:${prof.telefono}`} className="p-2 rounded-lg bg-gray-50 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 transition-colors">
-                                                                <Phone className="size-3.5" />
-                                                            </a>
-                                                        )}
-                                                    </div>
+                                                    {/* Botón único de contacto */}
+                                                    <button
+                                                        onClick={() => setProfContacto(prof)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors text-xs font-bold"
+                                                    >
+                                                        <Mail className="size-3.5" />
+                                                        Contacto
+                                                    </button>
                                                 </div>
                                             ))
                                         )}
@@ -111,6 +162,10 @@ export default function ProfesoresPage() {
                     </div>
                 )}
             </div>
+
+            {profContacto && (
+                <ContactoModal prof={profContacto} onClose={() => setProfContacto(null)} />
+            )}
         </AppLayout>
     );
 }

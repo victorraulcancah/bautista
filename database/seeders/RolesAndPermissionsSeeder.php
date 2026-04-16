@@ -74,35 +74,49 @@ class RolesAndPermissionsSeeder extends Seeder
                 // NO tiene: portal.docente.*, portal.padre.*, admin.*, asistencia.scanner.ver, credencial.qr
             ],
 
-            // Padre/Madre/Apoderado: portal familiar + recursos compartidos
+            // Padre/Madre/Apoderado: solo portal familiar + perfil + mensajería directa
             'padre_familia' => [
-                'dashboard.ver', 'dashboard.padre.resumen',
-                'perfil.ver', 'perfil.editar',
-                'institucion.ver', 'institucion.datos.ver', 'institucion.galeria.ver', 'institucion.noticias.ver', 'institucion.noticias.comentar',
-                'admin.comunicados.ver',
-                'recursos.mensajeria.ver', 'recursos.mensajeria.enviar',
-                'portal.padre.ver', 'portal.padre.hijos', 'portal.padre.pagos',
-                'portal.padre.cursos', 'portal.padre.profesores',
+                'dashboard.ver',
+                'dashboard.padre.resumen',
+                'perfil.ver',
+                'perfil.editar',
+                // Mensajería directa — puede escribir al docente/admin
+                'recursos.mensajeria.ver',
+                'recursos.mensajeria.enviar',
+                // Portal Familia
+                'portal.padre.ver',
+                'portal.padre.hijos',
+                'portal.padre.pagos',
+                'portal.padre.cursos',
+                'portal.padre.profesores',
             ],
 
             'madre_familia' => [
-                'dashboard.ver', 'dashboard.padre.resumen',
-                'perfil.ver', 'perfil.editar',
-                'institucion.ver', 'institucion.datos.ver', 'institucion.galeria.ver', 'institucion.noticias.ver', 'institucion.noticias.comentar',
-                'admin.comunicados.ver',
-                'recursos.mensajeria.ver', 'recursos.mensajeria.enviar',
-                'portal.padre.ver', 'portal.padre.hijos', 'portal.padre.pagos',
-                'portal.padre.cursos', 'portal.padre.profesores',
+                'dashboard.ver',
+                'dashboard.padre.resumen',
+                'perfil.ver',
+                'perfil.editar',
+                'recursos.mensajeria.ver',
+                'recursos.mensajeria.enviar',
+                'portal.padre.ver',
+                'portal.padre.hijos',
+                'portal.padre.pagos',
+                'portal.padre.cursos',
+                'portal.padre.profesores',
             ],
 
             'apoderado' => [
-                'dashboard.ver', 'dashboard.padre.resumen',
-                'perfil.ver', 'perfil.editar',
-                'institucion.ver', 'institucion.datos.ver', 'institucion.galeria.ver', 'institucion.noticias.ver', 'institucion.noticias.comentar',
-                'admin.comunicados.ver',
-                'recursos.mensajeria.ver', 'recursos.mensajeria.enviar',
-                'portal.padre.ver', 'portal.padre.hijos', 'portal.padre.pagos',
-                'portal.padre.cursos', 'portal.padre.profesores',
+                'dashboard.ver',
+                'dashboard.padre.resumen',
+                'perfil.ver',
+                'perfil.editar',
+                'recursos.mensajeria.ver',
+                'recursos.mensajeria.enviar',
+                'portal.padre.ver',
+                'portal.padre.hijos',
+                'portal.padre.pagos',
+                'portal.padre.cursos',
+                'portal.padre.profesores',
             ],
 
             // Usuario base: solo perfil y dashboard

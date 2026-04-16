@@ -139,8 +139,8 @@ class EstudianteApiController extends Controller
 
             $contacto = PadreApoderado::create($data);
             DB::table('estudiante_contacto')->insertOrIgnore([
-                'estudiante_id' => $estudiante->estu_id,
-                'contacto_id'   => $contacto->id_contacto,
+                'estu_id'     => $estudiante->estu_id,
+                'contacto_id' => $contacto->id_contacto,
             ]);
         }
 

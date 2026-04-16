@@ -277,6 +277,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('check.role:padre_familia|madre_familia|apoderado')->group(function () {
         Route::get('padre/hijos', [PadreApiController::class, 'hijos']);
         Route::get('padre/hijo/{id}/resumen', [PadreApiController::class, 'hijoDetalle']);
+        Route::get('padre/hijo/{id}/profesores', [PadreApiController::class, 'profesoresHijo']);
+        Route::get('padre/hijo/{id}/asistencia', [PadreApiController::class, 'asistenciaHijo']);
     });
 
     // Usuarios

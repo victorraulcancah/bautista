@@ -118,9 +118,11 @@ Route::middleware(['auth.token'])->group(function () {
         Route::get('/actividades/{id}/cuestionario', fn (int $id) => Inertia::render('PortalDocente/Contenido/QuizBuilder', ['actividadId' => $id]))->name('actividades.cuestionario');
     });
 
-    Route::prefix('padre')->name('padre.')->middleware('permission:portal.padre.hijos')->group(function () {
-        Route::get('/dashboard', fn () => redirect()->route('dashboard'))->name('dashboard');
+    Route::prefix('padre')->name('padre.')->middleware('permission:portal.padre.ver')->group(function () {
+        Route::get('/dashboard', fn () => Inertia::render('Matricula/Padre/MisHijos'))->name('dashboard');
         Route::get('/mis-hijos', fn () => Inertia::render('Matricula/Padre/MisHijos'))->name('mis-hijos');
+        Route::get('/pagos', fn () => Inertia::render('Matricula/Padre/MisPagos'))->name('pagos');
+        Route::get('/asistencia', fn () => Inertia::render('Matricula/Padre/AsistenciaHijos'))->name('asistencia');
         Route::get('/cursos', fn () => Inertia::render('Matricula/Padre/MisCursos'))->name('cursos');
         Route::get('/profesores', fn () => Inertia::render('Matricula/Padre/Profesores'))->name('profesores');
         Route::get('/matricula', fn () => inertia('Matricula/Padre/MatriculaWizard'))->name('matricula.wizard');
@@ -129,6 +131,7 @@ Route::middleware(['auth.token'])->group(function () {
 
     Route::prefix('mensajeria')->name('mensajeria.')->middleware('permission:recursos.mensajeria.ver')->group(function () {
         Route::get('/', fn () => Inertia::render('MensajesPrivados/index'))->name('index');
+        Route::get('/ver/{id}', fn (int $id) => Inertia::render('MensajesPrivados/Ver', ['mensajeId' => $id]))->name('ver');
     });
 
     Route::get('/biblioteca', fn () => Inertia::render('Medios/index'))->middleware('permission:recursos.biblioteca.ver')->name('medios.index');

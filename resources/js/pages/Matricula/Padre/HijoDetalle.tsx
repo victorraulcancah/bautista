@@ -1,14 +1,268 @@
 import { Head, Link } from '@inertiajs/react';
-import { GraduationCap, ClipboardCheck, CreditCard, ChevronLeft, Star, Clock, AlertCircle, FileText, Upload } from 'lucide-react';
+import { GraduationCap, ClipboardCheck, CreditCard, ChevronLeft, ChevronDown, Upload } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
+import AppLayout from '@/layouts/app-layout';
 import SubirVoucherModal from './components/SubirVoucherModal';
+import type { BreadcrumbItem } from '@/types';
+
+// ── Tab Asistencia: resumen global + cards por curso ─────────────────────────
+function TabAsistencia({ asistencia }: { asistencia: any }) {
+    const [cursoSel, setCursoSel] = useState<any | null>(null);
+
+    if (cursoSel) {
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <button onClick={() => setCursoSel(null)}
+                        className="size-10 rounded-xl bg-white border border-gray-100 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors">
+                        <ChevronLeft size={16} className="text-gray-600" />
+                    </button>
+                    <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Asistencia del curso</p>
+                        <h3 className="font-black text-gray-900 text-lg uppercase">{cursoSel.curso}</h3>
+                    </div>
+                    <span className={`ml-auto px-4 py-1.5 rounded-full text-sm font-black ${cursoSel.porcentaje >= 70 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                        {cursoSel.porcentaje}% asistencia
+                    </span>
+                </div>
+                <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+                    <table className="w-full text-left">
+                        <thead className="bg-gray-50 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                            <tr>
+                                <th className="px-6 py-4">Fecha</th>
+                                <th className="px-6 py-4 text-center">Estado</th>
+                                <th className="px-6 py-4 hidden sm:table-cell">Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                            {cursoSel.historial.map((h: any, i: number) => {
+                                const cfg = {
+                                    P: { label: 'Presente',    cls: 'bg-emerald-100 text-emerald-700' },
+                                    T: { label: 'Tardanza',    cls: 'bg-amber-100 text-amber-700' },
+                                    F: { label: 'Falta',       cls: 'bg-rose-100 text-rose-700' },
+                                    J: { label: 'Justificado', cls: 'bg-blue-100 text-blue-700' },
+                                }[h.estado as string] ?? { label: h.estado, cls: 'bg-gray-100 text-gray-500' };
+                                return (
+                                    <tr key={i} className="hover:bg-rose-50/20 transition-colors">
+                                        <td className="px-6 py-3 font-semibold text-gray-800 text-sm">{h.fecha}</td>
+                                        <td className="px-6 py-3 text-center">
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${cfg.cls}`}>{cfg.label}</span>
+                                        </td>
+                                        <td className="px-6 py-3 text-xs text-gray-500 italic hidden sm:table-cell">{h.observacion || '—'}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-5">
+            {/* Resumen global */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                    { label: 'Asistencia',  value: `${asistencia.porcentaje}%`, color: 'indigo' },
+                    { label: 'Presentes',   value: asistencia.presentes,        color: 'emerald' },
+                    { label: 'Tardanzas',   value: asistencia.tardanzas,        color: 'amber' },
+                    { label: 'Faltas',      value: asistencia.faltas,           color: 'rose' },
+                ].map(({ label, value, color }) => (
+                    <div key={label} className={`bg-${color}-50 p-5 rounded-[2rem] flex flex-col items-center justify-center text-center`}>
+                        <p className={`text-[10px] font-black text-${color}-400 uppercase tracking-widest mb-1`}>{label}</p>
+                        <p className={`text-3xl font-black text-${color}-600`}>{value}</p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Cards por curso */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {asistencia.por_curso?.length === 0 ? (
+                    <div className="col-span-full bg-white rounded-[2rem] border border-gray-100 p-12 text-center text-gray-400 font-bold">
+                        No hay registros de asistencia por curso.
+                    </div>
+                ) : (
+                    asistencia.por_curso?.map((curso: any) => {
+                        const ok = curso.porcentaje >= 70;
+                        return (
+                            <button key={curso.curso_id} onClick={() => setCursoSel(curso)}
+                                className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 flex flex-col gap-4 hover:border-rose-200 hover:shadow-lg transition-all group text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="size-12 rounded-2xl bg-rose-50 flex items-center justify-center flex-shrink-0 group-hover:bg-rose-100 transition-colors">
+                                        <ClipboardCheck size={20} className="text-rose-400" />
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-gray-900 text-sm uppercase leading-tight">{curso.curso}</p>
+                                        <p className="text-xs text-gray-400 font-medium mt-0.5">{curso.total} sesiones</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-end justify-between">
+                                    <div>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Asistencia</p>
+                                        <p className={`text-3xl font-black mt-0.5 ${ok ? 'text-emerald-600' : 'text-rose-600'}`}>{curso.porcentaje}%</p>
+                                    </div>
+                                    <div className="text-right text-xs text-gray-400 font-medium space-y-0.5">
+                                        <p><span className="text-emerald-600 font-black">{curso.presentes}</span> P</p>
+                                        <p><span className="text-amber-500 font-black">{curso.tardanzas}</span> T</p>
+                                        <p><span className="text-rose-500 font-black">{curso.faltas}</span> F</p>
+                                    </div>
+                                </div>
+                                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div className={`h-full rounded-full ${ok ? 'bg-emerald-400' : 'bg-rose-400'}`}
+                                        style={{ width: `${curso.porcentaje}%` }} />
+                                </div>
+                            </button>
+                        );
+                    })
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ── Tab Notas: lista de cursos → detalle de notas ────────────────────────────
+function TabNotas({ notas }: { notas: any[] }) {
+    const [cursoSeleccionado, setCursoSeleccionado] = useState<any | null>(null);
+
+    if (cursoSeleccionado) {
+        return <NotasCurso curso={cursoSeleccionado} onVolver={() => setCursoSeleccionado(null)} />;
+    }
+
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {notas.length === 0 ? (
+                <div className="col-span-full bg-white rounded-[2rem] border border-gray-100 p-16 text-center text-gray-400 font-bold">
+                    No hay calificaciones registradas aún.
+                </div>
+            ) : (
+                notas.map((curso: any) => {
+                    const aprobado = curso.promedio !== null && curso.promedio >= 11;
+                    return (
+                        <button
+                            key={curso.curso_id}
+                            onClick={() => setCursoSeleccionado(curso)}
+                            className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 flex flex-col gap-4 hover:border-rose-200 hover:shadow-lg transition-all group text-left"
+                        >
+                            {/* Icono + nombre */}
+                            <div className="flex items-center gap-3">
+                                <div className="size-12 rounded-2xl bg-rose-50 flex items-center justify-center flex-shrink-0 group-hover:bg-rose-100 transition-colors">
+                                    <GraduationCap size={22} className="text-rose-400" />
+                                </div>
+                                <div>
+                                    <p className="font-black text-gray-900 text-sm uppercase leading-tight">{curso.curso}</p>
+                                    <p className="text-xs text-gray-400 font-medium mt-0.5">
+                                        {curso.notas.length} actividad{curso.notas.length !== 1 ? 'es' : ''}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Promedio */}
+                            <div className="flex items-end justify-between">
+                                {curso.promedio !== null ? (
+                                    <div>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Promedio</p>
+                                        <p className={`text-3xl font-black mt-0.5 ${aprobado ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                            {curso.promedio}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-gray-300 font-bold">Sin calificar</p>
+                                )}
+                                <ChevronLeft size={18} className="text-gray-200 rotate-180 group-hover:text-rose-400 transition-colors mb-1" />
+                            </div>
+
+                            {/* Barra de progreso del promedio */}
+                            {curso.promedio !== null && (
+                                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full rounded-full transition-all ${aprobado ? 'bg-emerald-400' : 'bg-rose-400'}`}
+                                        style={{ width: `${Math.min((curso.promedio / 20) * 100, 100)}%` }}
+                                    />
+                                </div>
+                            )}
+                        </button>
+                    );
+                })
+            )}
+        </div>
+    );
+}
+
+// ── Detalle de notas de un curso ──────────────────────────────────────────────
+function NotasCurso({ curso, onVolver }: { curso: any; onVolver: () => void }) {
+    return (
+        <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <button
+                    onClick={onVolver}
+                    className="size-10 rounded-xl bg-white border border-gray-100 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
+                >
+                    <ChevronLeft size={16} className="text-gray-600" />
+                </button>
+                <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Notas del curso</p>
+                    <h3 className="font-black text-gray-900 text-lg uppercase">{curso.curso}</h3>
+                </div>
+                {curso.promedio !== null && (
+                    <span className={`ml-auto px-5 py-2 rounded-full text-sm font-black ${curso.promedio >= 11 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                        Promedio: {curso.promedio}
+                    </span>
+                )}
+            </div>
+
+            {/* Tabla */}
+            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-gray-50 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        <tr>
+                            <th className="px-6 py-4">Actividad</th>
+                            <th className="px-6 py-4 text-center w-24">Nota</th>
+                            <th className="px-6 py-4 text-center w-20">Máx.</th>
+                            <th className="px-6 py-4 hidden sm:table-cell">Observación</th>
+                            <th className="px-6 py-4 text-right w-28 hidden sm:table-cell">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                        {curso.notas.map((n: any) => {
+                            const nota = parseFloat(n.nota);
+                            const max  = parseFloat(n.puntos_maximos) || 20;
+                            const ok   = !isNaN(nota) && nota >= (max * 0.55);
+                            return (
+                                <tr key={n.actividad_id} className="hover:bg-rose-50/20 transition-colors">
+                                    <td className="px-6 py-4">
+                                        <p className="font-semibold text-gray-800 text-sm">{n.nombre_actividad}</p>
+                                        {n.tipo && <p className="text-[10px] text-gray-400 font-medium">{n.tipo}</p>}
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        {n.nota !== null ? (
+                                            <span className={`text-xl font-black ${ok ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                                {n.nota}
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs text-gray-300 font-bold">—</span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 text-center text-xs text-gray-400 font-bold">{n.puntos_maximos ?? 20}</td>
+                                    <td className="px-6 py-4 text-xs text-gray-500 italic hidden sm:table-cell max-w-xs truncate">{n.observacion || '—'}</td>
+                                    <td className="px-6 py-4 text-right text-xs text-gray-400 font-medium hidden sm:table-cell">{n.fecha}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
 
 export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'academico' | 'asistencia' | 'pagos'>('academico');
+    const [activeTab, setActiveTab] = useState<'academico' | 'asistencia'>('academico');
     const [voucherPagId, setVoucherPagId] = useState<number | null>(null);
     const [voucherMes, setVoucherMes] = useState('');
 
@@ -19,45 +273,46 @@ export default function HijoDetallePage({ hijoId }: { hijoId: number }) {
     }, [hijoId]);
 
     if (loading) {
-return <div className="p-10 text-center font-black animate-pulse text-rose-500">Cargando detalles...</div>;
-}
+        return (
+            <AppLayout breadcrumbs={[]}>
+                <div className="p-10 text-center font-black animate-pulse text-rose-500">Cargando detalles...</div>
+            </AppLayout>
+        );
+    }
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Mis Hijos', href: '/padre/dashboard' },
+        { title: data.hijo?.perfil?.primer_nombre ?? 'Detalle', href: '#' },
+    ];
 
     return (
-        <>
-        <div className="min-h-screen bg-[#FDFDFD] p-4 md:p-10 space-y-10 font-sans">
-            <Head title={`Seguimiento - ${data.hijo?.perfil?.primer_nombre}`} />
+        <AppLayout breadcrumbs={breadcrumbs}>
+        <Head title={`Seguimiento - ${data.hijo?.perfil?.primer_nombre}`} />
+        <div className="p-4 md:p-8 space-y-6 font-sans">
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-center space-x-6">
-                    <Link href="/padre/dashboard">
-                        <Button variant="ghost" className="h-12 w-12 rounded-2xl bg-white border border-gray-100 shadow-sm hover:bg-gray-50 p-0">
-                            <ChevronLeft className="w-6 h-6" />
-                        </Button>
-                    </Link>
-                    <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Seguimiento Académico</p>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tighter">
-                            {data.hijo?.perfil?.primer_nombre} {data.hijo?.perfil?.apellido_paterno}
-                        </h1>
-                    </div>
+            {/* Header — una sola fila */}
+            <div className="flex items-center justify-between gap-4">
+                <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Seguimiento Académico</p>
+                    <h1 className="text-2xl font-black text-gray-900 tracking-tighter">
+                        {data.hijo?.perfil?.primer_nombre} {data.hijo?.perfil?.apellido_paterno}
+                    </h1>
                 </div>
-                
-                <div className="flex p-2 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                <div className="flex p-1.5 bg-white rounded-2xl border border-gray-100 shadow-sm flex-shrink-0">
                     {[
                         { id: 'academico', icon: GraduationCap, label: 'Notas' },
                         { id: 'asistencia', icon: ClipboardCheck, label: 'Asistencia' },
-                        { id: 'pagos', icon: CreditCard, label: 'Pagos' },
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex items-center space-x-2 px-6 py-3 rounded-2xl transition-all font-bold text-sm ${
-                                activeTab === tab.id 
-                                ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' 
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all font-bold text-xs ${
+                                activeTab === tab.id
+                                ? 'bg-rose-500 text-white shadow-md shadow-rose-200'
                                 : 'text-gray-400 hover:bg-gray-50'
                             }`}
                         >
-                            <tab.icon className="w-4 h-4" />
+                            <tab.icon className="w-3.5 h-3.5" />
                             <span>{tab.label}</span>
                         </button>
                     ))}
@@ -67,185 +322,11 @@ return <div className="p-10 text-center font-black animate-pulse text-rose-500">
             {/* Tab Content */}
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {activeTab === 'academico' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 space-y-6">
-                            <h3 className="text-xl font-black text-gray-800 flex items-center px-2">
-                                <Star className="w-5 h-5 mr-3 text-amber-500" /> Últimas Calificaciones
-                            </h3>
-                            <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
-                                <table className="w-full text-left">
-                                    <thead className="bg-gray-50 border-b text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                        <tr>
-                                            <th className="px-8 py-6">Materia / Actividad</th>
-                                            <th className="px-8 py-6 w-32 text-center">Nota</th>
-                                            <th className="px-8 py-6">Observación</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-50">
-                                        {data.notas.map((n: any) => (
-                                            <tr key={n.actividad_id} className="hover:bg-rose-50/20 transition-colors group">
-                                                <td className="px-8 py-6">
-                                                    <p className="text-xs text-rose-400 font-bold uppercase tracking-tight">{n.actividad?.clase?.unidad?.curso?.nombre}</p>
-                                                    <p className="font-bold text-gray-800 text-lg leading-tight">{n.actividad?.nombre_actividad}</p>
-                                                </td>
-                                                <td className="px-8 py-6 text-center">
-                                                    <span className={`text-2xl font-black ${parseFloat(n.nota) >= 11 ? 'text-blue-600' : 'text-red-500'} bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100 group-hover:bg-white transition-all`}>
-                                                        {n.nota}
-                                                    </span>
-                                                </td>
-                                                <td className="px-8 py-6">
-                                                    <p className="text-xs text-gray-500 italic max-w-xs">{n.observacion || 'Evaluado satisfactoriamente.'}</p>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <div className="space-y-8">
-                            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-200/50 space-y-6">
-                                <h4 className="font-black text-gray-900 border-b pb-4">Resumen de Periodo</h4>
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><GraduationCap className="w-5 h-5" /></div>
-                                            <p className="text-sm font-bold text-gray-500 uppercase tracking-tighter">Promedio General</p>
-                                        </div>
-                                        <p className="text-2xl font-black text-gray-900">16.8</p>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="p-2 bg-rose-100 text-rose-600 rounded-lg"><Clock className="w-5 h-5" /></div>
-                                            <p className="text-sm font-bold text-gray-500 uppercase tracking-tighter">Cursos Jalados</p>
-                                        </div>
-                                        <p className="text-2xl font-black text-rose-600">0</p>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="p-2 bg-amber-100 text-amber-600 rounded-lg"><AlertCircle className="w-5 h-5" /></div>
-                                            <p className="text-sm font-bold text-gray-500 uppercase tracking-tighter">Conducta</p>
-                                        </div>
-                                        <p className="text-lg font-black text-gray-900">A+</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <Button className="w-full h-16 rounded-[2rem] bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 text-white font-black text-lg">
-                                <FileText className="w-6 h-6 mr-3" /> Descargar Libreta PDF
-                            </Button>
-                        </div>
-                    </div>
+                    <TabNotas notas={data.notas} />
                 )}
 
                 {activeTab === 'asistencia' && (
-                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {/* Summary Cards */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col items-center justify-center text-center transition-transform hover:scale-105">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Porcentaje</p>
-                                <p className="text-4xl font-black text-indigo-600">{data.asistencia.porcentaje}%</p>
-                            </div>
-                            <div className="bg-emerald-500 p-6 rounded-[2rem] shadow-xl shadow-emerald-200 flex flex-col items-center justify-center text-center text-white transition-transform hover:scale-105">
-                                <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-2">Días Presente</p>
-                                <p className="text-4xl font-black">{data.asistencia.asistencias}</p>
-                            </div>
-                            <div className="bg-amber-500 p-6 rounded-[2rem] shadow-xl shadow-amber-200 flex flex-col items-center justify-center text-center text-white transition-transform hover:scale-105">
-                                <p className="text-[10px] font-black text-amber-100 uppercase tracking-widest mb-2">Tardanzas</p>
-                                <p className="text-4xl font-black">{data.asistencia.tardanzas}</p>
-                            </div>
-                            <div className="bg-rose-500 p-6 rounded-[2rem] shadow-xl shadow-rose-200 flex flex-col items-center justify-center text-center text-white transition-transform hover:scale-105">
-                                <p className="text-[10px] font-black text-rose-100 uppercase tracking-widest mb-2">Faltas</p>
-                                <p className="text-4xl font-black">{data.asistencia.faltas}</p>
-                            </div>
-                        </div>
-
-                        {/* History Table */}
-                        <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
-                            <table className="w-full text-left">
-                                <thead className="bg-gray-50 border-b text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                    <tr>
-                                        <th className="px-8 py-6">Fecha</th>
-                                        <th className="px-8 py-6 text-center">Horario</th>
-                                        <th className="px-8 py-6 text-center">Estado</th>
-                                        <th className="px-8 py-6">Observación</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {data.asistencia.historial?.length > 0 ? (
-                                        data.asistencia.historial.map((log: any) => (
-                                            <tr key={log.id} className="hover:bg-rose-50/20 transition-colors">
-                                                <td className="px-8 py-6 font-bold text-gray-800">{log.fecha}</td>
-                                                <td className="px-8 py-6 text-center text-gray-500 font-bold">
-                                                    {log.hora_entrada ? `${log.hora_entrada.slice(0,5)}` : '--:--'} 
-                                                    {log.hora_salida ? ` - ${log.hora_salida.slice(0,5)}` : ''}
-                                                </td>
-                                                <td className="px-8 py-6 text-center">
-                                                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                                                        log.estado === '1' ? 'bg-emerald-100 text-emerald-600' :
-                                                        log.estado === 'T' ? 'bg-amber-100 text-amber-600' :
-                                                        'bg-rose-100 text-rose-600'
-                                                    }`}>
-                                                        {log.estado_label}
-                                                    </span>
-                                                </td>
-                                                <td className="px-8 py-6 text-xs text-gray-500 italic max-w-xs truncate">
-                                                    {log.observacion || '-'}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={4} className="px-8 py-10 text-center font-bold text-gray-400 italic">
-                                                No hay registros de asistencia en los últimos 30 días.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-
-                {activeTab === 'pagos' && (
-                    <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl overflow-hidden">
-                        <table className="w-full text-left">
-                            <thead className="bg-gray-50 border-b text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                <tr>
-                                    <th className="px-8 py-6">Concepto / Mes</th>
-                                    <th className="px-8 py-6 text-center">Monto</th>
-                                    <th className="px-8 py-6 text-center">Estado</th>
-                                    <th className="px-8 py-6 text-right">Fecha Pago</th>
-                                    <th className="px-8 py-6 text-center">Voucher</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-50">
-                                {data.pagos.map((p: any) => (
-                                    <tr key={p.pago_id} className="hover:bg-rose-50/20">
-                                        <td className="px-8 py-6 font-bold text-gray-800">{p.tipo_pago || 'Mensualidad'}</td>
-                                        <td className="px-8 py-6 text-center font-black">S/ {p.monto}</td>
-                                        <td className="px-8 py-6 text-center">
-                                            <span className="px-3 py-1 bg-emerald-100 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">Pagado</span>
-                                        </td>
-                                        <td className="px-8 py-6 text-right text-gray-400 font-bold">{p.fecha_pago}</td>
-                                        <td className="px-8 py-6 text-center">
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                title="Subir comprobante"
-                                                className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 h-8 w-8 p-0"
-                                                onClick={() => {
- setVoucherPagId(p.pag_id ?? p.pago_id); setVoucherMes(p.mes ?? p.tipo_pago ?? ''); 
-}}
-                                            >
-                                                <Upload className="h-4 w-4" />
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <TabAsistencia asistencia={data.asistencia} />
                 )}
             </div>
         </div>
@@ -256,6 +337,6 @@ return <div className="p-10 text-center font-black animate-pulse text-rose-500">
             pagId={voucherPagId}
             mes={voucherMes}
         />
-        </>
+        </AppLayout>
     );
 }

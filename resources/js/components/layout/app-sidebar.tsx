@@ -102,7 +102,12 @@ const navigation: NavItem[] = [
         { title: 'Mis Notas',   href: '/alumno/notas', permission: 'portal.estudiante.notas' },
         { title: 'Rompecabezas', href: '/alumno/puzzles', permission: 'portal.estudiante.puzzles' },
     ]},
-    { type: 'link', title: 'Portal Familia', icon: Users, href: '/padre/dashboard', permission: 'portal.padre.ver' },
+    { type: 'group', title: 'Portal Familia', icon: Users, children: [
+        { title: 'Mis Hijos',   href: '/padre/dashboard',   permission: 'portal.padre.hijos' },
+        { title: 'Asistencia',  href: '/padre/asistencia',  permission: 'portal.padre.hijos' },
+        { title: 'Mis Pagos',   href: '/padre/pagos',       permission: 'portal.padre.pagos' },
+        { title: 'Profesores',  href: '/padre/profesores',  permission: 'portal.padre.profesores' },
+    ]},
 
     // ── Procedimientos ───────────────────────────────────────────────
     { type: 'section', label: 'PROCEDIMIENTOS' },
