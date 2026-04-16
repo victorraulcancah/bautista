@@ -10,6 +10,7 @@ import NotificacionesPendientes from './components/NotificacionesPendientes';
 import StatsCards from './components/StatsCards';
 import DocenteCourses from './components/DocenteCourses';
 import EstudianteStats from './components/EstudianteStats';
+import PadreDashboard from './components/PadreDashboard';
 import { usePermission } from '@/hooks/usePermission';
 import StatCard from '@/components/shared/StatCard';
 
@@ -116,13 +117,7 @@ export default function Dashboard() {
 
                         {/* 5. Vista Padre (Resumen de Hijos) */}
                         {can('dashboard.padre.resumen') && data && (
-                            <div className="p-10 text-center bg-gray-50 rounded-2xl border-2 border-dashed">
-                                <h3 className="text-xl font-bold text-gray-800 mb-2">Panel de Familia</h3>
-                                <p className="text-gray-500">Aquí verás el resumen de tus {data.hijos?.length ?? 0} hijos.</p>
-                                <Link href="/padre/dashboard" className="text-indigo-600 font-bold mt-4 inline-block hover:underline">
-                                    Ir a gestión de hijos →
-                                </Link>
-                            </div>
+                            <PadreDashboard data={data} />
                         )}
                     </div>
                 )}
