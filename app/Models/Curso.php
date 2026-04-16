@@ -30,4 +30,9 @@ class Curso extends Model
     {
         return $this->hasMany(Unidad::class, 'curso_id', 'curso_id')->orderBy('orden');
     }
+
+    public function docenteCursos(): HasMany
+    {
+        return $this->hasMany(DocenteCurso::class, 'curso_id', 'curso_id');
+    }
 }

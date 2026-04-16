@@ -37,14 +37,16 @@ export function NotificationBell() {
     const unreadCount = notifications.length;
 
     const getIcon = (id: string) => {
-        if (id === 'pending_payments') {
-return <CreditCard className="size-5 text-amber-600" />;
-}
-
-        if (id === 'birthdays')        {
-return <Cake className="size-5 text-pink-600" />;
-}
-
+        if (id.startsWith('vouchers') || id === 'pending_payments' || id.startsWith('pagos'))
+            return <CreditCard className="size-5 text-amber-600" />;
+        if (id === 'birthdays')
+            return <Cake className="size-5 text-pink-600" />;
+        if (id.startsWith('mensajes') || id === 'unread_msgs')
+            return <Bell className="size-5 text-indigo-600" />;
+        if (id.startsWith('vence_hoy') || id.includes('vence_hoy'))
+            return <Bell className="size-5 text-red-600" />;
+        if (id.startsWith('vence_pronto') || id.includes('vence_pronto'))
+            return <Bell className="size-5 text-orange-500" />;
         return <Bell className="size-5 text-emerald-600" />;
     };
 

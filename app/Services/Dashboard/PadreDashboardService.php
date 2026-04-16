@@ -6,9 +6,11 @@ use App\Models\PadreApoderado;
 use App\Models\Pago;
 use App\Models\AsistenciaAlumno;
 use App\Models\User;
+use App\Services\Notifications\NotificationService;
 
 class PadreDashboardService
 {
+    public function __construct(private NotificationService $notifService) {}
     public function getStats(User $user): array
     {
         $padre = PadreApoderado::where('user_id', $user->id)->first();
@@ -50,7 +52,7 @@ class PadreDashboardService
             'hijos'               => $hijosData,
             'total_hijos'         => $hijos->count(),
             'pagos_recientes'     => $pagosRecientes,
-            'notificaciones'      => [],
+            'notificaciones'      => $this->notifService->forPadre($user),
             'mensajes_pendientes' => [],
         ];
     }
