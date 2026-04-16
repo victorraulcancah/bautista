@@ -113,6 +113,30 @@ class EstudianteApiController extends Controller
             $contacto->update($data);
         } else {
             $data['insti_id'] = $request->user()->insti_id;
+
+            // Crear usuario de acceso si tiene número de documento
+            if (!empty($data['numero_doc'])) {
+                $rolName = match($data['parentesco']) {
+                    'madre'     => 'madre_familia',
+                    'apoderado' => 'apoderado',
+                    default     => 'padre_familia',
+                };
+                $existeUser = \App\Models\User::where('username', $data['numero_doc'])->first();
+                if (!$existeUser) {
+                    $existeUser = \App\Models\User::create([
+                        'insti_id' => $request->user()->insti_id,
+                        'rol_id'   => \DB::table('roles')->where('name', $rolName)->value('id'),
+                        'username' => $data['numero_doc'],
+                        'name'     => trim(($data['nombres'] ?? '') . ' ' . ($data['apellidos'] ?? '')),
+                        'email'    => $data['email_contacto'] ?? null,
+                        'password' => \Hash::make($data['numero_doc']),
+                        'estado'   => '1',
+                    ]);
+                    $existeUser->assignRole($rolName);
+                }
+                $data['user_id'] = $existeUser->id;
+            }
+
             $contacto = PadreApoderado::create($data);
             DB::table('estudiante_contacto')->insertOrIgnore([
                 'estudiante_id' => $estudiante->estu_id,

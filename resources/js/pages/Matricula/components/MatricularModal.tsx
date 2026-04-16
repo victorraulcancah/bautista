@@ -23,8 +23,8 @@ type Props = {
     onSave:      (data: MatriculaFormData) => Promise<void>;
     apiErrors:   Record<string, string[]>;
     clearErrors: () => void;
-     
-    estudiantes?: any[];  // kept for API compatibility, not used internally
+    editingMatricula?: any | null;  // pre-fill for edit mode
+    estudiantes?: any[];
 };
 
 const TAB_CLS = 'rounded-none border-b-2 border-transparent data-[state=active]:border-[#00a65a] data-[state=active]:bg-transparent data-[state=active]:text-[#00a65a] data-[state=active]:shadow-none px-4 py-2 text-sm font-medium';
@@ -33,7 +33,7 @@ const TAB_CLS = 'rounded-none border-b-2 border-transparent data-[state=active]:
 
 export default function MatricularModal({
     open, onClose, aperturaId, nivelId, anio,
-    secciones, grados, onSave, clearErrors,
+    secciones, grados, onSave, clearErrors, editingMatricula,
 }: Props) {
     const [matricula, setMatricula]   = useState<MatriculaFormData>(defaultMatriculaForm);
     const [alumno, setAlumno]         = useState<AlumnoForm>(defaultAlumno());
@@ -49,14 +49,53 @@ export default function MatricularModal({
     // reset on open/close
     useEffect(() => {
         clearErrors();
-        setMatricula({ ...defaultMatriculaForm, apertura_id: aperturaId.toString(), anio: anio.toString() });
-        setAlumno(defaultAlumno());
-        setPadre(defaultContacto());
-        setMadre(defaultContacto());
-        setApoderado(defaultContacto());
         setErrors({});
         setDniSearch('');
         setSelectedGrado('');
+
+        if (open && editingMatricula) {
+            // Edit mode: pre-fill with existing student data
+            const s = editingMatricula.estudiante;
+            setAlumno({
+                estu_id:             s?.estu_id ?? null,
+                username:            s?.doc_numero ?? '',
+                email:               '',
+                primer_nombre:       s?.primer_nombre ?? '',
+                segundo_nombre:      s?.segundo_nombre ?? '',
+                apellido_paterno:    s?.apellido_paterno ?? '',
+                apellido_materno:    s?.apellido_materno ?? '',
+                genero:              s?.genero ?? '',
+                fecha_nacimiento:    '',
+                edad:                '',
+                talla:               '',
+                peso:                '',
+                telefono:            '',
+                direccion:           '',
+                colegio:             '',
+                neurodivergencia:    '',
+                terapia_ocupacional: '',
+                seguro:              '',
+                seguro_privado:      '',
+                mensualidad:         '',
+                fecha_ingreso:       '',
+                fecha_pago:          '',
+                foto:                null,
+            });
+            setMatricula({
+                apertura_id: aperturaId.toString(),
+                estu_id:     s?.estu_id?.toString() ?? '',
+                seccion_id:  editingMatricula.seccion_id?.toString() ?? '',
+                anio:        anio.toString(),
+            });
+            setSelectedGrado(editingMatricula.seccion?.grado?.grado_id?.toString() ?? '');
+        } else {
+            setMatricula({ ...defaultMatriculaForm, apertura_id: aperturaId.toString(), anio: anio.toString() });
+            setAlumno(defaultAlumno());
+        }
+
+        setPadre(defaultContacto());
+        setMadre(defaultContacto());
+        setApoderado(defaultContacto());
     }, [open]);
 
     // auto-load contacts when an existing student is found by DNI
@@ -285,7 +324,9 @@ errs.seccion_id       = 'Requerido';
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="max-w-4xl max-h-[92vh] flex flex-col p-0 gap-0">
                 <DialogHeader className="px-6 pt-5 pb-3 border-b">
-                    <DialogTitle className="text-lg font-bold">Matricular Estudiante</DialogTitle>
+                    <DialogTitle className="text-lg font-bold">
+                        {editingMatricula ? 'Editar Estudiante' : 'Matricular Estudiante'}
+                    </DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">

@@ -12,6 +12,7 @@ import { usePermission } from '@/hooks/usePermission';
 import AperturaFormModal from './components/AperturaFormModal';
 import MatriculasDrawer from './components/MatriculasDrawer';
 import type { MatriculaApertura, AperturaFormData, SeccionOption } from './hooks/useMatricula';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard',  href: '/dashboard' },

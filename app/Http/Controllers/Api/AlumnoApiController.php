@@ -333,11 +333,13 @@ class AlumnoApiController extends Controller
                 $perfil = $dc->docente->perfil;
                 return [
                     'docente_id'   => $dc->docente_id,
+                    'user_id'      => $dc->docente->user?->id,
                     'nombres'      => trim(($perfil->primer_nombre ?? '') . ' ' . ($perfil->segundo_nombre ?? '')),
                     'apellidos'    => trim(($perfil->apellido_paterno ?? '') . ' ' . ($perfil->apellido_materno ?? '')),
                     'especialidad' => $dc->docente->especialidad ?? '—',
                     'telefono'     => $perfil->telefono ?? '—',
                     'curso'        => $dc->curso->nombre ?? '—',
+                    'docen_curso_id' => $dc->docen_curso_id,
                     'foto'         => $perfil?->foto_perfil ? asset('storage/' . $perfil->foto_perfil) : null,
                     'email'        => $dc->docente->user?->email ?? '—',
                 ];

@@ -96,29 +96,65 @@ class DocenteAlumnoService implements DocenteAlumnoServiceInterface
             ->get()
             ->groupBy('id_estudiante');
 
-        return $alumnos->map(function ($m) use ($cursoId, $totalActividades, $todasLasNotas, $todasLasAsistencias) {
+        // Cargar mapa de tipos UNA sola vez fuera del loop
+        $tiposMap = \DB::table('tipo_actividad')->pluck('nombre', 'tipo_id');
+
+        return $alumnos->map(function ($m) use ($cursoId, $totalActividades, $todasLasNotas, $todasLasAsistencias, $dc, $tiposMap) {
             $estuId = $m->estu_id;
             $perfil = $m->estudiante?->perfil;
 
-            // Use the grouped collections instead of queries parent loop
             $misNotas = $todasLasNotas->get($estuId, collect());
-            
-            $sumaPonderada = 0;
-            foreach ($misNotas as $notaRec) {
-                $actividad = $notaRec->actividad;
-                if (!$actividad || !$actividad->es_calificado) continue;
 
-                $puntosObtenidos = is_numeric($notaRec->nota) ? floatval($notaRec->nota) : 0;
-                $puntosMaximos = floatval($actividad->puntos_maximos ?: 20);
-                $peso = floatval($actividad->peso_porcentaje ?: 0);
+            // Pesos por tipo desde settings del docente
+            $weightsByName = $dc->settings['weights'] ?? null;
 
-                // Normalizar a escala 20: (obtenido/máximo) * 20
-                $nota20 = ($puntosMaximos > 0) ? ($puntosObtenidos / $puntosMaximos) * 20 : 0;
-                
-                // Aplicar peso: nota20 * (peso/100)
-                $sumaPonderada += ($nota20 * ($peso / 100));
+            if ($weightsByName && count($weightsByName) > 0) {
+                // Calcular promedio por tipo (solo actividades calificadas con nota)
+                $promediosPorTipo = [];
+                foreach ($misNotas->groupBy(fn($n) => $n->actividad?->id_tipo_actividad) as $tipoId => $notasTipo) {
+                    $nombreTipo = $tiposMap[$tipoId] ?? null;
+                    if (!$nombreTipo) continue;
+                    $suma = 0; $count = 0;
+                    foreach ($notasTipo as $notaRec) {
+                        $actividad = $notaRec->actividad;
+                        if (!$actividad || !$actividad->es_calificado || !is_numeric($notaRec->nota)) continue;
+                        $puntosMaximos = floatval($actividad->puntos_maximos ?: 20);
+                        $nota20 = $puntosMaximos > 0 ? (floatval($notaRec->nota) / $puntosMaximos) * 20 : 0;
+                        $suma += $nota20; $count++;
+                    }
+                    if ($count > 0) {
+                        $promediosPorTipo[$nombreTipo] = $suma / $count;
+                    }
+                    // Si count=0 no se agrega — ese tipo no tiene notas aún, no penaliza
+                }
+
+                // Redistribuir pesos solo entre tipos que tienen notas
+                $pesoTotal = 0;
+                foreach ($promediosPorTipo as $tipo => $_) {
+                    $pesoTotal += floatval($weightsByName[$tipo] ?? 0);
+                }
+
+                $sumaPonderada = 0;
+                if ($pesoTotal > 0) {
+                    foreach ($promediosPorTipo as $tipo => $promTipo) {
+                        $pesoRelativo = floatval($weightsByName[$tipo] ?? 0) / $pesoTotal;
+                        $sumaPonderada += $promTipo * $pesoRelativo;
+                    }
+                }
+            } else {
+                // Fallback: usar peso_porcentaje individual de cada actividad
+                $sumaPonderada = 0;
+                foreach ($misNotas as $notaRec) {
+                    $actividad = $notaRec->actividad;
+                    if (!$actividad || !$actividad->es_calificado) continue;
+                    $puntosObtenidos = is_numeric($notaRec->nota) ? floatval($notaRec->nota) : 0;
+                    $puntosMaximos = floatval($actividad->puntos_maximos ?: 20);
+                    $peso = floatval($actividad->peso_porcentaje ?: 0);
+                    $nota20 = $puntosMaximos > 0 ? ($puntosObtenidos / $puntosMaximos) * 20 : 0;
+                    $sumaPonderada += $nota20 * ($peso / 100);
+                }
             }
-            
+
             $promedio = round($sumaPonderada, 2);
 
             $misAsistencias = $todasLasAsistencias->get($estuId, collect());
@@ -131,6 +167,7 @@ class DocenteAlumnoService implements DocenteAlumnoServiceInterface
 
             return [
                 'estu_id' => $estuId,
+                'user_id' => $m->estudiante?->user_id,
                 'nombre' => $perfil?->nombre_ordenado,
                 'foto' => $perfil?->foto ? '/storage/' . $perfil->foto : null,
                 'promedio' => $promedio,

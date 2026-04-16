@@ -120,6 +120,9 @@ Route::middleware(['auth.token'])->group(function () {
 
     Route::prefix('padre')->name('padre.')->middleware('permission:portal.padre.hijos')->group(function () {
         Route::get('/dashboard', fn () => redirect()->route('dashboard'))->name('dashboard');
+        Route::get('/mis-hijos', fn () => Inertia::render('Matricula/Padre/MisHijos'))->name('mis-hijos');
+        Route::get('/cursos', fn () => Inertia::render('Matricula/Padre/MisCursos'))->name('cursos');
+        Route::get('/profesores', fn () => Inertia::render('Matricula/Padre/Profesores'))->name('profesores');
         Route::get('/matricula', fn () => inertia('Matricula/Padre/MatriculaWizard'))->name('matricula.wizard');
         Route::get('/hijo/{id}', fn (int $id) => Inertia::render('Matricula/Padre/HijoDetalle', ['hijoId' => $id]))->name('hijo.detalle');
     });

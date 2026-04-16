@@ -11,6 +11,7 @@ class AlumnoMetricasResource extends JsonResource
     {
         return [
             'estu_id' => $this->resource['estu_id'],
+            'user_id' => $this->resource['user_id'] ?? null,
             'nombre' => $this->resource['nombre'],
             'foto' => $this->resource['foto'],
             'promedio' => $this->resource['promedio'],

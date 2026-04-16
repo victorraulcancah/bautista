@@ -1,5 +1,5 @@
-    import { useState, useEffect } from 'react';
-import { Settings, Palette, Image as ImageIcon, Save, RotateCcw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Palette, Image as ImageIcon, Save, RotateCcw, BarChart2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,10 +14,10 @@ interface Props {
 }
 
 interface CourseSettings {
-    nombre?: string;
     descripcion?: string;
     color?: string;
     banner?: string;
+    weights?: Record<string, number>; // { "Tarea": 30, "Examen": 50, "Cuestionario": 20 }
 }
 
 const PRESET_COLORS = [
@@ -32,12 +32,31 @@ const PRESET_COLORS = [
 ];
 
 export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh }: Props) {
+    const DEFAULT_WEIGHTS: Record<string, number> = { Tarea: 20, Examen: 40, Cuestionario: 20, Dibujo: 10, Rompecabezas: 10 };
+
+    const [tiposActividad, setTiposActividad] = useState<string[]>(Object.keys(DEFAULT_WEIGHTS));
     const [settings, setSettings] = useState<CourseSettings>({
-        nombre: courseData?.curso?.nombre || '',
         descripcion: courseData?.curso?.descripcion || '',
         color: courseData?.curso?.color || '#10b981',
         banner: courseData?.banner || '',
+        weights: (courseData?.settings?.weights && Object.keys(courseData.settings.weights).length > 0)
+            ? courseData.settings.weights
+            : DEFAULT_WEIGHTS,
     });
+
+    useEffect(() => {
+        api.get('/actividades/tipos').then(res => {
+            const nombres: string[] = (res.data ?? []).map((t: any) => t.nombre);
+            setTiposActividad(nombres);
+            // Si no hay weights guardados, inicializar con todos los tipos en 0 excepto los defaults
+            setSettings(prev => {
+                if (prev.weights && Object.keys(prev.weights).length > 0) return prev;
+                const w: Record<string, number> = {};
+                nombres.forEach(n => { w[n] = DEFAULT_WEIGHTS[n] ?? 0; });
+                return { ...prev, weights: w };
+            });
+        }).catch(() => {});
+    }, []);
     const [saving, setSaving] = useState(false);
     const [uploadingBanner, setUploadingBanner] = useState(false);
     const [previewBanner, setPreviewBanner] = useState<string | null>(courseData?.banner_url || null);
@@ -62,10 +81,12 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
     useEffect(() => {
         if (courseData) {
             setSettings({
-                nombre: courseData.curso?.nombre || '',
                 descripcion: courseData.curso?.descripcion || '',
                 color: courseData.curso?.color || '#10b981',
                 banner: courseData.banner || '',
+                weights: (courseData.settings?.weights && Object.keys(courseData.settings.weights).length > 0)
+                    ? courseData.settings.weights
+                    : DEFAULT_WEIGHTS,
             });
             if (courseData.banner_url) {
                 setPreviewBanner(courseData.banner_url);
@@ -161,14 +182,17 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
     const handleReset = () => {
         if (confirm('¿Estás seguro de que deseas restaurar la configuración predeterminada?')) {
             setSettings({
-                nombre: courseData?.curso?.nombre || '',
                 descripcion: courseData?.curso?.descripcion || '',
                 color: '#10b981',
                 banner: '',
+                weights: DEFAULT_WEIGHTS,
             });
             setPreviewBanner(null);
         }
     };
+
+    const totalWeight = Object.values(settings.weights ?? {}).reduce((a, b) => a + Number(b), 0);
+    const weightOk = totalWeight === 100;
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -212,16 +236,15 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
                         </div>
 
                         <div className="space-y-6">
+                            {/* Nombre — solo lectura */}
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
                                     Nombre del Curso
                                 </label>
-                                <Input 
-                                    value={settings.nombre}
-                                    onChange={(e) => setSettings(prev => ({ ...prev, nombre: e.target.value }))}
-                                    placeholder="Ej: Matemática Avanzada"
-                                    className="rounded-xl h-12 border-gray-200 font-medium text-base"
-                                />
+                                <div className="h-12 px-4 flex items-center rounded-xl bg-gray-50 border border-gray-100 text-gray-500 font-medium text-sm select-none">
+                                    {courseData?.curso?.nombre || '—'}
+                                </div>
+                                <p className="text-[10px] text-gray-400 px-1">El nombre del curso solo puede ser modificado por el administrador.</p>
                             </div>
 
                             <div className="space-y-2">
@@ -235,6 +258,68 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
                                     className="rounded-xl min-h-[120px] border-gray-200 font-medium resize-none"
                                 />
                             </div>
+                        </div>
+                    </Card>
+
+                    {/* Pesos por tipo de actividad */}
+                    <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="size-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+                                <BarChart2 size={20} className="text-amber-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-lg text-gray-900">Pesos por Tipo de Actividad</h3>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Define cómo se calcula el promedio final</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {tiposActividad.map(tipo => {
+                                const peso = settings.weights?.[tipo] ?? 0;
+                                return (
+                                <div key={tipo} className="flex items-center gap-4">
+                                    <span className="w-32 text-sm font-bold text-gray-700 shrink-0">{tipo}</span>
+                                    <div className="flex-1 relative">
+                                        <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                                            <div
+                                                className="h-full rounded-full bg-amber-400 transition-all"
+                                                style={{ width: `${Math.min(Number(peso), 100)}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 w-24">
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            max={100}
+                                            value={peso}
+                                            onChange={e => setSettings(prev => ({
+                                                ...prev,
+                                                weights: { ...prev.weights, [tipo]: Number(e.target.value) }
+                                            }))}
+                                            className="h-9 w-16 text-center rounded-xl border-gray-200 font-bold text-sm"
+                                        />
+                                        <span className="text-sm text-gray-400 font-bold">%</span>
+                                    </div>
+                                </div>
+                                );
+                            })}
+
+                            {/* Total */}
+                            <div className={`flex items-center justify-between pt-3 border-t ${weightOk ? 'border-emerald-100' : 'border-rose-100'}`}>
+                                <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Total</span>
+                                <span className={`text-lg font-black ${weightOk ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                    {totalWeight}%
+                                </span>
+                            </div>
+                            {!weightOk && (
+                                <p className="text-xs text-rose-500 font-bold">
+                                    La suma debe ser exactamente 100%. Actualmente: {totalWeight}%
+                                </p>
+                            )}
+                            {weightOk && (
+                                <p className="text-xs text-emerald-600 font-bold">✓ Los pesos suman 100%</p>
+                            )}
                         </div>
                     </Card>
 
@@ -361,7 +446,7 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
                                                 className="w-full h-full object-cover"
                                             />
                                         ) : (
-                                            <span className="relative z-10">{settings.nombre || 'Nombre del Curso'}</span>
+                                            <span className="relative z-10">{courseData?.curso?.nombre || 'Nombre del Curso'}</span>
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                                     </div>
@@ -369,7 +454,7 @@ export default function ConfiguracionTab({ docenteCursoId, courseData, onRefresh
                                     {/* Content Preview */}
                                     <div className="p-6 space-y-3">
                                         <h4 className="font-black text-gray-900 text-lg leading-tight">
-                                            {settings.nombre || 'Nombre del Curso'}
+                                            {courseData?.curso?.nombre || 'Nombre del Curso'}
                                         </h4>
                                         <p className="text-xs text-gray-500 leading-relaxed">
                                             {settings.descripcion || 'La descripción del curso aparecerá aquí...'}

@@ -74,7 +74,7 @@ export default function CursoDetalleAlumno({ cursoId }: { cursoId: number }) {
             <Head title={`${courseData?.curso?.nombre || 'Curso'}`} />
             
             <div className="min-h-screen bg-[#F8FAFC]">
-                <div className="p-8 pb-0">
+                <div className="px-4 sm:px-8 pt-4 sm:pt-8 pb-0">
                     <PageHeader 
                         icon={BookOpen}
                         title={courseData?.curso?.nombre || 'Curso'}
@@ -84,9 +84,9 @@ export default function CursoDetalleAlumno({ cursoId }: { cursoId: number }) {
                 </div>
 
                 {/* Navigation Tabs */}
-                <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
-                    <div className="max-w-7xl mx-auto px-6 overflow-x-auto no-scrollbar">
-                        <div className="flex items-center gap-2 py-3">
+                <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm mt-4">
+                    <div className="max-w-7xl mx-auto px-2 sm:px-6 overflow-x-auto no-scrollbar">
+                        <div className="flex items-center gap-1 py-2">
                             {TABS.map((tab) => {
                                 const Icon = tab.icon;
                                 const isActive = activeTab === tab.id;
@@ -94,13 +94,13 @@ export default function CursoDetalleAlumno({ cursoId }: { cursoId: number }) {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl transition-all duration-300 font-bold text-xs uppercase tracking-widest whitespace-nowrap
+                                        className={`flex items-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-xl transition-all duration-200 font-bold text-[10px] sm:text-xs uppercase tracking-widest whitespace-nowrap
                                             ${isActive 
-                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-100 ring-4 ring-blue-50' 
+                                                ? 'bg-blue-600 text-white shadow-md shadow-blue-100' 
                                                 : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50/50'}`}
                                     >
-                                        <Icon size={16} />
-                                        {tab.label}
+                                        <Icon size={14} />
+                                        <span className="hidden sm:inline">{tab.label}</span>
                                     </button>
                                 );
                             })}
@@ -109,7 +109,7 @@ export default function CursoDetalleAlumno({ cursoId }: { cursoId: number }) {
                 </nav>
 
                 {/* Tab Content */}
-                <main className="max-w-7xl mx-auto p-8 pb-20">
+                <main className="max-w-7xl mx-auto px-3 sm:px-8 py-4 sm:py-8 pb-20">
                     {activeTab === 'contenido' && <ContenidoTab unidades={unidades} />}
                     {activeTab === 'anuncios' && <AnunciosTab cursoId={cursoId} />}
                     {activeTab === 'calificaciones' && <NotasTab cursoId={cursoId} />}

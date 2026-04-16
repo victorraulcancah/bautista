@@ -126,9 +126,15 @@ class CalificacionApiController extends Controller
 
         // 4. Format Grade Matrix and calculate weighted averages if settings exist
         $settings = $dc->settings ?? [];
-        $weights = $settings['weights'] ?? null; // e.g. { "1": 40, "2": 60 } where 1 is Tarea, 2 is Examen
+        // weights por nombre de tipo: { "Tarea": 30, "Examen": 50, "Cuestionario": 20 }
+        $weightsByName = $settings['weights'] ?? null;
 
-        $estudiantes = $matriculas->map(function ($m) use ($actividades, $notas) {
+        // Mapa tipo_id → nombre para lookup rápido
+        $tiposMap = \DB::table('tipo_actividad')
+            ->whereIn('tipo_id', $actividades->pluck('id_tipo_actividad')->unique())
+            ->pluck('nombre', 'tipo_id');
+
+        $estudiantes = $matriculas->map(function ($m) use ($actividades, $notas, $weightsByName, $tiposMap) {
             $e = $m->estudiante;
             $nombre = $e->perfil?->nombre_ordenado;
             
@@ -146,16 +152,40 @@ class CalificacionApiController extends Controller
                 ];
             });
 
-            // Calculate Weighted Average
-            $sumaPonderada = 0;
-            foreach ($notasAlumno as $item) {
-                $puntosObtenidos = is_numeric($item['nota']) ? floatval($item['nota']) : 0;
-                $puntosMaximos = floatval($item['puntos_maximos'] ?: 20);
-                $peso = floatval($item['peso_porcentaje'] ?: 0);
-
-                // Escala 20: (obtenido/máximo) * 20
-                $nota20 = ($puntosMaximos > 0) ? ($puntosObtenidos / $puntosMaximos) * 20 : 0;
-                $sumaPonderada += ($nota20 * ($peso / 100));
+            // Calcular promedio según weights del settings o peso individual de cada actividad
+            if ($weightsByName && count($weightsByName) > 0) {
+                // Calcular promedio por tipo, solo tipos con notas
+                $promediosPorTipo = [];
+                foreach ($notasAlumno->groupBy('tipo_id') as $tipoId => $notasTipo) {
+                    $nombreTipo = $tiposMap[$tipoId] ?? null;
+                    if (!$nombreTipo) continue;
+                    $suma = 0; $count = 0;
+                    foreach ($notasTipo as $item) {
+                        if (!is_numeric($item['nota'])) continue;
+                        $puntosMaximos = floatval($item['puntos_maximos'] ?: 20);
+                        $nota20 = $puntosMaximos > 0 ? (floatval($item['nota']) / $puntosMaximos) * 20 : 0;
+                        $suma += $nota20; $count++;
+                    }
+                    if ($count > 0) $promediosPorTipo[$nombreTipo] = $suma / $count;
+                }
+                // Redistribuir pesos solo entre tipos con notas
+                $pesoTotal = array_sum(array_map(fn($t) => floatval($weightsByName[$t] ?? 0), array_keys($promediosPorTipo)));
+                $sumaPonderada = 0;
+                if ($pesoTotal > 0) {
+                    foreach ($promediosPorTipo as $tipo => $prom) {
+                        $sumaPonderada += $prom * (floatval($weightsByName[$tipo] ?? 0) / $pesoTotal);
+                    }
+                }
+            } else {
+                // Fallback: usar peso_porcentaje individual de cada actividad
+                $sumaPonderada = 0;
+                foreach ($notasAlumno as $item) {
+                    $puntosObtenidos = is_numeric($item['nota']) ? floatval($item['nota']) : 0;
+                    $puntosMaximos = floatval($item['puntos_maximos'] ?: 20);
+                    $peso = floatval($item['peso_porcentaje'] ?: 0);
+                    $nota20 = $puntosMaximos > 0 ? ($puntosObtenidos / $puntosMaximos) * 20 : 0;
+                    $sumaPonderada += $nota20 * ($peso / 100);
+                }
             }
 
             return [
