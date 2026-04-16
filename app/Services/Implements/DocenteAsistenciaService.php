@@ -82,6 +82,90 @@ class DocenteAsistenciaService implements DocenteAsistenciaServiceInterface
         ];
     }
 
+    /**
+     * Obtiene la matriz editable: alumnos × días del mes con sus estados actuales.
+     * Incluye todas las fechas que ya tienen sesión registrada en ese mes.
+     */
+    public function obtenerMatrizEditable(int $docenteCursoId, string $mes): array
+    {
+        $dc = DocenteCurso::find($docenteCursoId);
+        if (!$dc) throw new DocenteCursoNotFoundException();
+
+        $alumnos = Matricula::where('seccion_id', $dc->seccion_id)
+            ->where('apertura_id', $dc->apertura_id)
+            ->where('estado', '1')
+            ->with('estudiante.perfil')
+            ->get();
+
+        $clasesIds = Clase::whereHas('unidad', function ($q) use ($dc) {
+            $q->where('curso_id', $dc->curso_id);
+        })->pluck('clase_id');
+
+        // Sesiones del mes
+        [$year, $month] = explode('-', $mes);
+        $desde = "{$year}-{$month}-01";
+        $hasta = date('Y-m-t', strtotime($desde));
+
+        $sesiones = AsistenciaActividad::whereIn('id_clase_curso', $clasesIds)
+            ->whereBetween('fecha', [$desde, $hasta])
+            ->orderBy('fecha')
+            ->get();
+
+        $registros = AsistenciaAlumno::whereIn('id_asistencia_clase', $sesiones->pluck('id'))
+            ->get();
+
+        $fechas = $sesiones->pluck('fecha')->unique()->sort()->values();
+
+        $alumnosData = $alumnos->map(function ($m) use ($registros, $sesiones, $fechas) {
+            $dias = [];
+            foreach ($fechas as $fecha) {
+                $sesion = $sesiones->firstWhere('fecha', $fecha);
+                $reg = $sesion
+                    ? $registros->where('id_asistencia_clase', $sesion->id)->where('id_estudiante', $m->estu_id)->first()
+                    : null;
+                $dias[$fecha] = $reg?->estado ?? null;
+            }
+            return [
+                'estu_id'  => $m->estu_id,
+                'nombre'   => $m->estudiante?->perfil?->nombre_ordenado ?? 'Sin nombre',
+                'dias'     => $dias,
+            ];
+        })->values();
+
+        return [
+            'alumnos' => $alumnosData->toArray(),
+            'fechas'  => $fechas->toArray(),
+        ];
+    }
+
+    /**
+     * Guarda/actualiza asistencia de todos los alumnos para una fecha dada.
+     * Crea la sesión automáticamente usando la primera clase del curso.
+     */
+    public function guardarAsistenciaPorFecha(int $docenteCursoId, string $fecha, array $asistencias): void
+    {
+        $dc = DocenteCurso::find($docenteCursoId);
+        if (!$dc) throw new DocenteCursoNotFoundException();
+
+        // Obtener la primera clase del curso como "clase representativa"
+        $claseId = Clase::whereHas('unidad', function ($q) use ($dc) {
+            $q->where('curso_id', $dc->curso_id);
+        })->orderBy('clase_id')->value('clase_id');
+
+        if (!$claseId) return;
+
+        $sesion = AsistenciaActividad::firstOrCreate(
+            ['id_clase_curso' => $claseId, 'fecha' => $fecha]
+        );
+
+        foreach ($asistencias as $item) {
+            AsistenciaAlumno::updateOrCreate(
+                ['id_asistencia_clase' => $sesion->id, 'id_estudiante' => $item['id_estudiante']],
+                ['estado' => $item['estado'], 'observacion' => $item['observacion'] ?? null]
+            );
+        }
+    }
+
     public function iniciarSesionAsistencia(array $data): object
     {
         return AsistenciaActividad::firstOrCreate([

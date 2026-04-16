@@ -185,6 +185,38 @@ class DocenteApiController extends Controller
     }
 
     /**
+     * Get editable attendance matrix (alumnos × fechas del mes).
+     */
+    public function asistenciaEditable(Request $request, int $docenteCursoId): JsonResponse
+    {
+        $mes = $request->input('mes', date('Y-m'));
+        $data = $this->asistenciaService->obtenerMatrizEditable($docenteCursoId, $mes);
+        return response()->json($data);
+    }
+
+    /**
+     * Save attendance for all students on a specific date.
+     */
+    public function guardarAsistenciaFecha(Request $request, int $docenteCursoId): JsonResponse
+    {
+        $request->validate([
+            'fecha'                       => 'required|date_format:Y-m-d',
+            'asistencias'                 => 'required|array|min:1',
+            'asistencias.*.id_estudiante' => 'required|integer|exists:estudiantes,estu_id',
+            'asistencias.*.estado'        => 'required|in:P,F,T,J',
+            'asistencias.*.observacion'   => 'nullable|string|max:300',
+        ]);
+
+        $this->asistenciaService->guardarAsistenciaPorFecha(
+            $docenteCursoId,
+            $request->input('fecha'),
+            $request->input('asistencias')
+        );
+
+        return response()->json(['message' => 'Asistencia guardada.']);
+    }
+
+    /**
      * Get attendance matrix for a course.
      */
     public function asistenciaMatrix(Request $request, int $docenteCursoId): JsonResponse

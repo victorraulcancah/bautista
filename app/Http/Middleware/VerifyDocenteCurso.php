@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\Docente;
 use App\Models\DocenteCurso;
+use App\Models\AsistenciaActividad;
+use App\Models\Clase;
 
 class VerifyDocenteCurso
 {
@@ -50,6 +52,21 @@ class VerifyDocenteCurso
                     $hasAccess = DocenteCurso::where('docente_id', $docente->docente_id)
                         ->where('curso_id', $cursoIdFromActividad)
                         ->exists();
+                }
+            }
+
+            // Si no, puede ser un sessionId de asistencia_clases
+            if (!$hasAccess) {
+                $claseId = \App\Models\AsistenciaActividad::where('id', $id)->value('id_clase_curso');
+                if ($claseId) {
+                    $cursoIdFromClase = \App\Models\Clase::where('clase_id', $claseId)
+                        ->join('unidades', 'clases.unidad_id', '=', 'unidades.unidad_id')
+                        ->value('unidades.curso_id');
+                    if ($cursoIdFromClase) {
+                        $hasAccess = DocenteCurso::where('docente_id', $docente->docente_id)
+                            ->where('curso_id', $cursoIdFromClase)
+                            ->exists();
+                    }
                 }
             }
 

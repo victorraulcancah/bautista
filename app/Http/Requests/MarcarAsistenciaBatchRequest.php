@@ -11,15 +11,10 @@ class MarcarAsistenciaBatchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'registros'              => ['required', 'array', 'min:1'],
-            'registros.*.id_persona' => ['required', 'integer'],
-            'registros.*.tipo'       => ['required', 'in:E,D'],
-            'registros.*.fecha'      => ['required', 'date_format:Y-m-d'],
-            'registros.*.estado'     => ['required', 'in:1,0,T'],
-            'registros.*.turno'      => ['nullable', 'in:M,T'],
-            'registros.*.hora_entrada' => ['nullable', 'date_format:H:i'],
-            'registros.*.hora_salida'  => ['nullable', 'date_format:H:i'],
-            'registros.*.observacion'  => ['nullable', 'string', 'max:300'],
+            'asistencias'                  => ['required', 'array', 'min:1'],
+            'asistencias.*.id_estudiante'  => ['required', 'integer', 'exists:estudiantes,estu_id'],
+            'asistencias.*.estado'         => ['required', 'in:P,F,T,J'],
+            'asistencias.*.observacion'    => ['nullable', 'string', 'max:300'],
         ];
     }
 }

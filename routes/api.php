@@ -204,6 +204,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('docente/asistencia/iniciar', [DocenteApiController::class, 'iniciarAsistencia']);
         Route::post('docente/asistencia/{id}/marcar', [DocenteApiController::class, 'marcarAsistencia']);
         Route::get('docente/curso/{id}/asistencia-matrix', [DocenteApiController::class, 'asistenciaMatrix']);
+        Route::get('docente/curso/{id}/asistencia-editable', [DocenteApiController::class, 'asistenciaEditable']);
+        Route::post('docente/curso/{id}/asistencia-fecha', [DocenteApiController::class, 'guardarAsistenciaFecha']);
         Route::get('docente/curso/{id}/exportar-asistencia', [DocenteApiController::class, 'exportarAsistencia']);
         
         // Métricas y Calificaciones
