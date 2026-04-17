@@ -113,6 +113,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Cursos
     Route::apiResource('cursos', CursoApiController::class)->names('api.cursos');
+    Route::get('cursos/{cursoId}/docentes', [CursoApiController::class, 'docentes']);
 
     // Grados - Cursos (asignación)
     Route::get('grados/{gradoId}/cursos', [\App\Http\Controllers\Api\GradoCursoApiController::class, 'index']);

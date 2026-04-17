@@ -78,7 +78,7 @@ return;
                 next.seccion_id = '';
                 next.curso_id   = '';
                 setGradosFilt((grados as any[]).filter(g => String(g.nivel_id) === val));
-                setCursosFilt((cursos as any[]).filter(c => String(c.nivel_id) === val));
+                setCursosFilt([]);
                 setSeccionesFilt([]);
             }
 
@@ -86,11 +86,11 @@ return;
                 next.seccion_id = '';
                 next.curso_id   = '';
                 setSeccionesFilt((secciones as any[]).filter(s => String(s.grado_id) === val));
-                // Ver cursos del nivel con o sin grado asignado (pool del nivel)
-                setCursosFilt((cursos as any[]).filter(c => 
-                    String(c.nivel_id) === next.nivel_id && 
-                    (!c.grado_id || String(c.grado_id) === val)
-                ));
+                setCursosFilt([]);
+                http.get(`/grados/${val}/cursos`).then(r => {
+                    const list: any[] = Array.isArray(r.data) ? r.data : (r.data?.data ?? []);
+                    setCursosFilt(list.map(c => ({ id: c.curso_id, nombre: c.nombre })));
+                });
             }
 
             return next;

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCursoRequest;
 use App\Http\Requests\UpdateCursoRequest;
 use App\Http\Resources\CursoResource;
+use App\Models\DocenteCurso;
 use App\Services\Interfaces\CursoServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -55,5 +56,25 @@ class CursoApiController extends Controller
         $this->service->eliminar($id);
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * GET /api/cursos/{cursoId}/docentes
+     * Devuelve los docentes que tienen asignado ese curso en docente_cursos
+     */
+    public function docentes(int $cursoId): JsonResponse
+    {
+        $docentes = DocenteCurso::with(['docente.perfil'])
+            ->where('curso_id', $cursoId)
+            ->where('estado', 1)
+            ->get()
+            ->map(fn ($dc) => [
+                'docente_id'      => $dc->docente_id,
+                'nombre_completo' => $dc->docente?->nombre_completo ?? '—',
+            ])
+            ->unique('docente_id')
+            ->values();
+
+        return response()->json($docentes);
     }
 }

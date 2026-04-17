@@ -10,10 +10,11 @@ class DocenteResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'docente_id'  => $this->docente_id,
-            'especialidad'=> $this->especialidad,
-            'planilla'    => $this->planilla,
-            'estado'      => $this->estado,
+            'docente_id'      => $this->docente_id,
+            'nombre_completo' => $this->nombre_completo,
+            'especialidad'    => $this->especialidad,
+            'planilla'        => $this->planilla,
+            'estado'          => $this->estado,
             'perfil'      => $this->whenLoaded('perfil', fn () => [
                 'primer_nombre'    => $this->perfil->primer_nombre,
                 'apellido_paterno' => $this->perfil->apellido_paterno,

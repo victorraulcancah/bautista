@@ -15,7 +15,7 @@ class HorarioService implements HorarioServiceInterface
     {
         $anio = $anio ?? date('Y');
         
-        $clases = HorarioClase::with(['curso', 'docente'])
+        $clases = HorarioClase::with(['curso', 'docente.perfil'])
             ->where('seccion_id', $seccionId)
             ->where('anio_escolar', $anio)
             ->activo()
@@ -33,7 +33,7 @@ class HorarioService implements HorarioServiceInterface
     {
         $anio = $anio ?? date('Y');
         
-        $clases = HorarioClase::with(['curso', 'seccion.grado'])
+        $clases = HorarioClase::with(['curso', 'docente.perfil', 'seccion.grado'])
             ->where('docente_id', $docenteId)
             ->where('anio_escolar', $anio)
             ->activo()
@@ -221,7 +221,7 @@ class HorarioService implements HorarioServiceInterface
                 'id' => $clase->horario_clase_id,
                 'curso' => $clase->curso->nombre,
                 'curso_id' => $clase->curso_id,
-                'docente' => $clase->docente->nombres . ' ' . $clase->docente->apellidos,
+                'docente' => $clase->docente->nombre_completo,
                 'docente_id' => $clase->docente_id,
                 'hora_inicio' => $clase->hora_inicio_formateada,
                 'hora_fin' => $clase->hora_fin_formateada,

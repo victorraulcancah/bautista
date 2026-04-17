@@ -42,44 +42,57 @@ export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId,
 
     useEffect(() => {
         if (open) {
-            cargarDatos();
-            if (clase) {
-                setForm({
-                    dia_semana: clase.dia_semana?.toString() || '1',
-                    hora_inicio: clase.hora_inicio || '08:00',
-                    hora_fin: clase.hora_fin || '09:00',
-                    curso_id: clase.curso_id?.toString() || '',
-                    docente_id: clase.docente_id?.toString() || '',
-                    aula: clase.aula || '',
-                });
-            } else {
-                setForm({
-                    dia_semana: '1',
-                    hora_inicio: '08:00',
-                    hora_fin: '09:00',
-                    curso_id: '',
-                    docente_id: '',
-                    aula: '',
-                });
-            }
+            cargarCursos();
+            const cursoId = clase?.curso_id?.toString() || '';
+            setForm(clase ? {
+                dia_semana: clase.dia_semana?.toString() || '1',
+                hora_inicio: clase.hora_inicio || '08:00',
+                hora_fin: clase.hora_fin || '09:00',
+                curso_id: cursoId,
+                docente_id: clase.docente_id?.toString() || '',
+                aula: clase.aula || '',
+            } : {
+                dia_semana: '1',
+                hora_inicio: '08:00',
+                hora_fin: '09:00',
+                curso_id: '',
+                docente_id: '',
+                aula: '',
+            });
+            setDocentes([]);
             setConflictos([]);
+            if (cursoId) cargarDocentes(cursoId);
         }
     }, [open, clase]);
 
-    const cargarDatos = async () => {
+    useEffect(() => {
+        if (!open) return;
+        if (form.curso_id) {
+            cargarDocentes(form.curso_id);
+        } else {
+            setDocentes([]);
+        }
+    }, [form.curso_id]);
+
+    const cargarCursos = async () => {
         setLoading(true);
         try {
             const cursosUrl = gradoId ? `/grados/${gradoId}/cursos` : '/cursos';
-            const [cursosRes, docentesRes] = await Promise.all([
-                api.get(cursosUrl),
-                api.get('/docentes'),
-            ]);
-            setCursos(cursosRes.data.data || cursosRes.data || []);
-            setDocentes(docentesRes.data.data || docentesRes.data || []);
+            const res = await api.get(cursosUrl);
+            setCursos(res.data.data || res.data || []);
         } catch (error) {
-            console.error('Error al cargar datos:', error);
+            console.error('Error al cargar cursos:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const cargarDocentes = async (cursoId: string) => {
+        try {
+            const res = await api.get(`/cursos/${cursoId}/docentes`);
+            setDocentes(res.data || []);
+        } catch (error) {
+            console.error('Error al cargar docentes:', error);
         }
     };
 
@@ -219,7 +232,7 @@ export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId,
                             </label>
                             <select
                                 value={form.curso_id}
-                                onChange={(e) => setForm({ ...form, curso_id: e.target.value })}
+                                onChange={(e) => setForm({ ...form, curso_id: e.target.value, docente_id: '' })}
                                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 required
                             >
@@ -239,13 +252,16 @@ export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId,
                             <select
                                 value={form.docente_id}
                                 onChange={(e) => setForm({ ...form, docente_id: e.target.value })}
-                                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
                                 required
+                                disabled={!form.curso_id}
                             >
-                                <option value="">Seleccionar docente</option>
+                                <option value="">
+                                    {!form.curso_id ? 'Selecciona un curso primero' : docentes.length === 0 ? 'Sin docentes asignados a este curso' : 'Seleccionar docente'}
+                                </option>
                                 {docentes.map((docente) => (
                                     <option key={docente.docente_id} value={docente.docente_id}>
-                                        {docente.nombres} {docente.apellidos}
+                                        {docente.nombre_completo}
                                     </option>
                                 ))}
                             </select>
