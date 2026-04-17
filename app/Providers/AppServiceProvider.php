@@ -180,6 +180,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Horarios
         $this->app->bind(\App\Services\Interfaces\HorarioServiceInterface::class, \App\Services\Implements\HorarioService::class);
+
+        // Aulas
+        $this->app->bind(\App\Repositories\Interfaces\AulaRepositoryInterface::class, \App\Repositories\Implements\AulaRepository::class);
+        $this->app->bind(\App\Services\Interfaces\AulaServiceInterface::class, \App\Services\Implements\AulaService::class);
     }
 
     /**

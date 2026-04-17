@@ -15,7 +15,7 @@ class HorarioService implements HorarioServiceInterface
     {
         $anio = $anio ?? date('Y');
         
-        $clases = HorarioClase::with(['curso', 'docente.perfil'])
+        $clases = HorarioClase::with(['curso', 'docente.perfil', 'aulaObj'])
             ->where('seccion_id', $seccionId)
             ->where('anio_escolar', $anio)
             ->activo()
@@ -33,7 +33,7 @@ class HorarioService implements HorarioServiceInterface
     {
         $anio = $anio ?? date('Y');
         
-        $clases = HorarioClase::with(['curso', 'docente.perfil', 'seccion.grado'])
+        $clases = HorarioClase::with(['curso', 'docente.perfil', 'seccion.grado', 'aulaObj'])
             ->where('docente_id', $docenteId)
             ->where('anio_escolar', $anio)
             ->activo()
@@ -98,8 +98,8 @@ class HorarioService implements HorarioServiceInterface
         }
 
         // Conflicto 3: Aula ocupada (si se especifica)
-        if (!empty($datos['aula'])) {
-            $conflictoAula = HorarioClase::where('aula', $datos['aula'])
+        if (!empty($datos['aula_id'])) {
+            $conflictoAula = HorarioClase::where('aula_id', $datos['aula_id'])
                 ->where('dia_semana', $datos['dia_semana'])
                 ->where('anio_escolar', $datos['anio_escolar'])
                 ->where('activo', true)
@@ -110,7 +110,7 @@ class HorarioService implements HorarioServiceInterface
                     $q->where('hora_inicio', '<', $datos['hora_fin'])
                       ->where('hora_fin', '>', $datos['hora_inicio']);
                 })
-                ->with(['seccion', 'curso'])
+                ->with(['seccion', 'curso', 'aulaObj'])
                 ->first();
 
             if ($conflictoAula) {
@@ -164,16 +164,17 @@ class HorarioService implements HorarioServiceInterface
         $contador = 0;
         foreach ($clasesOrigen as $clase) {
             HorarioClase::create([
-                'seccion_id' => $clase->seccion_id,
-                'curso_id' => $clase->curso_id,
-                'docente_id' => $clase->docente_id,
-                'dia_semana' => $clase->dia_semana,
+                'seccion_id'  => $clase->seccion_id,
+                'curso_id'    => $clase->curso_id,
+                'docente_id'  => $clase->docente_id,
+                'dia_semana'  => $clase->dia_semana,
                 'hora_inicio' => $clase->hora_inicio,
-                'hora_fin' => $clase->hora_fin,
-                'aula' => $clase->aula,
-                'anio_escolar' => $anioDestino,
-                'periodo' => $clase->periodo,
-                'activo' => true,
+                'hora_fin'    => $clase->hora_fin,
+                'aula'        => $clase->aula,
+                'aula_id'     => $clase->aula_id,
+                'anio_escolar'=> $anioDestino,
+                'periodo'     => $clase->periodo,
+                'activo'      => true,
             ]);
             $contador++;
         }
@@ -225,7 +226,8 @@ class HorarioService implements HorarioServiceInterface
                 'docente_id' => $clase->docente_id,
                 'hora_inicio' => $clase->hora_inicio_formateada,
                 'hora_fin' => $clase->hora_fin_formateada,
-                'aula' => $clase->aula,
+                'aula' => $clase->aulaObj?->nombre ?? $clase->aula,
+                'aula_id' => $clase->aula_id,
                 'duracion' => $clase->duracion_minutos,
             ];
 

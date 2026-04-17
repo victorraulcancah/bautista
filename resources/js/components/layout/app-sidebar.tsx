@@ -6,6 +6,7 @@ import {
     ChevronRight,
     ClipboardList,
     CreditCard,
+    DoorOpen,
     GraduationCap,
     LayoutDashboard,
     MessageSquare,
@@ -84,7 +85,8 @@ const navigation: NavItem[] = [
         { title: 'Grados / Secciones', href: '/secciones', permission: 'academico.secciones.ver' },
     ]},
     { type: 'group', title: 'Horarios', icon: Calendar, children: [
-        { title: 'Horario de Clases', href: '/horario-clases', permission: 'horarios.ver' },
+        { title: 'Aulas',                  href: '/aulas', permission: 'academico.aulas.ver' },
+        { title: 'Horario de Clases',      href: '/horario-clases', permission: 'horarios.ver' },
         { title: 'Horarios de Asistencia', href: '/horarios', permission: 'horarios.asistencia.ver' },
     ]},
     { type: 'link', title: 'Gestión de Docentes',  icon: UserCheck, href: '/docentes', permission: 'personal.docentes.ver' },

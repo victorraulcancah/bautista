@@ -24,41 +24,48 @@ const DIAS_SEMANA = [
     { value: 6, label: 'Sábado' },
 ];
 
-export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId, anioEscolar, clase }: Props) {
-    const [form, setForm] = useState({
-        dia_semana: '1',
-        hora_inicio: '08:00',
-        hora_fin: '09:00',
-        curso_id: '',
-        docente_id: '',
-        aula: '',
-    });
+type FormState = {
+    dia_semana:  string;
+    hora_inicio: string;
+    hora_fin:    string;
+    curso_id:    string;
+    docente_id:  string;
+    aula:        string;
+    aula_id:     string;
+};
 
-    const [cursos, setCursos] = useState<any[]>([]);
+const EMPTY_FORM: FormState = {
+    dia_semana:  '1',
+    hora_inicio: '08:00',
+    hora_fin:    '09:00',
+    curso_id:    '',
+    docente_id:  '',
+    aula:        '',
+    aula_id:     '',
+};
+
+export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId, anioEscolar, clase }: Props) {
+    const [form, setForm]         = useState<FormState>(EMPTY_FORM);
+    const [cursos, setCursos]     = useState<any[]>([]);
     const [docentes, setDocentes] = useState<any[]>([]);
+    const [aulas, setAulas]       = useState<any[]>([]);
     const [conflictos, setConflictos] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [saving, setSaving] = useState(false);
+    const [loading, setLoading]   = useState(false);
+    const [saving, setSaving]     = useState(false);
 
     useEffect(() => {
         if (open) {
             cargarCursos();
             const cursoId = clase?.curso_id?.toString() || '';
             setForm(clase ? {
-                dia_semana: clase.dia_semana?.toString() || '1',
+                dia_semana:  clase.dia_semana?.toString() || '1',
                 hora_inicio: clase.hora_inicio || '08:00',
-                hora_fin: clase.hora_fin || '09:00',
-                curso_id: cursoId,
-                docente_id: clase.docente_id?.toString() || '',
-                aula: clase.aula || '',
-            } : {
-                dia_semana: '1',
-                hora_inicio: '08:00',
-                hora_fin: '09:00',
-                curso_id: '',
-                docente_id: '',
-                aula: '',
-            });
+                hora_fin:    clase.hora_fin || '09:00',
+                curso_id:    cursoId,
+                docente_id:  clase.docente_id?.toString() || '',
+                aula:        clase.aula || '',
+                aula_id:     clase.aula_id?.toString() || '',
+            } : EMPTY_FORM);
             setDocentes([]);
             setConflictos([]);
             if (cursoId) cargarDocentes(cursoId);
@@ -78,10 +85,14 @@ export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId,
         setLoading(true);
         try {
             const cursosUrl = gradoId ? `/grados/${gradoId}/cursos` : '/cursos';
-            const res = await api.get(cursosUrl);
-            setCursos(res.data.data || res.data || []);
+            const [cursosRes, aulasRes] = await Promise.all([
+                api.get(cursosUrl),
+                api.get('/aulas-all'),
+            ]);
+            setCursos(cursosRes.data.data || cursosRes.data || []);
+            setAulas(aulasRes.data.data || aulasRes.data || []);
         } catch (error) {
-            console.error('Error al cargar cursos:', error);
+            console.error('Error al cargar datos:', error);
         } finally {
             setLoading(false);
         }
@@ -101,14 +112,14 @@ export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId,
 
         try {
             const response = await api.post('/horario-clases/validar-conflictos', {
-                seccion_id: seccionId,
-                curso_id: parseInt(form.curso_id),
-                docente_id: parseInt(form.docente_id),
-                dia_semana: parseInt(form.dia_semana),
-                hora_inicio: form.hora_inicio,
-                hora_fin: form.hora_fin,
-                aula: form.aula || null,
-                anio_escolar: anioEscolar,
+                seccion_id:       seccionId,
+                curso_id:         parseInt(form.curso_id),
+                docente_id:       parseInt(form.docente_id),
+                dia_semana:       parseInt(form.dia_semana),
+                hora_inicio:      form.hora_inicio,
+                hora_fin:         form.hora_fin,
+                aula_id:          form.aula_id ? parseInt(form.aula_id) : null,
+                anio_escolar:     anioEscolar,
                 horario_clase_id: clase?.id,
             });
 
@@ -125,9 +136,9 @@ export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId,
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [form.dia_semana, form.hora_inicio, form.hora_fin, form.docente_id, form.aula]);
+    }, [form.dia_semana, form.hora_inicio, form.hora_fin, form.docente_id, form.aula_id]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!seccionId) return;
@@ -135,15 +146,15 @@ export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId,
         setSaving(true);
         try {
             const data = {
-                seccion_id: seccionId,
-                curso_id: parseInt(form.curso_id),
-                docente_id: parseInt(form.docente_id),
-                dia_semana: parseInt(form.dia_semana),
+                seccion_id:  seccionId,
+                curso_id:    parseInt(form.curso_id),
+                docente_id:  parseInt(form.docente_id),
+                dia_semana:  parseInt(form.dia_semana),
                 hora_inicio: form.hora_inicio,
-                hora_fin: form.hora_fin,
-                aula: form.aula || null,
+                hora_fin:    form.hora_fin,
+                aula_id:     form.aula_id ? parseInt(form.aula_id) : null,
                 anio_escolar: anioEscolar,
-                periodo: 'A',
+                periodo:     'A',
             };
 
             if (clase) {
@@ -200,12 +211,24 @@ export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId,
                                 </select>
                             </div>
 
-                            <FormField
-                                label="Aula"
-                                value={form.aula}
-                                onChange={(v) => setForm({ ...form, aula: v })}
-                                placeholder="Ej: Aula 201"
-                            />
+                            {/* Aula (select from registered aulas) */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Aula
+                                </label>
+                                <select
+                                    value={form.aula_id}
+                                    onChange={(e) => setForm({ ...form, aula_id: e.target.value })}
+                                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                >
+                                    <option value="">Sin aula (sin restricción)</option>
+                                    {aulas.map((aula) => (
+                                        <option key={aula.aula_id} value={aula.aula_id}>
+                                            {aula.nombre}{aula.capacidad ? ` (cap. ${aula.capacidad})` : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

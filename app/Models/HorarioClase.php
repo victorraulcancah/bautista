@@ -18,6 +18,7 @@ class HorarioClase extends Model
         'hora_inicio',
         'hora_fin',
         'aula',
+        'aula_id',
         'anio_escolar',
         'periodo',
         'activo',
@@ -43,6 +44,11 @@ class HorarioClase extends Model
     public function docente(): BelongsTo
     {
         return $this->belongsTo(Docente::class, 'docente_id', 'docente_id');
+    }
+
+    public function aulaObj(): BelongsTo
+    {
+        return $this->belongsTo(Aula::class, 'aula_id', 'aula_id');
     }
 
     // Scopes

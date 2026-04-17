@@ -45,6 +45,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'academico.cursos.ver', 'academico.cursos.crear', 'academico.cursos.editar', 'academico.cursos.eliminar',
                 'academico.secciones.ver', 'academico.secciones.crear', 'academico.secciones.editar', 'academico.secciones.eliminar',
                 'academico.horarios.ver', 'academico.horarios.editar',
+                'academico.aulas.ver', 'academico.aulas.crear', 'academico.aulas.editar', 'academico.aulas.eliminar',
                 'horarios.ver', 'horarios.bloques.ver', 'horarios.bloques.crear', 'horarios.bloques.editar', 'horarios.bloques.eliminar',
                 'horarios.clases.ver', 'horarios.clases.crear', 'horarios.clases.editar', 'horarios.clases.eliminar', 'horarios.clases.clonar',
                 'horarios.conflictos.ver',
@@ -201,6 +202,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'horarios.asistencia.crear',
             'horarios.asistencia.editar',
             'horarios.asistencia.eliminar',
+
+            // Aulas
+            'academico.aulas.ver',
+            'academico.aulas.crear',
+            'academico.aulas.editar',
+            'academico.aulas.eliminar',
 
             // ─────────────────────────────────────────────────────────
             // 5. PERSONAL (Docentes y Estudiantes)

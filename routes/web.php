@@ -147,6 +147,7 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/asistencia', fn () => Inertia::render('Asistencia/index'))->middleware('permission:asistencia.reportes.ver')->name('asistencia.index');
     Route::get('/asistencia/scanner', fn () => Inertia::render('Asistencia/Scanner'))->middleware('permission:asistencia.scanner.ver')->name('asistencia.scanner');
 
+    Route::get('/aulas',                  fn () => Inertia::render('Aulas/index'))->middleware('permission:academico.aulas.ver')->name('aulas.index');
     Route::get('/horarios',               fn () => Inertia::render('Horarios/index'))->middleware('permission:horarios.asistencia.ver')->name('horarios.index');
     Route::get('/horario-clases',         fn () => Inertia::render('HorarioClases/index'))->name('horario-clases.index');
     Route::get('/usuarios',               fn () => Inertia::render('Usuarios/index'))->middleware('permission:seguridad.usuarios.ver')->name('usuarios.index');

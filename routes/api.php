@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\InstitucionApiController;
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\CursoContenidoApiController;
 use App\Http\Controllers\Api\MatriculaApiController;
+use App\Http\Controllers\Api\AulaApiController;
 use App\Http\Controllers\Api\CursoApiController;
 use App\Http\Controllers\Api\DashboardApiController;
 use App\Http\Controllers\Api\DocenteApiController;
@@ -110,6 +111,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('secciones/{seccionId}/horarios',          [\App\Http\Controllers\Api\SeccionHorarioApiController::class, 'index']);
     Route::post('secciones/{seccionId}/horarios',         [\App\Http\Controllers\Api\SeccionHorarioApiController::class, 'store']);
     Route::delete('secciones/horarios/{id}',              [\App\Http\Controllers\Api\SeccionHorarioApiController::class, 'destroy']);
+
+    // Aulas
+    Route::apiResource('aulas', AulaApiController::class)->names('api.aulas');
+    Route::get('aulas-all', [AulaApiController::class, 'all']);
 
     // Cursos
     Route::apiResource('cursos', CursoApiController::class)->names('api.cursos');
