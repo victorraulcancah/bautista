@@ -21,12 +21,12 @@ class GradoCursoApiController extends Controller
 
         $cursos = $grado->cursosAsignados->map(function ($curso) {
             return [
-                'grac_id' => $curso->pivot->grac_id,
-                'curso_id' => $curso->curso_id,
-                'nombre' => $curso->nombre,
+                'grac_id'     => $curso->pivot->grac_id,
+                'curso_id'    => $curso->curso_id,
+                'nombre'      => $curso->nombre,
                 'descripcion' => $curso->descripcion,
-                'logo' => $curso->logo,
-                'estado' => $curso->estado,
+                'logo'        => $curso->logo ? \Illuminate\Support\Facades\Storage::url($curso->logo) : null,
+                'estado'      => $curso->estado,
             ];
         });
 

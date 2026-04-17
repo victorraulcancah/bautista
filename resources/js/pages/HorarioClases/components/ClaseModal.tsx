@@ -10,6 +10,7 @@ type Props = {
     onClose: () => void;
     onSaved: () => void;
     seccionId: number | null;
+    gradoId?: number | null;
     anioEscolar: number;
     clase?: any;
 };
@@ -23,7 +24,7 @@ const DIAS_SEMANA = [
     { value: 6, label: 'Sábado' },
 ];
 
-export default function ClaseModal({ open, onClose, onSaved, seccionId, anioEscolar, clase }: Props) {
+export default function ClaseModal({ open, onClose, onSaved, seccionId, gradoId, anioEscolar, clase }: Props) {
     const [form, setForm] = useState({
         dia_semana: '1',
         hora_inicio: '08:00',
@@ -68,8 +69,9 @@ export default function ClaseModal({ open, onClose, onSaved, seccionId, anioEsco
     const cargarDatos = async () => {
         setLoading(true);
         try {
+            const cursosUrl = gradoId ? `/grados/${gradoId}/cursos` : '/cursos';
             const [cursosRes, docentesRes] = await Promise.all([
-                api.get('/cursos'),
+                api.get(cursosUrl),
                 api.get('/docentes'),
             ]);
             setCursos(cursosRes.data.data || cursosRes.data || []);

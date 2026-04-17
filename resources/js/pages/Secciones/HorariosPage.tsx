@@ -11,11 +11,12 @@ import HorarioSemanal from '@/pages/HorarioClases/components/HorarioSemanal';
 
 type Props = {
     seccionId: number;
+    gradoId: number;
     seccionNombre: string;
     gradoNombre?: string;
 };
 
-export default function HorariosPage({ seccionId, seccionNombre, gradoNombre }: Props) {
+export default function HorariosPage({ seccionId, gradoId, seccionNombre, gradoNombre }: Props) {
     const [horario, setHorario] = useState<any>({});
     const [loading, setLoading] = useState(false);
     const [anio, setAnio] = useState(new Date().getFullYear());
@@ -135,6 +136,7 @@ export default function HorariosPage({ seccionId, seccionNombre, gradoNombre }: 
                 onClose={() => setClaseModal({ open: false })}
                 onSaved={() => { setClaseModal({ open: false }); cargarHorario(); }}
                 seccionId={seccionId}
+                gradoId={gradoId}
                 anioEscolar={anio}
                 clase={claseModal.clase}
             />

@@ -40,6 +40,7 @@ Route::middleware(['auth.token'])->group(function () {
         $seccion = \App\Models\Seccion::with('grado')->findOrFail($seccionId);
         return Inertia::render('Secciones/HorariosPage', [
             'seccionId'    => $seccionId,
+            'gradoId'      => $seccion->id_grado,
             'seccionNombre' => $seccion->nombre,
             'gradoNombre'   => $seccion->grado?->nombre_grado,
         ]);
