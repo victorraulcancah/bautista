@@ -51,8 +51,8 @@ export default function CredencialDigital() {
             details: {
                 student_id: user.estudiante?.estu_id ? `EST-${user.estudiante.estu_id.toString().padStart(6, '0')}` : undefined,
                 dni: user.perfil?.doc_numero,
-                grado: seccion?.grado?.nombre,
-                nivel: seccion?.grado?.nivel?.nombre,
+                grado: seccion?.grado?.nombre_grado,
+                nivel: seccion?.grado?.nivel?.nombre_nivel,
                 seccion: seccion?.nombre,
                 tel: user.perfil?.telefono,
             }

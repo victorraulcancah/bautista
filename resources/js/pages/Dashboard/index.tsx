@@ -112,7 +112,7 @@ export default function Dashboard() {
 
                         {/* 4. Vista Estudiante (Resumen Académico) */}
                         {can('dashboard.estudiante.resumen') && data && (
-                            <EstudianteStats stats={data.stats} />
+                            <EstudianteStats stats={data.stats} cursos={data.cursos ?? []} />
                         )}
 
                         {/* 5. Vista Padre (Resumen de Hijos) */}

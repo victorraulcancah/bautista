@@ -54,7 +54,10 @@ class VerifyEstudianteCurso
                 if ($clase && $clase->unidad) {
                     $hasAccess = DocenteCurso::where('curso_id', $clase->unidad->curso_id)
                         ->where('seccion_id', $matricula->seccion_id)
-                        ->where('apertura_id', $matricula->apertura_id)
+                        ->where(function ($q) use ($matricula) {
+                            $q->where('apertura_id', $matricula->apertura_id)
+                              ->orWhereNull('apertura_id');
+                        })
                         ->exists();
 
                     if (!$hasAccess) {
@@ -70,7 +73,10 @@ class VerifyEstudianteCurso
                 if ($cursoIdFromActividad) {
                     $hasAccess = DocenteCurso::where('curso_id', $cursoIdFromActividad)
                         ->where('seccion_id', $matricula->seccion_id)
-                        ->where('apertura_id', $matricula->apertura_id)
+                        ->where(function ($q) use ($matricula) {
+                            $q->where('apertura_id', $matricula->apertura_id)
+                              ->orWhereNull('apertura_id');
+                        })
                         ->exists();
                     if (!$hasAccess) {
                         return response()->json(['message' => 'No tienes acceso a este recurso.'], 403);
@@ -82,13 +88,19 @@ class VerifyEstudianteCurso
             // Caso 3: El ID es un ID de asignación (DocenteCurso)
             $hasAccess = DocenteCurso::where('docen_curso_id', $id)
                 ->where('seccion_id', $matricula->seccion_id)
-                ->where('apertura_id', $matricula->apertura_id)
+                ->where(function ($q) use ($matricula) {
+                    $q->where('apertura_id', $matricula->apertura_id)
+                      ->orWhereNull('apertura_id');
+                })
                 ->exists();
 
             if (!$hasAccess) {
                 $hasAccess = DocenteCurso::where('curso_id', $id)
                     ->where('seccion_id', $matricula->seccion_id)
-                    ->where('apertura_id', $matricula->apertura_id)
+                    ->where(function ($q) use ($matricula) {
+                        $q->where('apertura_id', $matricula->apertura_id)
+                          ->orWhereNull('apertura_id');
+                    })
                     ->exists();
                 
                 if (!$hasAccess) {
@@ -102,7 +114,10 @@ class VerifyEstudianteCurso
             // Verificar si el curso está disponible para la sección del alumno
             $hasAccess = DocenteCurso::where('curso_id', $cursoId)
                 ->where('seccion_id', $matricula->seccion_id)
-                ->where('apertura_id', $matricula->apertura_id)
+                ->where(function ($q) use ($matricula) {
+                    $q->where('apertura_id', $matricula->apertura_id)
+                      ->orWhereNull('apertura_id');
+                })
                 ->exists();
 
             if (!$hasAccess) {
