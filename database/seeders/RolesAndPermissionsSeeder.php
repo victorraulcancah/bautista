@@ -68,6 +68,7 @@ class RolesAndPermissionsSeeder extends Seeder
             // Docente: su portal + recursos compartidos, SIN admin ni portales de otros
             'docente' => [
                 'dashboard.ver', 'dashboard.notificaciones',
+                'dashboard.docente.resumen', 'dashboard.docente.cursos',
                 'perfil.ver', 'perfil.editar', 'credencial.ver',
                 'horarios.ver', 'horarios.clases.ver',
                 'admin.comunicados.ver',
@@ -133,6 +134,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'dashboard.mensajes.pendientes',
             'dashboard.notificaciones',
             'dashboard.docente.resumen',
+            'dashboard.docente.cursos',
             'dashboard.estudiante.resumen',
             'dashboard.estudiante.stats',
             'dashboard.padre.resumen',
