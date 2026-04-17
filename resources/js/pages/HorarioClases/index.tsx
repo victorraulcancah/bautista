@@ -24,8 +24,8 @@ export default function HorarioClasesPage() {
         }
 
         // Docente ve su propio horario
-        if (roleName === 'docente' && user.docente_id) {
-            return <DocenteHorarioView docenteId={user.docente_id} />;
+        if (roleName === 'docente' && user.docente?.docente_id) {
+            return <DocenteHorarioView docenteId={user.docente.docente_id} />;
         }
 
         // Alumno ve el horario de su sección

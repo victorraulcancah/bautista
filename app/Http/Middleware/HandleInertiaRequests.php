@@ -62,7 +62,7 @@ class HandleInertiaRequests extends Middleware
         }
 
         if ($userModel) {
-            $userModel->load('perfil', 'rol');
+            $userModel->load('perfil', 'rol', 'docente');
             // Usamos nombres únicos para no chocar con relaciones de Eloquent/Spatie
             $userModel->setAttribute('can_list', $userModel->getAllPermissions()->pluck('name'));
             $userModel->setAttribute('role_list', $userModel->getRoleNames());
