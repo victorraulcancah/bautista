@@ -36,8 +36,10 @@ class EstudianteRepository implements EstudianteRepositoryInterface
     public function create(array $data): Estudiante
     {
         // 1. Crear usuario de acceso
+        $rolId = \DB::table('roles')->where('name', 'estudiante')->value('id');
         $user = User::create([
             'insti_id' => $data['insti_id'],
+            'rol_id'   => $rolId,
             'username' => $data['username'],
             'name'     => $data['primer_nombre'] . ' ' . $data['apellido_paterno'],
             'email'    => $data['email'] ?? null,
@@ -75,8 +77,10 @@ class EstudianteRepository implements EstudianteRepositoryInterface
             'talla'              => $data['talla']              ?? null,
             'peso'               => $data['peso']               ?? null,
             'seguro'             => $data['seguro']             ?? null,
-            'mensualidad'        => $data['mensualidad']        ?? null,
-            'fecha_ingreso'      => $data['fecha_ingreso']      ?? now()->toDateString(),
+            'privado'            => $data['seguro_privado']      ?? null,
+            'mensualidad'        => $data['mensualidad'],
+            'fecha_ingreso'      => $data['fecha_ingreso'],
+            'fecha_promovido'    => $data['fecha_pago'],
         ]);
     }
 
@@ -116,7 +120,10 @@ class EstudianteRepository implements EstudianteRepositoryInterface
             'talla'               => $data['talla']               ?? null,
             'peso'                => $data['peso']                ?? null,
             'seguro'              => $data['seguro']              ?? null,
+            'privado'             => $data['seguro_privado']      ?? null,
             'mensualidad'         => $data['mensualidad']         ?? null,
+            'fecha_ingreso'       => $data['fecha_ingreso']       ?? null,
+            'fecha_promovido'     => $data['fecha_pago']          ?? null,
         ]);
 
         return $estudiante->load(['perfil', 'user']);

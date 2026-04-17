@@ -54,31 +54,30 @@ export default function MatricularModal({
         setSelectedGrado('');
 
         if (open && editingMatricula) {
-            // Edit mode: pre-fill with existing student data
             const s = editingMatricula.estudiante;
             setAlumno({
                 estu_id:             s?.estu_id ?? null,
                 username:            s?.doc_numero ?? '',
-                email:               '',
+                email:               s?.email ?? '',
                 primer_nombre:       s?.primer_nombre ?? '',
                 segundo_nombre:      s?.segundo_nombre ?? '',
                 apellido_paterno:    s?.apellido_paterno ?? '',
                 apellido_materno:    s?.apellido_materno ?? '',
                 genero:              s?.genero ?? '',
-                fecha_nacimiento:    '',
-                edad:                '',
-                talla:               '',
-                peso:                '',
-                telefono:            '',
-                direccion:           '',
-                colegio:             '',
-                neurodivergencia:    '',
-                terapia_ocupacional: '',
-                seguro:              '',
-                seguro_privado:      '',
-                mensualidad:         '',
-                fecha_ingreso:       '',
-                fecha_pago:          '',
+                fecha_nacimiento:    s?.fecha_nacimiento ?? '',
+                edad:                s?.edad?.toString() ?? '',
+                talla:               s?.talla ?? '',
+                peso:                s?.peso ?? '',
+                telefono:            s?.telefono ?? '',
+                direccion:           s?.direccion ?? '',
+                colegio:             s?.colegio ?? '',
+                neurodivergencia:    s?.neurodivergencia ?? '',
+                terapia_ocupacional: s?.terapia_ocupacional ?? '',
+                seguro:              s?.seguro ?? '',
+                seguro_privado:      s?.seguro_privado ?? '',
+                mensualidad:         s?.mensualidad?.toString() ?? '',
+                fecha_ingreso:       s?.fecha_ingreso ?? '',
+                fecha_pago:          s?.fecha_pago ?? '',
                 foto:                null,
             });
             setMatricula({
@@ -172,7 +171,8 @@ return;
                         setAlumno({
                             ...defaultAlumno(),
                             username:         d.dni,
-                            primer_nombre:    d.nombres,
+                            primer_nombre:    d.nombres?.split(' ')[0] ?? '',
+                            segundo_nombre:   d.nombres?.split(' ').slice(1).join(' ') ?? '',
                             apellido_paterno: d.apellidoPaterno,
                             apellido_materno: d.apellidoMaterno,
                         });

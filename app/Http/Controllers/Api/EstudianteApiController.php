@@ -79,6 +79,10 @@ class EstudianteApiController extends Controller
                 'numero_doc'     => $c->numero_doc,
                 'genero'         => $c->genero,
                 'direccion'      => $c->direccion,
+                'departamento'   => $c->departamento_id,
+                'provincia'      => $c->provincia_id,
+                'distrito'       => $c->distrito_id,
+                'estado_civil'   => $c->estado_civil,
                 'es_pagador'     => $c->es_pagador,
             ] : null;
         }
@@ -100,8 +104,17 @@ class EstudianteApiController extends Controller
             'numero_doc'     => ['nullable', 'string', 'max:20'],
             'genero'         => ['nullable', 'in:M,F'],
             'direccion'      => ['nullable', 'string', 'max:200'],
+            'departamento'   => ['nullable', 'string', 'max:3'],
+            'provincia'      => ['nullable', 'string', 'max:3'],
+            'distrito'       => ['nullable', 'string', 'max:3'],
+            'estado_civil'   => ['nullable', 'string', 'max:50'],
             'es_pagador'     => ['nullable', 'string'],
         ]);
+
+        // Mapear nombres de campos del frontend a los del modelo
+        if (isset($data['departamento'])) { $data['departamento_id'] = $data['departamento']; unset($data['departamento']); }
+        if (isset($data['provincia']))    { $data['provincia_id']    = $data['provincia'];    unset($data['provincia']); }
+        if (isset($data['distrito']))     { $data['distrito_id']     = $data['distrito'];     unset($data['distrito']); }
 
         $estudiante = Estudiante::findOrFail($id);
 

@@ -51,7 +51,7 @@ class MatriculaRepository implements MatriculaRepositoryInterface
 
     public function paginateMatriculas(int $aperturaId, string $search = '', int $perPage = 15, ?int $nivelId = null): LengthAwarePaginator
     {
-        return Matricula::with(['estudiante.perfil', 'estudiante.user', 'seccion.grado'])
+        return Matricula::with(['estudiante.perfil', 'estudiante.user', 'seccion.grado.nivel'])
             ->where('apertura_id', $aperturaId)
             ->when($search, fn ($q) => $q->whereHas('estudiante.perfil', fn ($p) => $p
                 ->where('primer_nombre', 'like', "%{$search}%")
@@ -85,12 +85,15 @@ class MatriculaRepository implements MatriculaRepositoryInterface
 
     public function findMatriculaById(int $id): Matricula
     {
-        return Matricula::with(['estudiante.perfil', 'estudiante.user', 'seccion.grado'])->findOrFail($id);
+        return Matricula::with(['estudiante.perfil', 'estudiante.user', 'seccion.grado.nivel'])->findOrFail($id);
     }
 
     public function createMatricula(array $data): Matricula
     {
-        $matricula = Matricula::create($data);
+        $matricula = Matricula::create(array_merge($data, [
+            'estado'          => '1',
+            'fecha_matricula' => now()->toDateString(),
+        ]));
         return $matricula->load(['estudiante.perfil', 'estudiante.user', 'seccion.grado']);
     }
 

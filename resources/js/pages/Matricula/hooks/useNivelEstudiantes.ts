@@ -110,20 +110,34 @@ export function useNivelEstudiantes(aperturaId: number, nivelId: number) {
 
     const openEditEst = async (m: Matricula) => {
         if (!m.estudiante?.estu_id) return;
-        // Load full student data for edit modal
         const res = await api.get(`/estudiantes/${m.estudiante.estu_id}`);
         const full = res.data.data ?? res.data;
-        // Merge full data into the matricula object for pre-filling
         setEditingMatricula({
             ...m,
             estudiante: {
                 ...m.estudiante,
-                primer_nombre:       full.perfil?.primer_nombre ?? m.estudiante.primer_nombre,
-                segundo_nombre:      full.perfil?.segundo_nombre ?? m.estudiante.segundo_nombre,
-                apellido_paterno:    full.perfil?.apellido_paterno ?? m.estudiante.apellido_paterno,
-                apellido_materno:    full.perfil?.apellido_materno ?? m.estudiante.apellido_materno,
-                genero:              full.perfil?.genero ?? m.estudiante.genero,
-                doc_numero:          full.perfil?.doc_numero ?? m.estudiante.doc_numero,
+                primer_nombre:        full.perfil?.primer_nombre        ?? m.estudiante.primer_nombre,
+                segundo_nombre:       full.perfil?.segundo_nombre        ?? m.estudiante.segundo_nombre,
+                apellido_paterno:     full.perfil?.apellido_paterno      ?? m.estudiante.apellido_paterno,
+                apellido_materno:     full.perfil?.apellido_materno      ?? m.estudiante.apellido_materno,
+                genero:               full.perfil?.genero                ?? m.estudiante.genero,
+                doc_numero:           full.perfil?.doc_numero            ?? m.estudiante.doc_numero,
+                fecha_nacimiento:     full.perfil?.fecha_nacimiento      ?? '',
+                telefono:             full.perfil?.telefono              ?? '',
+                direccion:            full.perfil?.direccion             ?? '',
+                email:                full.user?.email                   ?? '',
+                // datos del estudiante
+                edad:                 full.edad?.toString()            ?? '',
+                talla:                full.talla                       ?? '',
+                peso:                 full.peso                        ?? '',
+                colegio:              full.colegio                     ?? '',
+                neurodivergencia:     full.neurodivergencia            ?? '',
+                terapia_ocupacional:  full.terapia_ocupacional         ?? '',
+                seguro:               full.seguro                      ?? '',
+                seguro_privado:       full.privado                     ?? '',
+                mensualidad:          full.mensualidad?.toString()     ?? '',
+                fecha_ingreso:        full.fecha_ingreso               ?? '',
+                fecha_pago:           full.fecha_promovido             ?? '',
             },
         });
         setEditModalOpen(true);

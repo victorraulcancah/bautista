@@ -33,6 +33,8 @@ class MatriculaResource extends JsonResource
                 'genero'           => $this->estudiante->perfil?->genero,
                 'user_id'          => $this->estudiante->user?->id,
                 'estado_user'      => $this->estudiante->user?->estado,
+                'avatar'           => $this->estudiante->perfil?->foto_perfil ? asset('storage/' . $this->estudiante->perfil->foto_perfil) : null,
+                'telefono'         => $this->estudiante->perfil?->telefono,
             ]),
             'seccion' => $this->whenLoaded('seccion', fn () => [
                 'seccion_id' => $this->seccion->seccion_id,
@@ -40,6 +42,10 @@ class MatriculaResource extends JsonResource
                 'grado'      => $this->seccion->grado ? [
                     'grado_id'     => $this->seccion->grado->grado_id,
                     'nombre_grado' => $this->seccion->grado->nombre_grado,
+                    'nivel'        => $this->seccion->grado->nivel ? [
+                        'nivel_id'     => $this->seccion->grado->nivel->nivel_id,
+                        'nombre_nivel' => $this->seccion->grado->nivel->nombre_nivel,
+                    ] : null,
                 ] : null,
             ]),
         ];

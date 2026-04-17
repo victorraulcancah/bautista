@@ -10,6 +10,11 @@ interface MinimalEstudiante {
     estu_id: number;
     user_id?: number | null;
     nombre_completo?: string;
+    avatar?: string | null;
+    telefono?: string | null;
+    doc_numero?: string | null;
+    primer_nombre?: string;
+    apellido_paterno?: string;
     perfil?: {
         primer_nombre?: string;
         apellido_paterno?: string;
@@ -26,6 +31,9 @@ interface MinimalMatricula {
         nombre: string;
         grado?: {
             nombre_grado: string;
+            nivel?: {
+                nombre_nivel: string;
+            } | null;
         } | null;
     } | null;
 }
@@ -68,17 +76,23 @@ export default function FotocheckModal({ open, onClose, matricula, estudiante }:
         const student = activeEstudiante;
         const seccion = matricula?.seccion;
         
+        const pNombre = student?.primer_nombre || student?.perfil?.primer_nombre || '';
+        const pApellido = student?.apellido_paterno || student?.perfil?.apellido_paterno || '';
+        const builtName = (pNombre + ' ' + pApellido).trim();
+        const finalName = builtName || student?.nombre_completo || 'SIN NOMBRE';
+
         return {
             id: student?.user_id || estuId,
-            name: (student?.perfil?.primer_nombre + ' ' + (student?.perfil?.apellido_paterno ?? '')).trim() || student?.nombre_completo || 'SIN NOMBRE',
+            name: finalName,
             rol_name: 'ALUMNO(A)',
-            avatar: student?.perfil?.avatar ?? undefined,
+            avatar: student?.avatar || student?.perfil?.avatar || undefined,
             details: {
                 student_id: `EST-${estuId.toString().padStart(6, '0')}`,
-                dni: student?.perfil?.doc_numero ?? undefined,
-                grado: seccion?.grado?.nombre_grado ?? undefined,
-                seccion: seccion?.nombre ?? undefined,
-                tel: student?.perfil?.telefono ?? undefined,
+                dni: student?.doc_numero || student?.perfil?.doc_numero || undefined,
+                nivel: seccion?.grado?.nivel?.nombre_nivel || undefined,
+                grado: seccion?.grado?.nombre_grado || undefined,
+                seccion: seccion?.nombre || undefined,
+                tel: student?.telefono || student?.perfil?.telefono || undefined,
             }
         };
     };

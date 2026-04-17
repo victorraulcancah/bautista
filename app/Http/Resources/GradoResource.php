@@ -10,8 +10,8 @@ class GradoResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'grado_id'     => $this->grado_id,
-            'nivel_id'     => $this->nivel_id,
+            'grado_id'     => (int) $this->grado_id,
+            'nivel_id'     => (int) $this->nivel_id,
             'nombre_grado' => $this->nombre_grado,
             'abreviatura'  => $this->abreviatura,
             'nivel'        => $this->whenLoaded('nivel', fn () => [

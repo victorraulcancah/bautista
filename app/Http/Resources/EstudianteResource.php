@@ -20,8 +20,10 @@ class EstudianteResource extends JsonResource
             'talla'               => $this->talla,
             'peso'                => $this->peso,
             'seguro'              => $this->seguro,
+            'privado'             => $this->privado,
             'mensualidad'         => $this->mensualidad,
-            'fecha_ingreso'       => $this->fecha_ingreso,
+            'fecha_ingreso'       => $this->fecha_ingreso?->format('Y-m-d'),
+            'fecha_promovido'     => $this->fecha_promovido?->format('Y-m-d'),
             'perfil' => $this->whenLoaded('perfil', fn () => [
                 'primer_nombre'    => $this->perfil->primer_nombre,
                 'segundo_nombre'   => $this->perfil->segundo_nombre,

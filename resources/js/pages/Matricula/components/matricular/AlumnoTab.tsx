@@ -97,7 +97,7 @@ export default function AlumnoTab({
                         className={SELECT_CLS}
                     >
                         <option value="">Seleccionar…</option>
-                        {grados.filter(g => !nivelId || g.nivel_id === nivelId).map(g => (
+                        {grados.filter(g => !nivelId || Number(g.nivel_id) === Number(nivelId)).map(g => (
                             <option key={g.grado_id} value={g.grado_id.toString()}>
                                 {g.nombre_grado}
                             </option>
@@ -112,8 +112,14 @@ export default function AlumnoTab({
                         className={SELECT_CLS}
                         disabled={!selectedGrado}
                     >
-                        <option value="">Seleccionar…</option>
-                        {secciones.filter(s => s.id_grado === Number(selectedGrado)).map(s => (
+                        <option value="">
+                            {!selectedGrado
+                                ? 'Primero selecciona un grado'
+                                : secciones.filter(s => String(s.id_grado) === String(selectedGrado)).length === 0
+                                    ? 'Sin secciones para este grado'
+                                    : 'Seleccionar…'}
+                        </option>
+                        {secciones.filter(s => String(s.id_grado) === String(selectedGrado)).map(s => (
                             <option key={s.seccion_id} value={s.seccion_id.toString()}>
                                 {s.nombre}
                             </option>
@@ -134,7 +140,7 @@ export default function AlumnoTab({
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" type="email" value={alumno.email} onChange={e => setA('email', e.target.value)} placeholder="correo@..." />
                 </div>
                 <div className="space-y-1.5">
-                    <ReqLabel>Género</ReqLabel>
+                    <OptLabel>Género</OptLabel>
                     <select value={alumno.genero} onChange={e => setA('genero', e.target.value)} className={SELECT_CLS}>
                         <option value="">Seleccionar…</option>
                         <option value="M">Masculino</option>
@@ -152,7 +158,7 @@ export default function AlumnoTab({
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" value={alumno.segundo_nombre} onChange={e => setA('segundo_nombre', e.target.value)} placeholder="Segundo nombre..." />
                 </div>
                 <div className="space-y-1.5">
-                    <ReqLabel>Fecha Nacimiento</ReqLabel>
+                    <OptLabel>Fecha Nacimiento</OptLabel>
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" type="date" value={alumno.fecha_nacimiento} onChange={e => setA('fecha_nacimiento', e.target.value)} />
                 </div>
 
@@ -164,18 +170,19 @@ export default function AlumnoTab({
                 <div className="space-y-1.5">
                     <ReqLabel>Apellido Materno</ReqLabel>
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" value={alumno.apellido_materno} onChange={e => setA('apellido_materno', e.target.value)} placeholder="Ap. materno..." />
+                    {err('apellido_materno')}
                 </div>
                 <div className="space-y-1.5">
-                    <ReqLabel>Edad</ReqLabel>
+                    <OptLabel>Edad</OptLabel>
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" type="number" value={alumno.edad} onChange={e => setA('edad', e.target.value)} placeholder="0" />
                 </div>
 
                 <div className="space-y-1.5">
-                    <ReqLabel>Talla</ReqLabel>
+                    <OptLabel>Talla</OptLabel>
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" value={alumno.talla} onChange={e => setA('talla', e.target.value)} placeholder="1.50m" />
                 </div>
                 <div className="space-y-1.5">
-                    <ReqLabel>Peso</ReqLabel>
+                    <OptLabel>Peso</OptLabel>
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" value={alumno.peso} onChange={e => setA('peso', e.target.value)} placeholder="50kg" />
                 </div>
                 <div className="space-y-1.5">
@@ -184,7 +191,7 @@ export default function AlumnoTab({
                 </div>
 
                 <div className="col-span-2 space-y-1.5">
-                    <ReqLabel>Dirección</ReqLabel>
+                    <OptLabel>Dirección</OptLabel>
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" value={alumno.direccion} onChange={e => setA('direccion', e.target.value)} placeholder="Av. ..." />
                 </div>
                 <div className="space-y-1.5">
@@ -229,11 +236,11 @@ export default function AlumnoTab({
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" type="date" value={alumno.fecha_ingreso} onChange={e => setA('fecha_ingreso', e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
-                    <OptLabel>Mensualidad (S/)</OptLabel>
+                    <ReqLabel>Mensualidad (S/)</ReqLabel>
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" type="number" step="0.01" value={alumno.mensualidad} onChange={e => setA('mensualidad', e.target.value)} placeholder="0.00" />
                 </div>
                 <div className="space-y-1.5">
-                    <OptLabel>Fecha Pago</OptLabel>
+                    <ReqLabel>Fecha Pago</ReqLabel>
                     <Input className="h-10 text-sm rounded-xl bg-neutral-50/50" type="date" value={alumno.fecha_pago} onChange={e => setA('fecha_pago', e.target.value)} />
                 </div>
 

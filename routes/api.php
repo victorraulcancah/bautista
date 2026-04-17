@@ -273,6 +273,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Reniec
     Route::get('reniec/dni/{dni}', [ReniecApiController::class, 'searchDni']);
 
+    // Ubigeo
+    Route::get('ubigeo/departamentos', [\App\Http\Controllers\Api\UbigeoApiController::class, 'departamentos']);
+    Route::get('ubigeo/provincias/{dep}', [\App\Http\Controllers\Api\UbigeoApiController::class, 'provincias']);
+    Route::get('ubigeo/distritos/{dep}/{pro}', [\App\Http\Controllers\Api\UbigeoApiController::class, 'distritos']);
+
     // Portal Padre — detalle de hijos
     Route::middleware('check.role:padre_familia|madre_familia|apoderado')->group(function () {
         Route::get('padre/hijos', [PadreApiController::class, 'hijos']);

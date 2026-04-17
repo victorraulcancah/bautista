@@ -1,9 +1,10 @@
 import { Search } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ReqLabel, OptLabel, SELECT_CLS } from '@/components/shared/FormLabels';
 import TitleForm from '@/components/TitleForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import api from '@/lib/api';
 import type { ContactoForm } from './types';
 
 
@@ -17,6 +18,28 @@ type Props = {
 
 export default function ContactoTab({ tipo, data, onChange: s, onSearch, searching }: Props) {
     const label = tipo === 'padre' ? 'Padre' : tipo === 'madre' ? 'Madre' : 'Apoderado';
+
+    const [departamentos, setDepartamentos] = useState<{dep_cod: string; dep_nombre: string}[]>([]);
+    const [provincias, setProvincias]       = useState<{pro_cod: string; pro_nombre: string}[]>([]);
+    const [distritos, setDistritos]         = useState<{dis_codigo: string; dis_nombre: string}[]>([]);
+
+    // Cargar departamentos al montar
+    useEffect(() => {
+        api.get('/ubigeo/departamentos').then(r => setDepartamentos(r.data));
+    }, []);
+
+    // Cargar provincias cuando cambia departamento
+    useEffect(() => {
+        if (!data.departamento) { setProvincias([]); setDistritos([]); return; }
+        api.get(`/ubigeo/provincias/${data.departamento}`).then(r => setProvincias(r.data));
+        setDistritos([]);
+    }, [data.departamento]);
+
+    // Cargar distritos cuando cambia provincia
+    useEffect(() => {
+        if (!data.departamento || !data.provincia) { setDistritos([]); return; }
+        api.get(`/ubigeo/distritos/${data.departamento}/${data.provincia}`).then(r => setDistritos(r.data));
+    }, [data.provincia]);
 
     // Auto-search when DNI reaches 8 digits
     useEffect(() => {
@@ -120,26 +143,37 @@ export default function ContactoTab({ tipo, data, onChange: s, onSearch, searchi
                     </div>
                     <div className="space-y-1.5">
                         <ReqLabel>Departamento</ReqLabel>
-                        <select value={data.departamento} onChange={e => s('departamento', e.target.value)} className={SELECT_CLS}>
+                        <select value={data.departamento}
+                            onChange={e => { s('departamento', e.target.value); s('provincia', ''); s('distrito', ''); }}
+                            className={SELECT_CLS}>
                             <option value="">Seleccionar...</option>
-                            <option value="Lima">Lima</option>
-                            <option value="Arequipa">Arequipa</option>
+                            {departamentos.map(d => (
+                                <option key={d.dep_cod} value={d.dep_cod}>{d.dep_nombre}</option>
+                            ))}
                         </select>
                     </div>
                     <div className="space-y-1.5">
                         <ReqLabel>Provincia</ReqLabel>
-                        <select value={data.provincia} onChange={e => s('provincia', e.target.value)} className={SELECT_CLS}>
-                            <option value="">Seleccionar...</option>
-                            <option value="Lima">Lima</option>
-                            <option value="Callao">Callao</option>
+                        <select value={data.provincia}
+                            onChange={e => { s('provincia', e.target.value); s('distrito', ''); }}
+                            className={SELECT_CLS}
+                            disabled={!data.departamento}>
+                            <option value="">{data.departamento ? 'Seleccionar...' : 'Primero selecciona departamento'}</option>
+                            {provincias.map(p => (
+                                <option key={p.pro_cod} value={p.pro_cod}>{p.pro_nombre}</option>
+                            ))}
                         </select>
                     </div>
                     <div className="space-y-1.5">
                         <ReqLabel>Distrito</ReqLabel>
-                        <select value={data.distrito} onChange={e => s('distrito', e.target.value)} className={SELECT_CLS}>
-                            <option value="">Seleccionar...</option>
-                            <option value="Miraflores">Miraflores</option>
-                            <option value="San Isidro">San Isidro</option>
+                        <select value={data.distrito}
+                            onChange={e => s('distrito', e.target.value)}
+                            className={SELECT_CLS}
+                            disabled={!data.provincia}>
+                            <option value="">{data.provincia ? 'Seleccionar...' : 'Primero selecciona provincia'}</option>
+                            {distritos.map(d => (
+                                <option key={d.dis_codigo} value={d.dis_codigo}>{d.dis_nombre}</option>
+                            ))}
                         </select>
                     </div>
                 </div>

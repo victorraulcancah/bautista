@@ -28,8 +28,9 @@ class StoreEstudianteRequest extends FormRequest
             'talla'               => ['nullable', 'string', 'max:50'],
             'peso'                => ['nullable', 'numeric', 'min:0'],
             'seguro'              => ['nullable', 'string', 'max:255'],
-            'mensualidad'         => ['nullable', 'numeric', 'min:0'],
-            'fecha_ingreso'       => ['nullable', 'date'],
+            'mensualidad'         => ['required', 'numeric', 'min:0'],
+            'fecha_ingreso'       => ['required', 'date'],
+            'fecha_pago'          => ['required', 'date'],
         ];
     }
 
