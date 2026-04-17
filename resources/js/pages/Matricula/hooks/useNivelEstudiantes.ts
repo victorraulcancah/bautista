@@ -15,6 +15,8 @@ export function useNivelEstudiantes(aperturaId: number, nivelId: number) {
     const [loading, setLoading]         = useState(false);
     const [toggling, setToggling]       = useState<number | null>(null);
     const [search, setSearch]           = useState('');
+    const [gradoFiltro, setGradoFiltro]     = useState<number | ''>('');
+    const [seccionFiltro, setSeccionFiltro] = useState<number | ''>('');
 
     // Modal states
     const [modalOpen, setModalOpen]         = useState(false);
@@ -53,21 +55,62 @@ export function useNivelEstudiantes(aperturaId: number, nivelId: number) {
 
     useEffect(() => { cargar(); }, [cargar]);
 
-    const filteredMatriculas = search.trim()
-        ? matriculas.filter(m => {
+    const filteredMatriculas = (() => {
+        let result = matriculas;
+
+        // Filtro por grado
+        if (gradoFiltro !== '') {
+            result = result.filter(m => m.seccion?.grado?.grado_id === gradoFiltro);
+        }
+
+        // Filtro por sección (dependiente del grado seleccionado)
+        if (seccionFiltro !== '') {
+            result = result.filter(m => m.seccion_id === seccionFiltro);
+        }
+
+        // Filtro por búsqueda de texto
+        if (search.trim()) {
             const q = search.toLowerCase();
-            const s = m.estudiante;
-            return (
-                s?.primer_nombre?.toLowerCase().includes(q) ||
-                s?.segundo_nombre?.toLowerCase().includes(q) ||
-                s?.apellido_paterno?.toLowerCase().includes(q) ||
-                s?.apellido_materno?.toLowerCase().includes(q) ||
-                s?.doc_numero?.toLowerCase().includes(q) ||
-                m.seccion?.grado?.nombre_grado?.toLowerCase().includes(q) ||
-                m.seccion?.nombre?.toLowerCase().includes(q)
-            );
-          })
-        : matriculas;
+            result = result.filter(m => {
+                const s = m.estudiante;
+                return (
+                    s?.primer_nombre?.toLowerCase().includes(q) ||
+                    s?.segundo_nombre?.toLowerCase().includes(q) ||
+                    s?.apellido_paterno?.toLowerCase().includes(q) ||
+                    s?.apellido_materno?.toLowerCase().includes(q) ||
+                    s?.doc_numero?.toLowerCase().includes(q) ||
+                    m.seccion?.grado?.nombre_grado?.toLowerCase().includes(q) ||
+                    m.seccion?.nombre?.toLowerCase().includes(q)
+                );
+            });
+        }
+
+        return result;
+    })();
+
+    // Grados únicos presentes en las matrículas cargadas
+    const gradosDisponibles = Array.from(
+        new Map(
+            matriculas
+                .filter(m => m.seccion?.grado)
+                .map(m => [m.seccion!.grado!.grado_id, m.seccion!.grado!])
+        ).values()
+    ).sort((a, b) => a.nombre_grado.localeCompare(b.nombre_grado));
+
+    // Secciones filtradas según el grado seleccionado (o todas si no hay grado)
+    const seccionesDisponibles = Array.from(
+        new Map(
+            matriculas
+                .filter(m => m.seccion && m.seccion_id != null && (gradoFiltro === '' || m.seccion.grado?.grado_id === gradoFiltro))
+                .map(m => [m.seccion_id!, {
+                    seccion_id: m.seccion_id as number,
+                    nombre: m.seccion!.nombre,
+                    label: gradoFiltro !== ''
+                        ? m.seccion!.nombre
+                        : `${m.seccion!.grado?.nombre_grado ?? ''} - ${m.seccion!.nombre}`,
+                }])
+        ).values()
+    ).sort((a, b) => a.label.localeCompare(b.label));
 
     const handleMatricular = async (data: MatriculaFormData) => {
         await api.post('/matriculas/', data);
@@ -177,6 +220,9 @@ export function useNivelEstudiantes(aperturaId: number, nivelId: number) {
         // data
         apertura, nivelNombre, matriculas, filteredMatriculas, disponibles, loading, toggling,
         secciones, grados, search, setSearch, studentName,
+        gradoFiltro, setGradoFiltro: (v: number | '') => { setGradoFiltro(v); setSeccionFiltro(''); },
+        seccionFiltro, setSeccionFiltro,
+        gradosDisponibles, seccionesDisponibles,
         // modal states
         modalOpen, setModalOpen,
         editModalOpen, setEditModalOpen, editingMatricula,

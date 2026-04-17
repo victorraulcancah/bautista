@@ -18,6 +18,8 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
     const {
         cargar, apertura, nivelNombre, matriculas, filteredMatriculas, disponibles, loading, toggling,
         secciones, grados, search, setSearch, studentName,
+        gradoFiltro, setGradoFiltro, gradosDisponibles,
+        seccionFiltro, setSeccionFiltro, seccionesDisponibles,
         modalOpen, setModalOpen,
         editModalOpen, setEditModalOpen, editingMatricula,
         deletingId, setDeletingId,
@@ -65,7 +67,7 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                                 <p className="text-sm text-neutral-500 flex items-center gap-2">
                                     <span className="hidden sm:inline">{apertura?.nombre} ·</span>
                                     <span className="font-semibold text-emerald-600">
-                                        {filteredMatriculas.length}{search ? ` de ${matriculas.length}` : ''} alumnos
+                                        {filteredMatriculas.length}{(search || gradoFiltro !== '' || seccionFiltro !== '') ? ` de ${matriculas.length}` : ''} alumnos
                                     </span>
                                 </p>
                             </div>
@@ -75,16 +77,51 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                         </Button>
                     </div>
 
-                    {/* Buscador */}
-                    <div className="relative max-w-sm">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            placeholder="Buscar por nombre, DNI, grado..."
-                            className="w-full pl-9 pr-4 h-10 rounded-xl border border-neutral-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
-                        />
+                    {/* Buscador + Filtros */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        {/* Buscador */}
+                        <div className="relative flex-1 max-w-sm">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                placeholder="Buscar por nombre, DNI..."
+                                className="w-full pl-9 pr-4 h-10 rounded-xl border border-neutral-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+                            />
+                        </div>
+
+                        {/* Filtro por Grado */}
+                        {gradosDisponibles.length > 1 && (
+                            <select
+                                value={gradoFiltro}
+                                onChange={e => setGradoFiltro(e.target.value === '' ? '' : Number(e.target.value))}
+                                className="h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+                            >
+                                <option value="">Todos los grados</option>
+                                {gradosDisponibles.map(g => (
+                                    <option key={g.grado_id} value={g.grado_id}>
+                                        {g.nombre_grado}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+
+                        {/* Filtro por Sección */}
+                        {seccionesDisponibles.length > 1 && (
+                            <select
+                                value={seccionFiltro}
+                                onChange={e => setSeccionFiltro(e.target.value === '' ? '' : Number(e.target.value))}
+                                className="h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+                            >
+                                <option value="">Todas las secciones</option>
+                                {seccionesDisponibles.map(s => (
+                                    <option key={s.seccion_id} value={s.seccion_id}>
+                                        {s.label}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
 
                     {/* Tabla */}
