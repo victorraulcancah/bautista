@@ -20,6 +20,17 @@ class DocenteDashboardService
 
         $cursosCount = DocenteCurso::where('docente_id', $docente->docente_id)->count();
 
+        // Alumnos únicos en las secciones del docente (no todos los de la institución)
+        $seccionIds = DocenteCurso::where('docente_id', $docente->docente_id)
+            ->whereNotNull('seccion_id')
+            ->pluck('seccion_id')
+            ->unique();
+
+        $estudiantesCount = Matricula::whereIn('seccion_id', $seccionIds)
+            ->where('estado', '1')
+            ->distinct('estu_id')
+            ->count('estu_id');
+
         $pendientesCalificar = NotaActividad::whereHas('actividad', function ($q) use ($docente) {
             $q->whereHas('clase.unidad.curso', function ($q2) use ($docente) {
                 $q2->whereHas('docenteCursos', fn($q3) => $q3->where('docente_id', $docente->docente_id));
@@ -29,7 +40,7 @@ class DocenteDashboardService
         return [
             'resumen' => [
                 'cursos'               => $cursosCount,
-                'estudiantes'          => Matricula::whereHas('apertura', fn($q) => $q->where('insti_id', $user->insti_id))->count(),
+                'estudiantes'          => $estudiantesCount,
                 'pendientes_calificar' => $pendientesCalificar,
             ],
             'cursos' => DocenteCurso::where('docente_id', $docente->docente_id)
