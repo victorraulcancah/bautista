@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import { ClipboardList, Eye } from 'lucide-react';
+import { ClipboardList, Eye, IdCard } from 'lucide-react';
 import { usePermission } from '@/hooks/usePermission';
 import { useCallback, useEffect, useState } from 'react';
 import ResourceTable from '@/components/shared/ResourceTable';
@@ -151,7 +151,23 @@ return;
                                         columns={columns}
                                         getKey={(n) => n.nivel_id?.toString() ?? `sin-nivel-${Math.random()}`}
                                         extraActions={(n) => (
-                                            <>
+                                            <div className="flex items-center gap-2">
+                                                {can('matriculas.gestion.ver') && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="border-emerald-200 text-emerald-600 hover:bg-emerald-50 rounded-lg h-9 w-9 p-0"
+                                                        onClick={() => {
+                                                            if (n.nivel_id) {
+                                                                window.open(`/matriculas/aperturas/${selectedAperturaId}/niveles/${n.nivel_id}/fotochecks`, '_blank');
+                                                            }
+                                                        }}
+                                                        disabled={!n.nivel_id}
+                                                        title="Descargar Fotochecks Masivos"
+                                                    >
+                                                        <IdCard className="h-4 w-4" />
+                                                    </Button>
+                                                )}
                                                 {can('matriculas.gestion.ver') && (
                                                     <Button
                                                         size="sm"
@@ -168,7 +184,7 @@ return;
                                                         <Eye className="h-4 w-4" />
                                                     </Button>
                                                 )}
-                                            </>
+                                            </div>
                                         )}
                                         onPageChange={() => {}}
                                     />

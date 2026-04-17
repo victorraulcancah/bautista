@@ -61,7 +61,7 @@
             top: 18mm;
             left: 0;
             width: 54mm;
-            height: 59mm; /* Hasta antes del footer */
+            height: 63.6mm; /* Ajustado para llegar hasta el footer exacto (85.6 - 18 - 4) */
             background-color: {{ $config->secondary_color ?? '#7b8780' }};
             z-index: 1;
         }
@@ -69,15 +69,14 @@
         /* 3. Foto (32mm x 32mm) */
         .photo-frame {
             position: absolute;
-            top: 15mm; /* Solapa un poco con la cabecera como en el diseño React */
+            top: 19mm;
             left: 50%;
-            transform: translateX(-50%);
-            width: 32mm;
-            height: 32mm;
+            margin-left: -12mm; /* Centrado para 24mm de ancho */
+            width: 24mm;
+            height: 24mm;
             background-color: #ffffff;
-            border: 1mm solid #ffffff;
+            border: 0.5mm solid #ffffff;
             border-radius: 1mm;
-            box-shadow: 0 1mm 2mm rgba(0,0,0,0.2);
             z-index: 20;
             overflow: hidden;
         }
@@ -91,7 +90,7 @@
         /* 4. Identidad y Datos */
         .identity-container {
             position: absolute;
-            top: 48mm;
+            top: 45mm;
             left: 0;
             width: 54mm;
             text-align: center;
@@ -110,7 +109,7 @@
         }
 
         .full-name {
-            font-size: 9pt;
+            font-size: 6pt;
             font-weight: 900;
             color: {{ $config->text_color ?? '#ffffff' }};
             text-transform: uppercase;
@@ -157,20 +156,33 @@
         }
 
         .label {
-            font-size: 4pt;
+            font-size: 3.5pt;
             font-weight: 800;
             color: {{ $config->text_color ?? '#ffffff' }};
-            opacity: 0.7;
+            opacity: 0.9;
             text-transform: uppercase;
-            display: block;
         }
 
         .value {
             font-size: 5.5pt;
             font-weight: 900;
             color: {{ $config->text_color ?? '#ffffff' }};
-            display: block;
-            margin-top: -1pt;
+        }
+
+        table.metadata-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.metadata-table td {
+            padding: 0;
+            margin: 0;
+            vertical-align: top;
+            line-height: 1.1;
+        }
+
+        table.metadata-table td.label-cell {
+            width: 14mm;
         }
 
         /* 6. Footer (8.6mm) */
@@ -179,11 +191,11 @@
             bottom: 0;
             left: 0;
             width: 54mm;
-            height: 8.6mm;
+            height: 4mm;
             background-color: {{ $config->primary_color ?? '#2c63f2' }};
             color: #ffffff;
             text-align: center;
-            line-height: 8.6mm;
+            line-height: 4mm;
             z-index: 50;
         }
 
@@ -228,22 +240,36 @@
             <img src="{{ $qrSrc }}" alt="QR">
         </div>
         <div class="metadata">
-            <div class="data-row">
-                <span class="label">ID Sistema</span>
-                <span class="value">{{ $idDisplay }}</span>
-            </div>
-            <div class="data-row">
-                <span class="label">DNI / Documento</span>
-                <span class="value">{{ $dni ?? '----------' }}</span>
-            </div>
-            <div class="data-row">
-                <span class="label">Grado / Sección</span>
-                <span class="value">{{ $grado ?? 'PERSONAL' }} - {{ $seccion ?? 'S/S' }}</span>
-            </div>
+            <table class="metadata-table">
+                <tr>
+                    <td class="label-cell"><span class="label">STUDENT ID:</span></td>
+                    <td><span class="value">{{ $idDisplay }}</span></td>
+                </tr>
+                <tr>
+                    <td class="label-cell"><span class="label">DNI:</span></td>
+                    <td><span class="value">{{ $dni ?? '---' }}</span></td>
+                </tr>
+                <tr>
+                    <td class="label-cell"><span class="label">GRADO:</span></td>
+                    <td><span class="value">{{ $grado ?? 'S/G' }}</span></td>
+                </tr>
+                <tr>
+                    <td class="label-cell"><span class="label">NIVEL:</span></td>
+                    <td><span class="value">{{ $nivel ?? 'S/N' }}</span></td>
+                </tr>
+                <tr>
+                    <td class="label-cell"><span class="label">SECCIÓN:</span></td>
+                    <td><span class="value">{{ $seccion ?? 'S/S' }}</span></td>
+                </tr>
+                <tr>
+                    <td class="label-cell"><span class="label">TEL:</span></td>
+                    <td><span class="value">{{ $telefono ?? '---' }}</span></td>
+                </tr>
+            </table>
         </div>
     </div>
 
-    <div class="footer">
+    <div class="footer" style="background-color: {{ $config->primary_color }}">
         <span class="footer-text">{{ $config->footer_text ?? 'Periodo Académico '.date('Y') }}</span>
     </div>
 

@@ -146,11 +146,15 @@ class FotocheckService implements FotocheckServiceInterface
         // Extract student metadata if available
         $grado = null;
         $seccion = null;
-        $estudiante = \App\Models\Estudiante::where('user_id', $user->id)->with('matriculas.seccion.grado')->first();
+        $nivel = null;
+        $telefono = $user->perfil->telefono ?? null;
+
+        $estudiante = \App\Models\Estudiante::where('user_id', $user->id)->with('matriculas.seccion.grado.nivel')->first();
         if ($estudiante && $estudiante->matriculas->isNotEmpty()) {
             $lastMatricula = $estudiante->matriculas->first();
             $grado = $lastMatricula->seccion->grado->nombre_grado ?? null;
             $seccion = $lastMatricula->seccion->nombre ?? null;
+            $nivel = $lastMatricula->seccion->grado->nivel->nombre_nivel ?? null;
         }
 
         // Use Resource for standardized labels (manually mapping to array for blade)
@@ -166,7 +170,9 @@ class FotocheckService implements FotocheckServiceInterface
             'periodo' => $config->footer_text ?? date('Y'),
             'config'  => $config,
             'grado'   => $grado,
-            'seccion' => $seccion
+            'seccion' => $seccion,
+            'nivel'   => $nivel,
+            'telefono'=> $telefono
         ]);
     }
 }

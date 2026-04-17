@@ -13,6 +13,7 @@ use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
+use App\Services\Interfaces\FotocheckServiceInterface;
 use Illuminate\Http\Response;
 
 class FotocheckController extends Controller
