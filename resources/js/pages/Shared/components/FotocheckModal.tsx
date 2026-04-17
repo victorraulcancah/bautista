@@ -82,7 +82,7 @@ export default function FotocheckModal({ open, onClose, matricula, estudiante }:
         const finalName = builtName || student?.nombre_completo || 'SIN NOMBRE';
 
         return {
-            id: student?.user_id || estuId,
+            id: estuId,  // estu_id correcto para el ID del fotocheck
             name: finalName,
             rol_name: 'ALUMNO(A)',
             avatar: student?.avatar || student?.perfil?.avatar || undefined,

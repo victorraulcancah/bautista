@@ -60,12 +60,8 @@ class HorarioService implements HorarioServiceInterface
                 $q->where('horario_clase_id', '!=', $datos['horario_clase_id']);
             })
             ->where(function($q) use ($datos) {
-                $q->whereBetween('hora_inicio', [$datos['hora_inicio'], $datos['hora_fin']])
-                  ->orWhereBetween('hora_fin', [$datos['hora_inicio'], $datos['hora_fin']])
-                  ->orWhere(function($q2) use ($datos) {
-                      $q2->where('hora_inicio', '<=', $datos['hora_inicio'])
-                         ->where('hora_fin', '>=', $datos['hora_fin']);
-                  });
+                $q->where('hora_inicio', '<', $datos['hora_fin'])
+                  ->where('hora_fin', '>', $datos['hora_inicio']);
             })
             ->with(['seccion', 'curso'])
             ->first();
@@ -87,12 +83,8 @@ class HorarioService implements HorarioServiceInterface
                 $q->where('horario_clase_id', '!=', $datos['horario_clase_id']);
             })
             ->where(function($q) use ($datos) {
-                $q->whereBetween('hora_inicio', [$datos['hora_inicio'], $datos['hora_fin']])
-                  ->orWhereBetween('hora_fin', [$datos['hora_inicio'], $datos['hora_fin']])
-                  ->orWhere(function($q2) use ($datos) {
-                      $q2->where('hora_inicio', '<=', $datos['hora_inicio'])
-                         ->where('hora_fin', '>=', $datos['hora_fin']);
-                  });
+                $q->where('hora_inicio', '<', $datos['hora_fin'])
+                  ->where('hora_fin', '>', $datos['hora_inicio']);
             })
             ->with(['curso', 'docente'])
             ->first();
@@ -115,12 +107,8 @@ class HorarioService implements HorarioServiceInterface
                     $q->where('horario_clase_id', '!=', $datos['horario_clase_id']);
                 })
                 ->where(function($q) use ($datos) {
-                    $q->whereBetween('hora_inicio', [$datos['hora_inicio'], $datos['hora_fin']])
-                      ->orWhereBetween('hora_fin', [$datos['hora_inicio'], $datos['hora_fin']])
-                      ->orWhere(function($q2) use ($datos) {
-                          $q2->where('hora_inicio', '<=', $datos['hora_inicio'])
-                             ->where('hora_fin', '>=', $datos['hora_fin']);
-                      });
+                    $q->where('hora_inicio', '<', $datos['hora_fin'])
+                      ->where('hora_fin', '>', $datos['hora_inicio']);
                 })
                 ->with(['seccion', 'curso'])
                 ->first();

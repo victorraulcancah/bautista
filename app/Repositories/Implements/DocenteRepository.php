@@ -36,8 +36,10 @@ class DocenteRepository implements DocenteRepositoryInterface
     public function create(array $data): Docente
     {
         // 1. Crear usuario de acceso
+        $rolId = \DB::table('roles')->where('name', 'docente')->value('id');
         $user = User::create([
             'insti_id' => $data['insti_id'],
+            'rol_id'   => $rolId,
             'username' => $data['username'],
             'name'     => $data['primer_nombre'] . ' ' . $data['apellido_paterno'],
             'email'    => $data['email'] ?? null,

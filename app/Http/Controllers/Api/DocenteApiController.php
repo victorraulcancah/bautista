@@ -61,7 +61,10 @@ class DocenteApiController extends Controller
      */
     public function store(StoreDocenteRequest $request): JsonResponse
     {
-        return (new DocenteResource($this->docenteService->crear($request->validated())))
+        return (new DocenteResource($this->docenteService->crear(array_merge(
+            $request->validated(),
+            ['insti_id' => $request->user()->insti_id],
+        ))))
             ->response()
             ->setStatusCode(201);
     }

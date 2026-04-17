@@ -123,7 +123,7 @@ export default function FotocheckCardPreview({ user, config, className }: Props)
                         >
                             <div className="flex mb-[0.65mm]">
                                 <span className="w-[16mm] font-black uppercase tracking-tighter opacity-90">ID:</span>
-                                <span className="font-bold truncate">{'EST-' + user.id.toString().padStart(6, '0')}</span>
+                                <span className="font-bold truncate">{user.details?.student_id || ('EST-' + user.id.toString().padStart(6, '0'))}</span>
                             </div>
                             <div className="flex mb-[0.65mm]">
                                 <span className="w-[16mm] font-black uppercase tracking-tighter opacity-90">DNI:</span>

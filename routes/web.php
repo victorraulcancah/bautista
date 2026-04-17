@@ -36,6 +36,14 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/niveles',      fn () => Inertia::render('Niveles/index'))->middleware('permission:academico.niveles.ver')->name('niveles.index');
     Route::get('/grados',       fn () => Inertia::render('Grados/index'))->middleware('permission:academico.cursos.ver')->name('grados.index');
     Route::get('/secciones',    fn () => Inertia::render('Secciones/index'))->middleware('permission:academico.secciones.ver')->name('secciones.index');
+    Route::get('/secciones/{seccionId}/horarios', function (int $seccionId) {
+        $seccion = \App\Models\Seccion::with('grado')->findOrFail($seccionId);
+        return Inertia::render('Secciones/HorariosPage', [
+            'seccionId'    => $seccionId,
+            'seccionNombre' => $seccion->nombre,
+            'gradoNombre'   => $seccion->grado?->nombre_grado,
+        ]);
+    })->middleware('permission:academico.horarios.ver')->name('secciones.horarios');
     Route::get('/cursos',       fn () => Inertia::render('Cursos/index'))->middleware('permission:academico.cursos.ver|portal.estudiante.cursos|portal.docente.cursos')->name('cursos.index');
     
     Route::get('/pagos',      fn () => Inertia::render('Pagos/index'))->middleware('permission:admin.pagos.ver')->name('pagos.index');
