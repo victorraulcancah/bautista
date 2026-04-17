@@ -11,7 +11,7 @@ interface AsistenciaRepositoryInterface
     public function getPorPersonaMes(int $instiId, int $personaId, string $tipo, int $anio, int $mes): Collection;
 
     /** Registros de un mes para todos los alumnos/docentes de una institución (para reporte admin). */
-    public function getReporteMes(int $instiId, string $tipo, int $anio, int $mes): Collection;
+    public function getReporteMes(int $instiId, string $tipo, int $anio, int $mes, array $filters = []): Collection;
 
     /** Marcar/actualizar asistencia manual. */
     public function marcar(array $data): Asistencia;
@@ -25,7 +25,7 @@ interface AsistenciaRepositoryInterface
     public function getHistorialGlobal(int $limit = 20): Collection;
 
     /** Obtener usuarios (estudiantes o docentes) paginados para el panel de asistencia. */
-    public function getPaginatedUsers(string $tipo, string $search = '', int $perPage = 20);
+    public function getPaginatedUsers(string $tipo, string $search = '', int $perPage = 20, array $filters = []);
 
     /** Obtener historial de una persona específica en un rango de fechas. */
     public function getPorPersonaRango(int $id, string $tipo, string $fechaInicio, string $fechaFin): Collection;

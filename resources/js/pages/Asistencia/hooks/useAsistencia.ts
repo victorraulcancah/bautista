@@ -23,6 +23,7 @@ export type HistorialAsistencia = {
 export function useAsistencia() {
     const [tipo, setTipo] = useState<'E' | 'D'>('E');
     const [search, setSearch] = useState('');
+    const [filters, setFilters] = useState<Record<string, any>>({});
     const [page, setPage] = useState(1);
     const [allUsers, setAllUsers] = useState<Usuario[]>([]);
     const [hasMore, setHasMore] = useState(true);
@@ -30,19 +31,19 @@ export function useAsistencia() {
     const [totalCount, setTotalCount] = useState(0);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    // Reset cuando cambia tipo o búsqueda
+    // Reset cuando cambia tipo, búsqueda o filtros
     useEffect(() => {
         setAllUsers([]);
         setPage(1);
         setHasMore(true);
-    }, [tipo, search]);
+    }, [tipo, search, filters]);
 
     // Cargar usuarios
     useEffect(() => {
         if (page === 1 || hasMore) {
             loadUsers();
         }
-    }, [tipo, page, search]);
+    }, [tipo, page, search, filters]);
 
     const loadUsers = async () => {
         if (loading) return;
@@ -51,7 +52,7 @@ export function useAsistencia() {
 
         try {
             const res = await api.get('/asistencia/usuarios', {
-                params: { tipo, search, page }
+                params: { tipo, search, page, ...filters }
             });
             
             const newUsers = res.data.data || [];
@@ -87,11 +88,13 @@ export function useAsistencia() {
 
     const changeTipo = (newTipo: 'E' | 'D') => {
         setTipo(newTipo);
+        setFilters({}); // Reset filters when changing type
     };
 
     return {
         tipo,
         search,
+        filters,
         allUsers,
         loading,
         hasMore,
@@ -99,6 +102,7 @@ export function useAsistencia() {
         scrollContainerRef,
         handleScroll,
         setSearch,
+        setFilters,
         changeTipo,
     };
 }

@@ -6,6 +6,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogFooter,
 } from '@/components/ui/dialog';
 import {
     Select,
@@ -21,8 +22,9 @@ import api from '@/lib/api';
 type Props = {
     open: boolean;
     onClose: () => void;
+    userId: number | null;
     tipo: 'E' | 'D';
-    filters?: Record<string, any>;
+    userName: string;
 };
 
 const months = [
@@ -32,7 +34,7 @@ const months = [
     { v: '10', l: 'Octubre' }, { v: '11', l: 'Noviembre' }, { v: '12', l: 'Diciembre' }
 ];
 
-export default function ExportModal({ open, onClose, tipo, filters = {} }: Props) {
+export default function IndividualExportModal({ open, onClose, userId, tipo, userName }: Props) {
     const [exportType, setExportType] = useState<'mes' | 'rango'>('mes');
     const [selectedMonth, setSelectedMonth] = useState(String(new Date().getMonth() + 1));
     const [selectedYear, setSelectedYear] = useState(String(new Date().getFullYear()));
@@ -41,24 +43,19 @@ export default function ExportModal({ open, onClose, tipo, filters = {} }: Props
     const [loading, setLoading] = useState(false);
 
     const handleExport = async () => {
+        if (!userId) return;
         setLoading(true);
-        const tipoLabel = tipo === 'E' ? 'Estudiantes' : 'Docentes';
-        
-        try {
-            let url = '/asistencia/export-all?tipo=' + tipo;
-            let filename = `Reporte_Asistencia_${tipoLabel}`;
 
-            // Append academic filters
-            Object.entries(filters).forEach(([key, value]) => {
-                if (value) url += `&${key}=${value}`;
-            });
+        try {
+            let url = `/asistencia/usuario/${userId}/export?tipo=${tipo}`;
+            let filename = `Asistencia_${userName.replace(/\s+/g, '_')}`;
 
             if (exportType === 'mes') {
                 url += `&mes=${selectedMonth}&anio=${selectedYear}`;
                 filename += `_${months.find(m => m.v === selectedMonth)?.l}_${selectedYear}.xlsx`;
             } else {
                 url += `&fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
-                filename += `_${fechaInicio}_${fechaFin}.xlsx`;
+                filename += `_${fechaInicio}_as_${fechaFin}.xlsx`;
             }
 
             const response = await api.get(url, {
@@ -76,7 +73,8 @@ export default function ExportModal({ open, onClose, tipo, filters = {} }: Props
             
             onClose();
         } catch (error) {
-            console.error('Error al descargar Excel:', error);
+            console.error('Error al descargar Excel individual:', error);
+            window.alert('Ocurrió un error al generar el archivo Excel.');
         } finally {
             setLoading(false);
         }
@@ -87,24 +85,19 @@ export default function ExportModal({ open, onClose, tipo, filters = {} }: Props
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-md bg-white border-neutral-200 rounded-3xl p-0 overflow-hidden shadow-2xl">
-                <DialogHeader className="p-6 pb-4 border-b border-neutral-100 bg-emerald-50">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center">
-                            <FileSpreadsheet className="h-6 w-6 text-white" />
-                        </div>
-                        <div>
-                            <DialogTitle className="text-xl font-black text-neutral-950 tracking-tight">
-                                Exportar a Excel
-                            </DialogTitle>
-                            <p className="text-xs text-emerald-600 font-bold uppercase tracking-widest">
-                                {tipo === 'E' ? 'Estudiantes' : 'Docentes'}
-                            </p>
-                        </div>
+                <DialogHeader className="p-6 pb-4 border-b border-neutral-100 bg-emerald-50 text-center">
+                    <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center mb-2">
+                        <FileSpreadsheet className="h-6 w-6 text-white" />
                     </div>
+                    <DialogTitle className="text-xl font-black text-neutral-950 tracking-tight">
+                        Exportar Asistencia Individual
+                    </DialogTitle>
+                    <p className="text-xs text-emerald-600 font-bold uppercase tracking-widest mt-1">
+                        {userName}
+                    </p>
                 </DialogHeader>
 
                 <div className="p-6 space-y-6">
-                    {/* Selector de tipo de exportación */}
                     <div className="space-y-2">
                         <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
                             Tipo de exportación
@@ -133,39 +126,30 @@ export default function ExportModal({ open, onClose, tipo, filters = {} }: Props
                         </div>
                     </div>
 
-                    {/* Filtros por mes */}
                     {exportType === 'mes' && (
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
-                                    Mes
-                                </Label>
+                                <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">Mes</Label>
                                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                                     <SelectTrigger className="bg-white border-neutral-200 h-11 rounded-xl text-sm font-medium">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-white border-neutral-200">
                                         {months.map(m => (
-                                            <SelectItem key={m.v} value={m.v} className="text-sm font-medium">
-                                                {m.l}
-                                            </SelectItem>
+                                            <SelectItem key={m.v} value={m.v}>{m.l}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
-                                    Año
-                                </Label>
+                                <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">Año</Label>
                                 <Select value={selectedYear} onValueChange={setSelectedYear}>
                                     <SelectTrigger className="bg-white border-neutral-200 h-11 rounded-xl text-sm font-medium">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-white border-neutral-200">
                                         {years.map(y => (
-                                            <SelectItem key={y} value={String(y)} className="text-sm font-medium">
-                                                {y}
-                                            </SelectItem>
+                                            <SelectItem key={y} value={String(y)}>{y}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -173,13 +157,10 @@ export default function ExportModal({ open, onClose, tipo, filters = {} }: Props
                         </div>
                     )}
 
-                    {/* Filtros por rango de fechas */}
                     {exportType === 'rango' && (
-                        <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
-                                    Fecha de inicio
-                                </Label>
+                                <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">Desde</Label>
                                 <Input
                                     type="date"
                                     value={fechaInicio}
@@ -188,9 +169,7 @@ export default function ExportModal({ open, onClose, tipo, filters = {} }: Props
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">
-                                    Fecha de fin
-                                </Label>
+                                <Label className="text-xs font-bold text-neutral-500 uppercase tracking-widest">Hasta</Label>
                                 <Input
                                     type="date"
                                     value={fechaFin}
@@ -200,36 +179,25 @@ export default function ExportModal({ open, onClose, tipo, filters = {} }: Props
                             </div>
                         </div>
                     )}
-
-                    {/* Botones */}
-                    <div className="flex gap-3 pt-2">
-                        <Button
-                            onClick={onClose}
-                            variant="outline"
-                            className="flex-1 h-11 rounded-xl border-neutral-200 font-bold text-sm"
-                            disabled={loading}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            onClick={handleExport}
-                            disabled={loading || (exportType === 'rango' && (!fechaInicio || !fechaFin))}
-                            className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm gap-2"
-                        >
-                            {loading ? (
-                                <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    Exportando...
-                                </>
-                            ) : (
-                                <>
-                                    <FileSpreadsheet className="h-4 w-4" />
-                                    Exportar
-                                </>
-                            )}
-                        </Button>
-                    </div>
                 </div>
+
+                <DialogFooter className="p-6 bg-neutral-50 border-t border-neutral-100 flex gap-3">
+                    <Button
+                        onClick={onClose}
+                        variant="outline"
+                        className="flex-1 h-11 rounded-xl border-neutral-200 font-bold text-sm"
+                        disabled={loading}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={handleExport}
+                        disabled={loading || (exportType === 'rango' && (!fechaInicio || !fechaFin))}
+                        className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm gap-2"
+                    >
+                        {loading ? 'Exportando...' : 'Descargar Excel'}
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

@@ -8,7 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 interface SeccionServiceInterface
 {
-    public function listar(int $instiId, string $search = '', int $perPage = 15): LengthAwarePaginator;
+    public function listar(int $instiId, string $search = '', int $perPage = 15, ?int $gradoId = null): LengthAwarePaginator;
     public function todos(int $instiId): Collection;
     public function obtener(int $id): Seccion;
     public function crear(array $data): Seccion;

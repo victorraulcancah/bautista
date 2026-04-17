@@ -27,7 +27,9 @@ class AsistenciaGeneralApiController extends Controller
         $tipo = $request->query('tipo', 'E');
         $search = $request->query('search', '');
         
-        return response()->json($this->repository->getPaginatedUsers($tipo, $search));
+        $filters = $request->only(['nivel_id', 'grado_id', 'seccion_id', 'anio']);
+        
+        return response()->json($this->repository->getPaginatedUsers($tipo, $search, 20, $filters));
     }
 
     /**
@@ -88,7 +90,6 @@ class AsistenciaGeneralApiController extends Controller
         $nombre = $data['nombre'];
         $periodoLabel = $data['label'];
 
-        // Excel creation logic remains in controller (Boundary between logic and response)
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -112,6 +113,105 @@ class AsistenciaGeneralApiController extends Controller
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $filename = "Asistencia_{$nombre}_" . date('Ymd_His') . ".xlsx";
         $tempFile = tempnam(sys_get_temp_dir(), 'excel');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Get user info and parent contacts for WhatsApp modal.
+     */
+    public function showUserInfo(Request $request, $id)
+    {
+        $tipo = $request->query('tipo', 'E');
+        
+        $data = [
+            'nombre' => '',
+            'contactos' => []
+        ];
+
+        if ($tipo === 'E') {
+            $estu = Estudiante::with(['perfil', 'contactos'])->find($id);
+            if ($estu) {
+                $data['nombre'] = $estu->nombre_completo;
+                foreach ($estu->contactos as $c) {
+                    if ($c->telefono_1) {
+                        $data['contactos'][] = [
+                            'label'    => $c->parentesco ?? 'Contacto',
+                            'nombre'   => "{$c->nombres} {$c->apellidos}",
+                            'telefono' => $c->telefono_1
+                        ];
+                    }
+                }
+            }
+        } else {
+            $doc = Docente::with('perfil')->find($id);
+            if ($doc) {
+                $perfil = $doc->perfil;
+                $data['nombre'] = "{$perfil?->primer_nombre} {$perfil?->apellido_paterno}";
+                if ($perfil?->celular) {
+                    $data['contactos'][] = [
+                        'label'    => 'Personal',
+                        'nombre'   => 'Docente',
+                        'telefono' => $perfil->celular
+                    ];
+                }
+            }
+        }
+
+        return response()->json($data);
+    }
+
+    /**
+     * Export all attendance for a month.
+     */
+    public function exportAll(Request $request)
+    {
+        $tipo = $request->query('tipo', 'E');
+        $fechaInicio = $request->query('fecha_inicio');
+        $fechaFin = $request->query('fecha_fin');
+        $mes = $request->query('mes', date('m'));
+        $anio = $request->query('anio', date('Y'));
+
+        $filters = $request->only(['nivel_id', 'grado_id', 'seccion_id', 'anio']);
+        $instiId = auth()->user()->insti_id ?? 1;
+
+        // Handle both month/year and specific range
+        if ($fechaInicio && $fechaFin) {
+            $reporte = $this->service->reporteMes($instiId, $tipo, (int)$anio, (int)$mes, $filters); 
+            $periodoLabel = "Desde {$fechaInicio} hasta {$fechaFin}";
+        } else {
+            $reporte = $this->service->reporteMes($instiId, $tipo, (int)$anio, (int)$mes, $filters);
+            $periodoLabel = "Periodo: {$mes}/{$anio}";
+        }
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->mergeCells('A1:E1');
+        $sheet->setCellValue('A1', "Reporte Consolidado de Asistencia - " . ($tipo === 'E' ? 'Estudiantes' : 'Docentes'));
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        
+        $sheet->setCellValue('A2', $periodoLabel);
+        
+        $sheet->setCellValue('A4', '#')->setCellValue('B4', 'Nombre Completo')
+              ->setCellValue('C4', 'Asistencias')->setCellValue('D4', 'Tardanzas')->setCellValue('E4', 'Faltas');
+        
+        $sheet->getStyle('A4:E4')->getFont()->setBold(true);
+
+        $fila = 5;
+        foreach ($reporte as $idx => $item) {
+            $sheet->setCellValue('A' . $fila, $idx + 1);
+            $sheet->setCellValue('B' . $fila, $item['nombre_completo']);
+            $sheet->setCellValue('C' . $fila, $item['total_asistio']);
+            $sheet->setCellValue('D' . $fila, $item['total_tardanza']);
+            $sheet->setCellValue('E' . $fila, $item['total_falto']);
+            $fila++;
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = "Asistencia_General_" . ($tipo === 'E' ? 'Estudiantes' : 'Docentes') . "_" . date('Ymd_His') . ".xlsx";
+        $tempFile = tempnam(sys_get_temp_dir(), 'excel_all');
         $writer->save($tempFile);
 
         return response()->download($tempFile, $filename)->deleteFileAfterSend(true);

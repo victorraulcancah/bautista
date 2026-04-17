@@ -18,8 +18,8 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/institucion',         fn () => Inertia::render('Institucion/index'))->middleware('permission:institucion.datos.ver')->name('institucion.index');
     Route::get('/institucion/galeria',   fn () => Inertia::render('Institucion/Galeria/index'))->middleware('permission:institucion.galeria.ver')->name('institucion.galeria');
     Route::get('/institucion/noticias',  fn () => Inertia::render('Institucion/Noticias/index'))->middleware('permission:institucion.noticias.ver')->name('institucion.noticias');
-    Route::get('/institucion/noticias/portada', [\App\Http\Controllers\Admin\NoticiaController::class, 'portada'])->middleware('permission:institucion.noticias.ver')->name('institucion.noticias.portada');
-    Route::get('/institucion/noticias/diario/{id}', [\App\Http\Controllers\Admin\NoticiaController::class, 'showDiario'])->middleware('permission:institucion.noticias.ver')->name('institucion.noticias.diario');
+    Route::get('/institucion/noticias/portada', [\App\Http\Controllers\Admin\NoticiaController::class, 'portada'])->middleware('permission:institucion.noticias.ver|institucion.noticias.portada')->name('institucion.noticias.portada');
+    Route::get('/institucion/noticias/diario/{id}', [\App\Http\Controllers\Admin\NoticiaController::class, 'showDiario'])->middleware('permission:institucion.noticias.ver|institucion.noticias.portada')->name('institucion.noticias.diario');
     Route::post('/institucion/noticias/{id}/comentarios', [\App\Http\Controllers\Admin\NoticiaController::class, 'storeComentario'])->middleware('permission:institucion.noticias.comentar')->name('institucion.noticias.comentarios.store');
     
     Route::get('/mensajes',              fn () => Inertia::render('Comunicados/index'))->middleware('permission:admin.comunicados.ver')->name('mensajes.index');

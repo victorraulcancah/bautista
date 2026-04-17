@@ -15,6 +15,21 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     public static function getDefaultPermissions(string $roleName): array
     {
+        // Permisos compartidos para la familia
+        $familiaPermissions = [
+            'dashboard.ver',
+            'dashboard.padre.resumen',
+            'perfil.ver',
+            'perfil.editar',
+            'recursos.mensajeria.ver',
+            'recursos.mensajeria.enviar',
+            'portal.padre.ver',
+            'portal.padre.hijos',
+            'portal.padre.pagos',
+            'portal.padre.cursos',
+            'portal.padre.profesores',
+        ];
+
         $defaults = [
             // Admin: gestión total del sistema, SIN portales de otros roles
             'administrador' => [
@@ -53,71 +68,30 @@ class RolesAndPermissionsSeeder extends Seeder
             'docente' => [
                 'dashboard.ver', 'dashboard.notificaciones',
                 'perfil.ver', 'perfil.editar', 'credencial.ver',
-                'institucion.ver', 'institucion.datos.ver', 'institucion.galeria.ver', 'institucion.noticias.ver', 'institucion.noticias.comentar',
                 'horarios.ver', 'horarios.clases.ver',
                 'admin.comunicados.ver',
                 'recursos.biblioteca.ver', 'recursos.mensajeria.ver', 'recursos.mensajeria.enviar',
                 'portal.docente.ver', 'portal.docente.cursos', 'portal.docente.alumnos', 'portal.docente.calificar', 'portal.docente.asistencia',
-                // NO tiene: portal.estudiante.*, portal.padre.*, admin.*, asistencia.scanner.ver
+                // NO tiene: institucion.*, portal.estudiante.*, portal.padre.*, admin.*, asistencia.scanner.ver
             ],
 
             // Estudiante: su portal + recursos compartidos, SIN admin ni portales de otros
             'estudiante' => [
                 'dashboard.ver', 'dashboard.estudiante.resumen', 'dashboard.estudiante.stats',
                 'perfil.ver', 'perfil.editar', 'credencial.ver',
-                'institucion.ver', 'institucion.datos.ver', 'institucion.galeria.ver', 'institucion.noticias.ver', 'institucion.noticias.comentar',
+                'institucion.noticias.portada', // Único acceso permitido a institución
                 'horarios.ver', 'horarios.clases.ver',
                 'admin.comunicados.ver',
                 'recursos.biblioteca.ver', 'recursos.mensajeria.ver', 'recursos.mensajeria.enviar',
                 'portal.estudiante.ver', 'portal.estudiante.cursos', 'portal.estudiante.notas',
                 'portal.estudiante.asistencia', 'portal.estudiante.puzzles',
-                // NO tiene: portal.docente.*, portal.padre.*, admin.*, asistencia.scanner.ver, credencial.qr
+                // NO tiene: institucion.(datos|galeria|noticias.ver), portal.docente.*, portal.padre.*, admin.*
             ],
 
-            // Padre/Madre/Apoderado: solo portal familiar + perfil + mensajería directa
-            'padre_familia' => [
-                'dashboard.ver',
-                'dashboard.padre.resumen',
-                'perfil.ver',
-                'perfil.editar',
-                // Mensajería directa — puede escribir al docente/admin
-                'recursos.mensajeria.ver',
-                'recursos.mensajeria.enviar',
-                // Portal Familia
-                'portal.padre.ver',
-                'portal.padre.hijos',
-                'portal.padre.pagos',
-                'portal.padre.cursos',
-                'portal.padre.profesores',
-            ],
-
-            'madre_familia' => [
-                'dashboard.ver',
-                'dashboard.padre.resumen',
-                'perfil.ver',
-                'perfil.editar',
-                'recursos.mensajeria.ver',
-                'recursos.mensajeria.enviar',
-                'portal.padre.ver',
-                'portal.padre.hijos',
-                'portal.padre.pagos',
-                'portal.padre.cursos',
-                'portal.padre.profesores',
-            ],
-
-            'apoderado' => [
-                'dashboard.ver',
-                'dashboard.padre.resumen',
-                'perfil.ver',
-                'perfil.editar',
-                'recursos.mensajeria.ver',
-                'recursos.mensajeria.enviar',
-                'portal.padre.ver',
-                'portal.padre.hijos',
-                'portal.padre.pagos',
-                'portal.padre.cursos',
-                'portal.padre.profesores',
-            ],
+            // Padre/Madre/Apoderado: Unificados
+            'padre_familia' => $familiaPermissions,
+            'madre_familia' => $familiaPermissions,
+            'apoderado'     => $familiaPermissions,
 
             // Usuario base: solo perfil y dashboard
             'usuario' => [
@@ -188,6 +162,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'institucion.noticias.editar',
             'institucion.noticias.eliminar',
             'institucion.noticias.comentar',
+            'institucion.noticias.portada',
             
             // ─────────────────────────────────────────────────────────
             // 4. ACADÉMICO (Niveles, Grados, Secciones, Cursos)

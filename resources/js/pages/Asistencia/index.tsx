@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { CalendarDays, QrCode, Eye, GraduationCap, UserCheck, FileSpreadsheet } from 'lucide-react';
+import { CalendarDays, QrCode, Eye, GraduationCap, UserCheck, FileSpreadsheet, MessageCircle } from 'lucide-react';
 import ResourcePage from '@/components/shared/ResourcePage';
 import { Button } from '@/components/ui/button';
 import type { BreadcrumbItem } from '@/types';
 import { usePermission } from '@/hooks/usePermission';
 import HistorialModal from './components/HistorialModal';
 import ExportModal from './components/ExportModal';
+import WhatsAppModal from './components/WhatsAppModal';
+import IndividualExportModal from './components/IndividualExportModal';
+import FilterBar from './components/FilterBar';
 import { useAsistencia } from './hooks/useAsistencia';
 import { useHistorialAsistencia } from './hooks/useHistorialAsistencia';
 import type { Usuario } from './hooks/useAsistencia';
@@ -19,11 +22,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function AsistenciaIndex() {
     const [showExportModal, setShowExportModal] = useState(false);
+    const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+    const [selectedWhatsAppUser, setSelectedWhatsAppUser] = useState<Usuario | null>(null);
+    const [showIndividualExportModal, setShowIndividualExportModal] = useState(false);
+    const [selectedExportUser, setSelectedExportUser] = useState<Usuario | null>(null);
     const { can } = usePermission();
     
     const {
         tipo,
         search,
+        filters,
         allUsers,
         loading,
         hasMore,
@@ -31,6 +39,7 @@ export default function AsistenciaIndex() {
         scrollContainerRef,
         handleScroll,
         setSearch,
+        setFilters,
         changeTipo,
     } = useAsistencia();
 
@@ -41,7 +50,35 @@ export default function AsistenciaIndex() {
         closeModal,
     } = useHistorialAsistencia(tipo);
 
+    const openWhatsApp = (user: Usuario) => {
+        setSelectedWhatsAppUser(user);
+        setShowWhatsAppModal(true);
+    };
+
+    const closeWhatsApp = () => {
+        setShowWhatsAppModal(false);
+        setSelectedWhatsAppUser(null);
+    };
+
+    const openIndividualExport = (user: Usuario) => {
+        setSelectedExportUser(user);
+        setShowIndividualExportModal(true);
+    };
+
+    const closeIndividualExport = () => {
+        setShowIndividualExportModal(false);
+        setSelectedExportUser(null);
+    };
+
     const columns: Column<Usuario>[] = [
+        {
+            label: '#',
+            render: (_, index) => (
+                <span className="text-neutral-400 font-bold tabular-nums">
+                    {(index ?? 0) + 1}
+                </span>
+            ),
+        },
         {
             label: 'DNI',
             render: (user) => (
@@ -77,8 +114,7 @@ export default function AsistenciaIndex() {
                 subtitle={totalCount > 0 ? `${totalCount} registros` : 'Administración y control de accesos'}
                 icon={CalendarDays}
                 iconColor="bg-indigo-600"
-                search={search}
-                onSearch={setSearch}
+                hideSearch
             >
                 {/* Filtro de tipo y botón scanner */}
                 <div className="mb-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
@@ -129,6 +165,13 @@ export default function AsistenciaIndex() {
                     </div>
                 </div>
 
+                <FilterBar 
+                    active={tipo === 'E'} 
+                    search={search}
+                    onSearchChange={setSearch}
+                    onFilterChange={setFilters} 
+                />
+
                 {/* Tabla con scroll infinito */}
                 <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
                     {/* Vista Desktop */}
@@ -170,10 +213,32 @@ export default function AsistenciaIndex() {
                                                     <div className="flex items-center justify-center gap-1">
                                                         <Button 
                                                             onClick={() => openHistory(user)}
-                                                            size="sm"
-                                                            className="h-9 px-3 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors gap-2"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-9 w-9 rounded-xl text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 transition-colors"
+                                                            title="Ver historial"
                                                         >
-                                                            <Eye className="h-4 w-4" /> Ver
+                                                            <Eye className="h-5 w-5" />
+                                                        </Button>
+
+                                                        <Button 
+                                                            onClick={() => openWhatsApp(user)}
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-9 w-9 rounded-xl text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+                                                            title="Reporte por WhatsApp"
+                                                        >
+                                                            <MessageCircle className="h-5 w-5" />
+                                                        </Button>
+
+                                                        <Button 
+                                                            onClick={() => openIndividualExport(user)}
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-9 w-9 rounded-xl text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                                                            title="Exportar a Excel"
+                                                        >
+                                                            <FileSpreadsheet className="h-5 w-5" />
                                                         </Button>
                                                     </div>
                                                 </td>
@@ -220,10 +285,29 @@ export default function AsistenciaIndex() {
                                         <div className="mt-2 flex items-center justify-end gap-2 border-t border-gray-50 pt-3">
                                             <Button 
                                                 onClick={() => openHistory(user)}
-                                                size="sm"
-                                                className="h-9 px-3 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors gap-2"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-9 w-9 rounded-xl text-indigo-600 hover:bg-indigo-50"
                                             >
-                                                <Eye className="h-4 w-4" /> Ver
+                                                <Eye className="h-5 w-5" />
+                                            </Button>
+
+                                            <Button 
+                                                onClick={() => openWhatsApp(user)}
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-9 w-9 rounded-xl text-emerald-600 hover:bg-emerald-50"
+                                            >
+                                                <MessageCircle className="h-5 w-5" />
+                                            </Button>
+
+                                            <Button 
+                                                onClick={() => openIndividualExport(user)}
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-9 w-9 rounded-xl text-blue-600 hover:bg-blue-50"
+                                            >
+                                                <FileSpreadsheet className="h-5 w-5" />
                                             </Button>
                                         </div>
                                     </div>
@@ -252,6 +336,22 @@ export default function AsistenciaIndex() {
             <ExportModal
                 open={showExportModal}
                 onClose={() => setShowExportModal(false)}
+                tipo={tipo}
+                filters={filters}
+            />
+
+            <WhatsAppModal
+                open={showWhatsAppModal}
+                onClose={closeWhatsApp}
+                userId={selectedWhatsAppUser?.estu_id || selectedWhatsAppUser?.docente_id || null}
+                tipo={tipo}
+            />
+
+            <IndividualExportModal
+                open={showIndividualExportModal}
+                onClose={closeIndividualExport}
+                userId={selectedExportUser?.estu_id || selectedExportUser?.docente_id || null}
+                userName={selectedExportUser?.perfil ? `${selectedExportUser.perfil.primer_nombre} ${selectedExportUser.perfil.apellido_paterno}` : ''}
                 tipo={tipo}
             />
         </>

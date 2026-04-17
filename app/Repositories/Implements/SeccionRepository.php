@@ -9,10 +9,11 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class SeccionRepository implements SeccionRepositoryInterface
 {
-    public function paginate(int $instiId, string $search = '', int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $instiId, string $search = '', int $perPage = 15, ?int $gradoId = null): LengthAwarePaginator
     {
         return Seccion::with(['grado.nivel'])
             ->whereHas('grado.nivel', fn ($q) => $q->where('insti_id', $instiId))
+            ->when($gradoId, fn ($q) => $q->where('id_grado', $gradoId))
             ->when($search, fn ($q) => $q->where('nombre', 'like', "%{$search}%"))
             ->latest('seccion_id')
             ->paginate($perPage);

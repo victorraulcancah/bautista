@@ -10,7 +10,7 @@ interface AsistenciaServiceInterface
     public function calendarioPersona(int $instiId, int $personaId, string $tipo, int $anio, int $mes): array;
 
     /** Reporte mensual de toda la institución. */
-    public function reporteMes(int $instiId, string $tipo, int $anio, int $mes): array;
+    public function reporteMes(int $instiId, string $tipo, int $anio, int $mes, array $filters = []): array;
 
     /** Marcar asistencia vía QR (Soporta formato nuevo y antiguo). */
     public function marcarPorQR(string $qrData, string $tipoMarcado): array;

@@ -67,6 +67,7 @@ const navigation: NavItem[] = [
     { type: 'section', label: 'MENÚ DE NAVEGACIÓN' },
     { type: 'link', title: 'Inicio',           icon: LayoutDashboard, href: '/dashboard', permission: 'dashboard.ver' },
     { type: 'link', title: 'Mi Credencial',    icon: QrCode,          href: '/credencial', permission: 'credencial.ver' },
+    { type: 'link', title: 'Portada de Noticias', icon: Newspaper,    href: '/institucion/noticias/portada', permission: 'institucion.noticias.portada' },
     { type: 'group', title: 'Institución', icon: Building2, children: [
         { title: 'Datos Básicos', href: '/institucion', permission: 'institucion.datos.ver' },
         { title: 'Galería',       href: '/institucion/galeria', permission: 'institucion.galeria.ver' },

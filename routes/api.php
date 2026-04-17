@@ -264,6 +264,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['permission:asistencia.ver'])->group(function () {
         Route::get('asistencia/usuarios', [AsistenciaGeneralApiController::class, 'index']);
         Route::get('asistencia/usuario/{id}', [AsistenciaGeneralApiController::class, 'show']);
+        Route::get('asistencia/usuario/{id}/info', [AsistenciaGeneralApiController::class, 'showUserInfo']);
         Route::get('asistencia/usuario/{id}/export', [AsistenciaGeneralApiController::class, 'export']);
         Route::get('asistencia/export-all', [AsistenciaGeneralApiController::class, 'exportAll']);
         Route::get('asistencia/historial', [AsistenciaGeneralApiController::class, 'historial']);

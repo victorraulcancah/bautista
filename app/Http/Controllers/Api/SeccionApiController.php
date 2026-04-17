@@ -23,6 +23,7 @@ class SeccionApiController extends Controller
             instiId: $request->user()->insti_id,
             search:  $request->get('search') ?? '',
             perPage: (int) $request->get('per_page', 20),
+            gradoId: $request->has('grado_id') ? (int) $request->get('grado_id') : null,
         ));
     }
 

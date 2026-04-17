@@ -37,9 +37,9 @@ class AsistenciaService implements AsistenciaServiceInterface
         return $calendario;
     }
 
-    public function reporteMes(int $instiId, string $tipo, int $anio, int $mes): array
+    public function reporteMes(int $instiId, string $tipo, int $anio, int $mes, array $filters = []): array
     {
-        $registros = $this->repository->getReporteMes($instiId, $tipo, $anio, $mes);
+        $registros = $this->repository->getReporteMes($instiId, $tipo, $anio, $mes, $filters);
 
         // Agrupar por persona
         $reporte = [];
