@@ -29,8 +29,8 @@ export default function HorarioClasesPage() {
         }
 
         // Alumno ve el horario de su sección
-        if (roleName === 'estudiante' && user.estudiante?.seccion_id) {
-            return <AlumnoHorarioView seccionId={user.estudiante.seccion_id} />;
+        if (roleName === 'estudiante') {
+            return <AlumnoHorarioView />;
         }
 
         // Fallback

@@ -177,6 +177,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('alumno/curso/{id}', [AlumnoApiController::class, 'cursoDetalle']);
         Route::get('alumno/curso/{id}/asistencia', [AlumnoApiController::class, 'cursoAsistencia']);
         Route::get('alumno/asistencia', [AlumnoApiController::class, 'asistencia'])->withoutMiddleware('verify.estudiante.curso');
+        Route::get('alumno/horario', [AlumnoApiController::class, 'horario'])->withoutMiddleware('verify.estudiante.curso');
         Route::get('alumno/clase/{id}', [AlumnoApiController::class, 'claseDetalle']);
         Route::get('alumno/profesores', [AlumnoApiController::class, 'profesores'])->withoutMiddleware('verify.estudiante.curso');
         Route::post('alumno/actividad/{id}/entregar', [AlumnoApiController::class, 'entregarActividad']);

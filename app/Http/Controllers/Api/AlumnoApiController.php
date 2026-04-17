@@ -40,7 +40,9 @@ class AlumnoApiController extends Controller
 
         // Active courses for this section
         $cursosCount = DocenteCurso::where('seccion_id', $seccionId)
-            ->where('apertura_id', $aperturaId)
+            ->where(function ($q) use ($aperturaId) {
+                $q->where('apertura_id', $aperturaId)->orWhereNull('apertura_id');
+            })
             ->count();
 
         // Next pending activities
@@ -128,7 +130,10 @@ class AlumnoApiController extends Controller
         if (!$matricula) return response()->json([]);
 
         $docenteCursos = DocenteCurso::where('seccion_id', $matricula->seccion_id)
-            ->where('apertura_id', $matricula->apertura_id)
+            ->where(function ($q) use ($matricula) {
+                $q->where('apertura_id', $matricula->apertura_id)
+                  ->orWhereNull('apertura_id');
+            })
             ->with(['curso', 'docente.perfil'])
             ->get();
 
@@ -152,7 +157,9 @@ class AlumnoApiController extends Controller
                 $dc = DocenteCurso::with('curso')
                     ->where('curso_id', $docenteCursoId)
                     ->where('seccion_id', $matricula->seccion_id)
-                    ->where('apertura_id', $matricula->apertura_id)
+                    ->where(function ($q) use ($matricula) {
+                        $q->where('apertura_id', $matricula->apertura_id)->orWhereNull('apertura_id');
+                    })
                     ->first();
             }
         }
@@ -214,7 +221,9 @@ class AlumnoApiController extends Controller
         if ($matricula) {
             $docenCursoId = DocenteCurso::where('curso_id', $clase->unidad->curso_id)
                 ->where('seccion_id', $matricula->seccion_id)
-                ->where('apertura_id', $matricula->apertura_id)
+                ->where(function ($q) use ($matricula) {
+                    $q->where('apertura_id', $matricula->apertura_id)->orWhereNull('apertura_id');
+                })
                 ->value('docen_curso_id');
         }
 
@@ -274,6 +283,63 @@ class AlumnoApiController extends Controller
     }
 
     /**
+     * Return the logged-in student's section weekly schedule.
+     */
+    public function horario(Request $request)
+    {
+        $userId = $request->user()->id;
+        $estudiante = Estudiante::where('user_id', $userId)->first();
+
+        if (!$estudiante) {
+            return response()->json(['message' => 'No se encontró perfil de estudiante.'], 404);
+        }
+
+        $matricula = Matricula::where('estu_id', $estudiante->estu_id)
+            ->where('estado', '1')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (!$matricula) {
+            return response()->json(['message' => 'Sin matrícula activa.'], 404);
+        }
+
+        $anio = $request->query('anio', date('Y'));
+
+        $clases = \App\Models\HorarioClase::with(['curso', 'docente.perfil', 'aulaObj'])
+            ->where('seccion_id', $matricula->seccion_id)
+            ->where('anio_escolar', $anio)
+            ->where('activo', true)
+            ->orderBy('dia_semana')
+            ->orderBy('hora_inicio')
+            ->get();
+
+        $horario = [];
+        foreach ($clases as $clase) {
+            $dia = $clase->dia_semana;
+            if (!isset($horario[$dia])) {
+                $horario[$dia] = ['dia' => $clase->nombre_dia, 'clases' => []];
+            }
+            $horario[$dia]['clases'][] = [
+                'id'          => $clase->horario_clase_id,
+                'curso'       => $clase->curso->nombre,
+                'curso_id'    => $clase->curso_id,
+                'docente'     => $clase->docente->nombre_completo,
+                'docente_id'  => $clase->docente_id,
+                'hora_inicio' => $clase->hora_inicio_formateada,
+                'hora_fin'    => $clase->hora_fin_formateada,
+                'aula'        => $clase->aulaObj?->nombre ?? $clase->aula,
+                'duracion'    => $clase->duracion_minutos,
+            ];
+        }
+
+        return response()->json([
+            'seccion_id' => $matricula->seccion_id,
+            'anio'       => (int) $anio,
+            'horario'    => $horario,
+        ]);
+    }
+
+    /**
      * Get attendance history for the logged-in student.
      */
     public function asistencia(Request $request)
@@ -326,7 +392,9 @@ class AlumnoApiController extends Controller
         }
 
         $profesores = DocenteCurso::where('seccion_id', $matricula->seccion_id)
-            ->where('apertura_id', $matricula->apertura_id)
+            ->where(function ($q) use ($matricula) {
+                $q->where('apertura_id', $matricula->apertura_id)->orWhereNull('apertura_id');
+            })
             ->with(['docente.perfil', 'curso'])
             ->get()
             ->map(function ($dc) {
@@ -407,7 +475,9 @@ class AlumnoApiController extends Controller
 
         // Obtener cursos del alumno
         $docenteCursos = DocenteCurso::where('seccion_id', $matricula->seccion_id)
-            ->where('apertura_id', $matricula->apertura_id)
+            ->where(function ($q) use ($matricula) {
+                $q->where('apertura_id', $matricula->apertura_id)->orWhereNull('apertura_id');
+            })
             ->with(['curso'])
             ->get();
 

@@ -75,7 +75,10 @@ class PadreApiController extends Controller
         if (!$matricula) return response()->json([]);
 
         $profesores = DocenteCurso::where('seccion_id', $matricula->seccion_id)
-            ->where('apertura_id', $matricula->apertura_id)
+            ->where(function($query) use ($matricula) {
+                $query->where('apertura_id', $matricula->apertura_id)
+                      ->orWhereNull('apertura_id');
+            })
             ->with(['docente.perfil', 'docente.user', 'curso'])
             ->get()
             ->map(function ($dc) {

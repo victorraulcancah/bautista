@@ -56,7 +56,10 @@ class NotificationService
 
         // Cursos del alumno
         $docenteCursos = DocenteCurso::where('seccion_id', $matricula->seccion_id)
-            ->where('apertura_id', $matricula->apertura_id)
+            ->where(function($query) use ($matricula) {
+                $query->where('apertura_id', $matricula->apertura_id)
+                      ->orWhereNull('apertura_id');
+            })
             ->with('curso')
             ->get();
 
@@ -190,7 +193,11 @@ class NotificationService
             $docenteCursosQuery = DocenteCurso::query();
             foreach ($seccionAperturaPairs as $pair) {
                 $docenteCursosQuery->orWhere(function ($q) use ($pair) {
-                    $q->where('seccion_id', $pair['seccion_id'])->where('apertura_id', $pair['apertura_id']);
+                    $q->where('seccion_id', $pair['seccion_id'])
+                      ->where(function($subQ) use ($pair) {
+                          $subQ->where('apertura_id', $pair['apertura_id'])
+                               ->orWhereNull('apertura_id');
+                      });
                 });
             }
             $allDocenteCursos = $docenteCursosQuery->with('curso')->get();

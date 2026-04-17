@@ -4,26 +4,20 @@ import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import HorarioSemanal from './HorarioSemanal';
 
-type Props = {
-    seccionId: number;
-};
-
-export default function AlumnoHorarioView({ seccionId }: Props) {
+export default function AlumnoHorarioView() {
     const [horario, setHorario] = useState<any>({});
     const [loading, setLoading] = useState(true);
     const [anio, setAnio] = useState(new Date().getFullYear());
 
     useEffect(() => {
         cargarHorario();
-    }, [seccionId, anio]);
+    }, [anio]);
 
     const cargarHorario = async () => {
         setLoading(true);
         try {
-            const response = await api.get(`/secciones/${seccionId}/horario`, {
-                params: { anio },
-            });
-            setHorario(response.data);
+            const response = await api.get('/alumno/horario', { params: { anio } });
+            setHorario(response.data.horario ?? {});
         } catch (error) {
             console.error('Error al cargar horario:', error);
         } finally {
@@ -51,7 +45,7 @@ export default function AlumnoHorarioView({ seccionId }: Props) {
                         onChange={(e) => setAnio(parseInt(e.target.value))}
                         className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
-                        {[2024, 2025, 2026, 2027].map((y) => (
+                        {[new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1].map((y) => (
                             <option key={y} value={y}>
                                 {y}
                             </option>

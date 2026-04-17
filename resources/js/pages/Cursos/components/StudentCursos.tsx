@@ -71,7 +71,7 @@ export default function StudentCursos() {
 
                 <div className="flex items-center gap-3">
                     <select className="h-11 px-4 rounded-xl bg-gray-50 border-none font-bold text-xs text-gray-600 focus:ring-2 focus:ring-emerald-600/20 outline-none cursor-pointer">
-                        <option>Mis Cursos 2024</option>
+                        <option>Mis Cursos {new Date().getFullYear()}</option>
                         <option>Todos los periodos</option>
                     </select>
                     <Button variant="outline" className="h-11 rounded-xl border-gray-100 gap-2 font-bold text-xs uppercase tracking-widest">
@@ -101,7 +101,7 @@ export default function StudentCursos() {
                             role="student"
                             professor={`${c.docente?.perfil?.primer_nombre} ${c.docente?.perfil?.apellido_paterno}`}
                             progress={65} // Hardcoded por ahora, luego integrar progreso real
-                            term="2024-I"
+                            term={`${new Date().getFullYear()}-I`}
                         />
                     ) : (
                         <Link 
@@ -116,7 +116,7 @@ export default function StudentCursos() {
                                 <div>
                                     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-1">
                                         <BookOpen size={12} />
-                                        <span>COD-{c.curso_id} • 2024-I</span>
+                                        <span>COD-{c.curso_id} • {new Date().getFullYear()}-I</span>
                                     </div>
                                     <h3 className="text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors">
                                         {c.curso?.nombre}
