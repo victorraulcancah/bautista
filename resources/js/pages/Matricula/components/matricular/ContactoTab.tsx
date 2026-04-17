@@ -32,7 +32,7 @@ export default function ContactoTab({ tipo, data, onChange: s, onSearch, searchi
     useEffect(() => {
         if (!data.departamento) { setProvincias([]); setDistritos([]); return; }
         api.get(`/ubigeo/provincias/${data.departamento}`).then(r => setProvincias(r.data));
-        setDistritos([]);
+        // only reset distritos if we don't already have a matching distrito loaded
     }, [data.departamento]);
 
     // Cargar distritos cuando cambia provincia
@@ -40,13 +40,6 @@ export default function ContactoTab({ tipo, data, onChange: s, onSearch, searchi
         if (!data.departamento || !data.provincia) { setDistritos([]); return; }
         api.get(`/ubigeo/distritos/${data.departamento}/${data.provincia}`).then(r => setDistritos(r.data));
     }, [data.provincia]);
-
-    // Auto-search when DNI reaches 8 digits
-    useEffect(() => {
-        if (data.tipo_doc === '1' && data.numero_doc.length === 8) {
-            onSearch(data.numero_doc);
-        }
-    }, [data.numero_doc, data.tipo_doc]);
 
     return (
         <div className="space-y-6">

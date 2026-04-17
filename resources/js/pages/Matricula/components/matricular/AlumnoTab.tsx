@@ -1,5 +1,4 @@
 import { Search } from 'lucide-react';
-import { useEffect } from 'react';
 import { ReqLabel, OptLabel, SELECT_CLS } from '@/components/shared/FormLabels';
 import TitleForm from '@/components/TitleForm';
 import { Button } from '@/components/ui/button';
@@ -32,12 +31,6 @@ export default function AlumnoTab({
     dniSearch, setDniSearch, onDniSearch, searching,
     errors,
 }: Props) {
-    // Auto-search when DNI reaches 8 digits
-    useEffect(() => {
-        if (dniSearch.length === 8) {
-            onDniSearch();
-        }
-    }, [dniSearch]);
     const setA = (k: keyof AlumnoForm, v: string) =>
         setAlumno(prev => ({ ...prev, [k]: v }));
 

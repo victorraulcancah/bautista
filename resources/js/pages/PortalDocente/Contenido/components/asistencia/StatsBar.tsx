@@ -1,7 +1,5 @@
-/**
- * StatsBar — barra de estadísticas del tab General.
- * Responsabilidad: mostrar promedio, estudiantes perfectos y estudiantes con faltas.
- */
+import { Users, Trophy, AlertCircle } from 'lucide-react';
+
 interface Props {
     promedioAsistencia: number;
     totalEstudiantes: number;
@@ -18,30 +16,45 @@ export function StatsBar({ promedioAsistencia, totalEstudiantes, estudiantesConA
         : 0;
 
     return (
-        <div className="flex items-center gap-0 border-b border-gray-200 bg-white">
+        <div className="flex flex-wrap items-stretch border-b border-neutral-100 bg-neutral-50/20 p-6 gap-6">
             {/* Promedio */}
-            <div className="flex items-center gap-3 px-6 py-4 border-r border-gray-200">
-                <span className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-gray-900 text-white text-sm font-black">
-                    {promedioAsistencia.toFixed(2).replace('.', ',')} %
-                </span>
-                <span className="text-sm text-gray-500 font-medium">Promedio de asistencia</span>
+            <div className="flex-1 min-w-[200px] flex items-center gap-5 bg-white p-5 rounded-3xl border border-neutral-200 shadow-sm transition-all hover:shadow-md group">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-100 group-hover:scale-110 transition-transform">
+                    <span className="text-white text-base font-black tracking-tighter">
+                        {Math.round(promedioAsistencia)}%
+                    </span>
+                </div>
+                <div>
+                    <h4 className="text-[10px] font-black text-neutral-400 uppercase tracking-widest leading-none">Promedio General</h4>
+                    <p className="text-sm font-bold text-neutral-900 mt-1">Asistencia del curso</p>
+                </div>
             </div>
 
             {/* Asistencia perfecta */}
-            <div className="flex items-center gap-3 px-6 py-4 border-r border-gray-200">
-                <span className="text-2xl font-black text-gray-900">{estudiantesConAsistenciaPerfecta}</span>
-                <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-gray-700">Estudiantes con asistencia perfecta</span>
-                    <span className="text-xs text-gray-400">{pctPerfecta} % de la clase</span>
+            <div className="flex-1 min-w-[200px] flex items-center gap-5 bg-white p-5 rounded-3xl border border-neutral-200 shadow-sm transition-all hover:shadow-md group">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Trophy className="h-6 w-6 text-emerald-600" />
+                </div>
+                <div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-black text-neutral-900">{estudiantesConAsistenciaPerfecta}</span>
+                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{pctPerfecta}%</span>
+                    </div>
+                    <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mt-1">Asistencia Perfecta</p>
                 </div>
             </div>
 
             {/* Con faltas */}
-            <div className="flex items-center gap-3 px-6 py-4">
-                <span className="text-2xl font-black text-gray-900">{estudiantesConFaltas}</span>
-                <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-gray-700">Estudiantes con asistencia imperfecta</span>
-                    <span className="text-xs text-gray-400">{pctFaltas} % de la clase</span>
+            <div className="flex-1 min-w-[200px] flex items-center gap-5 bg-white p-5 rounded-3xl border border-neutral-200 shadow-sm transition-all hover:shadow-md group">
+                <div className="w-14 h-14 rounded-2xl bg-rose-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <AlertCircle className="h-6 w-6 text-rose-600" />
+                </div>
+                <div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-black text-neutral-900">{estudiantesConFaltas}</span>
+                        <span className="text-[10px] font-bold text-rose-600 uppercase tracking-widest">{pctFaltas}%</span>
+                    </div>
+                    <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mt-1">Registran Faltas</p>
                 </div>
             </div>
         </div>

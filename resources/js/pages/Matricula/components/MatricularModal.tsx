@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -46,6 +46,9 @@ export default function MatricularModal({
     const [errors, setErrors]         = useState<Record<string, string>>({});
     const [dniSearch, setDniSearch]   = useState('');
     const [selectedGrado, setSelectedGrado] = useState('');
+    // track which estu_id we already loaded contacts for — avoids re-loading
+    // when the user edits other fields and alumno.estu_id stays the same
+    const loadedContactsFor = useRef<number | null>(null);
 
     // reset on open/close
     useEffect(() => {
@@ -53,6 +56,7 @@ export default function MatricularModal({
         setErrors({});
         setDniSearch('');
         setSelectedGrado('');
+        loadedContactsFor.current = null;
 
         if (open && editingMatricula) {
             const s = editingMatricula.estudiante;
@@ -98,11 +102,11 @@ export default function MatricularModal({
         setApoderado(defaultContacto());
     }, [open]);
 
-    // auto-load contacts when an existing student is found by DNI
+    // auto-load contacts when an existing student is found by DNI — only once per student
     useEffect(() => {
-        if (!alumno.estu_id) {
-return;
-}
+        if (!alumno.estu_id) return;
+        if (loadedContactsFor.current === alumno.estu_id) return; // already loaded
+        loadedContactsFor.current = alumno.estu_id;
 
         api.get(`/estudiantes/${alumno.estu_id}/contactos`)
             .then(r => {
