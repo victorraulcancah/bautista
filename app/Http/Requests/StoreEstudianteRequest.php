@@ -8,6 +8,17 @@ class StoreEstudianteRequest extends FormRequest
 {
     public function authorize(): bool { return true; }
 
+    protected function prepareForValidation()
+    {
+        $data = $this->all();
+        foreach ($data as $key => $value) {
+            if ($value === 'null' || $value === 'undefined') {
+                $data[$key] = null;
+            }
+        }
+        $this->replace($data);
+    }
+
     public function rules(): array
     {
         return [
@@ -17,7 +28,7 @@ class StoreEstudianteRequest extends FormRequest
             'segundo_nombre'      => ['nullable', 'string', 'max:100'],
             'apellido_paterno'    => ['required', 'string', 'max:100'],
             'apellido_materno'    => ['nullable', 'string', 'max:100'],
-            'genero'              => ['nullable', 'in:M,F'],
+            'genero'              => ['nullable', 'string', 'max:15'],
             'fecha_nacimiento'    => ['nullable', 'date'],
             'direccion'           => ['nullable', 'string', 'max:200'],
             'telefono'            => ['nullable', 'string', 'max:20'],
@@ -31,6 +42,7 @@ class StoreEstudianteRequest extends FormRequest
             'mensualidad'         => ['required', 'numeric', 'min:0'],
             'fecha_ingreso'       => ['required', 'date'],
             'fecha_pago'          => ['required', 'date'],
+            'foto'                => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:2048'],
         ];
     }
 

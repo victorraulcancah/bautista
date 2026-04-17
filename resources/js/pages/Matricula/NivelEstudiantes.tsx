@@ -16,7 +16,7 @@ type Props = { aperturaId: number; nivelId: number };
 
 export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
     const {
-        apertura, nivelNombre, matriculas, filteredMatriculas, disponibles, loading, toggling,
+        cargar, apertura, nivelNombre, matriculas, filteredMatriculas, disponibles, loading, toggling,
         secciones, grados, search, setSearch, studentName,
         modalOpen, setModalOpen,
         editModalOpen, setEditModalOpen, editingMatricula,
@@ -142,6 +142,7 @@ export default function NivelEstudiantes({ aperturaId, nivelId }: Props) {
                 grados={grados}
                 nivelId={nivelId}
                 onSave={handleMatricular}
+                onEditSave={async () => { await cargar(); setEditModalOpen(false); }}
                 apiErrors={{}}
                 clearErrors={() => {}}
                 editingMatricula={editingMatricula}

@@ -186,7 +186,7 @@ export function useNivelEstudiantes(aperturaId: number, nivelId: number) {
         editEstOpen, setEditEstOpen, editEstudiante, editEstApiErrors,
         fotoOpen, setFotoOpen, selectedMatricula,
         // handlers
-        handleMatricular, handleAnular, handleToggleBloqueo,
+        cargar, handleMatricular, handleAnular, handleToggleBloqueo,
         openHistorial, openEditEst, handleSaveEstudiante, openReset, openFotocheck,
     };
 }

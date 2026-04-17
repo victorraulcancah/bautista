@@ -13,11 +13,11 @@ interface MinimalEstudiante {
     avatar?: string | null;
     telefono?: string | null;
     doc_numero?: string | null;
-    primer_nombre?: string;
-    apellido_paterno?: string;
+    primer_nombre?: string | null;
+    apellido_paterno?: string | null;
     perfil?: {
-        primer_nombre?: string;
-        apellido_paterno?: string;
+        primer_nombre?: string | null;
+        apellido_paterno?: string | null;
         doc_numero?: string | null;
         avatar?: string | null;
         telefono?: string | null;

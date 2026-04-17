@@ -25,7 +25,22 @@ export type Matricula = {
         apellido_materno: string | null;
         nombre_completo:  string;
         doc_numero:       string | null;
+        email:            string | null;
         genero:           string | null;
+        fecha_nacimiento: string | null;
+        edad:             string | null;
+        talla:            string | null;
+        peso:             string | null;
+        telefono:         string | null;
+        direccion:        string | null;
+        colegio:          string | null;
+        neurodivergencia: string | null;
+        terapia_ocupacional: string | null;
+        seguro:           string | null;
+        seguro_privado:   string | null;
+        mensualidad:      string | null;
+        fecha_ingreso:    string | null;
+        fecha_pago:       string | null;
         user_id:          number | null;
         estado_user:      string | null;
         perfil?: {
@@ -40,6 +55,10 @@ export type Matricula = {
         grado: {
             grado_id:     number;
             nombre_grado: string;
+            nivel?: {
+                nivel_id: number;
+                nombre_nivel: string;
+            } | null;
         } | null;
     } | null;
 };

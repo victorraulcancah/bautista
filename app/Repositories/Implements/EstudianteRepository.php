@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Repositories\Interfaces\EstudianteRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class EstudianteRepository implements EstudianteRepositoryInterface
 {
@@ -48,6 +50,12 @@ class EstudianteRepository implements EstudianteRepositoryInterface
         ]);
         $user->assignRole('estudiante'); // llama a User::assignRole() → FK directa
 
+        // Manejar foto si existe
+        $pathFoto = null;
+        if (isset($data['foto']) && $data['foto'] instanceof \Illuminate\Http\UploadedFile) {
+            $pathFoto = $data['foto']->store('perfiles', 'public');
+        }
+
         // 2. Crear perfil personal
         $perfil = Perfil::create([
             'user_id'          => $user->id,
@@ -61,6 +69,7 @@ class EstudianteRepository implements EstudianteRepositoryInterface
             'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
             'direccion'        => $data['direccion']        ?? null,
             'telefono'         => $data['telefono']         ?? null,
+            'foto_perfil'      => $pathFoto,
             'fecha_registro'   => now()->toDateString(),
         ]);
 
@@ -88,7 +97,7 @@ class EstudianteRepository implements EstudianteRepositoryInterface
     {
         // Actualizar perfil
         if ($estudiante->perfil) {
-            $estudiante->perfil->update([
+            $perfilData = [
                 'primer_nombre'    => $data['primer_nombre'],
                 'segundo_nombre'   => $data['segundo_nombre']   ?? null,
                 'apellido_paterno' => $data['apellido_paterno'],
@@ -98,7 +107,18 @@ class EstudianteRepository implements EstudianteRepositoryInterface
                 'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
                 'direccion'        => $data['direccion']        ?? null,
                 'telefono'         => $data['telefono']         ?? null,
-            ]);
+            ];
+
+            // Manejar nueva foto
+            if (isset($data['foto']) && $data['foto'] instanceof \Illuminate\Http\UploadedFile) {
+                // Eliminar anterior si existe
+                if ($estudiante->perfil->foto_perfil) {
+                    Storage::disk('public')->delete($estudiante->perfil->foto_perfil);
+                }
+                $perfilData['foto_perfil'] = $data['foto']->store('perfiles', 'public');
+            }
+
+            $estudiante->perfil->update($perfilData);
         }
 
         // Actualizar usuario

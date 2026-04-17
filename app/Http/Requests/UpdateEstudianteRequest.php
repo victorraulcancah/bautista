@@ -9,16 +9,31 @@ class UpdateEstudianteRequest extends FormRequest
 {
     public function authorize(): bool { return true; }
 
+    protected function prepareForValidation()
+    {
+        $data = $this->all();
+        foreach ($data as $key => $value) {
+            if ($value === 'null' || $value === 'undefined') {
+                $data[$key] = null;
+            }
+        }
+        $this->replace($data);
+    }
+
     public function rules(): array
     {
+        // Obtenemos el estudiante que se está actualizando para excluir su user_id en la validación
+        $estudianteId = $this->route('estudiante');
+        $userId = \App\Models\Estudiante::where('estu_id', $estudianteId)->value('user_id');
+
         return [
-            'username'            => ['required', 'string', 'max:20', Rule::unique('users', 'username')->ignore($this->route('estudiante'))],
+            'username'            => ['required', 'string', 'max:20', Rule::unique('users', 'username')->ignore($userId)],
             'email'               => ['nullable', 'email', 'max:100'],
             'primer_nombre'       => ['required', 'string', 'max:100'],
             'segundo_nombre'      => ['nullable', 'string', 'max:100'],
             'apellido_paterno'    => ['required', 'string', 'max:100'],
             'apellido_materno'    => ['nullable', 'string', 'max:100'],
-            'genero'              => ['nullable', 'in:M,F'],
+            'genero'              => ['nullable', 'string', 'max:15'],
             'fecha_nacimiento'    => ['nullable', 'date'],
             'direccion'           => ['nullable', 'string', 'max:200'],
             'telefono'            => ['nullable', 'string', 'max:20'],
@@ -33,6 +48,7 @@ class UpdateEstudianteRequest extends FormRequest
             'fecha_ingreso'       => ['required', 'date'],
             'fecha_pago'          => ['required', 'date'],
             'estado'              => ['nullable', 'in:1,0,5'],
+            'foto'                => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:2048'],
         ];
     }
 }

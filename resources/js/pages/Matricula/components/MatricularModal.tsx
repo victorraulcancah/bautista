@@ -21,6 +21,7 @@ type Props = {
     secciones:   SeccionOption[];
     grados:      GradoOption[];
     onSave:      (data: MatriculaFormData) => Promise<void>;
+    onEditSave?: () => Promise<void>;
     apiErrors:   Record<string, string[]>;
     clearErrors: () => void;
     editingMatricula?: any | null;  // pre-fill for edit mode
@@ -33,7 +34,7 @@ const TAB_CLS = 'rounded-none border-b-2 border-transparent data-[state=active]:
 
 export default function MatricularModal({
     open, onClose, aperturaId, nivelId, anio,
-    secciones, grados, onSave, clearErrors, editingMatricula,
+    secciones, grados, onSave, onEditSave, clearErrors, editingMatricula,
 }: Props) {
     const [matricula, setMatricula]   = useState<MatriculaFormData>(defaultMatriculaForm);
     const [alumno, setAlumno]         = useState<AlumnoForm>(defaultAlumno());
@@ -236,6 +237,7 @@ return;
         terapia_ocupacional: alumno.terapia_ocupacional, seguro: alumno.seguro,
         seguro_privado: alumno.seguro_privado, mensualidad: alumno.mensualidad,
         fecha_ingreso: alumno.fecha_ingreso, fecha_pago: alumno.fecha_pago,
+        foto: alumno.foto,
     });
 
     // ── Submit ─────────────────────────────────────────────────────────────────
@@ -270,15 +272,38 @@ errs.seccion_id       = 'Requerido';
 
         try {
             let estudianteId = alumno.estu_id;
+            const payload = buildAlumnoPayload();
+
+            // Usamos FormData si hay una foto o siempre para ser consistentes con archivos
+            const formData = new FormData();
+            Object.entries(payload).forEach(([key, value]) => {
+                if (value !== null && value !== undefined) {
+                    if (key === 'foto' && value instanceof File) {
+                        formData.append(key, value);
+                    } else if (key !== 'foto') {
+                        formData.append(key, String(value));
+                    }
+                }
+            });
 
             if (estudianteId) {
-                await api.put(`/estudiantes/${estudianteId}`, buildAlumnoPayload());
+                // Truco de Laravel para archivos en PUT
+                formData.append('_method', 'PUT');
+                await api.post(`/estudiantes/${estudianteId}`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
             } else {
-                const res = await api.post('/estudiantes', buildAlumnoPayload());
+                const res = await api.post('/estudiantes', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 estudianteId = res.data.data?.estu_id ?? res.data.estu_id;
             }
 
-            await onSave({ ...matricula, estu_id: String(estudianteId) });
+            if (editingMatricula) {
+                if (onEditSave) await onEditSave();
+            } else {
+                await onSave({ ...matricula, estu_id: String(estudianteId) });
+            }
 
             await Promise.allSettled(
                 [
