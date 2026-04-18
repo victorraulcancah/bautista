@@ -159,6 +159,7 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
                     {activeTab === "actividades" && (
                         <ActividadesTab 
                             courseData={courseData}
+                            docenteCursoId={docenteCursoId}
                             onRefresh={loadBasicData}
                         />
                     )}

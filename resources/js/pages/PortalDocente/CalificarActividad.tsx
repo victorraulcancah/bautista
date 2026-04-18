@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, ClipboardList, Search } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
@@ -21,6 +21,15 @@ export default function CalificarActividad({
     saveEndpoint,
     title = "Calificar Entregas"
 }: Props) {
+    const { url } = usePage();
+    const backUrl = (() => {
+        try {
+            const params = new URLSearchParams(url.split('?')[1] ?? '');
+            return params.get('back') || `/docente/actividades/${actividadId}`;
+        } catch {
+            return `/docente/actividades/${actividadId}`;
+        }
+    })();
     const [actividad, setActividad] = useState<any>(null);
     const [entregas, setEntregas] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -82,8 +91,8 @@ export default function CalificarActividad({
     const breadcrumbs = [
         { title: 'Panel Docente', href: '/docente/dashboard' },
         { title: 'Mis Cursos', href: '/docente/mis-cursos' },
-        { title: actividad?.nombre || 'Actividad', href: `/docente/actividades/${actividadId}` },
-        { title: 'Calificar', href: '#' },
+        { title: 'Curso', href: backUrl },
+        { title: actividad?.nombre || 'Actividad', href: '#' },
     ];
 
     const filteredEntregas = entregas.filter(e => {
@@ -105,9 +114,9 @@ export default function CalificarActividad({
                         subtitle={actividad?.nombre || "Gestionando Calificaciones"}
                         iconColor="bg-emerald-600"
                     />
-                    <Link href={`/docente/actividades/${actividadId}`}>
+                    <Link href={backUrl}>
                         <Button variant="ghost" className="rounded-2xl font-bold bg-white shadow-sm border-none hover:bg-gray-50 uppercase text-[10px] tracking-widest h-11 px-6">
-                            <ArrowLeft className="w-4 h-4 mr-2" /> Volver al Detalle
+                            <ArrowLeft className="w-4 h-4 mr-2" /> Volver
                         </Button>
                     </Link>
                 </div>

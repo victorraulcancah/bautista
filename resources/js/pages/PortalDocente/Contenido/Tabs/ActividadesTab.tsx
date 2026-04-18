@@ -12,6 +12,7 @@ import { router } from '@inertiajs/react';
 
 interface Props {
     courseData: any;
+    docenteCursoId: number;
     onRefresh: () => void;
 }
 
@@ -44,7 +45,7 @@ const tipoColors: Record<string, { bg: string; text: string; border: string }> =
     'Rompecabezas': { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200' },
 };
 
-export default function ActividadesTab({ courseData, onRefresh }: Props) {
+export default function ActividadesTab({ courseData, docenteCursoId, onRefresh }: Props) {
     const [actividades, setActividades] = useState<Actividad[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -95,7 +96,7 @@ export default function ActividadesTab({ courseData, onRefresh }: Props) {
     };
 
     const handleViewSubmissions = (actividadId: number) => {
-        router.visit(`/docente/actividades/${actividadId}/entregas`);
+        router.visit(`/docente/actividades/${actividadId}/entregas?back=/docente/cursos/${docenteCursoId}/contenido`);
     };
 
     const filteredActividades = actividades.filter(act => {

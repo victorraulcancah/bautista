@@ -93,14 +93,14 @@ export default function DetalleActividadPage({ actividadId }: Props) {
                 <div className="space-y-4">
                     {actividad?.tipo_id === 2 ? (
                         <>
-                            <Link href={`/docente/actividades/${actividadId}/cuestionario`}>
+                            <Link key="diseno" href={`/docente/actividades/${actividadId}/cuestionario`}>
                                 <Button
                                     className="w-full h-14 rounded-2xl bg-white text-emerald-600 hover:bg-emerald-50 font-black uppercase text-[10px] tracking-widest shadow-lg"
                                 >
                                     <Settings className="w-4 h-4 mr-2" /> Diseñar Examen
                                 </Button>
                             </Link>
-                            <Link href={`/docente/actividades/${actividadId}/calificar-examen`}>
+                            <Link key="calificar" href={`/docente/actividades/${actividadId}/calificar-examen`}>
                                 <Button
                                     className="w-full h-14 rounded-2xl bg-emerald-500/20 text-white border border-white/20 hover:bg-emerald-500/40 font-black uppercase text-[10px] tracking-widest"
                                 >
