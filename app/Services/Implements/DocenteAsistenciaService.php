@@ -20,11 +20,15 @@ class DocenteAsistenciaService implements DocenteAsistenciaServiceInterface
             throw new DocenteCursoNotFoundException();
         }
         
-        $alumnos = Matricula::where('seccion_id', $dc->seccion_id)
-            ->where('apertura_id', $dc->apertura_id)
+        $alumnosQuery = Matricula::where('seccion_id', $dc->seccion_id)
             ->where('estado', '1')
-            ->with('estudiante.perfil')
-            ->get();
+            ->with('estudiante.perfil');
+
+        if ($dc->apertura_id) {
+            $alumnosQuery->where('apertura_id', $dc->apertura_id);
+        }
+
+        $alumnos = $alumnosQuery->get();
 
         $clasesIds = Clase::whereHas('unidad', function($q) use ($dc) {
             $q->where('curso_id', $dc->curso_id);
@@ -91,11 +95,15 @@ class DocenteAsistenciaService implements DocenteAsistenciaServiceInterface
         $dc = DocenteCurso::find($docenteCursoId);
         if (!$dc) throw new DocenteCursoNotFoundException();
 
-        $alumnos = Matricula::where('seccion_id', $dc->seccion_id)
-            ->where('apertura_id', $dc->apertura_id)
+        $alumnosQuery = Matricula::where('seccion_id', $dc->seccion_id)
             ->where('estado', '1')
-            ->with('estudiante.perfil')
-            ->get();
+            ->with('estudiante.perfil');
+
+        if ($dc->apertura_id) {
+            $alumnosQuery->where('apertura_id', $dc->apertura_id);
+        }
+
+        $alumnos = $alumnosQuery->get();
 
         $clasesIds = Clase::whereHas('unidad', function ($q) use ($dc) {
             $q->where('curso_id', $dc->curso_id);

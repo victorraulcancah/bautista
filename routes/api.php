@@ -192,8 +192,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('padre/matricula/save-hijos', [MatriculaPadresController::class, 'saveHijos']);
     });
 
-    // Portal Docente — solo rol docente
-    Route::middleware(['check.role:docente', 'verify.docente.curso'])->group(function () {
+    // Portal Docente — docente + admin/director pueden consultar
+    Route::middleware(['check.role:docente|administrador|director', 'verify.docente.curso'])->group(function () {
         Route::get('docente/dashboard', [DocenteApiController::class, 'dashboard'])->withoutMiddleware('verify.docente.curso');
         Route::get('docente/mis-cursos', [DocenteApiController::class, 'misCursos'])->withoutMiddleware('verify.docente.curso');
         Route::get('docente/curso/{id}/contenido', [DocenteApiController::class, 'cursoContenido']);

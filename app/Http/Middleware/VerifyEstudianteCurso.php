@@ -20,8 +20,7 @@ class VerifyEstudianteCurso
     {
         $user = $request->user();
 
-        // Si es admin, dejamos pasar
-        if ($user->hasRole('admin') || $user->hasRole('super-admin')) {
+        if ($user->hasAnyRole(['admin', 'super-admin', 'administrador', 'director'])) {
             return $next($request);
         }
 

@@ -50,15 +50,37 @@ export default function ContenidoEditor({ docenteCursoId }: { docenteCursoId: nu
     const loadBasicData = async () => {
         try {
             setLoading(true);
-            const courseRes = await api.get('/docente/mis-cursos');
-            const currentCourse = courseRes.data.find((c: any) => c.docen_curso_id === docenteCursoId);
-            setCourseData(currentCourse);
 
             const contentRes = await api.get(`/docente/curso/${docenteCursoId}/contenido`);
-            setUnidades(contentRes.data);
-            
-            if (contentRes.data.length > 0) {
-                setExpanded({ [contentRes.data[0].unidad_id]: true });
+            const unidadesData = contentRes.data as any[];
+            setUnidades(unidadesData);
+            if (unidadesData.length > 0) {
+                setExpanded({ [unidadesData[0].unidad_id]: true });
+            }
+
+            // Load course metadata (best-effort — may fail for non-docente roles)
+            try {
+                const courseRes = await api.get('/docente/mis-cursos');
+                const current = courseRes.data.find((c: any) => c.docen_curso_id === docenteCursoId);
+                if (current) {
+                    setCourseData(current);
+                } else if (unidadesData.length > 0) {
+                    // Fallback: build minimal courseData from the content response
+                    setCourseData({
+                        docen_curso_id: docenteCursoId,
+                        curso_id: unidadesData[0].curso_id,
+                        curso: { nombre: unidadesData[0].curso?.nombre ?? 'Curso' },
+                    });
+                }
+            } catch {
+                // Admin or non-docente user: build minimal courseData from content
+                if (unidadesData.length > 0) {
+                    setCourseData({
+                        docen_curso_id: docenteCursoId,
+                        curso_id: unidadesData[0].curso_id,
+                        curso: { nombre: unidadesData[0].curso?.nombre ?? 'Curso' },
+                    });
+                }
             }
         } catch (error) {
             console.error("Error loading course data", error);

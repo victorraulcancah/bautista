@@ -185,7 +185,11 @@ class AlumnoApiController extends Controller
                             ->where('estu_id', $estudiante->estu_id)
                             ->first();
                         $act->nota = $nota?->nota;
-                        $act->entregado = !empty($nota?->archivo_entrega);
+                        $act->entregado = $nota && (
+                            !empty($nota->archivo_entrega) ||
+                            $nota->nota !== null ||
+                            $nota->fecha_entrega !== null
+                        );
                         $act->fecha_entrega = $nota?->fecha_entrega;
                     });
                 });
