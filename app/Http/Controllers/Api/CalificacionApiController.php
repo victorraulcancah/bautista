@@ -101,110 +101,147 @@ class CalificacionApiController extends Controller
     }
 
     /**
-     * Get a complete grade matrix (Students x Activities) for a course assignment.
+     * Get a complete grade matrix (Students x Activities) grouped by unit for a course assignment.
      */
     public function indexByCourse(int $docenteCursoId)
     {
         $dc = \App\Models\DocenteCurso::with('curso')->findOrFail($docenteCursoId);
-        
-        // 1. Get all gradable activities for this course
+
+        // 1. Students in section (handle NULL apertura_id)
+        $matriculasQuery = Matricula::where('seccion_id', $dc->seccion_id)
+            ->where('estado', '1')
+            ->with('estudiante.perfil');
+        if ($dc->apertura_id) {
+            $matriculasQuery->where('apertura_id', $dc->apertura_id);
+        }
+        $matriculas = $matriculasQuery->get();
+
+        // 2. Gradable activities with their clase → unidad chain
         $actividades = ActividadCurso::where('id_curso', $dc->curso_id)
             ->where('es_calificado', '1')
+            ->with(['clase.unidad', 'tipoActividad'])
             ->orderBy('created_at', 'asc')
             ->get();
 
-        // 2. Get all students in this section
-        $matriculas = Matricula::where('seccion_id', $dc->seccion_id)
-            ->where('apertura_id', $dc->apertura_id)
-            ->with('estudiante.perfil')
-            ->get();
-
-        // 3. Get all grades for these students/activities
+        // 3. All grades
         $notas = NotaActividad::whereIn('actividad_id', $actividades->pluck('actividad_id'))
             ->whereIn('estu_id', $matriculas->pluck('estu_id'))
             ->get();
 
-        // 4. Format Grade Matrix and calculate weighted averages if settings exist
-        $settings = $dc->settings ?? [];
-        // weights por nombre de tipo: { "Tarea": 30, "Examen": 50, "Cuestionario": 20 }
+        // 4. Weights & tipo map
+        $settings      = $dc->settings ?? [];
         $weightsByName = $settings['weights'] ?? null;
-
-        // Mapa tipo_id → nombre para lookup rápido
-        $tiposMap = \DB::table('tipo_actividad')
-            ->whereIn('tipo_id', $actividades->pluck('id_tipo_actividad')->unique())
+        $tiposMap      = \DB::table('tipo_actividad')
+            ->whereIn('tipo_id', $actividades->pluck('id_tipo_actividad')->filter()->unique())
             ->pluck('nombre', 'tipo_id');
 
-        $estudiantes = $matriculas->map(function ($m) use ($actividades, $notas, $weightsByName, $tiposMap) {
-            $e = $m->estudiante;
-            $nombre = $e->perfil?->nombre_ordenado;
-            
-            $notasAlumno = $actividades->map(function ($act) use ($e, $notas) {
-                $notaObj = $notas->where('estu_id', $e->estu_id)->where('actividad_id', $act->actividad_id)->first();
+        // Helper: weighted average for a set of activity rows (each with tipo_id, nota, puntos_maximos)
+        $calcPromedio = function (iterable $items) use ($weightsByName, $tiposMap): float {
+            $items = collect($items);
+            if ($weightsByName && count($weightsByName) > 0) {
+                $promediosPorTipo = [];
+                foreach ($items->groupBy('tipo_id') as $tipoId => $grupo) {
+                    $nombre = $tiposMap[$tipoId] ?? null;
+                    if (!$nombre) continue;
+                    $suma = 0; $cnt = 0;
+                    foreach ($grupo as $item) {
+                        if (!is_numeric($item['nota'])) continue;
+                        $max  = floatval($item['puntos_maximos'] ?: 20);
+                        $nota20 = $max > 0 ? (floatval($item['nota']) / $max) * 20 : 0;
+                        $suma += $nota20; $cnt++;
+                    }
+                    if ($cnt > 0) $promediosPorTipo[$nombre] = $suma / $cnt;
+                }
+                $pesoTotal = array_sum(array_map(
+                    fn($t) => floatval($weightsByName[$t] ?? 0),
+                    array_keys($promediosPorTipo),
+                ));
+                if ($pesoTotal <= 0) return 0;
+                $sum = 0;
+                foreach ($promediosPorTipo as $tipo => $prom) {
+                    $sum += $prom * (floatval($weightsByName[$tipo] ?? 0) / $pesoTotal);
+                }
+                return round($sum, 2);
+            }
+            // Fallback: peso_porcentaje individual
+            $sum = 0;
+            foreach ($items as $item) {
+                if (!is_numeric($item['nota'])) continue;
+                $max    = floatval($item['puntos_maximos'] ?: 20);
+                $peso   = floatval($item['peso_porcentaje'] ?: 0);
+                $nota20 = $max > 0 ? (floatval($item['nota']) / $max) * 20 : 0;
+                $sum   += $nota20 * ($peso / 100);
+            }
+            return round($sum, 2);
+        };
+
+        // 5. Group activities by unidad
+        $actividadesPorUnidad = $actividades->groupBy(fn($a) => $a->clase?->unidad?->unidad_id ?? 0);
+        $unidadesInfo = \App\Models\Unidad::where('curso_id', $dc->curso_id)
+            ->orderBy('orden')
+            ->get()
+            ->keyBy('unidad_id');
+
+        $unidades = $actividadesPorUnidad->map(function ($acts, $unidadId) use ($unidadesInfo, $matriculas, $notas, $calcPromedio) {
+            $unidad = $unidadesInfo[$unidadId] ?? null;
+            $actividadesCol = $acts->values();
+
+            $estudiantesUnidad = $matriculas->map(function ($m) use ($actividadesCol, $notas, $calcPromedio) {
+                $e = $m->estudiante;
+                $filas = $actividadesCol->map(function ($act) use ($e, $notas) {
+                    $notaObj = $notas->where('estu_id', $e->estu_id)->where('actividad_id', $act->actividad_id)->first();
+                    return [
+                        'actividad_id'   => $act->actividad_id,
+                        'tipo_id'        => $act->id_tipo_actividad,
+                        'nota'           => $notaObj?->nota ?? '',
+                        'observacion'    => $notaObj?->observacion ?? '',
+                        'entregado'      => $notaObj && (!empty($notaObj->archivo_entrega) || $notaObj->nota !== null || $notaObj->fecha_entrega !== null),
+                        'puntos_maximos' => $act->puntos_maximos,
+                        'peso_porcentaje'=> $act->peso_porcentaje,
+                    ];
+                });
                 return [
-                    'actividad_id'    => $act->actividad_id,
-                    'tipo_id'         => $act->id_tipo_actividad,
-                    'nota'            => $notaObj?->nota ?? '',
-                    'observacion'     => $notaObj?->observacion ?? '',
-                    'entregado'       => !empty($notaObj?->archivo_entrega),
-                    'fecha_entrega'   => $notaObj?->fecha_entrega,
-                    'puntos_maximos'  => $act->puntos_maximos,
-                    'peso_porcentaje' => $act->peso_porcentaje,
+                    'estu_id'        => $e->estu_id,
+                    'promedio_unidad' => $calcPromedio($filas),
+                    'notas'          => $filas,
                 ];
             });
 
-            // Calcular promedio según weights del settings o peso individual de cada actividad
-            if ($weightsByName && count($weightsByName) > 0) {
-                // Calcular promedio por tipo, solo tipos con notas
-                $promediosPorTipo = [];
-                foreach ($notasAlumno->groupBy('tipo_id') as $tipoId => $notasTipo) {
-                    $nombreTipo = $tiposMap[$tipoId] ?? null;
-                    if (!$nombreTipo) continue;
-                    $suma = 0; $count = 0;
-                    foreach ($notasTipo as $item) {
-                        if (!is_numeric($item['nota'])) continue;
-                        $puntosMaximos = floatval($item['puntos_maximos'] ?: 20);
-                        $nota20 = $puntosMaximos > 0 ? (floatval($item['nota']) / $puntosMaximos) * 20 : 0;
-                        $suma += $nota20; $count++;
-                    }
-                    if ($count > 0) $promediosPorTipo[$nombreTipo] = $suma / $count;
-                }
-                // Redistribuir pesos solo entre tipos con notas
-                $pesoTotal = array_sum(array_map(fn($t) => floatval($weightsByName[$t] ?? 0), array_keys($promediosPorTipo)));
-                $sumaPonderada = 0;
-                if ($pesoTotal > 0) {
-                    foreach ($promediosPorTipo as $tipo => $prom) {
-                        $sumaPonderada += $prom * (floatval($weightsByName[$tipo] ?? 0) / $pesoTotal);
-                    }
-                }
-            } else {
-                // Fallback: usar peso_porcentaje individual de cada actividad
-                $sumaPonderada = 0;
-                foreach ($notasAlumno as $item) {
-                    $puntosObtenidos = is_numeric($item['nota']) ? floatval($item['nota']) : 0;
-                    $puntosMaximos = floatval($item['puntos_maximos'] ?: 20);
-                    $peso = floatval($item['peso_porcentaje'] ?: 0);
-                    $nota20 = $puntosMaximos > 0 ? ($puntosObtenidos / $puntosMaximos) * 20 : 0;
-                    $sumaPonderada += $nota20 * ($peso / 100);
-                }
-            }
-
             return [
-                'estu_id' => $e->estu_id,
-                'nombre'  => $nombre,
-                'notas'   => $notasAlumno,
-                'promedio'=> round($sumaPonderada, 2),
+                'unidad_id' => $unidadId,
+                'titulo'    => $unidad?->titulo ?? 'Sin unidad',
+                'actividades' => $actividadesCol->map(fn($a) => [
+                    'id'      => $a->actividad_id,
+                    'nombre'  => $a->nombre_actividad,
+                    'tipo'    => $a->tipoActividad?->nombre ?? '—',
+                    'tipo_id' => $a->id_tipo_actividad,
+                ]),
+                'estudiantes' => $estudiantesUnidad,
+            ];
+        })->values();
+
+        // 6. Final average per student = simple average of unit averages (units with grades only)
+        $promediosFinales = $matriculas->mapWithKeys(function ($m) use ($unidades) {
+            $promsUnidad = $unidades->map(fn($u) =>
+                collect($u['estudiantes'])->firstWhere('estu_id', $m->estu_id)['promedio_unidad'] ?? 0
+            )->filter(fn($p) => $p > 0);
+
+            return [$m->estu_id => $promsUnidad->count() > 0 ? round($promsUnidad->avg(), 2) : 0];
+        });
+
+        $estudiantesFinales = $matriculas->map(function ($m) use ($promediosFinales) {
+            return [
+                'estu_id'  => $m->estu_id,
+                'nombre'   => $m->estudiante?->perfil?->nombre_ordenado,
+                'promedio' => $promediosFinales[$m->estu_id] ?? 0,
             ];
         });
 
         return response()->json([
-            'curso'       => $dc->curso->nombre,
-            'actividades' => $actividades->map(fn($a) => [
-                'id' => $a->actividad_id, 
-                'nombre' => $a->nombre_actividad,
-                'tipo_id' => $a->id_tipo_actividad
-            ]),
-            'estudiantes' => $estudiantes,
-            'settings'    => $settings,
+            'curso'      => $dc->curso->nombre,
+            'unidades'   => $unidades,
+            'estudiantes'=> $estudiantesFinales,
+            'settings'   => $settings,
         ]);
     }
 
